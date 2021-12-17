@@ -70,17 +70,18 @@ As MRI is being increasingly more accessible and used in both clinical and resea
   such multi-modal MR datasets are being gathered at an unprecedented rate.
 The size and organization of these datasets as well as the increasing complexity of the processing
   pipelines to analyze them present important challenges for scalable computing, data sharing,
-  reliability, reproducibility and transparency of the analysis.
+  reproducibility and transparency of the analysis.
 
-The last ten years have indeed witnessed a trend towards the adoption by the community of open research
-  practices, which promotes `open data` and `open method`, to address these challenges.
+To address these challenges, the last ten years have indeed witnessed a number of research initiatives
+  and the emergence of new standards and tools.
+  trend towards the adoption by the community of open research
+  practices, which promotes `open data` and `open method`.
 This has led to the elaboration of the principles of open and reproducible research for
   neuroimaging using Magnetic Resonance Imaging (MRI) [@Nichols:2017] and to recommendation of
   standard practices for sharing code and programs [@EglenTowardNeuroscience:2017]. 
-To ease and automate
-  the practice of sharing raw and processed neuroimaging data and code with appropriate metadata
-  and provenance records, multiple initiatives have developed new standards, tools, and educational
-  resources.
+To ease and automate the practice of sharing raw and processed neuroimaging data and code with
+  appropriate metadata and provenance records, multiple initiatives have developed new standards,
+  tools, and educational resources.
 Among others, this has contributed to the emergence of
   nipype [@GorgolewskiNipype:2011], a dataflow library that facilitates workflow
   execution/re-execution, provenance tracking and provides a uniform interface to existing
@@ -88,10 +89,10 @@ Among others, this has contributed to the emergence of
   standard [@GorgolewskiTheExperiments:2016], to standardize the organization and description
   of neuroimaging data; Datalad a data portal, versioning, and provenance tracking system
   supporting BIDS; and more recently, the BIDS-Apps framework [@GorgolewskiBIDSMethods:2017],
-  which employs modern software practices and encapsulates a processing
-  pipeline that takes a BIDS dataset as input into a software container in order to improve
-  the ease of use, accessibility, deliverability, portability, scalability and reproducibility
-  of processing pipelines. 
+  which employs modern software practices and encapsulates a processing pipeline that takes a
+  BIDS dataset as input into a software container in order to improve the ease of use,
+  accessibility, deliverability, portability, scalability and reproducibility of processing
+  pipelines.
 
 Following these advances, a number of processing pipelines such as C-PAC [@cpac:2013],
   NIAK [@BellecNeuroimagingNIAK:2016], fMRIPrep [@Ghosh:2018],
@@ -100,10 +101,16 @@ Following these advances, a number of processing pipelines such as C-PAC [@cpac:
   MRI data organized following the BIDS standard.
 They have demonstrated their capability in addressing all the challenges of data sharing,
   portability, computing scalability, reliability, reproducibility and transparency.
-However, none of the existing solutions provides a user-friendly graphical interface
-  that would enhance their accessibility and are designed to map from sMRI / dMRI / fMRI
-  the structural and / or functional connectomes, for five macroscopic brain parcellation
-  scales with hierarchical region grouping.
+However, none of the existing solutions provide a direct alternative to Connectome Mapper (CMP),
+  an open-source pipeline software with a graphical user interface, whose has been historically
+  designed before the emergence of the standards and containerization technologies to
+  simplify the organisation and the analysis of sMRI and dMRI from raw data to multi-scale structural weighted connectomes [@Daducci:2012].
+While CMP3 derives from the now deprecated CMP1 and CMP2 packages, it has migrated to Python 3 and
+  the processing pipelines have been encapsulated in software container images and continuously tested
+  in concordance to the BIDS Apps standard since its premises.
+
+% This has led to a massive evolution over the years in terms of the underlying codebase, the tools used, and the scope of the functionality
+%   provided.
 
 # Summary
 
@@ -114,10 +121,6 @@ Connectome Mapper 3 provides a unique open-source software pipeline solution wit
   neuroimaging tools (inclusing FSL [@Jenkinson2012FSL], FreeSurfer [@Fischl2012FreeSurfer],
   ANTs [@AVANTS2008SymmetricBrain], dipy [@Garyfallidis2014DipyData],
   mrtrix3 [@Tournier2019MRtrix3:Visualisation], and AFNI [@Cox2012]).
-While CMP3 derives from the now deprecated CMP1 and CMP2 packages[@Daducci:2012], whose original main
-  goals were to simplify the organisation and the analysis of sMRI and dMRI from raw data to
-  multi-scale structural weighted connectomes, it has evolved massively over the years in terms
-  of the underlying codebase, the tools used, and the scope of the functionality provided.
 Design considerations with the implementation of modular, configurable, and containerized
   processing pipelines, empowered by nipype, handling datasets concordant to the BIDS standard,
   distributed as a BIDS App, makes it not only easy to install and use (as it provides the user with a computing
@@ -301,9 +304,10 @@ Furthermore, bugs as well as both internal and external developer contributions 
   discussed and managed through issues directly on GitHub for transparent software
   development.
 
+
 # Mention
 
-Connectome Mapper 3 was successfully employed in:
+Connectome Mapper 3 has already been employed with success in a number of methodological and clinical research articles.
 
 *   2021 - VEPCON: Source imaging of high-density visual evoked potentials with multi-scale brain parcellations and connectomes
     In press, Scientific Data Nature
@@ -340,5 +344,8 @@ Connectome Mapper 3 was successfully employed in:
 
 This work was supported by Swiss National Science Foundation Sinergia
   [grant no. 170873](https://p3.snf.ch/project-170873).
+All the contributors listed in the project’s Zenodo and GitHub repository have contributed code and
+  intellectual labor to further improve CMP3.
+The same holds true for users that reported issues and continue to do so.
 
 # References
