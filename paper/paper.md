@@ -157,16 +157,11 @@ At the time of writing, an EEG source imaging pipeline is being integrated, init
 
 # Highlights
 
-\textbf{A flexible workflow for multi-modal human connectome mapping in the BIDS ecosystem.} MP3 implements
-  pipelines that maps from sMRI / dMRI / fMRI the structural and / or functional connectomes, for
-  five macroscopic brain parcellation scales with hierarchical region grouping.
-It is written in Python 3 and adopts an object-oriented programming style for the sake of modularity,
-  extensibility, and re-usability.
+\textbf{A flexible workflow for multi-modal human connectome mapping in the BIDS ecosystem.} CMP3 is
+  written in Python 3 and implements pipelines that maps from sMRI / dMRI / fMRI the structural and
+  / or functional connectomes, for five macroscopic brain parcellation scales with hierarchical
+  region grouping.
 \autoref{fig:cmp3-diagram} illustrates the participant-level analysis workflow.
-It is implemented with nipype [@GorgolewskiNipype:2011] adopting a modular architecture, composed of
-  three different pipeline classes (anatomical, diffusion, and fMRI) dedicated to the processing of
-  each modality (sMRI, dMRI, rfMRI), which takes as principal inputs the path of the BIDS dataset to
-  be processed, and a set of pipeline configuration files in `.json` format.
 
 ![\textbf{Overview of participant-level analysis workflow of the Connectome Mapper 3 BIDS App.}
 It has a modular architecture composed of three different pipelines (anatomical, diffusion and
@@ -185,6 +180,10 @@ This enables CMP3 to self-adapt to the type of dMRI acquisition scheme (DTI, DSI
   to appropriately set up the set of available pipeline configuration parameters for its processing.
 \label{fig:cmp3-diagram}](cmp3-diagram.png)
 
+The workflow  is implemented with nipype [@GorgolewskiNipype:2011] adopting an object-oriented programming style
+  with a modular architecture, composed of three different pipeline classes (anatomical, diffusion, and fMRI) dedicated to the processing of
+  each modality (sMRI, dMRI, rfMRI), which takes as principal inputs the path of the BIDS dataset to
+  be processed, and a set of pipeline configuration files in `.json` format.
 Each pipeline class provides methods to create and execute a nipype workflow that runs a number of
   nipype sub-workflows, described by stage classes and implementing one or multiple tasks,
   where each task can interface with either a specific tool including in
