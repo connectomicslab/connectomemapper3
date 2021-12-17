@@ -122,7 +122,7 @@ Design considerations with the implementation of modular, configurable, and cont
   processing pipelines, empowered by nipype, handling datasets concordant to the BIDS standard,
   distributed as a BIDS App, makes it not only easy to install and use (as it provides the user with a computing
   environment in which the pipelines are guarantee to run, and where all dependencies
-  are already installed), but also efficient in managing and scaling the pipeline execution
+  are already installed) on a diversity of multi-modal BIDS datasets, but also efficient in managing and scaling the pipeline execution
   while recording provenance, and easy to customize it for specific needs.
 Each pipeline can be individually configured and executed with the aid of the user-friendly
   GUI and the output of each stage can be visually reviewed, enabling the user to keep
