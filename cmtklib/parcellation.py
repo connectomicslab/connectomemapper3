@@ -147,7 +147,7 @@ class ComputeParcellationRoiVolumes(BaseInterface):
         # Compute the volume of the voxel
         voxel_dimX, voxel_dimY, voxel_dimZ = roiImg.header.get_zooms()
         voxel_volume = voxel_dimX * voxel_dimY * voxel_dimZ
-        iflogger.info("    ... Voxel volume = {} mm3".format(roi_fname))
+        iflogger.info("    ... Voxel volume = {} mm3".format(voxel_volume))
 
         # Initialize the TSV file used to store the parcellation volumetry resulty
         volumetry_file = op.abspath('roi_stats_{}.tsv'.format(parkey))
@@ -170,12 +170,10 @@ class ComputeParcellationRoiVolumes(BaseInterface):
         gp = nx.read_graphml(roi_info_graphml)
         n_nodes = len(gp)
 
+        iflogger.info("  > Processing parcels...")
         # variables used by the percent counter
         pc = -1
         cnt = -1
-
-        iflogger.info("  > Processing parcels...")
-
         # Loop over each parcel/ROI
         for u, d in gp.nodes(data=True):
             # Percent counter
