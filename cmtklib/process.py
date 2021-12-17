@@ -40,21 +40,16 @@ def run(command, env=None, cwd=None):
     if env is not None:
         merged_env.update(env)
 
-    process = subprocess.Popen(
+    process = subprocess.run(
         command,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
+        capture_output=True,
         shell=True,
         env=merged_env,
         cwd=cwd,
     )
-
-    while True:
-        line = process.stdout.readline()
-        line = str(line)[:-1]
-        print(line)
-        if line == "" and process.poll() is not None:
-            break
+    print(process.stdout.decode("utf8"))
 
     if process.returncode != 0:
-        raise Exception("Non zero return code: %d" % process.returncode)
+        raise Exception(
+                f'Non zero return code: {process.returncode}\n\n'
+                f'\tStandard error:\n {process.stderr.decode("utf8")}')
