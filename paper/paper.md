@@ -157,6 +157,8 @@ At the time of writing, an EEG source imaging pipeline is being integrated, init
 
 # Highlights
 
+\textbf{A unique parcellation scheme in the BIDS ecosystem.}
+
 \textbf{A flexible workflow for multi-modal human connectome mapping in the BIDS ecosystem.} CMP3 is
   written in Python 3 and implements pipelines that maps from sMRI / dMRI / fMRI the structural and
   / or functional connectomes, for five macroscopic brain parcellation scales with hierarchical
@@ -182,8 +184,7 @@ This enables CMP3 to self-adapt to the type of dMRI acquisition scheme (DTI, DSI
 
 The workflow  is implemented with nipype [@GorgolewskiNipype:2011] adopting an object-oriented programming style
   with a modular architecture, composed of three different pipeline classes (anatomical, diffusion, and fMRI) dedicated to the processing of
-  each modality (sMRI, dMRI, rfMRI), which takes as principal inputs the path of the BIDS dataset to
-  be processed, and a set of pipeline configuration files in `.json` format.
+  each modality (sMRI, dMRI, rfMRI).
 Each pipeline class provides methods to create and execute a nipype workflow that runs a number of
   nipype sub-workflows, described by stage classes and implementing one or multiple tasks,
   where each task can interface with either a specific tool including in
@@ -191,7 +192,7 @@ Each pipeline class provides methods to create and execute a nipype workflow tha
   ANTs [@AVANTS2008SymmetricBrain], dipy [@Garyfallidis2014DipyData],
   mrtrix3 [@Tournier2019MRtrix3:Visualisation], AFNI [@Cox2012], or with an in-house tool
   (\autoref{fig:cmp3-diagram}); Pipeline and stage object attributes (parameters)
-  can be set by loading the different pipeline configuration files.
+  can be set by loading pipeline configuration files in `.json` format.
 Empowered by the nipype workflow engine, the re-execution of the workflow will resume the
   processing at any stages a change of parameter occurred.
 To maximize accessibility and re-usability of the tool, the implemented pipelines are encapsulated
