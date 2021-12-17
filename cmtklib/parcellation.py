@@ -762,7 +762,7 @@ class CombineParcellations(BaseInterface):
         for _, roi in enumerate(self.inputs.input_rois):
             # colorLUT creation if enabled
             if self.inputs.create_colorLUT:
-                outprefix_name = Path(roi).name
+                outprefix_name = Path(roi).name.split(".")[0]
                 color_lut_file = op.abspath(
                     '{}_FreeSurferColorLUT.txt'.format(outprefix_name))
                 print("Create colorLUT file as %s" % color_lut_file)
@@ -776,7 +776,7 @@ class CombineParcellations(BaseInterface):
 
             # Create GraphML if enabled
             if self.inputs.create_graphml:
-                outprefix_name = Path(roi).name
+                outprefix_name = Path(roi).name.split(".")[0]
                 graphml_file = op.abspath('{}.graphml'.format(outprefix_name))
                 print("Create graphml_file as %s" % graphml_file)
                 f_graphml = open(graphml_file, 'w+')
@@ -814,7 +814,7 @@ class CombineParcellations(BaseInterface):
         for roi_index, roi in sorted(enumerate(self.inputs.input_rois)):
             # colorLUT creation if enabled
             if self.inputs.create_colorLUT:
-                outprefix_name = Path(roi).name
+                outprefix_name = Path(roi).name.split(".")[0]
                 color_lut_file = op.abspath(
                     '{}_FreeSurferColorLUT.txt'.format(outprefix_name))
                 iflogger.info("  > Create colorLUT file as %s" % color_lut_file)
@@ -828,7 +828,7 @@ class CombineParcellations(BaseInterface):
 
             # Create GraphML if enabled
             if self.inputs.create_graphml:
-                outprefix_name = Path(roi).name
+                outprefix_name = Path(roi).name.split(".")[0]
                 graphml_file = op.abspath('{}.graphml'.format(outprefix_name))
                 iflogger.info(
                     "  > Create graphml_file as {}".format(graphml_file))
@@ -877,7 +877,7 @@ class CombineParcellations(BaseInterface):
             # ColorLUT (cortical)
             if self.inputs.create_colorLUT or self.inputs.create_graphml:
                 f_color_lut.write("# Right Hemisphere. Cortical Structures \n")
-                outprefix_name = Path(roi).name
+                outprefix_name = Path(roi).name.split(".")[0]
                 for elem in outprefix_name.split("_"):
                     if "scale" in elem:
                         scale = elem
@@ -1152,7 +1152,7 @@ class CombineParcellations(BaseInterface):
             # ColorLUT (cortical)
             if self.inputs.create_colorLUT or self.inputs.create_graphml:
                 f_color_lut.write("# Left Hemisphere. Cortical Structures \n")
-                outprefix_name = Path(roi).name
+                outprefix_name = Path(roi).name.split(".")[0]
                 for elem in outprefix_name.split("_"):
                     if "scale" in elem:
                         scale = elem
@@ -1504,7 +1504,7 @@ class CombineParcellations(BaseInterface):
             img_data_out[img_data_out < 0] = 0
 
             # Saving the new parcellation
-            outprefix_name = Path(roi).name
+            outprefix_name = Path(roi).name.split(".")[0]
             output_roi = op.abspath('{}_final.nii.gz'.format(outprefix_name))
             hdr = img_v.get_header()
             hdr2 = hdr.copy()
@@ -1759,7 +1759,7 @@ class ParcellateThalamus(BaseInterface):
         hdr2 = hdr.copy()
         hdr2.set_data_dtype(np.uint16)
 
-        outprefix_name = Path(self.inputs.T1w_image).name
+        outprefix_name = Path(self.inputs.T1w_image).name.split(".")[0]
         outprefix_name = op.abspath('{}_Ind2temp'.format(outprefix_name))
 
         # Register the template image image to the subject T1w image
@@ -1784,7 +1784,7 @@ class ParcellateThalamus(BaseInterface):
         proc_stdout = process.communicate()[0].strip()
         iflogger.info(proc_stdout)
 
-        outprefix_name = Path(self.inputs.T1w_image).name
+        outprefix_name = Path(self.inputs.T1w_image).name.split(".")[0]
         transform_file = op.abspath(
             '{}_Ind2temp0GenericAffine.mat'.format(outprefix_name))
         warp_file = op.abspath('{}_Ind2temp1Warp.nii.gz'.format(outprefix_name))
@@ -2054,7 +2054,7 @@ class ParcellateThalamus(BaseInterface):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outprefix_name = Path(self.inputs.T1w_image).name
+        outprefix_name = Path(self.inputs.T1w_image).name.split(".")[0]
 
         outputs['prob_maps_registered'] = op.abspath('{}_class-thalamus_probtissue.nii.gz'.format(outprefix_name))
         outputs['max_prob_registered'] = op.abspath('{}_class-thalamus_probtissue_maxprob.nii.gz'.format(outprefix_name))
