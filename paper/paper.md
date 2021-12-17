@@ -309,6 +309,9 @@ Connectome Mapper 3 was successfully employed in:
     In press, Scientific Data Nature
     https://www.biorxiv.org/content/10.1101/2021.03.16.435599v1.abstract
     
+*   2021 - Structure supports function: informing directed and dynamic functional connectivity with anatomical priors
+    https://direct.mit.edu/netn/article/doi/10.1162/netn_a_00218/108678/Structure-supports-function-informing-directed-and
+    
 *   2021 - The connectome spectrum as a canonical basis for a sparse representation of fast brain activity
     https://www.sciencedirect.com/science/article/pii/S1053811921008843
     
