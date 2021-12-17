@@ -167,21 +167,6 @@ It is implemented with nipype [@GorgolewskiNipype:2011] adopting a modular archi
   three different pipeline classes (anatomical, diffusion, and fMRI) dedicated to the processing of
   each modality (sMRI, dMRI, rfMRI), which takes as principal inputs the path of the BIDS dataset to
   be processed, and a set of pipeline configuration files in `.json` format.
-Each pipeline class provides methods to create and execute a nipype workflow that runs a number of
-  nipype sub-workflows, described by stage classes and implementing one or multiple tasks,
-  where each task can interface with either a specific tool including in
-  FSL [@Jenkinson2012FSL], FreeSurfer [@Fischl2012FreeSurfer],
-  ANTs [@AVANTS2008SymmetricBrain], dipy [@Garyfallidis2014DipyData],
-  mrtrix3 [@Tournier2019MRtrix3:Visualisation], AFNI [@Cox2012], or with an in-house tool
-  (\autoref{fig:cmp3-diagram}); Pipeline and stage object attributes (parameters)
-  can be set by loading the different pipeline configuration files.
-Empowered by the nipype workflow engine, the re-execution of the workflow will resume the
-  processing at any stages a change of parameter occurred.
-To maximize accessibility and re-usability of the tool, the implemented pipelines are encapsulated
-  in a Docker [@merkeldocker:2014] and a Singularity [@Kurtzer2017Singularity:Compute] software image
-  containers, in concordance to the BIDS App standard [@GorgolewskiBIDSMethods:2017].
-This means that the BIDS App of CMP3 can be run on diversity of datasets Linux, MacOSX, Windows computers,
-  and on high performance computing systems (clusters) for large-scale analysis.
 
 ![\textbf{Overview of participant-level analysis workflow of the Connectome Mapper 3 BIDS App.}
 It has a modular architecture composed of three different pipelines (anatomical, diffusion and
@@ -199,6 +184,22 @@ The processing pipelines and stages are dynamically built and configured dependi
 This enables CMP3 to self-adapt to the type of dMRI acquisition scheme (DTI, DSI, multi-shell) and
   to appropriately set up the set of available pipeline configuration parameters for its processing.
 \label{fig:cmp3-diagram}](cmp3-diagram.png)
+
+Each pipeline class provides methods to create and execute a nipype workflow that runs a number of
+  nipype sub-workflows, described by stage classes and implementing one or multiple tasks,
+  where each task can interface with either a specific tool including in
+  FSL [@Jenkinson2012FSL], FreeSurfer [@Fischl2012FreeSurfer],
+  ANTs [@AVANTS2008SymmetricBrain], dipy [@Garyfallidis2014DipyData],
+  mrtrix3 [@Tournier2019MRtrix3:Visualisation], AFNI [@Cox2012], or with an in-house tool
+  (\autoref{fig:cmp3-diagram}); Pipeline and stage object attributes (parameters)
+  can be set by loading the different pipeline configuration files.
+Empowered by the nipype workflow engine, the re-execution of the workflow will resume the
+  processing at any stages a change of parameter occurred.
+To maximize accessibility and re-usability of the tool, the implemented pipelines are encapsulated
+  in a Docker [@merkeldocker:2014] and a Singularity [@Kurtzer2017Singularity:Compute] software image
+  containers, in concordance to the BIDS App standard [@GorgolewskiBIDSMethods:2017].
+This means that the BIDS App of CMP3 can be run on diversity of datasets Linux, MacOSX, Windows computers,
+  and on high performance computing systems (clusters) for large-scale analysis.
 
 \textbf{A Graphical User Interface that reflects the workflow structure.} CMP3 takes advantage of Traits/TraitsUI
   framework (\href{http://docs.enthought.com/traits/}{http://docs.enthought.com/traits/}) for building an
