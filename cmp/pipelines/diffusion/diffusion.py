@@ -232,8 +232,6 @@ class DiffusionPipeline(Pipeline):
             New value.
         """
         self.stages["Preprocessing"].config.tracking_tool = new
-        if self.stages["Preprocessing"].config.tracking_tool == 'Dipy':
-            self.stages["Preprocessing"].config.gmwmi_seeding = False
 
     def update_preprocessing_act(self, new):
         """Update ``self.stages["Preprocessing"].config.act_tracking`` when ``use_act`` is updated.
@@ -244,8 +242,7 @@ class DiffusionPipeline(Pipeline):
             New value.
         """
         self.stages["Preprocessing"].config.act_tracking = new
-        if (not self.stages["Preprocessing"].config.act_tracking or
-                self.stages["Preprocessing"].config.tracking_tool == 'Dipy'):
+        if not self.stages["Preprocessing"].config.act_tracking:
             self.stages["Preprocessing"].config.gmwmi_seeding = False
 
     def update_preprocessing_gmwmi(self, new):
