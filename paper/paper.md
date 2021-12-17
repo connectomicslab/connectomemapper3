@@ -157,27 +157,15 @@ At the time of writing, an EEG source imaging pipeline is being integrated, init
 
 # Highlights
 
-\textbf{A focus on reproducibility, portability, and accessibility.} CMP3 implements pipelines that maps
-  from sMRI / dMRI / fMRI the structural and / or functional connectomes, for five macroscopic brain
-  parcellation scales with hierarchical region grouping.
+\textbf{A flexible workflow for multi-modal connectome mapping in the BIDS ecosystem.} MP3 implements
+  pipelines that maps from sMRI / dMRI / fMRI the structural and / or functional connectomes, for
+  five macroscopic brain parcellation scales with hierarchical region grouping.
 It is written in Python 3 and adopts an object-oriented programming style for the sake of modularity,
   extensibility, and re-usability.
-It uses Miniconda (\href{https://docs.conda.io}{https://docs.conda.io}),
-  a package and environment manager, to facilitate the installation of the Python environment with
-  all package dependencies installed inside, that is particularly powerful at two levels.
-It eases the installation of python package dependencies at a fixed version for
-  both the processing core inside the BIDS App and the GUI on the host system.
-It also provides a way to isolate the installation of CMP3 with other python dependencies.
-This prevents conflicts with other package versions that might exist already on the host system.
-To maximize software accessibility, interoperability, portability and reproducibility, the
-  implemented pipelines are encapsulated in a Docker [@merkeldocker:2014]
-  and a Singularity [@Kurtzer2017Singularity:Compute] software image containers.
-
-\textbf{A flexible workflow for multi-modal connectome mapping in the BIDS ecosystem.} The implemented participant-level analysis
-  workflow is represented with nipype [@GorgolewskiNipype:2011] adopting a modular architecture, composed of
-  three different pipeline classes (anatomical, diffusion, and fMRI) dedicated to the processing of each
-  modality (sMRI, dMRI, rfMRI), which takes as principal inputs the path of the BIDS dataset
-  to be processed, and a set of pipeline configuration file.
+The participant-level analysis workflow is implemented with nipype [@GorgolewskiNipype:2011]
+  adopting a modular architecture, composed of three different pipeline classes (anatomical, diffusion, and fMRI)
+  dedicated to the processing of each modality (sMRI, dMRI, rfMRI), which takes as principal inputs the path of
+  the BIDS dataset to be processed, and a set of pipeline configuration file.
 Each pipeline class provides methods to create and execute a nipype workflow that runs a number of
   nipype sub-workflows, described by stage classes and implementing one or multiple tasks,
   where each task can interface with either a specific tool including in
@@ -188,10 +176,11 @@ Each pipeline class provides methods to create and execute a nipype workflow tha
   can be set from configuration files in `.json` format.
 Empowered by the nipype workflow engine, the re-execution of the workflow will resume the
   processing at any stages a change of parameter occurred.
-To maximize accessibility and re-usability of the tool, the implemented pipelines are encapsulated in
-  software image containers in concordance to the BIDS App standard [@GorgolewskiBIDSMethods:2017]. This means that the BIDS App
-  of CMP3 can be run on diversity of datasets Linux, MacOSX, Windows computers, and on high performance
-  computing systems (clusters) for large-scale analysis.
+To maximize accessibility and re-usability of the tool, the implemented pipelines are encapsulated
+  in a Docker [@merkeldocker:2014] and a Singularity [@Kurtzer2017Singularity:Compute] software image
+  containers, in concordance to the BIDS App standard [@GorgolewskiBIDSMethods:2017].
+This means that the BIDS App of CMP3 can be run on diversity of datasets Linux, MacOSX, Windows computers,
+  and on high performance computing systems (clusters) for large-scale analysis.
 
 ![\textbf{Overview of participant-level analysis workflow of the Connectome Mapper 3 BIDS App.}
 It has a modular architecture composed of three different pipelines (anatomical, diffusion and
@@ -304,42 +293,13 @@ Furthermore, bugs as well as both internal and external developer contributions 
   discussed and managed through issues directly on GitHub for transparent software
   development.
 
-
 # Mention
 
-Connectome Mapper 3 has already been employed with success in a number of methodological and clinical research articles.
+Connectome Mapper 3 has already been employed with success in a number of methodological
+  and clinical research articles [@Carboni2019TheOutcome] [@Zheng2020GeometricConnectomeb]
+  [@Vorderwulbecke2020High-densityPoint] [@CarboniNeuro:2020] [@GlombNeuro:2020] [@GlombNet:2020]
+  [@AkselrodHBM:2021] [@RueQueraltNeuro:2021] [@PascucciNet:2021] [@ds003505:1.0.1].
 
-*   2021 - VEPCON: Source imaging of high-density visual evoked potentials with multi-scale brain parcellations and connectomes
-    In press, Scientific Data Nature
-    https://www.biorxiv.org/content/10.1101/2021.03.16.435599v1.abstract
-    
-*   2021 - Structure supports function: informing directed and dynamic functional connectivity with anatomical priors
-    https://direct.mit.edu/netn/article/doi/10.1162/netn_a_00218/108678/Structure-supports-function-informing-directed-and
-    
-*   2021 - The connectome spectrum as a canonical basis for a sparse representation of fast brain activity
-    https://www.sciencedirect.com/science/article/pii/S1053811921008843
-    
-*   2021 - Relation between palm and finger cortical representations in primary somatosensory cortex: A 7T fMRI study
-    https://onlinelibrary.wiley.com/doi/10.1002/hbm.25365
-
-*   2020 - Using structural connectivity to augment community structure in EEG functional connectivity
-    https://direct.mit.edu/netn/article/4/3/761/95852/Using-structural-connectivity-to-augment-community
-
-*   2020 - Connectome spectral analysis to track EEG task dynamics on a subsecond scale
-    https://www.sciencedirect.com/science/article/pii/S1053811920306236
-
-*   2020 - Abnormal directed connectivity of resting state networks in focal epilepsy
-    https://www.sciencedirect.com/science/article/pii/S221315822030173X#bi005
-    
-*   2020 - High-density Electric Source Imaging of interictal epileptic discharges: How many electrodes and which time point?
-    https://www.sciencedirect.com/science/article/pii/S1388245720304934#bi005
-    
-*   2020 - Geometric renormalization unravels self-similarity of the multiscale human connectome
-    https://www.pnas.org/content/117/33/20244
-    
-*   2019 - The network integration of epileptic activity in relation to surgical outcome
-    https://www.sciencedirect.com/science/article/pii/S1388245719312258
-    
 # Acknowledgements
 
 This work was supported by Swiss National Science Foundation Sinergia
