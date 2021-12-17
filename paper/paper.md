@@ -157,23 +157,24 @@ At the time of writing, an EEG source imaging pipeline is being integrated, init
 
 # Highlights
 
-\textbf{A flexible workflow for multi-modal connectome mapping in the BIDS ecosystem.} MP3 implements
+\textbf{A flexible workflow for multi-modal human connectome mapping in the BIDS ecosystem.} MP3 implements
   pipelines that maps from sMRI / dMRI / fMRI the structural and / or functional connectomes, for
   five macroscopic brain parcellation scales with hierarchical region grouping.
 It is written in Python 3 and adopts an object-oriented programming style for the sake of modularity,
   extensibility, and re-usability.
-The participant-level analysis workflow is implemented with nipype [@GorgolewskiNipype:2011]
-  adopting a modular architecture, composed of three different pipeline classes (anatomical, diffusion, and fMRI)
-  dedicated to the processing of each modality (sMRI, dMRI, rfMRI), which takes as principal inputs the path of
-  the BIDS dataset to be processed, and a set of pipeline configuration file.
+\autoref{fig:cmp3-diagram} illustrates the participant-level analysis workflow.
+It is implemented with nipype [@GorgolewskiNipype:2011] adopting a modular architecture, composed of
+  three different pipeline classes (anatomical, diffusion, and fMRI) dedicated to the processing of
+  each modality (sMRI, dMRI, rfMRI), which takes as principal inputs the path of the BIDS dataset to
+  be processed, and a set of pipeline configuration files in `.json` format.
 Each pipeline class provides methods to create and execute a nipype workflow that runs a number of
   nipype sub-workflows, described by stage classes and implementing one or multiple tasks,
   where each task can interface with either a specific tool including in
   FSL [@Jenkinson2012FSL], FreeSurfer [@Fischl2012FreeSurfer],
   ANTs [@AVANTS2008SymmetricBrain], dipy [@Garyfallidis2014DipyData],
   mrtrix3 [@Tournier2019MRtrix3:Visualisation], AFNI [@Cox2012], or with an in-house tool
-  (see Figure \autoref{fig:cmp3-diagram}); Pipeline and stage object attributes (parameters)
-  can be set from configuration files in `.json` format.
+  (\autoref{fig:cmp3-diagram}); Pipeline and stage object attributes (parameters)
+  can be set by loading the different pipeline configuration files.
 Empowered by the nipype workflow engine, the re-execution of the workflow will resume the
   processing at any stages a change of parameter occurred.
 To maximize accessibility and re-usability of the tool, the implemented pipelines are encapsulated
