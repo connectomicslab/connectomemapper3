@@ -255,48 +255,35 @@ class PreprocessingStage(Stage):
         #
         # else:
 
+        # fmt: off
         flow.connect(
             [
-                (
-                    inputnode,
-                    processing_input,
-                    [
-                        ("diffusion", "diffusion"),
-                        ("bvecs", "bvecs"),
-                        ("bvals", "bvals"),
-                    ],
-                ),
-            ]
-        )
-
-        flow.connect(
-            [
-                (
-                    inputnode,
-                    processing_input,
-                    [
-                        ("T1", "T1"),
-                        ("aparc_aseg", "aparc_aseg"),
-                        ("aseg", "aseg"),
-                        ("brain", "brain"),
-                        ("brain_mask", "brain_mask"),
-                        ("wm_mask_file", "wm_mask_file"),
-                        ("roi_volumes", "roi_volumes"),
-                    ],
-                ),
+                (inputnode, processing_input, [("diffusion", "diffusion"),
+                                               ("bvecs", "bvecs"),
+                                               ("bvals", "bvals"),
+                                               ("T1", "T1"),
+                                               ("aparc_aseg", "aparc_aseg"),
+                                               ("aseg", "aseg"),
+                                               ("brain", "brain"),
+                                               ("brain_mask", "brain_mask"),
+                                               ("wm_mask_file", "wm_mask_file"),
+                                               ("roi_volumes", "roi_volumes")]),
                 (processing_input, outputnode, [("bvals", "bvals")]),
             ]
         )
+        # fmt: on
 
         # Conversion to MRTrix image format ".mif", grad_fsl=(inputnode.inputs.bvecs,inputnode.inputs.bvals)
         mr_convert = pe.Node(
-            interface=MRConvert(stride=[1, 2, +3, +4]), name="mr_convert"
+            interface=MRConvert(stride=[1, 2, +3, +4]),
+            name="mr_convert"
         )
         mr_convert.inputs.quiet = True
         mr_convert.inputs.force_writing = True
 
         concatnode = pe.Node(interface=util.Merge(2), name="concatnode")
 
+        # fmt: off
         flow.connect(
             [
                 (processing_input, concatnode, [("bvecs", "in1")]),
@@ -304,6 +291,7 @@ class PreprocessingStage(Stage):
                 (concatnode, mr_convert, [(("out", convertList2Tuple), "grad_fsl")]),
             ]
         )
+        # fmt: on
 
         # Convert Freesurfer data
         mr_convert_brainmask = pe.Node(
@@ -343,23 +331,17 @@ class PreprocessingStage(Stage):
             name="mr_convert_wm_mask_file",
         )
 
+        # fmt: off
         flow.connect(
             [
                 (processing_input, mr_convert_brainmask, [("brain_mask", "in_file")]),
                 (processing_input, mr_convert_brain, [("brain", "in_file")]),
                 (processing_input, mr_convert_T1, [("T1", "in_file")]),
-                (
-                    processing_input,
-                    mr_convert_roi_volumes,
-                    [("roi_volumes", "in_files")],
-                ),
-                (
-                    processing_input,
-                    mr_convert_wm_mask_file,
-                    [("wm_mask_file", "in_file")],
-                ),
+                (processing_input, mr_convert_roi_volumes, [("roi_volumes", "in_files")]),
+                (processing_input, mr_convert_wm_mask_file, [("wm_mask_file", "in_file")]),
             ]
         )
+        # fmt: on
 
         # if self.config.partial_volume_estimation:
         #     pve_extractor_from_5tt = pe.Node(interface=ExtractPVEsFrom5TT(),name='pve_extractor_from_5tt')
@@ -412,9 +394,11 @@ class PreprocessingStage(Stage):
             name="mr_threshold_brainmask",
         )
 
+        # fmt: off
         flow.connect(
             [(mr_convert_brainmask, mr_threshold_brainmask, [("converted", "in_file")])]
         )
+        # fmt: on
 
         # Extract b0 and create DWI mask
         flirt_dwimask_pre = pe.Node(
@@ -453,21 +437,18 @@ class PreprocessingStage(Stage):
         mr_convert_b0.inputs.extract_at_axis = 3
         mr_convert_b0.inputs.extract_at_coordinate = [0]
 
-        flow.connect([(processing_input, mr_convert_b0, [("diffusion", "in_file")])])
-
+        # fmt: off
         flow.connect(
             [
+                (processing_input, mr_convert_b0, [("diffusion", "in_file")]),
                 (mr_convert_T1, flirt_dwimask_pre, [("converted", "in_file")]),
                 (mr_convert_b0, flirt_dwimask_pre, [("converted", "reference")]),
                 (mr_convert_b0, flirt_dwimask, [("converted", "reference")]),
-                (
-                    flirt_dwimask_pre,
-                    flirt_dwimask,
-                    [("out_matrix_file", "in_matrix_file")],
-                ),
+                (flirt_dwimask_pre, flirt_dwimask, [("out_matrix_file", "in_matrix_file")]),
                 (mr_threshold_brainmask, flirt_dwimask, [("thresholded", "in_file")]),
             ]
         )
+        # fmt: on
 
         # Diffusion data denoising
         if self.config.denoising:
@@ -492,6 +473,7 @@ class PreprocessingStage(Stage):
                 dwi_denoise.inputs.debug = True
                 dwi_denoise.ignore_exception = True
 
+                # fmt: off
                 flow.connect(
                     [
                         # (processing_input,mr_convert,[('diffusion','in_file')]),
@@ -500,6 +482,7 @@ class PreprocessingStage(Stage):
                         (flirt_dwimask, dwi_denoise, [("out_file", "mask")]),
                     ]
                 )
+                # fmt: on
 
             elif self.config.denoising_algo == "Dipy (NLM)":
                 mr_convert.inputs.out_filename = "diffusion_denoised.mif"
@@ -509,6 +492,7 @@ class PreprocessingStage(Stage):
                 elif self.config.dipy_noise_model == "Rician":
                     dwi_denoise.inputs.noise_model = "rician"
 
+                # fmt: off
                 flow.connect(
                     [
                         (processing_input, dwi_denoise, [("diffusion", "in_file")]),
@@ -516,17 +500,16 @@ class PreprocessingStage(Stage):
                         (dwi_denoise, mr_convert, [("out_file", "in_file")]),
                     ]
                 )
+                # fmt: on
 
+            # fmt: off
             flow.connect(
                 [
                     (dwi_denoise, mr_convert_noise, [("out_file", "in_file")]),
-                    (
-                        mr_convert_noise,
-                        outputnode,
-                        [("converted", "diffusion_noisemap")],
-                    ),
+                    (mr_convert_noise, outputnode, [("converted", "diffusion_noisemap")]),
                 ]
             )
+            # fmt: on
         else:
             mr_convert.inputs.out_filename = "diffusion.mif"
             flow.connect([(processing_input, mr_convert, [("diffusion", "in_file")])])
@@ -566,6 +549,7 @@ class PreprocessingStage(Stage):
 
             if self.config.denoising:
                 if self.config.denoising_algo == "MRtrix (MP-PCA)":
+                    # fmt: off
                     flow.connect(
                         [
                             (dwi_denoise, dwi_biascorrect, [("out_file", "in_file")]),
@@ -574,7 +558,9 @@ class PreprocessingStage(Stage):
                             #  [('out_file', 'in_file')])
                         ]
                     )
+                    # fmt: on
                 elif self.config.denoising_algo == "Dipy (NLM)":
+                    # fmt: off
                     flow.connect(
                         [
                             (mr_convert, dwi_biascorrect, [("converted", "in_file")]),
@@ -583,43 +569,56 @@ class PreprocessingStage(Stage):
                             #  [('out_file', 'in_file')])
                         ]
                     )
+                    # fmt: on
             else:
+                # fmt: off
                 flow.connect(
                     [
                         (mr_convert, dwi_biascorrect, [("converted", "in_file")]),
                         (flirt_dwimask, dwi_biascorrect, [("out_file", "mask")]),
                     ]
                 )
+                # fmt: on
 
+            # fmt: off
             flow.connect(
                 [
                     (dwi_biascorrect, mr_convert_b, [("out_file", "in_file")]),
                     (dwi_biascorrect, mr_convert_bias, [("out_file", "in_file")]),
-                    (
-                        mr_convert_bias,
-                        outputnode,
-                        [("converted", "diffusion_biasfield")],
-                    ),
+                    (mr_convert_bias, outputnode, [("converted", "diffusion_biasfield")]),
                 ]
             )
+            # fmt: on
         else:
             if self.config.denoising:
                 if self.config.denoising_algo == "MRtrix (MP-PCA)":
+                    # fmt: off
                     flow.connect(
                         [(dwi_denoise, mr_convert_b, [("out_file", "in_file")])]
                     )
+                    # fmt: on
                 elif self.config.denoising_algo == "Dipy (NLM)":
+                    # fmt: off
                     flow.connect(
                         [(mr_convert, mr_convert_b, [("converted", "in_file")])]
                     )
+                    # fmt: on
             else:
-                flow.connect([(mr_convert, mr_convert_b, [("converted", "in_file")])])
+                # fmt: off
+                flow.connect(
+                    [(mr_convert, mr_convert_b, [("converted", "in_file")])]
+                )
+                # fmt: on
 
         extract_grad_mrtrix = pe.Node(
             interface=ExtractMRTrixGrad(out_grad_mrtrix="grad.txt"),
             name="extract_grad_mrtrix",
         )
-        flow.connect([(mr_convert, extract_grad_mrtrix, [("converted", "in_file")])])
+        # fmt: off
+        flow.connect(
+            [(mr_convert, extract_grad_mrtrix, [("converted", "in_file")])]
+        )
+        # fmt: on
         # extract_grad_fsl = pe.Node(interface=mrt.MRTrixInfo(out_grad_mrtrix=('diffusion_denoised.bvec','diffusion_denoised.bval')),name='extract_grad_fsl')
 
         # TODO extract the total readout directly from the BIDS json file
@@ -629,9 +628,11 @@ class PreprocessingStage(Stage):
         )
 
         indexnode = pe.Node(interface=CreateIndexFile(), name="indexnode")
+        # fmt: off
         flow.connect(
             [(extract_grad_mrtrix, indexnode, [("out_grad_mrtrix", "in_grad_mrtrix")])]
         )
+        # fmt: on
 
         fs_mriconvert = pe.Node(
             interface=fs.MRIConvert(
@@ -655,11 +656,13 @@ class PreprocessingStage(Stage):
         # fs_mriconvert_b0.inputs.vox_size = self.config.resampling
         # fs_mriconvert_b0.inputs.resample_type = self.config.interpolation
 
+        # fmt: off
         flow.connect(
             [
                 (fs_mriconvert, mr_convert_b0_resample, [("out_file", "in_file")]),
             ]
         )
+        # fmt: on
 
         # resampling Freesurfer data and setting output type to short
         fs_mriconvert_T1 = pe.Node(
@@ -669,6 +672,7 @@ class PreprocessingStage(Stage):
         fs_mriconvert_T1.inputs.vox_size = self.config.resampling
         fs_mriconvert_T1.inputs.resample_type = self.config.interpolation
 
+        # fmt: off
         flow.connect(
             [
                 (mr_convert_T1, fs_mriconvert_T1, [("converted", "in_file")]),
@@ -676,6 +680,7 @@ class PreprocessingStage(Stage):
                 (fs_mriconvert_T1, outputnode, [("out_file", "T1")]),
             ]
         )
+        # fmt: on
 
         fs_mriconvert_brain = pe.Node(
             interface=fs.MRIConvert(
@@ -686,6 +691,7 @@ class PreprocessingStage(Stage):
         fs_mriconvert_brain.inputs.vox_size = self.config.resampling
         fs_mriconvert_brain.inputs.resample_type = self.config.interpolation
 
+        # fmt: off
         flow.connect(
             [
                 (mr_convert_brain, fs_mriconvert_brain, [("converted", "in_file")]),
@@ -693,6 +699,7 @@ class PreprocessingStage(Stage):
                 (fs_mriconvert_brain, outputnode, [("out_file", "brain")]),
             ]
         )
+        # fmt: on
 
         fs_mriconvert_brainmask = pe.Node(
             interface=fs.MRIConvert(
@@ -703,17 +710,15 @@ class PreprocessingStage(Stage):
             name="brain_mask_resample",
         )
         fs_mriconvert_brainmask.inputs.vox_size = self.config.resampling
+        # fmt: off
         flow.connect(
             [
-                (
-                    mr_threshold_brainmask,
-                    fs_mriconvert_brainmask,
-                    [("thresholded", "in_file")],
-                ),
+                (mr_threshold_brainmask, fs_mriconvert_brainmask, [("thresholded", "in_file")],),
                 # (mr_convert_b0_resample,fs_mriconvert_brainmask,[('converted','reslice_like')]),
                 (fs_mriconvert_brainmask, outputnode, [("out_file", "brain_mask")]),
             ]
         )
+        # fmt: on
 
         fs_mriconvert_brainmaskfull = pe.Node(
             interface=fs.MRIConvert(
@@ -723,21 +728,15 @@ class PreprocessingStage(Stage):
         )
         fs_mriconvert_brainmaskfull.inputs.vox_size = self.config.resampling
         fs_mriconvert_brainmaskfull.inputs.resample_type = self.config.interpolation
+        # fmt: off
         flow.connect(
             [
-                (
-                    mr_convert_brainmask,
-                    fs_mriconvert_brainmaskfull,
-                    [("converted", "in_file")],
-                ),
+                (mr_convert_brainmask, fs_mriconvert_brainmaskfull, [("converted", "in_file")]),
                 # (mr_convert_b0_resample,fs_mriconvert_brainmaskfull,[('converted','reslice_like')]),
-                (
-                    fs_mriconvert_brainmaskfull,
-                    outputnode,
-                    [("out_file", "brain_mask_full")],
-                ),
+                (fs_mriconvert_brainmaskfull, outputnode, [("out_file", "brain_mask_full")]),
             ]
         )
+        # fmt: on
 
         fs_mriconvert_wm_mask = pe.Node(
             interface=fs.MRIConvert(
@@ -748,17 +747,15 @@ class PreprocessingStage(Stage):
             name="wm_mask_resample",
         )
         fs_mriconvert_wm_mask.inputs.vox_size = self.config.resampling
+        # fmt: off
         flow.connect(
             [
-                (
-                    mr_convert_wm_mask_file,
-                    fs_mriconvert_wm_mask,
-                    [("converted", "in_file")],
-                ),
+                (mr_convert_wm_mask_file, fs_mriconvert_wm_mask, [("converted", "in_file")],),
                 # (mr_convert_b0_resample,fs_mriconvert_wm_mask,[('converted','reslice_like')]),
                 (fs_mriconvert_wm_mask, outputnode, [("out_file", "wm_mask_file")]),
             ]
         )
+        # fmt: on
 
         fs_mriconvert_ROIs = pe.MapNode(
             interface=fs.MRIConvert(out_type="niigz", resample_type="nearest"),
@@ -766,17 +763,15 @@ class PreprocessingStage(Stage):
             name="ROIs_resample",
         )
         fs_mriconvert_ROIs.inputs.vox_size = self.config.resampling
+        # fmt: off
         flow.connect(
             [
-                (
-                    mr_convert_roi_volumes,
-                    fs_mriconvert_ROIs,
-                    [("converted_files", "in_file")],
-                ),
+                (mr_convert_roi_volumes, fs_mriconvert_ROIs, [("converted_files", "in_file")],),
                 # (mr_convert_b0_resample,fs_mriconvert_ROIs,[('converted','reslice_like')]),
                 (fs_mriconvert_ROIs, outputnode, [("out_file", "roi_volumes")]),
             ]
         )
+        # fmt: on
 
         # fs_mriconvert_PVEs = pe.MapNode(interface=fs.MRIConvert(out_type='niigz'),name="PVEs_resample",iterfield=['in_file'])
         # fs_mriconvert_PVEs.inputs.vox_size = self.config.resampling
@@ -796,17 +791,16 @@ class PreprocessingStage(Stage):
             name="dwi_brainmask_resample",
         )
         # fs_mriconvert_dwimask.inputs.vox_size = self.config.resampling
+
+        # fmt: off
         flow.connect(
             [
                 (flirt_dwimask, fs_mriconvert_dwimask, [("out_file", "in_file")]),
-                (
-                    mr_convert_b0_resample,
-                    fs_mriconvert_dwimask,
-                    [("converted", "reslice_like")],
-                ),
+                (mr_convert_b0_resample, fs_mriconvert_dwimask, [("converted", "reslice_like")],),
                 (fs_mriconvert_dwimask, outputnode, [("out_file", "dwi_brain_mask")]),
             ]
         )
+        # fmt: on
 
         # TODO Implementation of FSL Topup
 
@@ -821,7 +815,9 @@ class PreprocessingStage(Stage):
                     name="eddy_correct",
                 )
 
+                # fmt: off
                 flow.connect([(processing_input, outputnode, [("bvecs", "bvecs_rot")])])
+                # fmt: on
 
                 if self.config.eddy_correct_motion_correction:
 
@@ -833,16 +829,20 @@ class PreprocessingStage(Stage):
                         ),
                         name="motion_correction",
                     )
-                    flow.connect([(mr_convert_b, mc_flirt, [("converted", "in_file")])])
-
-                    # FIXME rotate b vectors after motion correction (mcflirt)
-
-                    flow.connect([(mc_flirt, eddy_correct, [("out_file", "in_file")])])
+                    # fmt: off
+                    flow.connect(
+                        [
+                            (mr_convert_b, mc_flirt, [("converted", "in_file")]),
+                            (mc_flirt, eddy_correct, [("out_file", "in_file")])
+                        ]
+                    )
+                    # fmt: on
                 else:
-
+                    # fmt: off
                     flow.connect(
                         [(mr_convert_b, eddy_correct, [("converted", "in_file")])]
                     )
+                    # fmt: on
 
                 # # DTK needs fixed number of directions (512)
                 # if self.config.start_vol > 0 and self.config.end_vol == self.config.max_vol:
@@ -889,16 +889,15 @@ class PreprocessingStage(Stage):
                 #                 (fs_mriconvert,outputnode,[("out_file","diffusion_preproc")])
                 #                 ])
                 # else:
+
+                # fmt: off
                 flow.connect(
                     [
                         (eddy_correct, fs_mriconvert, [("eddy_corrected", "in_file")]),
-                        (
-                            fs_mriconvert,
-                            outputnode,
-                            [("out_file", "diffusion_preproc")],
-                        ),
+                        (fs_mriconvert, outputnode, [("out_file", "diffusion_preproc")],),
                     ]
                 )
+                # fmt: on
 
             else:
                 eddy_correct = pe.Node(
@@ -907,6 +906,7 @@ class PreprocessingStage(Stage):
                     ),
                     name="eddy",
                 )
+                # fmt: off
                 flow.connect(
                     [
                         (mr_convert_b, eddy_correct, [("converted", "in_file")]),
@@ -917,8 +917,10 @@ class PreprocessingStage(Stage):
                         (acqpnode, eddy_correct, [("acqp", "acqp")]),
                     ]
                 )
+                # fmt: on
 
                 # resampling diffusion image and setting output type to short
+                # fmt: off
                 flow.connect(
                     [
                         (eddy_correct, outputnode, [("bvecs_rotated", "bvecs_rot")]),
@@ -926,8 +928,10 @@ class PreprocessingStage(Stage):
                         (fs_mriconvert,outputnode, [("out_file", "diffusion_preproc")])
                     ]
                 )
+                # fmt: on
         else:
             # resampling diffusion image and setting output type to short
+            # fmt: off
             flow.connect(
                 [
                     (mr_convert_b, fs_mriconvert, [("converted", "in_file")]),
@@ -935,6 +939,7 @@ class PreprocessingStage(Stage):
                     (inputnode, outputnode, [("bvecs", "bvecs_rot")]),
                 ]
             )
+            # fmt: on
 
         # #mr_convertB.inputs.grad_fsl = ('bvecs', 'bvals')
         # flow.connect([
@@ -1015,12 +1020,14 @@ class PreprocessingStage(Stage):
                 pve_extractor_from_5tt.inputs.pve_gm_file = "pve_1.nii.gz"
                 pve_extractor_from_5tt.inputs.pve_wm_file = "pve_2.nii.gz"
 
+                # fmt: off
                 flow.connect(
                     [
                         (mrtrix_5tt, pve_extractor_from_5tt, [("out_file", "in_5tt")]),
                         (processing_input, pve_extractor_from_5tt, [("T1", "ref_image")]),
                     ]
                 )
+                # fmt: on
 
                 fs_mriconvert_PVEs = pe.MapNode(
                     interface=fs.MRIConvert(out_type="niigz"),
@@ -1029,21 +1036,15 @@ class PreprocessingStage(Stage):
                 )
                 fs_mriconvert_PVEs.inputs.vox_size = self.config.resampling
                 fs_mriconvert_PVEs.inputs.resample_type = self.config.interpolation
+                # fmt: off
                 flow.connect(
                     [
-                        (
-                            pve_extractor_from_5tt,
-                            fs_mriconvert_PVEs,
-                            [("partial_volume_files", "in_file")],
-                        ),
+                        (pve_extractor_from_5tt, fs_mriconvert_PVEs, [("partial_volume_files", "in_file")],),
                         # (mr_convert_b0_resample,fs_mriconvert_ROIs,[('converted','reslice_like')]),
-                        (
-                            fs_mriconvert_PVEs,
-                            outputnode,
-                            [("out_file", "partial_volume_files")],
-                        ),
+                        (fs_mriconvert_PVEs, outputnode, [("out_file", "partial_volume_files")],),
                     ]
                 )
+                # fmt: on
 
         if self.config.gmwmi_seeding:
             fs_mriconvert_gmwmi = pe.Node(
@@ -1064,7 +1065,7 @@ class PreprocessingStage(Stage):
                 interface=UpdateGMWMInterfaceSeeding(), name="update_gmwmi"
             )
             update_gmwmi.inputs.out_gmwmi_file = "gmwmi_proc.nii.gz"
-
+            # fmt: off
             flow.connect(
                 [
                     (mrtrix_5tt, mrtrix_gmwmi, [("out_file", "in_file")]),
@@ -1074,6 +1075,7 @@ class PreprocessingStage(Stage):
                     (fs_mriconvert_gmwmi, outputnode, [("out_file", "gmwmi")]),
                 ]
             )
+            # fmt: on
 
     def define_inspect_outputs(self):
         """Update the `inspect_outputs` class attribute.
