@@ -165,6 +165,10 @@ commands:
             --fs_license "${bids_dir}/code/license.txt" \
             --ants_number_of_threads 4 \
             --coverage
+            # Rename partial coverage
+            mv /tmp/data/<<parameters.circleci_job>>/ds-sample/code/coverage.xml /tmp/data/ds-sample/test/<<parameters.test_name>>_coverage.xml
+            # Rename execution log
+            mv /tmp/data/<<parameters.circleci_job>>/ds-sample/code/log.txt /tmp/data/ds-sample/test/<<parameters.test_name>>_log.txt
       - run:
           name: Checking outputs of Connectome Mapper run (<<parameters.test_name>>)
           command: |
@@ -1243,6 +1247,8 @@ jobs:
                 -l Python -r /tmp/data/ds-sample/test/test-08_coverage.xml --partial &&\
             bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
                 -l Python -r /tmp/data/ds-sample/test/test-09_coverage.xml --partial &&\
+            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
+                -l Python -r /tmp/data/ds-sample/test/test-10_coverage.xml --partial &&\
             bash <(curl -Ls https://coverage.codacy.com/get.sh) final
 
   send_codecov_report:
@@ -1270,6 +1276,8 @@ jobs:
           file: /tmp/data/ds-sample/test/test-08_coverage.xml
       - codecov/upload:
           file: /tmp/data/ds-sample/test/test-09_coverage.xml
+      - codecov/upload:
+          file: /tmp/data/ds-sample/test/test-10_coverage.xml
 
   build_docs:
     machine:
