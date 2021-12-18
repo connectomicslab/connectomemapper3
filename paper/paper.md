@@ -72,55 +72,47 @@ The size and organization of these datasets as well as the increasing complexity
   pipelines to analyze them present important challenges for scalable computing, data sharing,
   reproducibility and transparency of the analysis.
 
-To address these challenges, the last ten years have indeed witnessed a number of research initiatives
-  and the emergence of new standards and tools.
-  trend towards the adoption by the community of open research
-  practices, which promotes `open data` and `open method`.
-This has led to the elaboration of the principles of open and reproducible research for
-  neuroimaging using Magnetic Resonance Imaging (MRI) [@Nichols:2017] and to recommendation of
+The last ten years have indeed witnessed a trend towards the adoption by the community of open research
+  practices, which promotes `open data` and `open method`, to not only address these challenges, but also
+  due to the evolution of research incentives.
+This has led for instance to the elaboration of the principles of open and reproducible research for
+  neuroimaging using Magnetic Resonance Imaging (MRI) [@Nichols:2017] and to the recommendation of
   standard practices for sharing code and programs [@EglenTowardNeuroscience:2017]. 
 To ease and automate the practice of sharing raw and processed neuroimaging data and code with
   appropriate metadata and provenance records, multiple initiatives have developed new standards,
-  tools, and educational resources.
-Among others, this has contributed to the emergence of
-  nipype [@GorgolewskiNipype:2011], a dataflow library that facilitates workflow
-  execution/re-execution, provenance tracking and provides a uniform interface to existing
-  neuroimaging softwares; the Brain Imaging Data Structure (BIDS)
-  standard [@GorgolewskiTheExperiments:2016], to standardize the organization and description
-  of neuroimaging data; Datalad a data portal, versioning, and provenance tracking system
-  supporting BIDS; and more recently, the BIDS-Apps framework [@GorgolewskiBIDSMethods:2017],
-  which employs modern software practices and encapsulates a processing pipeline that takes a
-  BIDS dataset as input into a software container in order to improve the ease of use,
-  accessibility, deliverability, portability, scalability and reproducibility of processing
-  pipelines.
+  tools, and educational resources [@GorgolewskiNipype:2011] [@GorgolewskiTheExperiments:2016]
+  [@GorgolewskiBIDSMethods:2017].
 
-Following these advances, a number of processing pipelines such as C-PAC [@cpac:2013],
+Following these advances, a number of processing pipelines, supporting the mapping of connectomes
+  derived from MRI data organized following the BIDS standard, such as C-PAC [@cpac:2013],
   NIAK [@BellecNeuroimagingNIAK:2016], fMRIPrep [@Ghosh:2018],
   dMRIPrep [@dmriprep:2019], QSIPREP [@CieslakQSIPrep:2020], NDMG [@KiarAVariability:2018] and PyNets
-  [@PisnerPyNets:2020] have been developed to support the mapping of connectomes derived from
-  MRI data organized following the BIDS standard.
+  [@PisnerPyNets:2020] have been developed .
 They have demonstrated their capability in addressing all the challenges of data sharing,
   portability, computing scalability, reliability, reproducibility and transparency.
-However, none of the existing solutions provide a direct alternative to Connectome Mapper (CMP),
-  an open-source pipeline software with a graphical user interface, whose has been historically
-  designed before the emergence of the standards and containerization technologies to
-  simplify the organisation and the analysis of sMRI and dMRI from raw data to multi-scale structural weighted connectomes [@Daducci:2012].
+However, none of the existing solutions provide a direct alternative to Connectome Mapper (CMP)
+  whose has created to distribute its own and unique multi-scale brain parcellation scheme [@].
+  and to simplify the organisation and the analysis of sMRI and dMRI from raw data to multi-scale
+  structural weighted connectomes [@Daducci:2012]. However it has been historically
+  designed before the emergence of the BIDS standards and the containerization technologies.
 While CMP3 derives from the now deprecated CMP1 and CMP2 packages, it has migrated to Python 3 and
   the processing pipelines have been encapsulated in software container images and continuously tested
-  in concordance to the BIDS Apps standard since its premises.
-
-% This has led to a massive evolution over the years in terms of the underlying codebase, the tools used, and the scope of the functionality
-%   provided.
+  in concordance to the BIDS Apps standard since its premises. It has massively evolved over the years
+  in terms of the underlying codebase, the tools used, and the scope of the functionality provided.
 
 # Summary
 
 Connectome Mapper 3 provides a unique open-source software pipeline solution with a Graphical User Interface
   (GUI) for researchers to easily, reliably and transparently create a hierarchical multi-scale
   connectome representation of the structural and functional brain systems, on any sMRI / dMRI /
-  rfMRI dataset structured according to the BIDS standard, by interfacing with a number of popular
+  rfMRI dataset structured according to the BIDS standard, by interfacing with a number of widely adopted
   neuroimaging tools (inclusing FSL [@Jenkinson2012FSL], FreeSurfer [@Fischl2012FreeSurfer],
   ANTs [@AVANTS2008SymmetricBrain], dipy [@Garyfallidis2014DipyData],
   mrtrix3 [@Tournier2019MRtrix3:Visualisation], and AFNI [@Cox2012]).
+It has been developed around different principles and characteristics that are presented right after.
+
+
+
 Design considerations with the implementation of modular, configurable, and containerized
   processing pipelines, empowered by nipype, handling datasets concordant to the BIDS standard,
   distributed as a BIDS App, makes it not only easy to install and use (as it provides the user with a computing
