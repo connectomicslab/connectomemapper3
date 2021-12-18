@@ -591,7 +591,7 @@ jobs:
             if [[ ! -d /tmp/data/ds-sample ]]; then
               mkdir -p /tmp/data
               wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -v \
-                -O ds-sample.tar.gz "https://zenodo.org/record/5788803/files/ds-sample.tar.gz?download=1"
+                -O ds-sample.tar.gz "https://zenodo.org/record/5790821/files/ds-sample.tar.gz?download=1"
               tar xvzf ds-sample.tar.gz -C /tmp/data/
               echo "Dataset ds-sample has been successfully downloaded"
             else
@@ -603,7 +603,7 @@ jobs:
             if [[ ! -d /tmp/data/ds-sample/derivatives/freesurfer-6.0.1 ]]; then
               mkdir -p /tmp/data/ds-sample/derivatives
               wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -v \
-                -O freesurfer.tar.gz "https://zenodo.org/record/5788803/files/freesurfer.tar.gz?download=1"
+                -O freesurfer.tar.gz "https://zenodo.org/record/5790821/files/freesurfer.tar.gz?download=1"
               tar xvzf freesurfer.tar.gz -C /tmp/data/ds-sample/derivatives
               mv /tmp/data/ds-sample/derivatives/freesurfer /tmp/data/ds-sample/derivatives/freesurfer-6.0.1
               echo "FreeSurfer derivatives of ds-sample have been successfully downloaded"
