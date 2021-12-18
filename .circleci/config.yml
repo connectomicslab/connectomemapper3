@@ -1232,8 +1232,6 @@ jobs:
             bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
                 -l Python -r /tmp/data/ds-sample/test/test-02_coverage.xml --partial &&\
             bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
-                -l Python -r /tmp/data/ds-sample/test/test-03_coverage.xml --partial &&\
-            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
                 -l Python -r /tmp/data/ds-sample/test/test-04_coverage.xml --partial &&\
             bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
                 -l Python -r /tmp/data/ds-sample/test/test-05_coverage.xml --partial &&\
@@ -1258,8 +1256,8 @@ jobs:
           file: /tmp/data/ds-sample/test/test-01_coverage.xml
       - codecov/upload:
           file: /tmp/data/ds-sample/test/test-02_coverage.xml
-      - codecov/upload:
-          file: /tmp/data/ds-sample/test/test-03_coverage.xml
+      # - codecov/upload:
+      #     file: /tmp/data/ds-sample/test/test-03_coverage.xml
       - codecov/upload:
           file: /tmp/data/ds-sample/test/test-04_coverage.xml
       - codecov/upload:
@@ -1619,14 +1617,14 @@ workflows:
       - codacy_coverage_report:
           requires:
             - test10_singularity_parcellation
-            - test11_singularity_parcellation
+            # - test11_singularity_parcellation
             - test4_docker_dsi_mrtrix
             - test5_docker_dsi_mrtrix
             - test6_docker_dsi_dipy
             - test7_docker_dsi_dipy
             - test1_docker_parcellation
             - test2_docker_parcellation
-            - test3_docker_parcellation
+            # - test3_docker_parcellation
             - test8_docker_fmri
             - test9_docker_fmri
           filters:
