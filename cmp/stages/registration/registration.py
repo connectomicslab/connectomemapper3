@@ -171,6 +171,19 @@ class RegistrationConfig(HasTraits):
         Apply estimated transform to eroded brain mask
         (Default: False)
 
+    tracking_tool : Enum(['Dipy', 'MRtrix'])
+        Tool used for tractography
+
+    act_tracking : traits.Bool
+        True if Anatomically-Constrained or Particle Filtering
+        Tractography is enabled
+        (Default: False)
+
+    gmwmi_seeding : traits.Bool
+        True if tractography seeding is performed from the
+        gray-matter / white-matter interface
+        (Default: False)
+
     See Also
     --------
     cmp.stages.registration.registration.RegistrationStage
@@ -240,6 +253,11 @@ class RegistrationConfig(HasTraits):
     apply_to_eroded_wm = Bool(True)
     apply_to_eroded_csf = Bool(True)
     apply_to_eroded_brain = Bool(False)
+
+    # ACT tracking / GMWM interface seeding
+    tracking_tool = Enum(['Dipy', 'MRtrix'])
+    act_tracking = Bool(False)
+    gmwmi_seeding = Bool(False)
 
 
 class RegistrationStage(Stage):
@@ -340,7 +358,7 @@ class RegistrationStage(Stage):
             ]
 
     def create_workflow(self, flow, inputnode, outputnode):
-        """Create the stage worflow.
+        """Create the stage workflow.
 
         Parameters
         ----------
@@ -707,32 +725,36 @@ class RegistrationStage(Stage):
                 ),
                 name="apply_warp_roivs",
             )
-            ants_applywarp_pves = pe.Node(
-                interface=MultipleANTsApplyTransforms(
-                    interpolation="Gaussian", default_value=0, out_postfix="_warped"
-                ),
-                name="apply_warp_pves",
-            )
 
-            ants_applywarp_5tt = pe.Node(
-                interface=ants.ApplyTransforms(
-                    default_value=0, interpolation="Gaussian", out_postfix="_warped"
-                ),
-                name="apply_warp_5tt",
-            )
-            ants_applywarp_5tt.inputs.dimension = 3
-            ants_applywarp_5tt.inputs.input_image_type = 3
-            ants_applywarp_5tt.inputs.float = True
+            if self.config.act_tracking:
+                ants_applywarp_5tt = pe.Node(
+                    interface=ants.ApplyTransforms(
+                        default_value=0, interpolation="Gaussian", out_postfix="_warped"
+                    ),
+                    name="apply_warp_5tt",
+                )
+                ants_applywarp_5tt.inputs.dimension = 3
+                ants_applywarp_5tt.inputs.input_image_type = 3
+                ants_applywarp_5tt.inputs.float = True
 
-            ants_applywarp_gmwmi = pe.Node(
-                interface=ants.ApplyTransforms(
-                    default_value=0, interpolation="Gaussian", out_postfix="_warped"
-                ),
-                name="apply_warp_gmwmi",
-            )
-            ants_applywarp_gmwmi.inputs.dimension = 3
-            ants_applywarp_gmwmi.inputs.input_image_type = 3
-            ants_applywarp_gmwmi.inputs.float = True
+                if self.config.tracking_tool == "Dipy":
+                    ants_applywarp_pves = pe.Node(
+                        interface=MultipleANTsApplyTransforms(
+                            interpolation="Gaussian", default_value=0, out_postfix="_warped"
+                        ),
+                        name="apply_warp_pves",
+                    )
+
+                if self.config.gmwmi_seeding:
+                    ants_applywarp_gmwmi = pe.Node(
+                        interface=ants.ApplyTransforms(
+                            default_value=0, interpolation="Gaussian", out_postfix="_warped"
+                        ),
+                        name="apply_warp_gmwmi",
+                    )
+                    ants_applywarp_gmwmi.inputs.dimension = 3
+                    ants_applywarp_gmwmi.inputs.input_image_type = 3
+                    ants_applywarp_gmwmi.inputs.float = True
 
             def reverse_order_transforms(transforms):
                 """Reverse the order of the transformations estimated by linear and SyN registration.
@@ -790,34 +812,76 @@ class RegistrationStage(Stage):
                 flow.connect(
                     [
                         (SyN_registration, ants_applywarp_T1, [(("forward_transforms", reverse_order_transforms), "transforms")]),
-                        (SyN_registration, ants_applywarp_5tt, [(("forward_transforms", reverse_order_transforms), "transforms")]),
-                        (SyN_registration, ants_applywarp_gmwmi, [(("forward_transforms", reverse_order_transforms), "transforms")]),
                         (SyN_registration, ants_applywarp_brain, [(("forward_transforms", reverse_order_transforms), "transforms")]),
                         (SyN_registration, ants_applywarp_brainmask, [(("forward_transforms", reverse_order_transforms), "transforms")]),
                         (SyN_registration, ants_applywarp_wm, [(("forward_transforms", reverse_order_transforms), "transforms")]),
                         (SyN_registration, ants_applywarp_rois, [(("forward_transforms", reverse_order_transforms), "transforms")]),
-                        (SyN_registration, ants_applywarp_pves, [(("forward_transforms", reverse_order_transforms), "transforms")]),
                         (SyN_registration, outputnode, [(("forward_transforms", extract_affine_transform), "affine_transform")]),
                         (SyN_registration, outputnode, [(("forward_transforms", extract_warp_field), "warp_field")]),
                     ]
                 )
                 # fmt:on
+                if self.config.act_tracking:
+                    # fmt:off
+                    flow.connect(
+                        [
+                            (SyN_registration, ants_applywarp_5tt, [(("forward_transforms", reverse_order_transforms), "transforms")]),
+                        ]
+                    )
+                    # fmt:on
+                    if self.config.tracking_tool == "Dipy":
+                        # fmt:off
+                        flow.connect(
+                            [
+                                (SyN_registration, ants_applywarp_pves, [(("forward_transforms", reverse_order_transforms), "transforms")]),
+                            ]
+                        )
+                        # fmt:on
+                    if self.config.gmwmi_seeding:
+                        # fmt:off
+                        flow.connect(
+                            [
+                                (SyN_registration, ants_applywarp_gmwmi, [(("forward_transforms", reverse_order_transforms), "transforms")]),
+                            ]
+                        )
+                        # fmt:on
             else:
                 # fmt:off
                 flow.connect(
                     [
                         (affine_registration, ants_applywarp_T1, [(("forward_transforms", reverse_order_transforms), "transforms")]),
-                        (affine_registration, ants_applywarp_5tt, [(("forward_transforms", reverse_order_transforms), "transforms")]),
-                        (affine_registration, ants_applywarp_gmwmi, [(("forward_transforms", reverse_order_transforms), "transforms")]),
                         (affine_registration, ants_applywarp_brain, [(("forward_transforms", reverse_order_transforms), "transforms")]),
                         (affine_registration, ants_applywarp_brainmask, [(("forward_transforms", reverse_order_transforms), "transforms")]),
                         (affine_registration, ants_applywarp_wm, [(("forward_transforms", reverse_order_transforms), "transforms")]),
                         (affine_registration, ants_applywarp_rois, [(("forward_transforms", reverse_order_transforms), "transforms")]),
-                        (affine_registration, ants_applywarp_pves, [(("forward_transforms", reverse_order_transforms), "transforms")]),
                         (affine_registration, outputnode, [(("forward_transforms", extract_affine_transform), "affine_transform")]),
                     ]
                 )
                 # fmt:on
+                if self.config.act_tracking:
+                    # fmt:off
+                    flow.connect(
+                        [
+                            (affine_registration, ants_applywarp_5tt, [(("forward_transforms", reverse_order_transforms), "transforms")])
+                        ]
+                    )
+                    # fmt:on
+                    if self.config.tracking_tool == "Dipy":
+                        # fmt:off
+                        flow.connect(
+                            [
+                                (affine_registration, ants_applywarp_pves, [(("forward_transforms", reverse_order_transforms), "transforms")])
+                            ]
+                        )
+                        # fmt:on
+                    if self.config.gmwmi_seeding:
+                        # fmt:off
+                        flow.connect(
+                            [
+                                (affine_registration, ants_applywarp_gmwmi, [(("forward_transforms", reverse_order_transforms), "transforms")])
+                            ]
+                        )
+                        # fmt:on
 
             # fmt:off
             flow.connect(
@@ -825,12 +889,6 @@ class RegistrationStage(Stage):
                     (inputnode, ants_applywarp_T1, [("T1", "input_image")]),
                     (mr_convert_b0, ants_applywarp_T1, [("converted", "reference_image")],),
                     (ants_applywarp_T1, outputnode, [("output_image", "T1_registered_crop")],),
-                    (inputnode, ants_applywarp_5tt, [("act_5TT", "input_image")]),
-                    (mr_convert_b0, ants_applywarp_5tt, [("converted", "reference_image")],),
-                    (ants_applywarp_5tt, outputnode, [("output_image", "act_5tt_registered_crop")],),
-                    (inputnode, ants_applywarp_gmwmi, [("gmwmi", "input_image")]),
-                    (mr_convert_b0, ants_applywarp_gmwmi, [("converted", "reference_image")],),
-                    (ants_applywarp_gmwmi, outputnode, [("output_image", "gmwmi_registered_crop")],),
                     (inputnode, ants_applywarp_brain, [("brain", "input_image")]),
                     (mr_convert_b0, ants_applywarp_brain, [("converted", "reference_image")],),
                     (ants_applywarp_brain, outputnode, [("output_image", "brain_registered_crop")],),
@@ -843,12 +901,39 @@ class RegistrationStage(Stage):
                     (inputnode, ants_applywarp_rois, [("roi_volumes", "input_images")]),
                     (mr_convert_b0, ants_applywarp_rois, [("converted", "reference_image")],),
                     (ants_applywarp_rois, outputnode, [("output_images", "roi_volumes_registered_crop")],),
-                    (inputnode, ants_applywarp_pves, [("partial_volume_files", "input_images")],),
-                    (mr_convert_b0, ants_applywarp_pves, [("converted", "reference_image")],),
-                    (ants_applywarp_pves, outputnode, [("output_images", "partial_volumes_registered_crop")],)
                 ]
             )
             # fmt:on
+            if self.config.act_tracking:
+                # fmt:off
+                flow.connect(
+                    [
+                        (inputnode, ants_applywarp_5tt, [("act_5TT", "input_image")]),
+                        (mr_convert_b0, ants_applywarp_5tt, [("converted", "reference_image")]),
+                        (ants_applywarp_5tt, outputnode, [("output_image", "act_5tt_registered_crop")]),
+                    ]
+                )
+                # fmt:on
+                if self.config.tracking_tool == "Dipy":
+                    # fmt:off
+                    flow.connect(
+                        [
+                            (inputnode, ants_applywarp_pves, [("partial_volume_files", "input_images")]),
+                            (mr_convert_b0, ants_applywarp_pves, [("converted", "reference_image")]),
+                            (ants_applywarp_pves, outputnode, [("output_images", "partial_volumes_registered_crop")])
+                        ]
+                    )
+                    # fmt:on
+                if self.config.gmwmi_seeding:
+                    # fmt:off
+                    flow.connect(
+                        [
+                            (inputnode, ants_applywarp_gmwmi, [("gmwmi", "input_image")]),
+                            (mr_convert_b0, ants_applywarp_gmwmi, [("converted", "reference_image")]),
+                            (ants_applywarp_gmwmi, outputnode, [("output_image", "gmwmi_registered_crop")]),
+                        ]
+                    )
+                    # fmt:on
 
         if self.config.registration_mode == "FSL (Linear)":
             fsl_flirt = pe.Node(
@@ -1294,19 +1379,20 @@ class RegistrationStage(Stage):
                 ),
                 name="apply_registration_T1",
             )
-
-            fsl_applyxfm_5tt = pe.Node(
-                interface=fsl.ApplyXFM(
-                    apply_xfm=True, interp="spline", out_file="5tt_registered.nii.gz"
-                ),
-                name="apply_registration_5tt",
-            )
-            fsl_applyxfm_gmwmi = pe.Node(
-                interface=fsl.ApplyXFM(
-                    apply_xfm=True, interp="spline", out_file="gmwmi_registered.nii.gz"
-                ),
-                name="apply_registration_gmwmi",
-            )
+            if self.config.act_tracking:
+                fsl_applyxfm_5tt = pe.Node(
+                    interface=fsl.ApplyXFM(
+                        apply_xfm=True, interp="spline", out_file="5tt_registered.nii.gz"
+                    ),
+                    name="apply_registration_5tt",
+                )
+                if self.config.gmwmi_seeding:
+                    fsl_applyxfm_gmwmi = pe.Node(
+                        interface=fsl.ApplyXFM(
+                            apply_xfm=True, interp="spline", out_file="gmwmi_registered.nii.gz"
+                        ),
+                        name="apply_registration_gmwmi",
+                    )
 
             # fmt:off
             flow.connect(
@@ -1329,16 +1415,30 @@ class RegistrationStage(Stage):
                     (inputnode, fsl_applyxfm_T1, [("T1", "in_file")]),
                     (T12DWIaff, fsl_applyxfm_T1, [("out_file", "in_matrix_file")]),
                     (mr_convert_b0, fsl_applyxfm_T1, [("converted", "reference")]),
-                    (inputnode, fsl_applyxfm_5tt, [("act_5TT", "in_file")]),
-                    (T12DWIaff, fsl_applyxfm_5tt, [("out_file", "in_matrix_file")]),
-                    (mr_convert_b0, fsl_applyxfm_5tt, [("converted", "reference")]),
-                    (inputnode, fsl_applyxfm_gmwmi, [("gmwmi", "in_file")]),
-                    (T12DWIaff, fsl_applyxfm_gmwmi, [("out_file", "in_matrix_file")]),
-                    (mr_convert_b0, fsl_applyxfm_gmwmi, [("converted", "reference")]),
                     (fsl_applyxfm_brain_mask, outputnode, [("out_file", "brain_mask_registered_crop")],),
                 ]
             )
             # fmt:on
+            if self.config.act_tracking:
+                # fmt:off
+                flow.connect(
+                    [
+                        (inputnode, fsl_applyxfm_5tt, [("act_5TT", "in_file")]),
+                        (T12DWIaff, fsl_applyxfm_5tt, [("out_file", "in_matrix_file")]),
+                        (mr_convert_b0, fsl_applyxfm_5tt, [("converted", "reference")])
+                    ]
+                )
+                # fmt:on
+                if self.config.gmwmi_seeding:
+                    # fmt:off
+                    flow.connect(
+                        [
+                            (inputnode, fsl_applyxfm_gmwmi, [("gmwmi", "in_file")]),
+                            (T12DWIaff, fsl_applyxfm_gmwmi, [("out_file", "in_matrix_file")]),
+                            (mr_convert_b0, fsl_applyxfm_gmwmi, [("converted", "reference")])
+                        ]
+                    )
+                    # fmt:on
 
             fsl_fnirt_crop = pe.Node(
                 interface=fsl.FNIRT(fieldcoeff_file=True), name="fsl_fnirt_crop"
@@ -1360,16 +1460,18 @@ class RegistrationStage(Stage):
                 interface=fsl.ApplyWarp(interp="spline", out_file="T1_warped.nii.gz"),
                 name="apply_warp_T1",
             )
-            fsl_applywarp_5tt = pe.Node(
-                interface=fsl.ApplyWarp(interp="spline", out_file="act_5tt_resampled_warped.nii.gz"),
-                name="apply_warp_5tt",
-            )
-            fsl_applywarp_gmwmi = pe.Node(
-                interface=fsl.ApplyWarp(
-                    interp="spline", out_file="gmwmi_resampled_warped.nii.gz"
-                ),
-                name="apply_warp_gmwmi",
-            )
+            if self.config.act_tracking:
+                fsl_applywarp_5tt = pe.Node(
+                    interface=fsl.ApplyWarp(interp="spline", out_file="act_5tt_resampled_warped.nii.gz"),
+                    name="apply_warp_5tt",
+                )
+                if self.config.gmwmi_seeding:
+                    fsl_applywarp_gmwmi = pe.Node(
+                        interface=fsl.ApplyWarp(
+                            interp="spline", out_file="gmwmi_resampled_warped.nii.gz"
+                        ),
+                        name="apply_warp_gmwmi",
+                    )
             fsl_applywarp_brain = pe.Node(
                 interface=fsl.ApplyWarp(
                     interp="spline", out_file="brain_warped.nii.gz"
@@ -1391,14 +1493,6 @@ class RegistrationStage(Stage):
                     (inputnode, fsl_applywarp_T1, [("target", "ref_file")]),
                     (fsl_fnirt_crop, fsl_applywarp_T1, [("fieldcoeff_file", "field_file")],),
                     (fsl_applywarp_T1, outputnode, [("out_file", "T1_registered_crop")],),
-                    (inputnode, fsl_applywarp_5tt, [("act_5TT", "in_file")]),
-                    (inputnode, fsl_applywarp_5tt, [("target", "ref_file")]),
-                    (fsl_fnirt_crop, fsl_applywarp_5tt, [("fieldcoeff_file", "field_file")],),
-                    (fsl_applywarp_5tt, outputnode, [("out_file", "act_5tt_registered_crop")],),
-                    (inputnode, fsl_applywarp_gmwmi, [("gmwmi", "in_file")]),
-                    (inputnode, fsl_applywarp_gmwmi, [("target", "ref_file")]),
-                    (fsl_fnirt_crop, fsl_applywarp_gmwmi, [("fieldcoeff_file", "field_file")],),
-                    (fsl_applywarp_gmwmi, outputnode, [("out_file", "gmwmi_registered_crop")],),
                     (inputnode, fsl_applywarp_brain, [("brain", "in_file")]),
                     (inputnode, fsl_applywarp_brain, [("target", "ref_file")]),
                     (fsl_fnirt_crop, fsl_applywarp_brain, [("fieldcoeff_file", "field_file")],),
@@ -1414,6 +1508,28 @@ class RegistrationStage(Stage):
                 ]
             )
             # fmt:on
+            if self.config.act_tracking:
+                # fmt:off
+                flow.connect(
+                    [
+                        (inputnode, fsl_applywarp_5tt, [("act_5TT", "in_file")]),
+                        (inputnode, fsl_applywarp_5tt, [("target", "ref_file")]),
+                        (fsl_fnirt_crop, fsl_applywarp_5tt, [("fieldcoeff_file", "field_file")]),
+                        (fsl_applywarp_5tt, outputnode, [("out_file", "act_5tt_registered_crop")])
+                    ]
+                )
+                # fmt:on
+                if self.config.gmwmi_seeding:
+                    # fmt:off
+                    flow.connect(
+                        [
+                            (inputnode, fsl_applywarp_gmwmi, [("gmwmi", "in_file")]),
+                            (inputnode, fsl_applywarp_gmwmi, [("target", "ref_file")]),
+                            (fsl_fnirt_crop, fsl_applywarp_gmwmi, [("fieldcoeff_file", "field_file")]),
+                            (fsl_applywarp_gmwmi, outputnode, [("out_file", "gmwmi_registered_crop")])
+                        ]
+                    )
+                    # fmt:on
 
     def define_inspect_outputs(self):
         """Update the `inspect_outputs` class attribute.

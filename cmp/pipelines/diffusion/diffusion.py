@@ -148,12 +148,12 @@ class DiffusionPipeline(Pipeline):
         self.subject = project_info.subject
         self.diffusion_imaging_model = project_info.diffusion_imaging_model
 
-        if self.stages["Diffusion"].config.tracking_processing_tool == "Dipy":
-            self.stages["Preprocessing"].config.act_tracking = self.stages["Diffusion"].config.dipy_tracking_config.use_act
-            self.stages["Preprocessing"].config.gmwmi_seeding = False
-        elif self.stages["Diffusion"].config.tracking_processing_tool == "MRtrix":
-            self.stages["Preprocessing"].config.act_tracking = self.stages["Diffusion"].config.mrtrix_tracking_config.use_act
-            self.stages["Preprocessing"].config.gmwmi_seeding = self.stages["Diffusion"].config.mrtrix_tracking_config.seed_from_gmwmi
+        self.stages["Preprocessing"].config.tracking_tool = self.stages["Diffusion"].config.tracking_processing_tool
+        self.stages["Preprocessing"].config.act_tracking = self.stages["Diffusion"].config.mrtrix_tracking_config.use_act
+        self.stages["Preprocessing"].config.gmwmi_seeding = self.stages["Diffusion"].config.mrtrix_tracking_config.seed_from_gmwmi
+        self.stages["Registration"].config.tracking_tool = self.stages["Diffusion"].config.tracking_processing_tool
+        self.stages["Registration"].config.act_tracking = self.stages["Diffusion"].config.mrtrix_tracking_config.use_act
+        self.stages["Registration"].config.gmwmi_seeding = self.stages["Diffusion"].config.mrtrix_tracking_config.seed_from_gmwmi
 
         self.stages["Connectome"].config.on_trait_change(
             self.update_vizualization_layout, "circular_layout"
@@ -232,6 +232,7 @@ class DiffusionPipeline(Pipeline):
             New value.
         """
         self.stages["Preprocessing"].config.tracking_tool = new
+        self.stages["Registration"].config.tracking_tool = new
 
     def update_preprocessing_act(self, new):
         """Update ``self.stages["Preprocessing"].config.act_tracking`` when ``use_act`` is updated.
@@ -242,8 +243,10 @@ class DiffusionPipeline(Pipeline):
             New value.
         """
         self.stages["Preprocessing"].config.act_tracking = new
-        if not self.stages["Preprocessing"].config.act_tracking:
+        self.stages["Registration"].config.act_tracking = new
+        if not new:
             self.stages["Preprocessing"].config.gmwmi_seeding = False
+            self.stages["Registration"].config.gmwmi_seeding = False
 
     def update_preprocessing_gmwmi(self, new):
         """Update ``self.stages["Preprocessing"].config.gmwmi_seeding`` when ``seed_from_gmwmi`` is updated.
@@ -254,6 +257,7 @@ class DiffusionPipeline(Pipeline):
             New value.
         """
         self.stages["Preprocessing"].config.gmwmi_seeding = new
+        self.stages["Registration"].config.gmwmi_seeding = new
 
     def _subject_changed(self, new):
         """Update subject in the connectome stage configuration when ``subject`` is updated.

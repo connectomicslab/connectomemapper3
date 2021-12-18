@@ -112,7 +112,8 @@ class PreprocessingConfig(HasTraits):
 
     gmwmi_seeding : Bool
         True if tractography seeding is performed from the
-        gray-matter / white-matter interface(Default: False)
+        gray-matter / white-matter interface
+        (Default: False)
 
     See Also
     --------
