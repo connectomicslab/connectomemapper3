@@ -150,7 +150,7 @@ class ComputeParcellationRoiVolumes(BaseInterface):
         iflogger.info("    ... Voxel volume = {} mm3".format(voxel_volume))
 
         # Initialize the TSV file used to store the parcellation volumetry resulty
-        volumetry_file = op.abspath('roi_stats_{}.tsv'.format(parkey))
+        volumetry_file = op.abspath('{}_roi_stats.tsv'.format(parkey))
         f_volumetry = open(volumetry_file, 'w+')
         iflogger.info(
             "  > Create Volumetry TSV file as {}".format(volumetry_file)

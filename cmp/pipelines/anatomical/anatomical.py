@@ -750,11 +750,11 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             custom_atlas_res = self.stages["Parcellation"].config.custom_parcellation.res
             if custom_atlas_res is not None and custom_atlas_res != "":
                 sinker.inputs.substitutions = [
-                    ("roi_stats_custom.tsv", f'{self.subject}_atlas-{custom_atlas}_res-{custom_atlas_res}_stats.tsv')
+                    ("custom_roi_stats.tsv", f'{self.subject}_atlas-{custom_atlas}_res-{custom_atlas_res}_stats.tsv')
                 ]
             else:
                 sinker.inputs.substitutions = [
-                    ("roi_stats_custom.tsv", f'{self.subject}_atlas-{custom_atlas}_stats.tsv')
+                    ("custom_roi_stats.tsv", f'{self.subject}_atlas-{custom_atlas}_stats.tsv')
                 ]
             sinker.inputs.substitutions.append(
                 (f'{self.subject}_desc-cmp_T1w.nii.gz', f'{self.subject}_desc-head_T1w.nii.gz')
@@ -813,7 +813,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                         (f'resolution{scale_mapping[scale]}.tsv', self.subject + f'_atlas-L2008_res-{scale}_dseg.tsv')
                     )
                     sinker.inputs.substitutions.append(
-                        (f'roi_stats_{scale}.tsv', self.subject + f'_atlas-L2008_res-{scale}_stats.tsv')
+                        (f'{scale}_roi_stats.tsv', self.subject + f'_atlas-L2008_res-{scale}_stats.tsv')
                     )
                 # fmt: on
             elif self.parcellation_scheme == "Lausanne2018":
@@ -841,7 +841,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                         (f'ROIv_Lausanne2018_{scale}.tsv', self.subject + f'_atlas-L2018_res-{scale}_dseg.tsv')
                     )
                     sinker.inputs.substitutions.append(
-                        (f'roi_stats_{scale}.tsv', self.subject + f'_atlas-L2018_res-{scale}_stats.tsv')
+                        (f'{scale}_roi_stats.tsv', self.subject + f'_atlas-L2018_res-{scale}_stats.tsv')
                     )
                 # fmt: on
             elif self.parcellation_scheme == "NativeFreesurfer":
@@ -862,7 +862,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                     ("freesurferaparc.tsv", self.subject + "_atlas-Desikan_dseg.tsv")
                 )
                 sinker.inputs.substitutions.append(
-                    ("roi_stats_freesurferaparc.tsv", self.subject + "_atlas-Desikan_stats.tsv")
+                    ("freesurferaparc_roi_stats.tsv", self.subject + "_atlas-Desikan_stats.tsv")
                 )
                 # fmt: on
 
