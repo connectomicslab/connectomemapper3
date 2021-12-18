@@ -1528,17 +1528,17 @@ workflows:
             tags:
               only: /.*/
 
-      - test3_docker_parcellation:
-          requires:
-            - get_data
-            # - update_cache
-            - build_docker
-          filters:
-            branches:
-              ignore:
-                - /docs?\/.*/
-            tags:
-              only: /.*/
+      # - test3_docker_parcellation:
+      #     requires:
+      #       - get_data
+      #       # - update_cache
+      #       - build_docker
+      #     filters:
+      #       branches:
+      #         ignore:
+      #           - /docs?\/.*/
+      #       tags:
+      #         only: /.*/
 
       - test4_docker_dsi_mrtrix:
           requires:
@@ -1611,16 +1611,16 @@ workflows:
             tags:
               only: /.*/
 
-      - test11_singularity_parcellation:
-          requires:
-            - get_data
-            - build_singularity
-          filters:
-            branches:
-              ignore:
-                - /docs?\/.*/
-            tags:
-              only: /.*/
+      # - test11_singularity_parcellation:
+      #     requires:
+      #       - get_data
+      #       - build_singularity
+      #     filters:
+      #       branches:
+      #         ignore:
+      #           - /docs?\/.*/
+      #       tags:
+      #         only: /.*/
 
       - codacy_coverage_report:
           requires:
