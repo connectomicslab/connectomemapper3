@@ -46,7 +46,9 @@ def create_singularity_cmd(args):
         String containing the command to be run via `subprocess.run()`
     """
     # Singularity run command prelude
-    cmd = 'singularity run --containall '
+    cmd = 'singularity '
+    cmd += 'run ' if not args.coverage else 'exec '
+    cmd += '--containall '
     cmd += f'--bind {args.bids_dir}:/bids_dir '
     cmd += f'--bind {args.output_dir}:/output_dir '
     if args.config_dir:
@@ -57,6 +59,9 @@ def create_singularity_cmd(args):
         cmd += f'--bind {args.fs_license}:/bids_dir/code/license.txt '
 
     cmd += f'{args.singularity_image} '
+
+    if args.coverage:
+        cmd += f'/bin/bash /app/run_coverage_cmp3.sh '
 
     # Standard BIDS App inputs
     cmd += '/bids_dir '
