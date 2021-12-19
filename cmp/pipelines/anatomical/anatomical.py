@@ -772,12 +772,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                 ("T1w_class-GM.nii.gz", self.subject + "_label-GM_dseg.nii.gz"),
                 ("wm_eroded.nii.gz", self.subject + "_label-WM_desc-eroded_dseg.nii.gz"),
                 ("csf_eroded.nii.gz", self.subject + "_label-CSF_desc-eroded_dseg.nii.gz"),
-                ("brain_eroded.nii.gz", self.subject + "_label-brain_desc-eroded_dseg.nii.gz"),
-                ("_createBIDSLabelIndexMappingFile0/", ""),
-                ("_createBIDSLabelIndexMappingFile1/", ""),
-                ("_createBIDSLabelIndexMappingFile2/", ""),
-                ("_createBIDSLabelIndexMappingFile3/", ""),
-                ("_createBIDSLabelIndexMappingFile4/", ""),
+                ("brain_eroded.nii.gz", self.subject + "_label-brain_desc-eroded_dseg.nii.gz")
             ]
             # fmt: on
             # Dataname substitutions in order to comply with BIDS derivatives specifications
@@ -857,6 +852,9 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                 )
                 sinker.inputs.substitutions.append(
                     ("FreeSurferColorLUT_adapted.txt", self.subject + "_atlas-Desikan_FreeSurferColorLUT.txt")
+                )
+                sinker.inputs.substitutions.append(
+                    ("_createBIDSLabelIndexMappingFile0/", "")
                 )
                 sinker.inputs.substitutions.append(
                     ("freesurferaparc.tsv", self.subject + "_atlas-Desikan_dseg.tsv")
