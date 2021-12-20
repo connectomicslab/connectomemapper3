@@ -770,7 +770,7 @@ class CombineParcellations(BaseInterface):
             indrep = np.where(img_data == 16)
             img_data[indrep] = 0
 
-        for roi_index, roi in sorted(enumerate(self.inputs.input_rois)):
+        for _, roi in sorted(enumerate(self.inputs.input_rois)):
             # colorLUT creation if enabled
             if self.inputs.create_colorLUT:
                 outprefix_name = Path(roi).name.split(".")[0]
@@ -2470,9 +2470,9 @@ def create_roi(subject_id, subjects_dir, v=True):
                                             op.join('data', 'parcellation', 'lausanne2018', lh_annot_files[i])),
             os.path.join(subject_dir, 'label', lh_annot_files[i]))
         if v == 2:
-            status = subprocess.call(mri_cmd, shell=True)
+            _ = subprocess.call(mri_cmd, shell=True)
         else:
-            status = subprocess.call(
+            _ = subprocess.call(
                 mri_cmd, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
         # Right hemisphere
         mri_cmd = fs_string + '; mri_surf2surf --srcsubject fsaverage --trgsubject %s --hemi rh --sval-annot %s --tval %s' % (
