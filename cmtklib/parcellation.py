@@ -207,7 +207,7 @@ class ComputeParcellationRoiVolumes(BaseInterface):
     def _list_outputs(self):
         outputs = self._outputs().get()
         if self.inputs.parcellation_scheme == "Custom":
-            outputs['roi_volumes_stats'] = 'roi_stats_custom.tsv'
+            outputs['roi_volumes_stats'] = 'custom_roi_stats.tsv'
         else:
             outputs['roi_volumes_stats'] = self._gen_outfilenames('roi_stats', '.tsv')
 
@@ -216,7 +216,7 @@ class ComputeParcellationRoiVolumes(BaseInterface):
     def _gen_outfilenames(self, basename, posfix):
         filepaths = []
         for scale in list(get_parcellation(self.inputs.parcellation_scheme).keys()):
-            filepaths.append(op.abspath(basename + '_' + scale + posfix))
+            filepaths.append(op.abspath(f'{scale}_{basename}{posfix}'))
         return filepaths
 
 
