@@ -27,9 +27,6 @@ except ImportError:
     raise Exception(
         'Need scipy for binary erosion of white matter and CSF masks')
 
-import skimage.morphology as skmorphology
-import skimage.filters as skfilters
-
 # Nipype imports
 from nipype.interfaces.base import traits, BaseInterfaceInputSpec, TraitedSpec, BaseInterface, Directory, File, \
     InputMultiPath, OutputMultiPath
@@ -112,7 +109,7 @@ class ComputeParcellationRoiVolumes(BaseInterface):
         else:
             resolutions = get_parcellation(self.inputs.parcellation_scheme)
 
-            for parkey, parval in list(resolutions.items()):
+            for parkey, _ in list(resolutions.items()):
 
                 for roi in self.inputs.roi_volumes:
                     if parkey in roi:
@@ -172,7 +169,7 @@ class ComputeParcellationRoiVolumes(BaseInterface):
         pc = -1
         cnt = -1
         # Loop over each parcel/ROI
-        for u, d in gp.nodes(data=True):
+        for _, d in gp.nodes(data=True):
             # Percent counter
             cnt += 1
             pcN = int(round(float(100 * cnt) / n_nodes))
@@ -258,39 +255,6 @@ def erode_mask(fsdir, mask_file):
     print('    > Save eroded mask to: {}'.format(out_fname))
     ni.save(img, out_fname)
     del img
-
-
-class Erode_inputspec(BaseInterfaceInputSpec):
-    in_file = File(exists=True, desc="Input mask to erode")
-
-
-class Erode_outputspec(TraitedSpec):
-    out_file = File(exists=True, desc="Eroded mask")
-
-
-class Erode(BaseInterface):
-    """Erodes a mask.
-
-    Examples
-    --------
-    >>> erode = Erode()
-    >>> erode.inputs.in_file = '/path/to/sub-01_desc-brain_mask.nii.gz'
-    >>> erode.run()  # doctest: +SKIP
-
-    """
-
-    input_spec = Erode_inputspec
-    output_spec = Erode_outputspec
-
-    def _run_interface(self, runtime):
-        erode_mask(self.inputs.in_file)
-        return runtime
-
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['out_file'] = op.abspath(
-            '%s_eroded.nii.gz' % os.path.splitext(op.splitext(op.basename(self.inputs.in_file))[0])[0])
-        return outputs
 
 
 class ParcellateHippocampalSubfieldsInputSpec(BaseInterfaceInputSpec):

@@ -537,7 +537,7 @@ class SegmentationStage(Stage):
         )
 
         def get_first_path(paths):
-            from cmtklib.bids.utils import get_native_space_files  # noqa
+            from cmtklib.bids.utils import get_native_space_files  # pylint: disable=W0404 # noqa: W0404
             paths = get_native_space_files(paths)
             return paths[0]
 
