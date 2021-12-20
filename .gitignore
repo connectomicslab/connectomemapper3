@@ -32,3 +32,5 @@ dev/notebooks/*
 *.ipynb_checkpoints
 
 .idea/
+.vscode
+*.egg-info
