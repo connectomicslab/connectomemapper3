@@ -187,7 +187,7 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
         else:
             self.stages["Parcellation"].config.parcellation_scheme = "Lausanne2018"
             self.stages["Parcellation"].config.parcellation_scheme_editor = [
-                "NativeFreesurfer", "Lausanne2008", "Lausanne2018", "Custom"
+                "NativeFreesurfer", "Lausanne2018", "Custom"
             ]
 
     def _update_segmentation(self):

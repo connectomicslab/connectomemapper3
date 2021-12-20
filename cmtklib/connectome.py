@@ -182,7 +182,7 @@ def cmat(
     roi_graphmls : list
         List of graphmls files that describes parcellation nodes
 
-    parcellation_scheme : ['NativeFreesurfer','Lausanne2008','Lausanne2018']
+    parcellation_scheme : ['NativeFreesurfer', 'Lausanne2018', 'Custom']
 
     compute_curvature : Boolean
 
@@ -308,20 +308,12 @@ def cmat(
                 G.nodes[int(u)][key] = d[key]
             # compute a position for the node based on the mean position of the
             # ROI in voxel coordinates (segmentation volume )
-            if parcellation_scheme not in ["Custom", "Lausanne2018"]:
-                G.nodes[int(u)]["dn_position"] = tuple(
-                    np.mean(np.where(roiData == int(d["dn_correspondence_id"])), axis=1)
-                )
-                G.nodes[int(u)]["roi_volume"] = np.sum(
-                    roiData == int(d["dn_correspondence_id"])
-                )
-            else:
-                G.nodes[int(u)]["dn_position"] = tuple(
-                    np.mean(np.where(roiData == int(d["dn_multiscaleID"])), axis=1)
-                )
-                G.nodes[int(u)]["roi_volume"] = np.sum(
-                    roiData == int(d["dn_multiscaleID"])
-                )
+            G.nodes[int(u)]["dn_position"] = tuple(
+                np.mean(np.where(roiData == int(d["dn_multiscaleID"])), axis=1)
+            )
+            G.nodes[int(u)]["roi_volume"] = np.sum(
+                roiData == int(d["dn_multiscaleID"])
+            )
 
         dis = 0
 
@@ -633,12 +625,7 @@ def cmat(
                     g2[u_gml][v_gml][key] = d_gml[key]
             for u_gml, d_gml in G_out.nodes(data=True):
                 g2.add_node(u_gml)
-                if parcellation_scheme not in ["Custom", "Lausanne2018"]:
-                    g2.nodes[u_gml]["dn_correspondence_id"] = d_gml[
-                        "dn_correspondence_id"
-                    ]
-                else:
-                    g2.nodes[u_gml]["dn_multiscaleID"] = d_gml["dn_multiscaleID"]
+                g2.nodes[u_gml]["dn_multiscaleID"] = d_gml["dn_multiscaleID"]
                 g2.nodes[u_gml]["dn_fsname"] = d_gml["dn_fsname"]
                 g2.nodes[u_gml]["dn_hemisphere"] = d_gml["dn_hemisphere"]
                 g2.nodes[u_gml]["dn_name"] = d_gml["dn_name"]
@@ -681,8 +668,8 @@ class CMTK_cmatInputSpec(BaseInterfaceInputSpec):
         File(exists=True), desc="ROI volumes registered to diffusion space"
     )
     parcellation_scheme = traits.Enum(
-        "Lausanne2008",
-        ["Lausanne2008", "Lausanne2018", "NativeFreesurfer", "Custom"],
+        "Lausanne2018",
+        ["Lausanne2018", "NativeFreesurfer", "Custom"],
         desc="Parcellation scheme",
         usedefault=True,
     )
@@ -813,8 +800,8 @@ class CMTK_rsfmri_cmat_InputSpec(BaseInterfaceInputSpec):
     )
 
     parcellation_scheme = traits.Enum(
-        "Lausanne2008",
-        ["Lausanne2008", "Lausanne2018", "NativeFreesurfer", "Custom"],
+        "Lausanne2018",
+        ["Lausanne2018", "NativeFreesurfer", "Custom"],
         desc="Parcellation scheme",
         usedefault=True,
     )
@@ -887,9 +874,9 @@ class CMTK_rsfmri_cmat(BaseInterface):
         tp = fdata.shape[3]
 
         if self.inputs.parcellation_scheme != "Custom":
-            if self.inputs.parcellation_scheme != "Lausanne2018":
+            if self.inputs.parcellation_scheme == "NativeFreesurfer":
                 resolutions = get_parcellation(self.inputs.parcellation_scheme)
-            else:
+            else:  # Lausanne2018
                 resolutions = get_parcellation(self.inputs.parcellation_scheme)
                 for parkey, parval in list(resolutions.items()):
                     for vol, graphml in zip(self.inputs.roi_volumes, self.inputs.roi_graphmls):
@@ -948,18 +935,10 @@ class CMTK_rsfmri_cmat(BaseInterface):
                     G.nodes[int(u)][key] = d[key]
                 # Compute a position for the node based on the mean position of the
                 # ROI in voxel coordinates (segmentation volume )
-                if self.inputs.parcellation_scheme not in ["Custom", "Lausanne2018"]:
-                    G.nodes[int(u)]["dn_position"] = tuple(
-                        np.mean(
-                            np.where(mask == int(d["dn_correspondence_id"])), axis=1
-                        )
-                    )
-                    ROI_idx.append(int(d["dn_correspondence_id"]))
-                else:
-                    G.nodes[int(u)]["dn_position"] = tuple(
-                        np.mean(np.where(mask == int(d["dn_multiscaleID"])), axis=1)
-                    )
-                    ROI_idx.append(int(d["dn_multiscaleID"]))
+                G.nodes[int(u)]["dn_position"] = tuple(
+                    np.mean(np.where(mask == int(d["dn_multiscaleID"])), axis=1)
+                )
+                ROI_idx.append(int(d["dn_multiscaleID"]))
 
             # Apply scrubbing (if enabled)
             if self.inputs.apply_scrubbing:
@@ -1080,10 +1059,7 @@ class CMTK_rsfmri_cmat(BaseInterface):
                 # Create graph nodes
                 for u_gml, d_gml in G.nodes(data=True):
                     g2.add_node(u_gml)
-                    if self.inputs.parcellation_scheme not in ["Custom", "Lausanne2018"]:
-                        g2.nodes[u_gml]["dn_correspondence_id"] = d_gml["dn_correspondence_id"]
-                    else:
-                        g2.nodes[u_gml]["dn_multiscaleID"] = d_gml["dn_multiscaleID"]
+                    g2.nodes[u_gml]["dn_multiscaleID"] = d_gml["dn_multiscaleID"]
                     g2.nodes[u_gml]["dn_fsname"] = d_gml["dn_fsname"]
                     g2.nodes[u_gml]["dn_hemisphere"] = d_gml["dn_hemisphere"]
                     g2.nodes[u_gml]["dn_name"] = d_gml["dn_name"]

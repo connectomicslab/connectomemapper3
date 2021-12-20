@@ -104,7 +104,7 @@ class CMP_Project_Info(HasTraits):
 
     parcellation_scheme : traits.Str
         Parcellation scheme used
-        (Default: 'Lausanne2008')
+        (Default: 'Lausanne2018')
 
     atlas_info : traits.Dict
         Dictionary storing parcellation atlas information
@@ -206,7 +206,7 @@ class CMP_Project_Info(HasTraits):
 
     # process_type = Enum('diffusion',['diffusion','fMRI'])
     diffusion_imaging_model = Enum("DTI", ["DSI", "DTI", "HARDI", "multishell"])
-    parcellation_scheme = Str("Lausanne2008")
+    parcellation_scheme = Str("Lausanne2018")
     atlas_info = Dict()
     freesurfer_subjects_dir = Str("")
     freesurfer_subject_id = Str("")

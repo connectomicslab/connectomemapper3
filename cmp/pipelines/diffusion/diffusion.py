@@ -951,9 +951,7 @@ class DiffusionPipeline(Pipeline):
         elif tracking_model == "Probabilistic":
             tracking_model = "PROB"
 
-        if self.parcellation_scheme == "Lausanne2008":
-            bids_atlas_label = "L2008"
-        elif self.parcellation_scheme == "Lausanne2018":
+        if self.parcellation_scheme == "Lausanne2018":
             bids_atlas_label = "L2018"
         elif self.parcellation_scheme == "NativeFreesurfer":
             bids_atlas_label = "Desikan"

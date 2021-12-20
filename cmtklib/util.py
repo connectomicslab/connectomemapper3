@@ -196,7 +196,7 @@ def load_graphs(output_dir, subjects, parcellation_scheme, weight):
     subjects : list
         List of subject
 
-    parcellation_scheme : ['NativeFreesurfer','Lausanne2008','Lausanne2018']
+    parcellation_scheme : ['NativeFreesurfer', 'Lausanne2018', 'Custom']
         Parcellation scheme
 
     weight : ['number_of_fibers','fiber_density',...]
@@ -208,9 +208,7 @@ def load_graphs(output_dir, subjects, parcellation_scheme, weight):
         Dictionary of connectivity matrices
 
     """
-    if parcellation_scheme == "Lausanne2008":
-        bids_atlas_label = "L2008"
-    elif parcellation_scheme == "Lausanne2018":
+    if parcellation_scheme == "Lausanne2018":
         bids_atlas_label = "L2018"
     elif parcellation_scheme == "NativeFreesurfer":
         bids_atlas_label = "Desikan"
@@ -234,7 +232,7 @@ def load_graphs(output_dir, subjects, parcellation_scheme, weight):
                     # self.subject+'_label-'+bids_atlas_label+'_desc-scale5_conndata-snetwork_connectivity'
                     connmat_fname = os.path.join(
                         conn_derivatives_dir,
-                        "{}_{}_label-{}_conndata-snetwork_connectivity.gpickle".format(
+                        "{}_{}_atlas-{}_conndata-snetwork_connectivity.gpickle".format(
                             subj, subj_session, bids_atlas_label
                         ),
                     )
@@ -263,7 +261,7 @@ def load_graphs(output_dir, subjects, parcellation_scheme, weight):
                         # self.subject+'_label-'+bids_atlas_label+'_desc-scale5_conndata-snetwork_connectivity'
                         connmat_fname = os.path.join(
                             conn_derivatives_dir,
-                            "{}_{}_label-{}_desc-scale{}_conndata-snetwork_connectivity.gpickle".format(
+                            "{}_{}_atlas-{}_res-scale{}_conndata-snetwork_connectivity.gpickle".format(
                                 subj, subj_session, bids_atlas_label, scale
                             ),
                         )

@@ -50,9 +50,9 @@ class ParcellationConfig(HasTraits):
 
     parcellation_scheme : traits.Str
         Parcellation scheme used
-        (Default: 'Lausanne2008')
+        (Default: 'Lausanne2018')
 
-    parcellation_scheme_editor : traits.List(['NativeFreesurfer', 'Lausanne2008', 'Lausanne2018', 'Custom'])
+    parcellation_scheme_editor : traits.List(['NativeFreesurfer', 'Lausanne2018', 'Custom'])
         Choice of parcellation schemes
 
     include_thalamic_nuclei_parcellation : traits.Bool
@@ -95,9 +95,9 @@ class ParcellationConfig(HasTraits):
     """
 
     pipeline_mode = Enum(["Diffusion", "fMRI"])
-    parcellation_scheme = Str("Lausanne2008")
+    parcellation_scheme = Str("Lausanne2018")
     parcellation_scheme_editor = List(
-        ["NativeFreesurfer", "Lausanne2008", "Lausanne2018", "Custom"]
+        ["NativeFreesurfer", "Lausanne2018", "Custom"]
     )
     include_thalamic_nuclei_parcellation = Bool(True)
     ants_precision_type = Enum(["double", "float"])
@@ -327,65 +327,33 @@ class ParcellationStage(Stage):
                     ]
                 )
                 # fmt: on
-            else:
-                roi_colorLUTs = []
-                roi_graphMLs = []
+            else:  # Native Freesurfer
+                resource_prefix = os.path.join("data", "parcellation", "nativefreesurfer")
 
-                if self.config.parcellation_scheme == "Lausanne2008":
-                    resource_prefix = os.path.join("data", "parcellation", "lausanne2008")
-
-                    for scale in ["83", "150", "258", "500", "1015"]:
-                        roi_colorLUTs.append(
+                roi_colorLUTs = [
+                    os.path.join(
+                        pkg_resources.resource_filename(
+                            "cmtklib",
                             os.path.join(
-                                pkg_resources.resource_filename(
-                                    "cmtklib",
-                                    os.path.join(
-                                        resource_prefix,
-                                        f'resolution{scale}',
-                                        f'resolution{scale}_LUT.txt',
-                                    ),
-                                )
-                            )
+                                resource_prefix,
+                                "freesurferaparc",
+                                "FreeSurferColorLUT_adapted.txt",
+                            ),
                         )
-                        roi_graphMLs.append(
+                    )
+                ]
+                roi_graphMLs = [
+                    os.path.join(
+                        pkg_resources.resource_filename(
+                            "cmtklib",
                             os.path.join(
-                                pkg_resources.resource_filename(
-                                    "cmtklib",
-                                    os.path.join(
-                                        resource_prefix,
-                                        f'resolution{scale}',
-                                        f'resolution{scale}.graphml',
-                                    ),
-                                )
-                            )
+                                resource_prefix,
+                                "freesurferaparc",
+                                "freesurferaparc.graphml",
+                            ),
                         )
-                else:  # Native Freesurfer
-                    resource_prefix = os.path.join("data", "parcellation", "nativefreesurfer")
-
-                    roi_colorLUTs = [
-                        os.path.join(
-                            pkg_resources.resource_filename(
-                                "cmtklib",
-                                os.path.join(
-                                    resource_prefix,
-                                    "freesurferaparc",
-                                    "FreeSurferColorLUT_adapted.txt",
-                                ),
-                            )
-                        )
-                    ]
-                    roi_graphMLs = [
-                        os.path.join(
-                            pkg_resources.resource_filename(
-                                "cmtklib",
-                                os.path.join(
-                                    resource_prefix,
-                                    "freesurferaparc",
-                                    "freesurferaparc.graphml",
-                                ),
-                            )
-                        )
-                    ]
+                    )
+                ]
 
                 parc_files = pe.Node(
                     interface=util.IdentityInterface(
@@ -583,45 +551,11 @@ class ParcellationStage(Stage):
                             roi_v + ":colormap=lut:lut=" + lut_file,
                         ]
                 elif isinstance(anat_outputs["anat.@roivs"], list):
-                    if self.config.parcellation_scheme == "Lausanne2008":
-                        resolution = {
-                            "1": "resolution83",
-                            "2": "resolution150",
-                            "3": "resolution258",
-                            "4": "resolution500",
-                            "5": "resolution1015",
-                        }
-                        for roi_v in anat_outputs["anat.@roivs"]:
-                            roi_basename = os.path.basename(roi_v)
-                            scale = roi_basename[23:-7]
-                            lut_file = pkg_resources.resource_filename(
-                                "cmtklib",
-                                os.path.join(
-                                    "data",
-                                    "parcellation",
-                                    "lausanne2008",
-                                    resolution[scale],
-                                    resolution[scale] + "_LUT.txt",
-                                ),
-                            )
-                            if os.path.exists(white_matter_file) and os.path.exists(
-                                roi_v
-                            ):
-                                self.inspect_outputs_dict[roi_basename] = [
-                                    "freeview",
-                                    "-v",
-                                    white_matter_file + ":colormap=GEColor",
-                                    roi_v + ":colormap=lut:lut=" + lut_file,
-                                ]
-                    elif self.config.parcellation_scheme == "Lausanne2018":
-                        for roi_v, lut_file in zip(
-                            anat_outputs["anat.@roivs"], anat_outputs["anat.@luts"]
-                        ):
+                    if self.config.parcellation_scheme == "Lausanne2018":
+                        for roi_v, lut_file in zip(anat_outputs["anat.@roivs"], anat_outputs["anat.@luts"]):
                             roi_basename = os.path.basename(roi_v)
 
-                            if os.path.exists(white_matter_file) and os.path.exists(
-                                roi_v
-                            ):
+                            if os.path.exists(white_matter_file) and os.path.exists(roi_v):
                                 self.inspect_outputs_dict[roi_basename] = [
                                     "freeview",
                                     "-v",

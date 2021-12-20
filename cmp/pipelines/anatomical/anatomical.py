@@ -604,9 +604,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             anat_deriv_subject_directory, subject + "_label-WM_dseg.nii.gz"
         )
 
-        if self.parcellation_scheme == "Lausanne2008":
-            bids_atlas_label = "L2008"
-        elif self.parcellation_scheme == "Lausanne2018":
+        if self.parcellation_scheme == "Lausanne2018":
             bids_atlas_label = "L2018"
         elif self.parcellation_scheme == "NativeFreesurfer":
             bids_atlas_label = "Desikan"
@@ -745,6 +743,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         sinker.inputs.base_directory = os.path.abspath(base_directory)
         # sinker.inputs.parametrization = True  # Store output in parametrized structure (for MapNode)
 
+        # Dataname substitutions in order to comply with BIDS derivatives specifications
         if self.stages["Parcellation"].config.parcellation_scheme == "Custom":
             custom_atlas = self.stages["Parcellation"].config.custom_parcellation.atlas
             custom_atlas_res = self.stages["Parcellation"].config.custom_parcellation.res
@@ -759,7 +758,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             sinker.inputs.substitutions.append(
                 (f'{self.subject}_desc-cmp_T1w.nii.gz', f'{self.subject}_desc-head_T1w.nii.gz')
             )
-        else:
+        else:  # Lausanne2018 /Native Freesurfer
             # fmt: off
             sinker.inputs.substitutions = [
                 ("T1.nii.gz", self.subject + "_desc-head_T1w.nii.gz"),
@@ -775,43 +774,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                 ("brain_eroded.nii.gz", self.subject + "_label-brain_desc-eroded_dseg.nii.gz")
             ]
             # fmt: on
-            # Dataname substitutions in order to comply with BIDS derivatives specifications
-            if self.parcellation_scheme == "Lausanne2008":
-                # fmt: off
-                scale_mapping = {
-                    "scale1": "83",
-                    "scale2": "150",
-                    "scale3": "258",
-                    "scale4": "500",
-                    "scale5": "1015",
-                }
-                for i, scale in enumerate(['scale1', 'scale2', 'scale3', 'scale4', 'scale5']):
-                    sinker.inputs.substitutions.append(
-                        ("aparc+aseg.native.nii.gz", self.subject + "_desc-aparcaseg_dseg.nii.gz")
-                    )
-                    sinker.inputs.substitutions.append(
-                        (f'ROIv_Lausanne2008_{scale}.nii.gz', self.subject + f'_atlas-L2008_res-{scale}_dseg.nii.gz')
-                    )
-                    sinker.inputs.substitutions.append(
-                        (f'ROIv_Lausanne2008_{scale}_final.nii.gz', self.subject + f'_atlas-L2008_res-{scale}_dseg.nii.gz')
-                    )
-                    sinker.inputs.substitutions.append(
-                        (f'resolution{scale_mapping[scale]}.graphml', self.subject + f'_atlas-L2008_res-{scale}_dseg.graphml')
-                    )
-                    sinker.inputs.substitutions.append(
-                        (f'resolution{scale_mapping[scale]}_LUT.txt', self.subject + f'_atlas-L2008_res-{scale}_FreeSurferColorLUT.txt')
-                    )
-                    sinker.inputs.substitutions.append(
-                        (f'_createBIDSLabelIndexMappingFile{i}/', '')
-                    )
-                    sinker.inputs.substitutions.append(
-                        (f'resolution{scale_mapping[scale]}.tsv', self.subject + f'_atlas-L2008_res-{scale}_dseg.tsv')
-                    )
-                    sinker.inputs.substitutions.append(
-                        (f'{scale}_roi_stats.tsv', self.subject + f'_atlas-L2008_res-{scale}_stats.tsv')
-                    )
-                # fmt: on
-            elif self.parcellation_scheme == "Lausanne2018":
+            if self.parcellation_scheme == "Lausanne2018":
                 # fmt: off
                 for i, scale in enumerate(['scale1', 'scale2', 'scale3', 'scale4', 'scale5']):
                     sinker.inputs.substitutions.append(
