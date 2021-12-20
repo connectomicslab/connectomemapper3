@@ -685,7 +685,7 @@ jobs:
       - persist_to_workspace:
           root: /tmp
           paths:
-            - data/ds-sample/test
+            - data/ds-sample/test/test-01_*
             - data/test1_docker_parcellation/ds-sample/derivatives/nipype-*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
@@ -738,7 +738,7 @@ jobs:
       - persist_to_workspace:
           root: /tmp
           paths:
-            - data/ds-sample/test
+            - data/ds-sample/test/test-02_*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
@@ -790,7 +790,7 @@ jobs:
       - persist_to_workspace:
           root: /tmp
           paths:
-            - data/ds-sample/test
+            - data/ds-sample/test/test-03_*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
@@ -841,7 +841,7 @@ jobs:
       - persist_to_workspace:
           root: /tmp
           paths:
-            - data/ds-sample/test
+            - data/ds-sample/test/test-04_*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
@@ -892,7 +892,7 @@ jobs:
       - persist_to_workspace:
           root: /tmp
           paths:
-            - data/ds-sample/test
+            - data/ds-sample/test/test-05_*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
@@ -943,7 +943,7 @@ jobs:
       - persist_to_workspace:
           root: /tmp
           paths:
-            - data/ds-sample/test
+            - data/ds-sample/test/test-06_*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
@@ -994,7 +994,7 @@ jobs:
       - persist_to_workspace:
           root: /tmp
           paths:
-            - data/ds-sample/test
+            - data/ds-sample/test/test-07_*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
@@ -1045,7 +1045,7 @@ jobs:
       - persist_to_workspace:
           root: /tmp
           paths:
-            - data/ds-sample/test
+            - data/ds-sample/test/test-08_*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
@@ -1096,7 +1096,7 @@ jobs:
       - persist_to_workspace:
           root: /tmp
           paths:
-            - data/ds-sample/test
+            - data/ds-sample/test/test-09_*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
@@ -1154,7 +1154,7 @@ jobs:
       - persist_to_workspace:
           root: /tmp
           paths:
-            - data/ds-sample/test
+            - data/ds-sample/test/test-10_*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
@@ -1212,7 +1212,7 @@ jobs:
       - persist_to_workspace:
           root: /tmp
           paths:
-            - data/ds-sample/test
+            - data/ds-sample/test/test-11_*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
