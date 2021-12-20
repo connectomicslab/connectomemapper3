@@ -673,7 +673,7 @@ jobs:
           test_name: "test-01"
           config_dir: /home/circleci/src/connectomemapper3/.circleci/tests/configuration_files
           anat_pipeline_config: "ref_anatomical_config_1.ini"
-          check_output : false
+          check_output : true
       - run:
           name: Clean working directory
           when: always
