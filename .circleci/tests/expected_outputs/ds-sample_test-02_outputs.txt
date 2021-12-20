@@ -390,7 +390,7 @@ nipype-1.7.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/compute_roi_vo
 nipype-1.7.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/compute_roi_volumetry/_node.pklz
 nipype-1.7.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/compute_roi_volumetry/_report/report.rst
 nipype-1.7.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/compute_roi_volumetry/result_compute_roi_volumetry.pklz
-nipype-1.7.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/compute_roi_volumetry/roi_stats_freesurferaparc.tsv
+nipype-1.7.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/compute_roi_volumetry/freesurferaparc_roi_stats.tsv
 nipype-1.7.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/createBIDSLabelIndexMappingFile/_inputs.pklz
 nipype-1.7.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/createBIDSLabelIndexMappingFile/mapflow/_createBIDSLabelIndexMappingFile0/freesurferaparc.tsv
 nipype-1.7.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/createBIDSLabelIndexMappingFile/mapflow/_createBIDSLabelIndexMappingFile0/_inputs.pklz
