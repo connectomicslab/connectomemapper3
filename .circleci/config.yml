@@ -211,13 +211,17 @@ commands:
             bids_dir="/tmp/data/<<parameters.circleci_job>>/ds-sample"
             output_dir="${bids_dir}/derivatives"
             connectomemapper3_docker \
-            "${bids_dir}" "${output_dir}" participant --participant_label 01 --session_label 01 \
-            --docker_image "sebastientourbier/connectomemapper3" \
-            --config_dir <<parameters.config_dir>> \
-            --anat_pipeline_config <<parameters.anat_pipeline_config>> \
-            --fs_license "${bids_dir}/code/license.txt" \
-            --ants_number_of_threads 4 \
-            --coverage
+              "${bids_dir}" "${output_dir}" participant --participant_label 01 --session_label 01 \
+              --docker_image "sebastientourbier/connectomemapper3" \
+              --config_dir <<parameters.config_dir>> \
+              --anat_pipeline_config <<parameters.anat_pipeline_config>> \
+              --fs_license "${bids_dir}/code/license.txt" \
+              --ants_number_of_threads 4 \
+              --coverage
+            # Rename partial coverage
+            mv /tmp/data/<<parameters.circleci_job>>/ds-sample/code/coverage.xml /tmp/data/ds-sample/test/<<parameters.test_name>>_coverage.xml
+            # Rename execution log
+            mv /tmp/data/<<parameters.circleci_job>>/ds-sample/code/log.txt /tmp/data/ds-sample/test/<<parameters.test_name>>_log.txt
       - run:
           name: Checking outputs of Connectome Mapper run (<<parameters.test_name>>)
           command: |
