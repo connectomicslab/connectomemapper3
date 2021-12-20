@@ -2,6 +2,7 @@ version: 2.1
 
 orbs:
   singularity: singularity/singularity@1.0.11
+  coverage-reporter: codacy/coverage-reporter@13.5.3
   codecov: codecov/codecov@1.1.5
 
 commands:
@@ -1225,45 +1226,58 @@ jobs:
   codacy_coverage_report:
     docker:
       - image: 'circleci/openjdk:8-jdk'
-    working_directory: /tmp/data/ds-sample/code
+    working_directory: /tmp/data/ds-sample/test
     steps:
+      - checkout
       - attach_workspace:
           at: /tmp
-      - run:
-          name: Run Codacy Coverage Reporter to convert and upload the reports to Codacy
-          command: |
-            export CODACY_REPORTER_VERSION=latest
-            export CODACY_PROJECT_TOKEN=${CODACY_PROJECT_TOKEN}
-            # Handles partial reports and send the final report to Codacy
-            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
-                --project-token ${CODACY_PROJECT_TOKEN} \
-                -l Python -r /tmp/data/ds-sample/test/test-01_coverage.xml --partial &&\
-            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
-                --project-token ${CODACY_PROJECT_TOKEN} \
-                -l Python -r /tmp/data/ds-sample/test/test-02_coverage.xml --partial &&\
-            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
-                --project-token ${CODACY_PROJECT_TOKEN} \
-                -l Python -r /tmp/data/ds-sample/test/test-04_coverage.xml --partial &&\
-            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
-                --project-token ${CODACY_PROJECT_TOKEN} \
-                -l Python -r /tmp/data/ds-sample/test/test-05_coverage.xml --partial &&\
-            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
-                --project-token ${CODACY_PROJECT_TOKEN} \
-                -l Python -r /tmp/data/ds-sample/test/test-06_coverage.xml --partial &&\
-            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
-                --project-token ${CODACY_PROJECT_TOKEN} \
-                -l Python -r /tmp/data/ds-sample/test/test-07_coverage.xml --partial &&\
-            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
-                --project-token ${CODACY_PROJECT_TOKEN} \
-                -l Python -r /tmp/data/ds-sample/test/test-08_coverage.xml --partial &&\
-            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
-                --project-token ${CODACY_PROJECT_TOKEN} \
-                -l Python -r /tmp/data/ds-sample/test/test-09_coverage.xml --partial &&\
-            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
-                --project-token ${CODACY_PROJECT_TOKEN} \
-                -l Python -r /tmp/data/ds-sample/test/test-10_coverage.xml --partial &&\
-            bash <(curl -Ls https://coverage.codacy.com/get.sh) final \
-                --project-token ${CODACY_PROJECT_TOKEN}
+      - run commands to generate the coverage result
+      - coverage-reporter/send_report:
+          coverage-reports: 'test-01_coverage.xml,test-02_coverage.xml,test-04_coverage.xml,test-05_coverage.xml,test-06_coverage.xml,test-07_coverage.xml,test-08_coverage.xml,test-09_coverage.xml,test-10_coverage.xml'
+          project-token: ${CODACY_PROJECT_TOKEN}
+
+#  codacy_coverage_report:
+#    docker:
+#      - image: 'circleci/openjdk:8-jdk'
+#    working_directory: /tmp/data/ds-sample/code
+#    steps:
+#      - attach_workspace:
+#          at: /tmp
+#      - run:
+#          name: Run Codacy Coverage Reporter to convert and upload the reports to Codacy
+#          command: |
+#            export CODACY_REPORTER_VERSION=latest
+#            export CODACY_PROJECT_TOKEN=${CODACY_PROJECT_TOKEN}
+#            # Handles partial reports and send the final report to Codacy
+#            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
+#                --project-token ${CODACY_PROJECT_TOKEN} \
+#                -l Python -r /tmp/data/ds-sample/test/test-01_coverage.xml --partial &&\
+#            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
+#                --project-token ${CODACY_PROJECT_TOKEN} \
+#                -l Python -r /tmp/data/ds-sample/test/test-02_coverage.xml --partial &&\
+#            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
+#                --project-token ${CODACY_PROJECT_TOKEN} \
+#                -l Python -r /tmp/data/ds-sample/test/test-04_coverage.xml --partial &&\
+#            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
+#                --project-token ${CODACY_PROJECT_TOKEN} \
+#                -l Python -r /tmp/data/ds-sample/test/test-05_coverage.xml --partial &&\
+#            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
+#                --project-token ${CODACY_PROJECT_TOKEN} \
+#                -l Python -r /tmp/data/ds-sample/test/test-06_coverage.xml --partial &&\
+#            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
+#                --project-token ${CODACY_PROJECT_TOKEN} \
+#                -l Python -r /tmp/data/ds-sample/test/test-07_coverage.xml --partial &&\
+#            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
+#                --project-token ${CODACY_PROJECT_TOKEN} \
+#                -l Python -r /tmp/data/ds-sample/test/test-08_coverage.xml --partial &&\
+#            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
+#                --project-token ${CODACY_PROJECT_TOKEN} \
+#                -l Python -r /tmp/data/ds-sample/test/test-09_coverage.xml --partial &&\
+#            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
+#                --project-token ${CODACY_PROJECT_TOKEN} \
+#                -l Python -r /tmp/data/ds-sample/test/test-10_coverage.xml --partial &&\
+#            bash <(curl -Ls https://coverage.codacy.com/get.sh) final \
+#                --project-token ${CODACY_PROJECT_TOKEN}
 
   send_codecov_report:
     docker:
