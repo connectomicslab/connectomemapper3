@@ -23,6 +23,14 @@ which includes the following changes.
     BIDS-formatted files.
     (`PR #88 <https://github.com/connectomicslab/connectomemapper3/pull/88>`_)
 
+*   CMP3 generates generic label-index mapping `.tsv` files along with the parcellation
+    files, in accordance to
+    `BIDS derivatives <https://bids-specification.readthedocs.io/en/stable/05-derivatives/03-imaging.html#common-image-derived-labels>`_.
+    This has led to the creation of the :py:class:`~cmtklib.bids.utils.CreateBIDSStandardParcellationLabelIndexMappingFile`
+    and :py:class:`~cmtklib.bids.utils.CreateCMPParcellationNodeDescriptionFilesFromBIDSFile` interfaces, which allows us to
+    create the BIDS label-index mapping file from the parcellation node description files employed
+    by CMP3 (that includes `_FreeSurferColorLUT.txt` and `_dseg.graphml`), and vice versa.
+
 *   CMP3 provide python wrappers to the Docker and Singularity container images
     (`connectomemapper3_docker` and `connectomemapper3_singularity`)
     that will generate and execute the appropriate command to run the BIDS App.
@@ -30,12 +38,28 @@ which includes the following changes.
       `PR #115 <https://github.com/connectomicslab/connectomemapper3/pull/115>`_,
       `PR #130 <https://github.com/connectomicslab/connectomemapper3/pull/130>`_)
 
-*Updates*
+*Removed feature*
+
+*   Lausanne2018 parcellation is not anymore an alternative to, but a replacement to the
+    old Lausanne2008 parcellation, as it provides improvements in the way Lausanne parcellation
+    label are generated. Any code and data related to Lausanne2008 has been removed. If one still
+    wish to use this old parcellation scheme, one should use CMP3 (`v3.0.0-RC4`)
+
+*Output updates*
 
 *   Directories for the derivatives produced by cmp (`cmp`, `freesurfer`, `nipype`)
     were renamed to `cmp-<cmp_version>`,  `freesurfer-<freesurfer_version>`, and
     `nipype-<nipype_version>` to comply with BIDS 1.4.0+.
     (`PR #3 (fork) <https://github.com/sebastientourbier/connectomemapper3/pull/3>`_)
+
+*Code refactoring*
+
+*   Creation in `AnatomicalPipeline`, `DiffusionPipeline`, `fMRIPipeline` of
+    `create_datagrabber_node()` and `create_datasinker_node()` methods to
+    reduce the code in `create_workflow()`.
+
+*   The `run(command)` function of `cmp.bidsappmanager.core` has been moved to
+    :py:mod:`cmtklib.process`, which is used by the python wrappers in `cmp.cli`.
 
 *Pipeline Improvements*
 
@@ -46,11 +70,7 @@ which includes the following changes.
     are performed in the preprocessing stage of the diffusion pipeline only if
     necessary
 
-*Code Improvements*
-
-*   Creation in `AnatomicalPipeline`, `DiffusionPipeline`, `fMRIPipeline` of
-    `create_datagrabber_node()` and `create_datasinker_node()` methods to
-    reduce the code in `create_workflow()`.
+*Code Style*
 
 *   Clean code and remove a number of commented lines that are now obsolete.
     Code related to the connection of nodes in the Nipype `Workflow` adopts a
@@ -67,6 +87,9 @@ which includes the following changes.
 *   Add instructions to use the python wrappers for running the BIDS App.
     (`PR #115 <https://github.com/connectomicslab/connectomemapper3/pull/115>`_)
 
+*   Add notification about the removal of the old Lausanne2008 parcellation, and
+    remove any other mentions in the documentation.
+
 *Software container*
 
 *   Define multiple build stages in Dockerfile, which can be run in parallel at build
@@ -80,13 +103,13 @@ which includes the following changes.
 
 *   Following major changes in the pricing plans of CircleCI but also to improve its readability,
     `.circleci/config.yml` has been dramatically refactored, including:
+    *   Use BUILDKIT in docker build to take advantage of the multi-stage build
     *   Reordering and modularization of the tests:
         *   tests 01-03 (Docker): anatomical pipeline for each parcellation scheme
         *   tests 04-07 (Docker): diffusion pipeline for dipy/mrtrix deterministic/probabilistic tractography
         *   tests 08-09 (Docker): fMRI pipeline for FLIRT and BBRegistration registrations
         *   tests 10-11 (Singularity): anatomical pipeline for NativeFreesurfer and Lausanne2008 schemes
     *   Creation of commands for steps that are shared between jobs to reduce code duplication
-    *   Use BUILDKIT in docker build to take advantage of the multi-stage build
     (`PR #88 <https://github.com/connectomicslab/connectomemapper3/pull/88>`_)
 
 *Contributors*
