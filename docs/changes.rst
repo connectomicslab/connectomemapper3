@@ -41,13 +41,12 @@ which includes the following changes.
 *Major changes*
 
 *   Lausanne2018 parcellation has completely replaced the old Lausanne2008 parcellation.
-    In brief, Lausanne2018 parcellation provides (1) symmetry of labels between hemispheres,
-      and (2) a more optimal generation of the volumetric parcellation images, that now
-      are generated at once from `.annot` files.
-    This fixes the issue of overwritten labels encountered by in the process of creating
-      the Lausanne2008 parcellation.
-    Any code and data related to Lausanne2008 has been removed.
-    If one still wish to use this old parcellation scheme, one should use CMP3 (`v3.0.0-RC4`).
+    In brief, the new parcellation was introduced to provide (1) symmetry of labels
+    between hemispheres, and (2) a more optimal generation of the volumetric parcellation images,
+    that now are generated at once from `.annot` files. This fixes the issue of overwritten labels
+    encountered by in the process of creating the Lausanne2008 parcellation. Any code and data
+    related to Lausanne2008 has been removed. If one still wish to use this old parcellation scheme,
+    one should use CMP3 (`v3.0.0-RC4`).
 
 *Output updates*
 
