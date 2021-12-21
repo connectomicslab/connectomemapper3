@@ -76,7 +76,7 @@ commands:
     parameters:
       archive_file:
         type: string
-        default: "/tmp/cache/docker.tar.zst"
+        default: "/tmp/cache/docker/docker.tar.zst"
       run_name:
         type: string
         default: "Load Docker image layer cache"
@@ -502,7 +502,7 @@ jobs:
       image: ubuntu-1604:201903-01
       docker_layer_caching: true
     resource_class: medium
-    working_directory: tmp/src/connectomemapper3
+    working_directory: /home/circleci/src/connectomemapper3
     steps:
       - run:
           name: Install parallel zstd
@@ -524,15 +524,16 @@ jobs:
       #      - docker-v1-
       #    paths:
       #      - /tmp/cache
-      - checkout
+      - checkout:
+          path: /home/circleci/src/connectomemapper3
       - run:
           name: Load Docker image layer cache
           no_output_timeout: 30m
           command: |
             docker info
             set +o pipefail
-            if [ -f /tmp/cache/docker.tar.zst ]; then
-              zstd -d --stdout /tmp/cache/docker.tar.zst | docker load
+            if [ -f /tmp/cache/docker/docker.tar.zst ]; then
+              zstd -d --stdout /tmp/cache/docker/docker.tar.zst | docker load
               docker images
             fi
       - run:
@@ -541,7 +542,7 @@ jobs:
           command: |
             # Get version, update files.
             python --version
-            THISVERSION=$( python /tmp/src/connectomemapper3/get_version.py )
+            THISVERSION=$( python /home/circleci/src/connectomemapper3/get_version.py )
             echo "THISVERSION : ${THISVERSION}"
             echo "CIRCLE_TAG : ${CIRCLE_TAG}"
             if [[ ${THISVERSION:0:1} == "0" ]] ; then
@@ -551,9 +552,9 @@ jobs:
               echo "them to your fork with ``git push origin --tags``"
             fi
             # Build CMP BIDS App docker image
-            cd /tmp/src/connectomemapper3/
+            cd /home/circleci/src/connectomemapper3
             ls -la .
-            DOCKER_BUILDKIT=1 docker build --progress=plain --squash --rm=true --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` --build-arg VCS_REF=`git rev-parse --short HEAD` --build-arg VERSION="${CIRCLE_TAG:-$THISVERSION}" -t sebastientourbier/connectomemapper3 /tmp/src/connectomemapper3 \
+            DOCKER_BUILDKIT=1 docker build --progress=plain --squash --rm=true --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` --build-arg VCS_REF=`git rev-parse --short HEAD` --build-arg VERSION="${CIRCLE_TAG:-$THISVERSION}" -t sebastientourbier/connectomemapper3 /home/circleci/src/connectomemapper3 \
       #- run:
       #    name: Prune Docker cache (temporary)
       #    command: docker system prune -f
@@ -572,15 +573,14 @@ jobs:
           no_output_timeout: 40m
           command: |
             # Get version, update files.
-            THISVERSION=$( python /tmp/src/connectomemapper3/get_version.py )
-            mkdir -p /tmp/cache
+            THISVERSION=$( python /home/circleci/src/connectomemapper3/get_version.py )
+            mkdir -p /tmp/cache/docker
             docker save sebastientourbier/connectomemapper3 \
-            | zstd -10 --threads=4 > /tmp/cache/docker.tar.zst
+            | zstd -10 --threads=4 > /tmp/cache/docker/docker.tar.zst
       - persist_to_workspace:
           root: /tmp
           paths:
-            - cache/docker.tar.zst
-            - src/connectomemapper3
+            - cache/docker/docker.tar.zst
       #- save_cache:
       #    key: docker-v1-{{ .Branch }}-{{ .Revision }}
       #    paths:
@@ -591,7 +591,7 @@ jobs:
       # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
       image: ubuntu-1604:201903-01
     resource_class: large
-    working_directory: /tmp/src/connectomemapper3
+    working_directory: /home/circleci/src/connectomemapper3
     steps:
       - checkout:
           path: /home/circleci/src/connectomemapper3
@@ -609,11 +609,11 @@ jobs:
           name: "Starting local registry"
           command: docker run -d -p 5000:5000 --restart=always --name registry registry:2
       - load-docker-image-archive:
-          archive_file: "/tmp/cache/docker.tar.zst"
+          archive_file: "/tmp/cache/docker/docker.tar.zst"
       - singularity/install-go:
           go-version: '1.13'
       - singularity/debian-install-3:
-          singularity-version: 3.8.3
+          singularity-version: 3.8.4
       - run:
           name: "Set SINGULARITY TMP and CACHEDIR to prevent overflowing the /tmp folder"
           command: |
@@ -631,6 +631,7 @@ jobs:
       - run:
           name: "Building Singularity image from Docker image"
           command: |
+            mkdir -p /tmp/cache/singularity
             docker tag sebastientourbier/connectomemapper3 localhost:5000/sebastientourbier/connectomemapper3:latest
             docker push localhost:5000/sebastientourbier/connectomemapper3:latest
             docker images -a | grep "sebastientourbier/connectomemapper3"
@@ -638,17 +639,15 @@ jobs:
             SINGULARITY_LOCALCACHEDIR=~/.singularity/tmp \
             SINGULARITY_CACHEDIR=~/.singularity/tmp SINGULARITY_TMPDIR=~/.singularity/tmp \
             TMPDIR=~/.singularity/tmp SINGULARITY_DISABLE_CACHE=true \
-            singularity build /tmp/cache/connectomemapper3.simg docker://localhost:5000/sebastientourbier/connectomemapper3:latest
+            singularity build /tmp/cache/singularity/connectomemapper3.simg docker://localhost:5000/sebastientourbier/connectomemapper3:latest
           no_output_timeout: 5h
       - run:
           name: "Display storage information ALL"
           command: df -h
       - persist_to_workspace:
-          root: /tmp
+          root: /tmp/cache/singularity
           paths:
-            - cache/connectomemapper3.simg
-      - store_artifacts:
-          path: ~/usage.txt
+            - connectomemapper3.simg
 
   get_data:
     machine:
@@ -733,7 +732,7 @@ jobs:
       - attach_workspace:
           at: /tmp
       - load-docker-image-archive:
-          archive_file: "/tmp/cache/docker.tar.zst"
+          archive_file: "/tmp/cache/docker/docker.tar.zst"
       - install-conda-and-cmp3:
           run_name: "Setup miniconda environment and install connectomemapper3 with Python wrappers"
           cmp3_dir: /home/circleci/src/connectomemapper3
@@ -755,10 +754,9 @@ jobs:
                 -not -name "*.mat" -not -name "*.gpickle" -not -name "*.lta" -not -name "*.json" -not -name "*.txt" \
                 -not -name "*.log" -not -name "*.pklz" -type f -delete
       - persist_to_workspace:
-          root: /tmp
+          root: /tmp/data/ds-sample/test
           paths:
-            - data/ds-sample/test/test-01_*
-            - data/test1_docker_parcellation/ds-sample/derivatives/nipype-*
+            - /test-01_*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
@@ -790,7 +788,7 @@ jobs:
       - attach_workspace:
           at: /tmp
       - load-docker-image-archive:
-          archive_file: "/tmp/cache/docker.tar.zst"
+          archive_file: "/tmp/cache/docker/docker.tar.zst"
       - clean-configuration-files:
           circleci_job: ${CIRCLE_JOB}
       - test-docker-anat-pipeline:
@@ -808,9 +806,9 @@ jobs:
                 -not -name "*.mat" -not -name "*.gpickle" -not -name "*.lta" -not -name "*.json" -not -name "*.txt" \
                 -not -name "*.log" -not -name "*.pklz" -type f -delete
       - persist_to_workspace:
-          root: /tmp
+          root: /tmp/data/ds-sample/test
           paths:
-            - data/ds-sample/test/test-02_*
+            - test-02_*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
@@ -842,7 +840,7 @@ jobs:
       - attach_workspace:
           at: /tmp
       - load-docker-image-archive:
-          archive_file: "/tmp/cache/docker.tar.zst"
+          archive_file: "/tmp/cache/docker/docker.tar.zst"
       - clean-configuration-files:
           circleci_job: ${CIRCLE_JOB}
       - test-docker-anat-pipeline:
@@ -860,9 +858,9 @@ jobs:
                 -not -name "*.mat" -not -name "*.gpickle" -not -name "*.lta" -not -name "*.json" -not -name "*.txt" \
                 -not -name "*.log" -not -name "*.pklz" -type f -delete
       - persist_to_workspace:
-          root: /tmp
+          root: /tmp/data/ds-sample/test
           paths:
-            - data/ds-sample/test/test-03_*
+            - test-03_*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
@@ -900,7 +898,7 @@ jobs:
             cp -r /tmp/data/test1_docker_parcellation/ds-sample/derivatives/nipype-* \
             /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives
       - load-docker-image-archive:
-          archive_file: "/tmp/cache/docker.tar.zst"
+          archive_file: "/tmp/cache/docker/docker.tar.zst"
       - clean-configuration-files:
           circleci_job: ${CIRCLE_JOB}
       - test-docker-anat-dwi-pipelines:
@@ -911,9 +909,9 @@ jobs:
           anat_pipeline_config: "ref_anatomical_config_1.ini"
           dwi_pipeline_config: "ref_diffusion_config_1.ini"
       - persist_to_workspace:
-          root: /tmp
+          root: /tmp/data/ds-sample/test
           paths:
-            - data/ds-sample/test/test-04_*
+            - test-04_*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
@@ -951,7 +949,7 @@ jobs:
             cp -r /tmp/data/test1_docker_parcellation/ds-sample/derivatives/nipype-* \
             /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives
       - load-docker-image-archive:
-          archive_file: "/tmp/cache/docker.tar.zst"
+          archive_file: "/tmp/cache/docker/docker.tar.zst"
       - clean-configuration-files:
           circleci_job: ${CIRCLE_JOB}
       - test-docker-anat-dwi-pipelines:
@@ -962,9 +960,9 @@ jobs:
           anat_pipeline_config: "ref_anatomical_config_1.ini"
           dwi_pipeline_config: "ref_diffusion_config_2.ini"
       - persist_to_workspace:
-          root: /tmp
+          root: /tmp/data/ds-sample/test
           paths:
-            - data/ds-sample/test/test-05_*
+            - test-05_*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
@@ -1002,7 +1000,7 @@ jobs:
             cp -r /tmp/data/test1_docker_parcellation/ds-sample/derivatives/nipype-* \
             /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives
       - load-docker-image-archive:
-          archive_file: "/tmp/cache/docker.tar.zst"
+          archive_file: "/tmp/cache/docker/docker.tar.zst"
       - clean-configuration-files:
           circleci_job: ${CIRCLE_JOB}
       - test-docker-anat-dwi-pipelines:
@@ -1013,9 +1011,9 @@ jobs:
           anat_pipeline_config: "ref_anatomical_config_1.ini"
           dwi_pipeline_config: "ref_diffusion_config_3.ini"
       - persist_to_workspace:
-          root: /tmp
+          root: /tmp/data/ds-sample/test
           paths:
-            - data/ds-sample/test/test-06_*
+            - test-06_*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
@@ -1053,7 +1051,7 @@ jobs:
             cp -r /tmp/data/test1_docker_parcellation/ds-sample/derivatives/nipype-* \
             /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives
       - load-docker-image-archive:
-          archive_file: "/tmp/cache/docker.tar.zst"
+          archive_file: "/tmp/cache/docker/docker.tar.zst"
       - clean-configuration-files:
           circleci_job: ${CIRCLE_JOB}
       - test-docker-anat-dwi-pipelines:
@@ -1064,9 +1062,9 @@ jobs:
           anat_pipeline_config: "ref_anatomical_config_1.ini"
           dwi_pipeline_config: "ref_diffusion_config_4.ini"
       - persist_to_workspace:
-          root: /tmp
+          root: /tmp/data/ds-sample/test
           paths:
-            - data/ds-sample/test/test-07_*
+            - test-07_*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
@@ -1104,7 +1102,7 @@ jobs:
             cp -r /tmp/data/test1_docker_parcellation/ds-sample/derivatives/nipype-* \
             /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives
       - load-docker-image-archive:
-          archive_file: "/tmp/cache/docker.tar.zst"
+          archive_file: "/tmp/cache/docker/docker.tar.zst"
       - clean-configuration-files:
           circleci_job: ${CIRCLE_JOB}
       - test-docker-anat-func-pipelines:
@@ -1115,9 +1113,9 @@ jobs:
           anat_pipeline_config: "ref_anatomical_config_1.ini"
           func_pipeline_config: "ref_fMRI_config_1.ini"
       - persist_to_workspace:
-          root: /tmp
+          root: /tmp/data/ds-sample/test
           paths:
-            - data/ds-sample/test/test-08_*
+            - test-08_*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
@@ -1155,7 +1153,7 @@ jobs:
             cp -r /tmp/data/test1_docker_parcellation/ds-sample/derivatives/nipype-* \
             /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives
       - load-docker-image-archive:
-          archive_file: "/tmp/cache/docker.tar.zst"
+          archive_file: "/tmp/cache/docker/docker.tar.zst"
       - clean-configuration-files:
           circleci_job: ${CIRCLE_JOB}
       - test-docker-anat-func-pipelines:
@@ -1166,9 +1164,9 @@ jobs:
           anat_pipeline_config: "ref_anatomical_config_1.ini"
           func_pipeline_config: "ref_fMRI_config_2.ini"
       - persist_to_workspace:
-          root: /tmp
+          root: /tmp/data/ds-sample/test
           paths:
-            - data/ds-sample/test/test-09_*
+            - test-09_*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
@@ -1202,7 +1200,7 @@ jobs:
       - singularity/install-go:
           go-version: '1.13'
       - singularity/debian-install-3:
-          singularity-version: 3.8.3
+          singularity-version: 3.8.4
       - install-conda-and-cmp3:
           run_name: "Setup miniconda environment and install connectomemapper3 with Python wrappers"
           cmp3_dir: /home/circleci/src/connectomemapper3
@@ -1224,9 +1222,9 @@ jobs:
                 -not -name "*.mat" -not -name "*.gpickle" -not -name "*.lta" -not -name "*.json" -not -name "*.txt" \
                 -not -name "*.log" -not -name "*.pklz" -type f -delete
       - persist_to_workspace:
-          root: /tmp
+          root: /tmp/data/ds-sample/test
           paths:
-            - data/ds-sample/test/test-10_*
+            - test-10_*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
@@ -1260,7 +1258,7 @@ jobs:
       - singularity/install-go:
           go-version: '1.13'
       - singularity/debian-install-3:
-          singularity-version: 3.8.3
+          singularity-version: 3.8.4
       - install-conda-and-cmp3:
           run_name: "Setup miniconda environment and install connectomemapper3 with Python wrappers"
           cmp3_dir: /home/circleci/src/connectomemapper3
@@ -1282,9 +1280,9 @@ jobs:
                 -not -name "*.mat" -not -name "*.gpickle" -not -name "*.lta" -not -name "*.json" -not -name "*.txt" \
                 -not -name "*.log" -not -name "*.pklz" -type f -delete
       - persist_to_workspace:
-          root: /tmp
+          root: /tmp/data/ds-sample/test
           paths:
-            - data/ds-sample/test/test-11_*
+            - test-11_*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
@@ -1301,7 +1299,7 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: /tmp
+          at: /tmp/data/ds-sample/test
       - send_codacy_report:
           coverage-reports: 'test-01_coverage.xml,test-02_coverage.xml,test-04_coverage.xml,test-05_coverage.xml,test-06_coverage.xml,test-07_coverage.xml,test-08_coverage.xml,test-09_coverage.xml,test-10_coverage.xml'
           project-token: ${CODACY_PROJECT_TOKEN}
@@ -1358,7 +1356,7 @@ jobs:
     working_directory: /tmp/data/ds-sample/code
     steps:
       - attach_workspace:
-          at: /tmp
+          at: /tmp/data
       - codecov/upload:
           file: /tmp/data/ds-sample/test/test-01_coverage.xml
       - codecov/upload:
@@ -1400,7 +1398,7 @@ jobs:
       - attach_workspace:
           at: /tmp
       - load-docker-image-archive:
-          archive_file: "/tmp/cache/docker.tar.zst"
+          archive_file: "/tmp/cache/docker/docker.tar.zst"
       - run:
           name: Build Connectome Mapper 3 documentation
           no_output_timeout: 2h
@@ -1420,14 +1418,14 @@ jobs:
       # Ubuntu 14.04 with Docker 17.10.0-ce
       image: ubuntu-1604:201903-01
     resource_class: medium
-    working_directory: /tmp/src/connectomemapper3
+    working_directory: /home/circleci/src/connectomemapper3
     steps:
       - checkout:
           path: /home/circleci/src/connectomemapper3
       - attach_workspace:
           at: /tmp
       - load-docker-image-archive:
-          archive_file: "/tmp/cache/docker.tar.zst"
+          archive_file: "/tmp/cache/docker/docker.tar.zst"
       - run:
           name: Deploy release with version tag to Docker Hub
           no_output_timeout: 40m
@@ -1450,14 +1448,14 @@ jobs:
       # Ubuntu 14.04 with Docker 17.10.0-ce
       image: ubuntu-1604:201903-01
     resource_class: medium
-    working_directory: /tmp/src/connectomemapper3
+    working_directory: /home/circleci/src/connectomemapper3
     steps:
       - checkout:
           path: /home/circleci/src/connectomemapper3
       - attach_workspace:
           at: /tmp
       - load-docker-image-archive:
-          archive_file: "/tmp/cache/docker.tar.zst"
+          archive_file: "/tmp/cache/docker/docker.tar.zst"
       - run:
           name: Deploy latest master to Docker Hub
           no_output_timeout: 40m
@@ -1478,7 +1476,7 @@ jobs:
       # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
       image: ubuntu-1604:201903-01
     resource_class: medium
-    working_directory: /tmp/src/connectomemapper3
+    working_directory: /home/circleci/src/connectomemapper3
     steps:
       - checkout:
           path: /home/circleci/src/connectomemapper3
@@ -1491,11 +1489,11 @@ jobs:
               circleci step halt
             fi
       - attach_workspace:
-          at: /tmp
+          at: /tmp/cache/singularity
       - singularity/install-go:
           go-version: '1.13'
       - singularity/debian-install-3:
-          singularity-version: 3.8.3
+          singularity-version: 3.8.4
       - run:
           name: 'Write Sylabs.io TOKEN'
           command: |
@@ -1508,15 +1506,15 @@ jobs:
       - run:
           name: 'Deploy simg with latest tag to Sylabs.io'
           command: |
-            singularity delete --arch=amd64 library://connectomicslab/default/connectomemapper-bidsapp:latest
-            singularity push -U /tmp/cache/connectomemapper3.simg library://connectomicslab/default/connectomemapper-bidsapp:latest
+            # singularity delete --arch=amd64 library://connectomicslab/default/connectomemapper-bidsapp:latest
+            singularity push -U /tmp/cache/singularity/connectomemapper3.simg library://connectomicslab/default/connectomemapper-bidsapp:latest
 
   deploy_singularity_release:
     machine:
       # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
       image: ubuntu-1604:201903-01
     resource_class: medium
-    working_directory: /tmp/src/connectomemapper3
+    working_directory: /home/circleci/src/connectomemapper3
     steps:
       - checkout:
           path: /home/circleci/src/connectomemapper3
@@ -1529,11 +1527,11 @@ jobs:
               circleci step halt
             fi
       - attach_workspace:
-          at: /tmp
+          at: /tmp/cache/singularity
       - singularity/install-go:
           go-version: '1.13'
       - singularity/debian-install-3:
-          singularity-version: 3.8.3
+          singularity-version: 3.8.4
       - run:
           name: 'Write Sylabs.io TOKEN'
           command: |
@@ -1551,7 +1549,7 @@ jobs:
             # THISVERSION="$( python /home/circleci/src/connectomemapper3/get_version.py )"
             # echo "THISVERSION : ${THISVERSION}"
             echo "CIRCLE_TAG : ${CIRCLE_TAG}"
-            singularity push -U /tmp/cache/connectomemapper3.simg library://connectomicslab/default/connectomemapper-bidsapp:latest
+            singularity push -U /tmp/cache/singularity/connectomemapper3.simg library://connectomicslab/default/connectomemapper-bidsapp:latest
 
 workflows:
   version: 2.1
