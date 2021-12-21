@@ -38,13 +38,16 @@ which includes the following changes.
       `PR #115 <https://github.com/connectomicslab/connectomemapper3/pull/115>`_,
       `PR #130 <https://github.com/connectomicslab/connectomemapper3/pull/130>`_)
 
-*Removed feature*
+*Major changes*
 
-*   Lausanne2018 parcellation has completely replaced the old Lausanne2008 parcellation,
-    as it provides symmetry of labels between hemispheres as well as a more optimal generation
-    of the labels, by taking as new `.annot` files. Any code and data related to Lausanne2008
-    has been removed. If one still wish to use this old parcellation scheme,
-    one should use CMP3 (`v3.0.0-RC4`).
+*   Lausanne2018 parcellation has completely replaced the old Lausanne2008 parcellation.
+    In brief, Lausanne2018 parcellation provides (1) symmetry of labels between hemispheres,
+      and (2) a more optimal generation of the volumetric parcellation images, that now
+      are generated at once from `.annot` files.
+    This fixes the issue of overwritten labels encountered by in the process of creating
+      the Lausanne2008 parcellation.
+    Any code and data related to Lausanne2008 has been removed.
+    If one still wish to use this old parcellation scheme, one should use CMP3 (`v3.0.0-RC4`).
 
 *Output updates*
 
