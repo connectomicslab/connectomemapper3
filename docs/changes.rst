@@ -9,7 +9,7 @@ Version 3.0.0
 Date: Dec XX, 2021
 
 This version corresponds to the first official release of Connectome Mapper 3 (CMP3).
-It incorporates `Pull Request #88 <https://github.com/connectomicslab/connectomemapper3/pull/88>`_ (~230 commits)
+It incorporates `Pull Request #88 <https://github.com/connectomicslab/connectomemapper3/pull/88>`_ (>450 commits)
 which includes the following changes.
 
 *New features*
@@ -40,10 +40,11 @@ which includes the following changes.
 
 *Removed feature*
 
-*   Lausanne2018 parcellation is not anymore an alternative to, but a replacement to the
-    old Lausanne2008 parcellation, as it provides improvements in the way Lausanne parcellation
-    labels are generated. Any code and data related to Lausanne2008 has been removed. If one still
-    wish to use this old parcellation scheme, one should use CMP3 (`v3.0.0-RC4`)
+*   Lausanne2018 parcellation has completely replaced the old Lausanne2008 parcellation,
+    as it provides symmetry of labels between hemispheres as well as a more optimal generation
+    of the labels, by taking as new `.annot` files. Any code and data related to Lausanne2008
+    has been removed. If one still wish to use this old parcellation scheme,
+    one should use CMP3 (`v3.0.0-RC4`).
 
 *Output updates*
 
@@ -114,10 +115,10 @@ which includes the following changes.
 
 *Contributors*
 
-*   [Sebastien Tourbier](https://github.com/connectomicslab/connectomemapper3/issues?q=is%3Apr+author%3Asebastientourbier)
-*   [Anil Tuncel](https://github.com/connectomicslab/connectomemapper3/issues?q=is%3Apr+author%3Aanilbey)
-*   [Jakub Jancovic] (https://github.com/connectomicslab/connectomemapper3/issues?q=is%3Apr+author%3Akuba-fidel)
-*   [Jonathan Wirsich] (https://github.com/connectomicslab/connectomemapper3/issues?q=is%3Apr+author%3Ajwirsich)
+*   `Sebastien Tourbier <https://github.com/connectomicslab/connectomemapper3/issues?q=is%3Apr+author%3Asebastientourbier>`_
+*   `Anil Tuncel <https://github.com/connectomicslab/connectomemapper3/issues?q=is%3Apr+author%3Aanilbey)>`_
+*   `Jakub Jancovic <https://github.com/connectomicslab/connectomemapper3/issues?q=is%3Apr+author%3Akuba-fidel)>`_
+*   `Jonathan Wirsich <https://github.com/connectomicslab/connectomemapper3/issues?q=is%3Apr+author%3Ajwirsich)>`_
 
 Please check the `main pull request 88 page <https://github.com/connectomicslab/connectomemapper3/pull/88>`_ for more details.
 

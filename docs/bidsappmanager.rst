@@ -114,12 +114,12 @@ Generates the Native Freesurfer or Lausanne2008/Lausanne2018 parcellation from F
 
         New version of Lausanne parcellation atlas, corrected, and extended with 7 thalamic nuclei, 12 hippocampal subfields, and 4 brainstem sub-structure per hemisphere
 
-.. admonition:: Since `v3.0.0`, Lausanne2018 parcellation is not anymore an alternative to, but a replacement to the
-    old Lausanne2008 parcellation.
+        .. admonition:: Since ``v3.0.0``, Lausanne2018 parcellation has completely replaced the old Lausanne2008 parcellation.
 
-    As it provides improvements in the way Lausanne parcellation label are generated,
-    any code and data related to Lausanne2008 has been removed. If one still
-    wish to use this old parcellation scheme, one should use CMP3 (`v3.0.0-RC4`).
+            As it provides improvements in the way Lausanne parcellation label are generated,
+            any code and data related to Lausanne2008 has been removed. If you still wish to
+            use this old parcellation scheme, please use `v3.0.0-RC4` which is the last version
+            that supports it.
 
 Diffusion pipeline stages
 ---------------------------
