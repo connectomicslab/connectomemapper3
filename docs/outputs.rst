@@ -85,6 +85,7 @@ Anatomical derivatives
         - ``anat/sub-<subject_label>_atlas-<atlas_label>[_res-<scale_label>]_dseg.tsv``
         - ``anat/sub-<subject_label>_atlas-<atlas_label>[_res-<scale_label>]_stats.tsv``
 
+        
         and with the description of parcel labels and the updated FreeSurfer color lookup table:
 
         - ``anat/sub-<subject_label>_atlas-<atlas_label>[_res-<scale_label>]_dseg.graphml``
