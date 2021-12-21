@@ -1225,7 +1225,7 @@ jobs:
 
   codacy_coverage_report:
     docker:
-      - image: 'circleci/openjdk:8-jdk'
+      - image: 'cimg/openjdk:8.0.312'
     working_directory: /tmp/data/ds-sample/test
     steps:
       - checkout
