@@ -688,9 +688,10 @@ jobs:
                 -not -name "*.mat" -not -name "*.gpickle" -not -name "*.lta" -not -name "*.json" -not -name "*.txt" \
                 -not -name "*.log" -not -name "*.pklz" -type f -delete
       - persist_to_workspace:
-          root: /tmp/data/ds-sample/test
+          root: /tmp/data
           paths:
-            - test-01_*
+            - ds-sample/test/test-01_*
+            - test1_docker_parcellation/ds-sample/derivatives/nipype-*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
