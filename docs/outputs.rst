@@ -80,12 +80,12 @@ Anatomical derivatives
           - ``<scale_label>``: ``scale1``, ``scale2``, ``scale3``, ``scale4``, ``scale5``
             corresponds to the parcellation scale if applicable
 
-        along with the two following `.tsv` side-car files, respectively describing the label/index mapping and reporting volumetry of the different parcels, in accordance to BIDS Derivatives:
+        with the two `.tsv` side-car files, one describing the parcel label/index mapping (`_dseg.tsv`), one reporting volumetry of the different parcels (`_stats.tsv`), accordingly to the `BIDS derivatives <https://bids-specification.readthedocs.io/en/stable/05-derivatives/03-imaging.html#common-image-derived-labels>`_:
 
         - ``anat/sub-<subject_label>_atlas-<atlas_label>[_res-<scale_label>]_dseg.tsv``
         - ``anat/sub-<subject_label>_atlas-<atlas_label>[_res-<scale_label>]_stats.tsv``
 
-        
+
         and with the description of parcel labels and the updated FreeSurfer color lookup table:
 
         - ``anat/sub-<subject_label>_atlas-<atlas_label>[_res-<scale_label>]_dseg.graphml``

@@ -16,7 +16,7 @@ which includes the following changes.
 
 *   CMP3 can take custom segmentation (brain, white-matter, gray-matter and
     CSF masks, Freesurfer's aparcaseg - used for ACT for PFT) and parcellation
-    files as long as they comply to [BIDS Derivatives specifications](https://bids-specification.readthedocs.io/en/stable/05-derivatives/01-introduction.html),
+    files as long as they comply to `BIDS Derivatives specifications <https://bids-specification.readthedocs.io/en/stable/05-derivatives/01-introduction.html>`_,
     by providing the label value for the different entity in the filename.
     This has led to the creation of the new module :py:mod:`cmtklib.bids.io`,
     which provides different classes to represent the diversity of custom input
