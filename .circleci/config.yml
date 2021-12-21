@@ -93,7 +93,7 @@ commands:
         default: /home/circleci/src/connectomemapper3/.circleci/tests/configuration_files
       singularity_image:
         type: string
-        default: "/tmp/cache/connectomemapper3.simg"
+        default: "/tmp/cache/singularity/connectomemapper3.simg"
       anat_pipeline_config:
         type: string
         default: "ref_anatomical_config_1.ini"
@@ -143,7 +143,7 @@ commands:
         default: "/home/circleci/src/connectomemapper3/.circleci/tests/configuration_files"
       singularity_image:
         type: string
-        default: "/tmp/cache/connectomemapper3.simg"
+        default: "/tmp/cache/singularity/connectomemapper3.simg"
       anat_pipeline_config:
         type: string
         default: "ref_anatomical_config_1.ini"
@@ -1145,7 +1145,7 @@ jobs:
           run_name: Run anatomical pipeline on ds-sample (test 10 - Native Freesurfer)
           test_name: "test-10"
           config_dir: /home/circleci/src/connectomemapper3/.circleci/tests/configuration_files
-          singularity_image: "/tmp/cache/connectomemapper3.simg"
+          singularity_image: "/tmp/cache/singularity/connectomemapper3.simg"
           anat_pipeline_config: "ref_anatomical_config_2.ini"
       - run:
           name: Clean working directory
@@ -1203,7 +1203,7 @@ jobs:
           run_name: Run anatomical pipeline on ds-sample (test 11 - Lausanne 2008)
           test_name: "test-11"
           config_dir: /home/circleci/src/connectomemapper3/.circleci/tests/configuration_files
-          singularity_image: "/tmp/cache/connectomemapper3.simg"
+          singularity_image: "/tmp/cache/singularity/connectomemapper3.simg"
           anat_pipeline_config: "ref_anatomical_config_3.ini"
       - run:
           name: Clean working directory
