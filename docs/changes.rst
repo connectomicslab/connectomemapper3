@@ -42,7 +42,7 @@ which includes the following changes.
 
 *   Lausanne2018 parcellation is not anymore an alternative to, but a replacement to the
     old Lausanne2008 parcellation, as it provides improvements in the way Lausanne parcellation
-    label are generated. Any code and data related to Lausanne2008 has been removed. If one still
+    labels are generated. Any code and data related to Lausanne2008 has been removed. If one still
     wish to use this old parcellation scheme, one should use CMP3 (`v3.0.0-RC4`)
 
 *Output updates*
