@@ -690,7 +690,7 @@ jobs:
       - persist_to_workspace:
           root: /tmp/data/ds-sample/test
           paths:
-            - /test-01_*
+            - test-01_*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
