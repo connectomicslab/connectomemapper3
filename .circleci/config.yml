@@ -35,6 +35,7 @@ commands:
         type: string
     steps:
       - run:
+          name: "Upload Coverage Results to Codacy"
           command: |
             export CODACY_REPORTER_VERSION=<< parameters.tool_version >>
             export CODACY_PROJECT_TOKEN=<< parameters.project-token >>
@@ -70,7 +71,6 @@ commands:
 
             source get.sh report $params --partial --project-token "${CODACY_PROJECT_TOKEN}" --commit-uuid "${COMMIT_UUID}" $skip_option &&\
             source get.sh final  --project-token "${CODACY_PROJECT_TOKEN}" --commit-uuid "${COMMIT_UUID}" --$skip_option
-          name: Upload Coverage Results to Codacy
 
   load-docker-image-archive:
     parameters:
