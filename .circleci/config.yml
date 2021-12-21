@@ -579,9 +579,9 @@ jobs:
           name: "Display storage information ALL"
           command: df -h
       - persist_to_workspace:
-          root: /tmp/cache/singularity
+          root: /tmp
           paths:
-            - connectomemapper3.simg
+            - cache/singularity/connectomemapper3.simg
 
   get_data:
     machine:
@@ -688,10 +688,10 @@ jobs:
                 -not -name "*.mat" -not -name "*.gpickle" -not -name "*.lta" -not -name "*.json" -not -name "*.txt" \
                 -not -name "*.log" -not -name "*.pklz" -type f -delete
       - persist_to_workspace:
-          root: /tmp/data
+          root: /tmp
           paths:
-            - ds-sample/test/test-01_*
-            - test1_docker_parcellation/ds-sample/derivatives/nipype-*
+            - data/ds-sample/test/test-01_*
+            - data/test1_docker_parcellation/ds-sample/derivatives/nipype-*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
@@ -741,9 +741,9 @@ jobs:
                 -not -name "*.mat" -not -name "*.gpickle" -not -name "*.lta" -not -name "*.json" -not -name "*.txt" \
                 -not -name "*.log" -not -name "*.pklz" -type f -delete
       - persist_to_workspace:
-          root: /tmp/data/ds-sample/test
+          root: /tmp
           paths:
-            - test-02_*
+            - data/ds-sample/test/test-02_*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
@@ -793,9 +793,9 @@ jobs:
                 -not -name "*.mat" -not -name "*.gpickle" -not -name "*.lta" -not -name "*.json" -not -name "*.txt" \
                 -not -name "*.log" -not -name "*.pklz" -type f -delete
       - persist_to_workspace:
-          root: /tmp/data/ds-sample/test
+          root: /tmp
           paths:
-            - test-03_*
+            - data/ds-sample/test/test-03_*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
@@ -844,9 +844,9 @@ jobs:
           anat_pipeline_config: "ref_anatomical_config_1.ini"
           dwi_pipeline_config: "ref_diffusion_config_1.ini"
       - persist_to_workspace:
-          root: /tmp/data/ds-sample/test
+          root: /tmp
           paths:
-            - test-04_*
+            - data/ds-sample/test/test-04_*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
@@ -895,9 +895,9 @@ jobs:
           anat_pipeline_config: "ref_anatomical_config_1.ini"
           dwi_pipeline_config: "ref_diffusion_config_2.ini"
       - persist_to_workspace:
-          root: /tmp/data/ds-sample/test
+          root: /tmp
           paths:
-            - test-05_*
+            - data/ds-sample/test/test-05_*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
@@ -946,9 +946,9 @@ jobs:
           anat_pipeline_config: "ref_anatomical_config_1.ini"
           dwi_pipeline_config: "ref_diffusion_config_3.ini"
       - persist_to_workspace:
-          root: /tmp/data/ds-sample/test
+          root: /tmp
           paths:
-            - test-06_*
+            - data/ds-sample/test/test-06_*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
@@ -997,9 +997,9 @@ jobs:
           anat_pipeline_config: "ref_anatomical_config_1.ini"
           dwi_pipeline_config: "ref_diffusion_config_4.ini"
       - persist_to_workspace:
-          root: /tmp/data/ds-sample/test
+          root: /tmp
           paths:
-            - test-07_*
+            - data/ds-sample/test/test-07_*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
@@ -1048,9 +1048,9 @@ jobs:
           anat_pipeline_config: "ref_anatomical_config_1.ini"
           func_pipeline_config: "ref_fMRI_config_1.ini"
       - persist_to_workspace:
-          root: /tmp/data/ds-sample/test
+          root: /tmp
           paths:
-            - test-08_*
+            - data/ds-sample/test/test-08_*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
@@ -1099,9 +1099,9 @@ jobs:
           anat_pipeline_config: "ref_anatomical_config_1.ini"
           func_pipeline_config: "ref_fMRI_config_2.ini"
       - persist_to_workspace:
-          root: /tmp/data/ds-sample/test
+          root: /tmp
           paths:
-            - test-09_*
+            - data/ds-sample/test/test-09_*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
@@ -1157,9 +1157,9 @@ jobs:
                 -not -name "*.mat" -not -name "*.gpickle" -not -name "*.lta" -not -name "*.json" -not -name "*.txt" \
                 -not -name "*.log" -not -name "*.pklz" -type f -delete
       - persist_to_workspace:
-          root: /tmp/data/ds-sample/test
+          root: /tmp
           paths:
-            - test-10_*
+            - data/ds-sample/test/test-10_*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
@@ -1215,9 +1215,9 @@ jobs:
                 -not -name "*.mat" -not -name "*.gpickle" -not -name "*.lta" -not -name "*.json" -not -name "*.txt" \
                 -not -name "*.log" -not -name "*.pklz" -type f -delete
       - persist_to_workspace:
-          root: /tmp/data/ds-sample/test
+          root: /tmp
           paths:
-            - test-11_*
+            - data/ds-sample/test/test-11_*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
@@ -1233,7 +1233,7 @@ jobs:
     working_directory: /tmp/data/ds-sample/test
     steps:
       - attach_workspace:
-          at: /tmp/data/ds-sample/test
+          at: /tmp
       - run:
           name: Run Codacy Coverage Reporter to convert and upload the reports to Codacy
           command: |
@@ -1280,7 +1280,7 @@ jobs:
     working_directory: /tmp/data/ds-sample/test
     steps:
       - attach_workspace:
-          at: /tmp/data/ds-sample/test
+          at: /tmp
       - codecov/upload:
           file: /tmp/data/ds-sample/test/test-01_coverage.xml
       - codecov/upload:
@@ -1413,7 +1413,7 @@ jobs:
               circleci step halt
             fi
       - attach_workspace:
-          at: /tmp/cache/singularity
+          at: /tmp
       - singularity/install-go:
           go-version: '1.13'
       - singularity/debian-install-3:
@@ -1451,7 +1451,7 @@ jobs:
               circleci step halt
             fi
       - attach_workspace:
-          at: /tmp/cache/singularity
+          at: /tmp
       - singularity/install-go:
           go-version: '1.13'
       - singularity/debian-install-3:
