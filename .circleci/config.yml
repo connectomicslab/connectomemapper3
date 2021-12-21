@@ -1234,6 +1234,7 @@ jobs:
       - coverage-reporter/send_report:
           coverage-reports: 'test-01_coverage.xml,test-02_coverage.xml,test-04_coverage.xml,test-05_coverage.xml,test-06_coverage.xml,test-07_coverage.xml,test-08_coverage.xml,test-09_coverage.xml,test-10_coverage.xml'
           project-token: ${CODACY_PROJECT_TOKEN}
+          tool_version: 12.1.3
 
 #  codacy_coverage_report:
 #    docker:
