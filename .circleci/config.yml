@@ -6,72 +6,6 @@ orbs:
 
 commands:
 
-  # This code is licensed from CircleCI to the user under the MIT license.
-  # See here for details: https://circleci.com/developer/orbs/licensing
-  send_codacy_report:
-    description: Download Codacy's coverage reporter and run it
-    parameters:
-      coverage-reports:
-        default: ""
-        description: Optional comma separated list of coverage reports to send to
-          Codacy
-        type: string
-      project-token:
-        default: ${CODACY_PROJECT_TOKEN}
-        description: Specify Codacy's project token
-        type: string
-      commit-uuid:
-        default: ${CIRCLECI_SHA1}
-        description: Specify git commit unique id (SHA1)
-        type: string
-      skip:
-        default: false
-        description: Skip if token isn't defined. Useful to let forks CI pass without
-          passing secrets
-        type: boolean
-      tool_version:
-        default: ""
-        description: Specify Codacy's coverage reporter tool version
-        type: string
-    steps:
-      - run:
-          name: "Upload Coverage Results to Codacy"
-          command: |
-            export CODACY_REPORTER_VERSION=<< parameters.tool_version >>
-            export CODACY_PROJECT_TOKEN=<< parameters.project-token >>
-            export COMMIT_UUID=<< parameters.commit-uuid >>
-            # comma separated list of report files
-            # reference from https://unix.stackexchange.com/a/191125
-            # plus https://stackoverflow.com/a/20323801/7898052
-            report_array=$(printf "<< parameters.coverage-reports >>" | cut -d',' -f1)
-
-            params=''
-            for report in $report_array
-            do
-                if [ ! -z "$report" ]
-                then
-                    params="$params -l Python -r $report"
-                fi
-            done
-
-            if << parameters.skip >>; then
-                skip_option="--skip"
-            else
-                skip_option=""
-            fi
-
-
-            if [ -x "$(which curl)" ]; then
-                curl -Ls https://coverage.codacy.com/get.sh > get.sh
-            elif [ -x "$(which wget)" ] ; then
-                wget -qO - https://coverage.codacy.com/get.sh > get.sh
-            else
-                printf "Could not find curl or wget, please install one."
-            fi
-
-            source get.sh report $params --partial --project-token "${CODACY_PROJECT_TOKEN}" --commit-uuid "${COMMIT_UUID}" $skip_option &&\
-            source get.sh final  --project-token "${CODACY_PROJECT_TOKEN}" --commit-uuid "${COMMIT_UUID}" --$skip_option
-
   load-docker-image-archive:
     parameters:
       archive_file:
@@ -1297,66 +1231,55 @@ jobs:
       - image: 'cimg/openjdk:8.0.312'
     working_directory: /tmp/data/ds-sample/test
     steps:
-      - checkout
       - attach_workspace:
           at: /tmp/data/ds-sample/test
-      - send_codacy_report:
-          coverage-reports: 'test-01_coverage.xml,test-02_coverage.xml,test-04_coverage.xml,test-05_coverage.xml,test-06_coverage.xml,test-07_coverage.xml,test-08_coverage.xml,test-09_coverage.xml,test-10_coverage.xml'
-          project-token: ${CODACY_PROJECT_TOKEN}
-          commit-uuid: ${CIRCLECI_SHA1}
-          tool_version: 12.1.3
-          skip: true
-
-#  codacy_coverage_report:
-#    docker:
-#      - image: 'circleci/openjdk:8-jdk'
-#    working_directory: /tmp/data/ds-sample/code
-#    steps:
-#      - attach_workspace:
-#          at: /tmp
-#      - run:
-#          name: Run Codacy Coverage Reporter to convert and upload the reports to Codacy
-#          command: |
-#            export CODACY_REPORTER_VERSION=latest
-#            export CODACY_PROJECT_TOKEN=${CODACY_PROJECT_TOKEN}
-#            # Handles partial reports and send the final report to Codacy
-#            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
-#                --project-token ${CODACY_PROJECT_TOKEN} \
-#                -l Python -r /tmp/data/ds-sample/test/test-01_coverage.xml --partial &&\
-#            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
-#                --project-token ${CODACY_PROJECT_TOKEN} \
-#                -l Python -r /tmp/data/ds-sample/test/test-02_coverage.xml --partial &&\
-#            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
-#                --project-token ${CODACY_PROJECT_TOKEN} \
-#                -l Python -r /tmp/data/ds-sample/test/test-04_coverage.xml --partial &&\
-#            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
-#                --project-token ${CODACY_PROJECT_TOKEN} \
-#                -l Python -r /tmp/data/ds-sample/test/test-05_coverage.xml --partial &&\
-#            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
-#                --project-token ${CODACY_PROJECT_TOKEN} \
-#                -l Python -r /tmp/data/ds-sample/test/test-06_coverage.xml --partial &&\
-#            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
-#                --project-token ${CODACY_PROJECT_TOKEN} \
-#                -l Python -r /tmp/data/ds-sample/test/test-07_coverage.xml --partial &&\
-#            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
-#                --project-token ${CODACY_PROJECT_TOKEN} \
-#                -l Python -r /tmp/data/ds-sample/test/test-08_coverage.xml --partial &&\
-#            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
-#                --project-token ${CODACY_PROJECT_TOKEN} \
-#                -l Python -r /tmp/data/ds-sample/test/test-09_coverage.xml --partial &&\
-#            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
-#                --project-token ${CODACY_PROJECT_TOKEN} \
-#                -l Python -r /tmp/data/ds-sample/test/test-10_coverage.xml --partial &&\
-#            bash <(curl -Ls https://coverage.codacy.com/get.sh) final \
-#                --project-token ${CODACY_PROJECT_TOKEN}
+      - run:
+          name: Run Codacy Coverage Reporter to convert and upload the reports to Codacy
+          command: |
+            export CODACY_REPORTER_VERSION=latest
+            export CODACY_PROJECT_TOKEN="${CODACY_PROJECT_TOKEN}"
+            export COMMIT_UUID="${CIRCLECI_SHA1}"
+            echo "CODACY_REPORTER_VERSION = ${CODACY_REPORTER_VERSION}"
+            echo "CODACY_PROJECT_TOKEN = ${CODACY_PROJECT_TOKEN}"
+            echo "COMMIT_UUID = ${COMMIT_UUID}"
+            # Handles partial reports and send the final report to Codacy
+            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
+                --project-token ${CODACY_PROJECT_TOKEN} --commit-uuid ${COMMIT_UUID} \
+                -l Python -r /tmp/data/ds-sample/test/test-01_coverage.xml --partial &&\
+            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
+                --project-token ${CODACY_PROJECT_TOKEN} --commit-uuid ${COMMIT_UUID} \
+                -l Python -r /tmp/data/ds-sample/test/test-02_coverage.xml --partial &&\
+            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
+                --project-token ${CODACY_PROJECT_TOKEN} --commit-uuid ${COMMIT_UUID} \
+                -l Python -r /tmp/data/ds-sample/test/test-04_coverage.xml --partial &&\
+            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
+                --project-token ${CODACY_PROJECT_TOKEN} --commit-uuid ${COMMIT_UUID} \
+                -l Python -r /tmp/data/ds-sample/test/test-05_coverage.xml --partial &&\
+            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
+                --project-token ${CODACY_PROJECT_TOKEN} --commit-uuid ${COMMIT_UUID} \
+                -l Python -r /tmp/data/ds-sample/test/test-06_coverage.xml --partial &&\
+            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
+                --project-token ${CODACY_PROJECT_TOKEN} --commit-uuid ${COMMIT_UUID} \
+                -l Python -r /tmp/data/ds-sample/test/test-07_coverage.xml --partial &&\
+            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
+                --project-token ${CODACY_PROJECT_TOKEN} --commit-uuid ${COMMIT_UUID} \
+                -l Python -r /tmp/data/ds-sample/test/test-08_coverage.xml --partial &&\
+            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
+                --project-token ${CODACY_PROJECT_TOKEN} --commit-uuid ${COMMIT_UUID} \
+                -l Python -r /tmp/data/ds-sample/test/test-09_coverage.xml --partial &&\
+            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
+                --project-token ${CODACY_PROJECT_TOKEN}  --commit-uuid ${COMMIT_UUID} \
+                -l Python -r /tmp/data/ds-sample/test/test-10_coverage.xml --partial &&\
+            bash <(curl -Ls https://coverage.codacy.com/get.sh) final \
+                --project-token ${CODACY_PROJECT_TOKEN} --commit-uuid ${COMMIT_UUID}
 
   send_codecov_report:
     docker:
-      - image: 'circleci/openjdk:8-jdk'
-    working_directory: /tmp/data/ds-sample/code
+      - image: 'cimg/openjdk:8.0.312'
+    working_directory: /tmp/data/ds-sample/test
     steps:
       - attach_workspace:
-          at: /tmp/data
+          at: /tmp/data/ds-sample/test
       - codecov/upload:
           file: /tmp/data/ds-sample/test/test-01_coverage.xml
       - codecov/upload:
@@ -1743,7 +1666,17 @@ workflows:
 
       - send_codecov_report:
           requires:
-            - codacy_coverage_report
+            - test10_singularity_parcellation
+            # - test11_singularity_parcellation
+            - test4_docker_dsi_mrtrix
+            - test5_docker_dsi_mrtrix
+            - test6_docker_dsi_dipy
+            - test7_docker_dsi_dipy
+            - test1_docker_parcellation
+            - test2_docker_parcellation
+            # - test3_docker_parcellation
+            - test8_docker_fmri
+            - test9_docker_fmri
           filters:
             branches:
               ignore:
@@ -1754,6 +1687,7 @@ workflows:
       - deploy_docker_release:
           requires:
             # - build_docs
+            - codacy_coverage_report
             - send_codecov_report
           filters:
             # ignore any commit on any branch by default
@@ -1767,6 +1701,7 @@ workflows:
       - deploy_docker_latest:
           requires:
             # - build_docs
+            - codacy_coverage_report
             - send_codecov_report
           filters:
             # ignore any commit on any branch by default
@@ -1776,6 +1711,7 @@ workflows:
       - deploy_singularity_release:
           requires:
             # - build_docs
+            - codacy_coverage_report
             - send_codecov_report
           filters:
             # ignore any commit on any branch by default
