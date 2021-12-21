@@ -178,7 +178,8 @@ commands:
                 --anat_pipeline_config /config/<<parameters.anat_pipeline_config>> \
                 --fs_license /bids_dir/code/license.txt \
                 --ants_number_of_threads 4 \
-                --coverage
+                --coverage \
+                --notrack
             # Rename partial coverage
             mv /tmp/data/<<parameters.circleci_job>>/ds-sample/code/coverage.xml /tmp/data/ds-sample/test/<<parameters.test_name>>_coverage.xml
             # Rename execution log
@@ -224,13 +225,14 @@ commands:
             bids_dir="/tmp/data/<<parameters.circleci_job>>/ds-sample"
             output_dir="${bids_dir}/derivatives"
             connectomemapper3_singularity \
-            "${bids_dir}" "${output_dir}" participant --participant_label 01 --session_label 01 \
-            --singularity_image <<parameters.singularity_image>> \
-            --config_dir <<parameters.config_dir>> \
-            --anat_pipeline_config <<parameters.anat_pipeline_config>> \
-            --fs_license "${bids_dir}/code/license.txt" \
-            --ants_number_of_threads 4 \
-            --coverage
+                "${bids_dir}" "${output_dir}" participant --participant_label 01 --session_label 01 \
+                --singularity_image <<parameters.singularity_image>> \
+                --config_dir <<parameters.config_dir>> \
+                --anat_pipeline_config <<parameters.anat_pipeline_config>> \
+                --fs_license "${bids_dir}/code/license.txt" \
+                --ants_number_of_threads 4 \
+                --coverage \
+                --notrack
             # Rename partial coverage
             mv /tmp/data/<<parameters.circleci_job>>/ds-sample/code/coverage.xml /tmp/data/ds-sample/test/<<parameters.test_name>>_coverage.xml
             # Rename execution log
@@ -277,13 +279,14 @@ commands:
             bids_dir="/tmp/data/<<parameters.circleci_job>>/ds-sample"
             output_dir="${bids_dir}/derivatives"
             connectomemapper3_docker \
-              "${bids_dir}" "${output_dir}" participant --participant_label 01 --session_label 01 \
-              --docker_image "sebastientourbier/connectomemapper3" \
-              --config_dir <<parameters.config_dir>> \
-              --anat_pipeline_config <<parameters.anat_pipeline_config>> \
-              --fs_license "${bids_dir}/code/license.txt" \
-              --ants_number_of_threads 4 \
-              --coverage
+                "${bids_dir}" "${output_dir}" participant --participant_label 01 --session_label 01 \
+                --docker_image "sebastientourbier/connectomemapper3" \
+                --config_dir <<parameters.config_dir>> \
+                --anat_pipeline_config <<parameters.anat_pipeline_config>> \
+                --fs_license "${bids_dir}/code/license.txt" \
+                --ants_number_of_threads 4 \
+                --coverage \
+                --notrack
             # Rename partial coverage
             mv /tmp/data/<<parameters.circleci_job>>/ds-sample/code/coverage.xml /tmp/data/ds-sample/test/<<parameters.test_name>>_coverage.xml
             # Rename execution log
@@ -337,7 +340,8 @@ commands:
                 --anat_pipeline_config /config/<<parameters.anat_pipeline_config>> \
                 --fs_license /bids_dir/code/license.txt \
                 --ants_number_of_threads 4 \
-                --coverage
+                --coverage \
+                --notrack
             # Rename partial coverage
             mv /tmp/data/<<parameters.circleci_job>>/ds-sample/code/coverage.xml /tmp/data/ds-sample/test/<<parameters.test_name>>_coverage.xml
             # Rename execution log
@@ -388,7 +392,8 @@ commands:
                 --dwi_pipeline_config /config/<<parameters.dwi_pipeline_config>> \
                 --fs_license /bids_dir/code/license.txt \
                 --ants_number_of_threads 4 \
-                --coverage
+                --coverage \
+                --notrack
             # Rename partial coverage
             mv /tmp/data/<<parameters.circleci_job>>/ds-sample/code/coverage.xml /tmp/data/ds-sample/test/<<parameters.test_name>>_coverage.xml
             # Rename execution log
@@ -439,7 +444,8 @@ commands:
                 --func_pipeline_config /config/<<parameters.func_pipeline_config>> \
                 --fs_license /bids_dir/code/license.txt \
                 --ants_number_of_threads 4 \
-                --coverage
+                --coverage \
+                --notrack
             # Rename partial coverage
             mv /tmp/data/<<parameters.circleci_job>>/ds-sample/code/coverage.xml /tmp/data/ds-sample/test/<<parameters.test_name>>_coverage.xml
             # Rename execution log
