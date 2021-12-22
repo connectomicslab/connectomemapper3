@@ -1172,6 +1172,7 @@ jobs:
     steps:
       - attach_workspace:
           at: /tmp
+      - checkout
       - codecov/upload:
           file: /tmp/data/ds-sample/test/test-01_coverage.xml
       - codecov/upload:
