@@ -1226,36 +1226,6 @@ jobs:
       - store_artifacts:
           path: /home/circleci/out/docs
 
-  deploy_docker_release:
-    machine:
-      # Ubuntu 14.04 with Docker 17.10.0-ce
-      image: ubuntu-1604:201903-01
-    resource_class: medium
-    working_directory: /home/circleci/src/connectomemapper3
-    steps:
-      - checkout:
-          path: /home/circleci/src/connectomemapper3
-      - attach_workspace:
-          at: /tmp
-      - load-docker-image-archive:
-          archive_file: "/tmp/cache/docker/docker.tar.zst"
-      - run:
-          name: Deploy release with version tag to Docker Hub
-          no_output_timeout: 40m
-          command: |
-            # Get version, update files.
-            THISVERSION=$( python /home/circleci/src/connectomemapper3/get_version.py )
-            echo "THISVERSION : ${THISVERSION}"
-            echo "CIRCLE_TAG : ${CIRCLE_TAG}"
-
-            if [[ -n "$DOCKER_PASS" ]]; then
-              docker login -u $DOCKER_USER -p $DOCKER_PASS
-              if [[ -n "$CIRCLE_TAG" ]]; then
-                docker tag sebastientourbier/connectomemapper3 sebastientourbier/connectomemapper-bidsapp:$CIRCLE_TAG
-                docker push sebastientourbier/connectomemapper-bidsapp:$CIRCLE_TAG
-              fi
-            fi
-
   deploy_docker_latest:
     machine:
       # Ubuntu 14.04 with Docker 17.10.0-ce
@@ -1318,9 +1288,40 @@ jobs:
             singularity remote login --tokenfile ~/.singularity/sylabs-token SylabsCloud
       - run:
           name: 'Deploy simg with latest tag to Sylabs.io'
+          no_output_timeout: 40m
           command: |
             # singularity delete --arch=amd64 library://connectomicslab/default/connectomemapper-bidsapp:latest
             singularity push -U /tmp/cache/singularity/connectomemapper3.simg library://connectomicslab/default/connectomemapper-bidsapp:latest
+
+  deploy_docker_release:
+    machine:
+      # Ubuntu 14.04 with Docker 17.10.0-ce
+      image: ubuntu-1604:201903-01
+    resource_class: medium
+    working_directory: /home/circleci/src/connectomemapper3
+    steps:
+      - checkout:
+          path: /home/circleci/src/connectomemapper3
+      - attach_workspace:
+          at: /tmp
+      - load-docker-image-archive:
+          archive_file: "/tmp/cache/docker/docker.tar.zst"
+      - run:
+          name: Deploy release with version tag to Docker Hub
+          no_output_timeout: 40m
+          command: |
+            # Get version, update files.
+            THISVERSION=$( python /home/circleci/src/connectomemapper3/get_version.py )
+            echo "THISVERSION : ${THISVERSION}"
+            echo "CIRCLE_TAG : ${CIRCLE_TAG}"
+
+            if [[ -n "$DOCKER_PASS" ]]; then
+              docker login -u $DOCKER_USER -p $DOCKER_PASS
+              if [[ -n "$CIRCLE_TAG" ]]; then
+                docker tag sebastientourbier/connectomemapper3 sebastientourbier/connectomemapper-bidsapp:$CIRCLE_TAG
+                docker push sebastientourbier/connectomemapper-bidsapp:$CIRCLE_TAG
+              fi
+            fi
 
   deploy_singularity_release:
     machine:
@@ -1356,13 +1357,14 @@ jobs:
             singularity remote login --tokenfile ~/.singularity/sylabs-token SylabsCloud
       - run:
           name: 'Deploy simg with version tag to Sylabs.io'
+          no_output_timeout: 40m
           command: |
             # Get version, update files.
             # FIXME: cannot use python (might need to install extra package with apt-get)
             # THISVERSION="$( python /home/circleci/src/connectomemapper3/get_version.py )"
             # echo "THISVERSION : ${THISVERSION}"
             echo "CIRCLE_TAG : ${CIRCLE_TAG}"
-            singularity push -U /tmp/cache/singularity/connectomemapper3.simg library://connectomicslab/default/connectomemapper-bidsapp:latest
+            singularity push -U /tmp/cache/singularity/connectomemapper3.simg library://connectomicslab/default/connectomemapper-bidsapp:${CIRCLE_TAG}
 
 workflows:
   version: 2.1
