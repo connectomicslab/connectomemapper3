@@ -1239,7 +1239,7 @@ jobs:
           command: |
             export CODACY_REPORTER_VERSION=latest
             export CODACY_PROJECT_TOKEN="${CODACY_PROJECT_TOKEN}"
-            export COMMIT_UUID="${CIRCLECI_SHA1}"
+            export COMMIT_UUID="${CIRCLE_SHA1}"
             echo "CODACY_REPORTER_VERSION = ${CODACY_REPORTER_VERSION}"
             echo "CODACY_PROJECT_TOKEN = ${CODACY_PROJECT_TOKEN}"
             echo "COMMIT_UUID = ${COMMIT_UUID}"
