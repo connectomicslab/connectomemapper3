@@ -1175,31 +1175,22 @@ jobs:
       - checkout:
           path: /home/circleci/src/connectomemapper3
       - codecov/upload:
-          conf: /home/circleci/src/connectomemapper3/.codecov.yml
           file: /tmp/data/ds-sample/test/test-01_coverage.xml
       - codecov/upload:
-          conf: /home/circleci/src/connectomemapper3/.codecov.yml
           file: /tmp/data/ds-sample/test/test-02_coverage.xml
       - codecov/upload:
-          conf: /home/circleci/src/connectomemapper3/.codecov.yml
           file: /tmp/data/ds-sample/test/test-03_coverage.xml
       - codecov/upload:
-          conf: /home/circleci/src/connectomemapper3/.codecov.yml
           file: /tmp/data/ds-sample/test/test-04_coverage.xml
       - codecov/upload:
-          conf: /home/circleci/src/connectomemapper3/.codecov.yml
           file: /tmp/data/ds-sample/test/test-05_coverage.xml
       - codecov/upload:
-          conf: /home/circleci/src/connectomemapper3/.codecov.yml
           file: /tmp/data/ds-sample/test/test-06_coverage.xml
       - codecov/upload:
-          conf: /home/circleci/src/connectomemapper3/.codecov.yml
           file: /tmp/data/ds-sample/test/test-07_coverage.xml
       - codecov/upload:
-          conf: /home/circleci/src/connectomemapper3/.codecov.yml
           file: /tmp/data/ds-sample/test/test-08_coverage.xml
       - codecov/upload:
-          conf: /home/circleci/src/connectomemapper3/.codecov.yml
           file: /tmp/data/ds-sample/test/test-09_coverage.xml
 
   build_docs:
