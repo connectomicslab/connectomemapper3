@@ -30,7 +30,8 @@ class ExtractHeaderVoxel2WorldMatrix(BaseInterface):
     >>> from cmtklib.interfaces.misc import ExtractHeaderVoxel2WorldMatrix
     >>> extract_mat = ExtractHeaderVoxel2WorldMatrix()
     >>> extract_mat.inputs.in_file = 'sub-01_T1w.nii.gz'
-    >>> extract_mat.run() # doctest: +SKIP
+    >>> extract_mat.run()  # doctest: +SKIP
+
     """
 
     input_spec = ExtractHeaderVoxel2WorldMatrixInputSpec
@@ -67,7 +68,8 @@ class ExtractImageVoxelSizes(BaseInterface):
     >>> from cmtklib.interfaces.misc import ExtractImageVoxelSizes
     >>> extract_voxel_sizes = ExtractImageVoxelSizes()
     >>> extract_voxel_sizes.inputs.in_file = 'sub-01_T1w.nii.gz'
-    >>> extract_voxel_sizes.run() # doctest: +SKIP
+    >>> extract_voxel_sizes.run()  # doctest: +SKIP
+
     """
 
     input_spec = ExtractImageVoxelSizesInputSpec
@@ -103,7 +105,8 @@ class ConcatOutputsAsTuple(BaseInterface):
     >>> concat_outputs = ConcatOutputsAsTuple()
     >>> concat_outputs.inputs.input1  = 'output_interface1.nii.gz'
     >>> concat_outputs.inputs.input2  = 'output_interface2.nii.gz'
-    >>> concat_outputs.run() # doctest: +SKIP
+    >>> concat_outputs.run()  # doctest: +SKIP
+
     """
 
     input_spec = ConcatOutputsAsTupleInputSpec

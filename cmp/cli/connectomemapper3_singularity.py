@@ -8,13 +8,11 @@
 
 # General imports
 import sys
-from pathlib import Path
 
 # Own imports
-from cmp.info import __version__
 from cmp.parser import get_singularity_wrapper_parser
 from cmp.input_validator import check_directory_exists
-from cmp.bidsappmanager.core import run
+from cmtklib.process import run
 
 
 def create_singularity_cmd(args):
@@ -48,7 +46,9 @@ def create_singularity_cmd(args):
         String containing the command to be run via `subprocess.run()`
     """
     # Singularity run command prelude
-    cmd = 'singularity run --containall '
+    cmd = 'singularity '
+    cmd += 'run ' if not args.coverage else 'exec '
+    cmd += '--containall '
     cmd += f'--bind {args.bids_dir}:/bids_dir '
     cmd += f'--bind {args.output_dir}:/output_dir '
     if args.config_dir:
@@ -59,6 +59,9 @@ def create_singularity_cmd(args):
         cmd += f'--bind {args.fs_license}:/bids_dir/code/license.txt '
 
     cmd += f'{args.singularity_image} '
+
+    if args.coverage:
+        cmd += f'/bin/bash /app/run_coverage_cmp3.sh '
 
     # Standard BIDS App inputs
     cmd += '/bids_dir '
@@ -73,11 +76,11 @@ def create_singularity_cmd(args):
         for label in args.session_label:
             cmd += f'{label} '
     if args.anat_pipeline_config:
-        cmd += f'/config/{args.anat_pipeline_config} '
+        cmd += f'--anat_pipeline_config /config/{args.anat_pipeline_config} '
     if args.dwi_pipeline_config:
-        cmd += f'/config/{args.dwi_pipeline_config} '
+        cmd += f'--dwi_pipeline_config /config/{args.dwi_pipeline_config} '
     if args.func_pipeline_config:
-        cmd += f'/config/{args.func_pipeline_config} '
+        cmd += f'--func_pipeline_config /config/{args.func_pipeline_config} '
     cmd += f'--fs_license /bids_dir/code/license.txt '
     optional_single_args = (
         "number_of_threads", "number_of_participants_processed_in_parallel",

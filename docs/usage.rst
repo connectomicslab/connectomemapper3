@@ -27,7 +27,9 @@ The command to run ``CMP3`` follows the `BIDS-Apps <https://github.com/BIDS-Apps
 Participant Level Analysis
 ===========================
 
-You can run `CMP3`` using the lightweight Docker or Singularity wrappers we created for convenience or you can interact directly with the Docker / Singularity Engine via the docker or singularity run command.
+You can run ``CMP3`` using the lightweight Docker or Singularity wrappers we created for convenience or you can interact directly with the Docker / Singularity Engine via the docker or singularity run command.
+
+.. _wrapperusage:
 
 With the wrappers
 -------------------
@@ -59,7 +61,8 @@ When you run ``connectomemapper3_singularity``, it will generate a Singularity c
             (--dwi_pipeline_config "ref_diffusion_config.json" \)
             (--func_pipeline_config "ref_fMRI_config.json" \)
             (--number_of_participants_processed_in_parallel 1)
-            
+
+.. _containerusage:
 
 With the Docker / Singularity Engine
 --------------------------------------

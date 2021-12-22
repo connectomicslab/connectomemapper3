@@ -7,7 +7,9 @@
 """The Diffusion Toolkit module provides Nipype interfaces for the Diffusion Toolkit missing in nipype or modified.
 
 .. note:
+
     Module not used anymore by CMP3.
+
 """
 
 import re
@@ -75,7 +77,8 @@ class HARDIMat(CommandLine):
     >>> hardi_mat.inputs.out_file = 'recon_mat.dat'
     >>> hardi_mat.inputs.order = 8
     >>> hardi_mat.inputs.reference_file = 'sub-01_dwi.nii.gz'
-    >>> hardi_mat.run() # doctest: +SKIP
+    >>> hardi_mat.run()  # doctest: +SKIP
+
     """
 
     input_spec = HARDIMatInputSpec
@@ -138,7 +141,8 @@ class DiffUnpack(CommandLine):
     >>> convert.inputs.input_dicom = '/path/to/sub-01_dwi.dcm'
     >>> convert.inputs.out_prefix = 'output'
     >>> convert.inputs.output_type = 'nii.gz'
-    >>> convert.run() # doctest: +SKIP
+    >>> convert.run()  # doctest: +SKIP
+
     """
 
     input_spec = DiffUnpackInputSpec
@@ -207,6 +211,7 @@ class DTIRecon(CommandLine):
     """Use dti_recon to generate tensors and other maps.
 
     .. note::
+
         Not used anymore by CMP3
 
     """
