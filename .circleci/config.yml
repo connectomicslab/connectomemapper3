@@ -692,6 +692,7 @@ jobs:
           paths:
             - data/ds-sample/test/test-01_*
             - data/test1_docker_parcellation/ds-sample/derivatives/nipype-*
+            - data/test1_docker_parcellation/ds-sample/derivatives/cmp-*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
@@ -753,11 +754,11 @@ jobs:
       - store_artifacts:
           path: /tmp/data/test2_docker_parcellation/ds-sample/derivatives/nipype-*
 
-  test3_docker_parcellation:
+  test3_docker_dsi_mrtrix:
     machine:
       # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
       image: ubuntu-1604:201903-01
-    resource_class: medium
+    resource_class: large
     working_directory: /tmp/data
     environment:
       - FS_LICENSE: /tmp/data/${CIRCLE_JOB}/ds-sample/code/license.txt
@@ -765,33 +766,32 @@ jobs:
       - checkout:
           path: /home/circleci/src/connectomemapper3
       - run:
-          name: Check whether test_docker_parcellation should be skipped
+          name: Check whether test_docker_dsi_mrtrix should be skipped
           command: |
             cd /home/circleci/src/connectomemapper3
-            if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[skip[ _]?test_docker_parcellation\]' )" != "" ]]; then
-              echo "Skipping test_docker_parcellation job"
+            if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[skip[ _]?test_docker_dsi_mrtrix\]' )" != "" ]]; then
+              echo "Skipping test_docker_dsi_mrtrix job"
               circleci step halt
             fi
       - attach_workspace:
           at: /tmp
+      - run:
+          name: "Copy anatomical pipeline output from test 1"
+          command: |
+            mkdir -p /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives/cmp-custom
+            cp -r /tmp/data/test1_docker_parcellation/ds-sample/derivatives/cmp-*/* \
+            /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives/cmp-custom/
       - load-docker-image-archive:
           archive_file: "/tmp/cache/docker/docker.tar.zst"
       - clean-configuration-files:
           circleci_job: ${CIRCLE_JOB}
-      - test-docker-anat-pipeline:
+      - test-docker-anat-dwi-pipelines:
           circleci_job: ${CIRCLE_JOB}
-          run_name: Run anatomical pipeline on ds-sample (test 3 - Lausanne 2008)
+          run_name: Run anatomical and diffusion pipelines on ds-sample (test 3 - Lausanne2018 + FSL FLIRT + Dipy SHORE + MRtrix SD_STREAM tracking + MRtrix SIFT tractogram filtering)
           test_name: "test-03"
           config_dir: /home/circleci/src/connectomemapper3/.circleci/tests/configuration_files
-          anat_pipeline_config: "ref_anatomical_config_3.ini"
-      - run:
-          name: Clean working directory
-          when: always
-          command: |
-            sudo chown $(id -un):$(id -gn) -R /tmp/data/${CIRCLE_JOB}/ds-sample
-            find /tmp/data/ds-sample/derivatives -not -name "*.svg" -not -name "*.html" -not -name "*.rst" \
-                -not -name "*.mat" -not -name "*.gpickle" -not -name "*.lta" -not -name "*.json" -not -name "*.txt" \
-                -not -name "*.log" -not -name "*.pklz" -type f -delete
+          anat_pipeline_config: "ref_anatomical_config_3.json"
+          dwi_pipeline_config: "ref_diffusion_config_1.ini"
       - persist_to_workspace:
           root: /tmp
           paths:
@@ -799,11 +799,11 @@ jobs:
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
-          path: /tmp/data/test3_docker_parcellation/ds-sample/code
+          path: /tmp/data/test3_docker_dsi_mrtrix/ds-sample/code
       - store_artifacts:
-          path: /tmp/data/test3_docker_parcellation/ds-sample/derivatives/cmp-*
+          path: /tmp/data/test3_docker_dsi_mrtrix/ds-sample/derivatives/cmp-*
       - store_artifacts:
-          path: /tmp/data/test3_docker_parcellation/ds-sample/derivatives/nipype-*
+          path: /tmp/data/test3_docker_dsi_mrtrix/ds-sample/derivatives/nipype-*
 
   test4_docker_dsi_mrtrix:
     machine:
@@ -838,11 +838,11 @@ jobs:
           circleci_job: ${CIRCLE_JOB}
       - test-docker-anat-dwi-pipelines:
           circleci_job: ${CIRCLE_JOB}
-          run_name: Run anatomical and diffusion pipelines on ds-sample (test 4 - Lausanne2018 + FSL FLIRT + Dipy SHORE + MRtrix SD_STREAM tracking + MRtrix SIFT tractogram filtering)
+          run_name: Run anatomical and diffusion pipelines on ds-sample (test 4 - Lausanne2018 + ANTs SyN + Dipy SHORE + MRtrix ACT iFOV2 tracking)
           test_name: "test-04"
           config_dir: /home/circleci/src/connectomemapper3/.circleci/tests/configuration_files
           anat_pipeline_config: "ref_anatomical_config_1.ini"
-          dwi_pipeline_config: "ref_diffusion_config_1.ini"
+          dwi_pipeline_config: "ref_diffusion_config_2.ini"
       - persist_to_workspace:
           root: /tmp
           paths:
@@ -856,7 +856,7 @@ jobs:
       - store_artifacts:
           path: /tmp/data/test4_docker_dsi_mrtrix/ds-sample/derivatives/nipype-*
 
-  test5_docker_dsi_mrtrix:
+  test5_docker_dsi_dipy:
     machine:
       # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
       image: ubuntu-1604:201903-01
@@ -868,11 +868,11 @@ jobs:
       - checkout:
           path: /home/circleci/src/connectomemapper3
       - run:
-          name: Check whether test_docker_dsi_mrtrix should be skipped
+          name: Check whether test_docker_dsi_dipy should be skipped
           command: |
             cd /home/circleci/src/connectomemapper3
-            if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[skip[ _]?test_docker_dsi_mrtrix\]' )" != "" ]]; then
-              echo "Skipping test_docker_dsi_mrtrix job"
+            if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[skip[ _]?test_docker_dsi_dipy\]' )" != "" ]]; then
+              echo "Skipping test_docker_dsi_dipy job"
               circleci step halt
             fi
       - attach_workspace:
@@ -889,11 +889,11 @@ jobs:
           circleci_job: ${CIRCLE_JOB}
       - test-docker-anat-dwi-pipelines:
           circleci_job: ${CIRCLE_JOB}
-          run_name: Run anatomical and diffusion pipelines on ds-sample (test 5 - Lausanne2018 + ANTs SyN + Dipy SHORE + MRtrix ACT iFOV2 tracking)
+          run_name: Run anatomical and diffusion pipelines on ds-sample (test 5 - Dipy SHORE + Deterministic tracking)
           test_name: "test-05"
           config_dir: /home/circleci/src/connectomemapper3/.circleci/tests/configuration_files
           anat_pipeline_config: "ref_anatomical_config_1.ini"
-          dwi_pipeline_config: "ref_diffusion_config_2.ini"
+          dwi_pipeline_config: "ref_diffusion_config_3.ini"
       - persist_to_workspace:
           root: /tmp
           paths:
@@ -901,11 +901,11 @@ jobs:
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
-          path: /tmp/data/test5_docker_dsi_mrtrix/ds-sample/code
+          path: /tmp/data/test5_docker_dsi_dipy/ds-sample/code
       - store_artifacts:
-          path: /tmp/data/test5_docker_dsi_mrtrix/ds-sample/derivatives/cmp-*
+          path: /tmp/data/test5_docker_dsi_dipy/ds-sample/derivatives/cmp-*
       - store_artifacts:
-          path: /tmp/data/test5_docker_dsi_mrtrix/ds-sample/derivatives/nipype-*
+          path: /tmp/data/test5_docker_dsi_dipy/ds-sample/derivatives/nipype-*
 
   test6_docker_dsi_dipy:
     machine:
@@ -940,11 +940,11 @@ jobs:
           circleci_job: ${CIRCLE_JOB}
       - test-docker-anat-dwi-pipelines:
           circleci_job: ${CIRCLE_JOB}
-          run_name: Run anatomical and diffusion pipelines on ds-sample (test 6 - Dipy SHORE + Deterministic tracking)
+          run_name: Run anatomical and diffusion pipelines on ds-sample (test 6 - Dipy SHORE + PFT tracking)
           test_name: "test-06"
           config_dir: /home/circleci/src/connectomemapper3/.circleci/tests/configuration_files
           anat_pipeline_config: "ref_anatomical_config_1.ini"
-          dwi_pipeline_config: "ref_diffusion_config_3.ini"
+          dwi_pipeline_config: "ref_diffusion_config_4.ini"
       - persist_to_workspace:
           root: /tmp
           paths:
@@ -958,7 +958,7 @@ jobs:
       - store_artifacts:
           path: /tmp/data/test6_docker_dsi_dipy/ds-sample/derivatives/nipype-*
 
-  test7_docker_dsi_dipy:
+  test7_docker_fmri:
     machine:
       # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
       image: ubuntu-1604:201903-01
@@ -970,11 +970,11 @@ jobs:
       - checkout:
           path: /home/circleci/src/connectomemapper3
       - run:
-          name: Check whether test_docker_dsi_dipy should be skipped
+          name: Check whether test_docker_fmri should be skipped
           command: |
             cd /home/circleci/src/connectomemapper3
-            if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[skip[ _]?test_docker_dsi_dipy\]' )" != "" ]]; then
-              echo "Skipping test_docker_dsi_dipy job"
+            if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[skip[ _]?test_docker_fmri\]' )" != "" ]]; then
+              echo "Skipping test_docker_fmri job"
               circleci step halt
             fi
       - attach_workspace:
@@ -989,13 +989,13 @@ jobs:
           archive_file: "/tmp/cache/docker/docker.tar.zst"
       - clean-configuration-files:
           circleci_job: ${CIRCLE_JOB}
-      - test-docker-anat-dwi-pipelines:
+      - test-docker-anat-func-pipelines:
           circleci_job: ${CIRCLE_JOB}
-          run_name: Run anatomical and diffusion pipelines on ds-sample (test 7 - Dipy SHORE + PFT tracking)
+          run_name: Run anatomical and fmri pipelines on ds-sample (test 7 - Lausanne2018 + BBRegister + fmri)
           test_name: "test-07"
           config_dir: /home/circleci/src/connectomemapper3/.circleci/tests/configuration_files
           anat_pipeline_config: "ref_anatomical_config_1.ini"
-          dwi_pipeline_config: "ref_diffusion_config_4.ini"
+          func_pipeline_config: "ref_fMRI_config_1.ini"
       - persist_to_workspace:
           root: /tmp
           paths:
@@ -1003,11 +1003,11 @@ jobs:
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
-          path: /tmp/data/test7_docker_dsi_dipy/ds-sample/code
+          path: /tmp/data/test7_docker_fmri/ds-sample/code
       - store_artifacts:
-          path: /tmp/data/test7_docker_dsi_dipy/ds-sample/derivatives/cmp-*
+          path: /tmp/data/test7_docker_fmri/ds-sample/derivatives/cmp-*
       - store_artifacts:
-          path: /tmp/data/test7_docker_dsi_dipy/ds-sample/derivatives/nipype-*
+          path: /tmp/data/test7_docker_fmri/ds-sample/derivatives/nipype-*
 
   test8_docker_fmri:
     machine:
@@ -1042,11 +1042,11 @@ jobs:
           circleci_job: ${CIRCLE_JOB}
       - test-docker-anat-func-pipelines:
           circleci_job: ${CIRCLE_JOB}
-          run_name: Run anatomical and fmri pipelines on ds-sample (test 8 - Lausanne2018 + BBRegister + fmri)
+          run_name: Run anatomical and fmri pipelines on ds-sample (test 8 - Lausanne2018 + FSL FLIRT + All nuisance regression + linear detrending + scrubbing)
           test_name: "test-08"
           config_dir: /home/circleci/src/connectomemapper3/.circleci/tests/configuration_files
           anat_pipeline_config: "ref_anatomical_config_1.ini"
-          func_pipeline_config: "ref_fMRI_config_1.ini"
+          func_pipeline_config: "ref_fMRI_config_2.ini"
       - persist_to_workspace:
           root: /tmp
           paths:
@@ -1060,58 +1060,7 @@ jobs:
       - store_artifacts:
           path: /tmp/data/test8_docker_fmri/ds-sample/derivatives/nipype-*
 
-  test9_docker_fmri:
-    machine:
-      # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
-      image: ubuntu-1604:201903-01
-    resource_class: large
-    working_directory: /tmp/data
-    environment:
-      - FS_LICENSE: /tmp/data/${CIRCLE_JOB}/ds-sample/code/license.txt
-    steps:
-      - checkout:
-          path: /home/circleci/src/connectomemapper3
-      - run:
-          name: Check whether test_docker_fmri should be skipped
-          command: |
-            cd /home/circleci/src/connectomemapper3
-            if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[skip[ _]?test_docker_fmri\]' )" != "" ]]; then
-              echo "Skipping test_docker_fmri job"
-              circleci step halt
-            fi
-      - attach_workspace:
-          at: /tmp
-      - run:
-          name: "Copy anatomical pipeline output from test 1"
-          command: |
-            mkdir -p /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives
-            cp -r /tmp/data/test1_docker_parcellation/ds-sample/derivatives/nipype-* \
-            /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives
-      - load-docker-image-archive:
-          archive_file: "/tmp/cache/docker/docker.tar.zst"
-      - clean-configuration-files:
-          circleci_job: ${CIRCLE_JOB}
-      - test-docker-anat-func-pipelines:
-          circleci_job: ${CIRCLE_JOB}
-          run_name: Run anatomical and fmri pipelines on ds-sample (test 9 - Lausanne2018 + FSL FLIRT + All nuisance regression + linear detrending + scrubbing)
-          test_name: "test-09"
-          config_dir: /home/circleci/src/connectomemapper3/.circleci/tests/configuration_files
-          anat_pipeline_config: "ref_anatomical_config_1.ini"
-          func_pipeline_config: "ref_fMRI_config_2.ini"
-      - persist_to_workspace:
-          root: /tmp
-          paths:
-            - data/ds-sample/test/test-09_*
-      - store_artifacts:
-          path: /tmp/data/ds-sample/test
-      - store_artifacts:
-          path: /tmp/data/test9_docker_fmri/ds-sample/code
-      - store_artifacts:
-          path: /tmp/data/test9_docker_fmri/ds-sample/derivatives/cmp-*
-      - store_artifacts:
-          path: /tmp/data/test9_docker_fmri/ds-sample/derivatives/nipype-*
-
-  test10_singularity_parcellation:
+  test9_singularity_parcellation:
     machine:
       # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
       image: ubuntu-1604:201903-01
@@ -1143,11 +1092,11 @@ jobs:
           circleci_job: ${CIRCLE_JOB}
       - test-singularity-anat-pipeline-wrapper:
           circleci_job: ${CIRCLE_JOB}
-          run_name: Run anatomical pipeline on ds-sample (test 10 - Native Freesurfer)
-          test_name: "test-10"
+          run_name: Run anatomical pipeline on ds-sample (test 9 - Lausanne 2018)
+          test_name: "test-09"
           config_dir: /home/circleci/src/connectomemapper3/.circleci/tests/configuration_files
           singularity_image: "/tmp/cache/singularity/connectomemapper3.simg"
-          anat_pipeline_config: "ref_anatomical_config_2.ini"
+          anat_pipeline_config: "ref_anatomical_config_1.ini"
       - run:
           name: Clean working directory
           when: always
@@ -1159,73 +1108,15 @@ jobs:
       - persist_to_workspace:
           root: /tmp
           paths:
-            - data/ds-sample/test/test-10_*
+            - data/ds-sample/test/test-09_*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
-          path: /tmp/data/test10_singularity_parcellation/ds-sample/code
+          path: /tmp/data/test9_singularity_parcellation/ds-sample/code
       - store_artifacts:
-          path: /tmp/data/test10_singularity_parcellation/ds-sample/derivatives/cmp-*
+          path: /tmp/data/test9_singularity_parcellation/ds-sample/derivatives/cmp-*
       - store_artifacts:
-          path: /tmp/data/test10_singularity_parcellation/ds-sample/derivatives/nipype-*
-
-  test11_singularity_parcellation:
-    machine:
-      # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
-      image: ubuntu-1604:201903-01
-    resource_class: large
-    working_directory: /tmp/data
-    environment:
-      - FS_LICENSE: /tmp/data/${CIRCLE_JOB}/ds-sample/code/license.txt
-    steps:
-      - checkout:
-          path: /home/circleci/src/connectomemapper3
-      - run:
-          name: Check whether test_singularity_parcellation should be skipped
-          command: |
-            cd /home/circleci/src/connectomemapper3
-            if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[skip[ _]?test_singularity_parcellation\]' )" != "" ]]; then
-              echo "Skipping test_singularity_parcellation job"
-              circleci step halt
-            fi
-      - attach_workspace:
-          at: /tmp
-      - singularity/install-go:
-          go-version: '1.13'
-      - singularity/debian-install-3:
-          singularity-version: 3.8.4
-      - install-conda-and-cmp3:
-          run_name: "Setup miniconda environment and install connectomemapper3 with Python wrappers"
-          cmp3_dir: /home/circleci/src/connectomemapper3
-      - clean-configuration-files:
-          circleci_job: ${CIRCLE_JOB}
-      - test-singularity-anat-pipeline:
-          circleci_job: ${CIRCLE_JOB}
-          run_name: Run anatomical pipeline on ds-sample (test 11 - Lausanne 2008)
-          test_name: "test-11"
-          config_dir: /home/circleci/src/connectomemapper3/.circleci/tests/configuration_files
-          singularity_image: "/tmp/cache/singularity/connectomemapper3.simg"
-          anat_pipeline_config: "ref_anatomical_config_3.ini"
-      - run:
-          name: Clean working directory
-          when: always
-          command: |
-            sudo chown $(id -un):$(id -gn) -R /tmp/data/${CIRCLE_JOB}/ds-sample
-            find /tmp/data/ds-sample/derivatives -not -name "*.svg" -not -name "*.html" -not -name "*.rst" \
-                -not -name "*.mat" -not -name "*.gpickle" -not -name "*.lta" -not -name "*.json" -not -name "*.txt" \
-                -not -name "*.log" -not -name "*.pklz" -type f -delete
-      - persist_to_workspace:
-          root: /tmp
-          paths:
-            - data/ds-sample/test/test-11_*
-      - store_artifacts:
-          path: /tmp/data/ds-sample/test
-      - store_artifacts:
-          path: /tmp/data/test10_singularity_parcellation/ds-sample/code
-      - store_artifacts:
-          path: /tmp/data/test10_singularity_parcellation/ds-sample/derivatives/cmp-*
-      - store_artifacts:
-          path: /tmp/data/test10_singularity_parcellation/ds-sample/derivatives/nipype-*
+          path: /tmp/data/test9_singularity_parcellation/ds-sample/derivatives/nipype-*
 
   codacy_coverage_report:
     docker:
@@ -1239,7 +1130,7 @@ jobs:
           command: |
             export CODACY_REPORTER_VERSION=latest
             export CODACY_PROJECT_TOKEN="${CODACY_PROJECT_TOKEN}"
-            export COMMIT_UUID="${CIRCLECI_SHA1}"
+            export COMMIT_UUID="${CIRCLE_SHA1}"
             echo "CODACY_REPORTER_VERSION = ${CODACY_REPORTER_VERSION}"
             echo "CODACY_PROJECT_TOKEN = ${CODACY_PROJECT_TOKEN}"
             echo "COMMIT_UUID = ${COMMIT_UUID}"
@@ -1250,6 +1141,9 @@ jobs:
             bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
                 --project-token ${CODACY_PROJECT_TOKEN} --commit-uuid ${COMMIT_UUID} \
                 -l Python -r /tmp/data/ds-sample/test/test-02_coverage.xml --partial &&\
+            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
+                --project-token ${CODACY_PROJECT_TOKEN} --commit-uuid ${COMMIT_UUID} \
+                -l Python -r /tmp/data/ds-sample/test/test-03_coverage.xml --partial &&\
             bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
                 --project-token ${CODACY_PROJECT_TOKEN} --commit-uuid ${COMMIT_UUID} \
                 -l Python -r /tmp/data/ds-sample/test/test-04_coverage.xml --partial &&\
@@ -1268,9 +1162,6 @@ jobs:
             bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
                 --project-token ${CODACY_PROJECT_TOKEN} --commit-uuid ${COMMIT_UUID} \
                 -l Python -r /tmp/data/ds-sample/test/test-09_coverage.xml --partial &&\
-            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
-                --project-token ${CODACY_PROJECT_TOKEN}  --commit-uuid ${COMMIT_UUID} \
-                -l Python -r /tmp/data/ds-sample/test/test-10_coverage.xml --partial &&\
             bash <(curl -Ls https://coverage.codacy.com/get.sh) final \
                 --project-token ${CODACY_PROJECT_TOKEN} --commit-uuid ${COMMIT_UUID}
 
@@ -1285,8 +1176,8 @@ jobs:
           file: /tmp/data/ds-sample/test/test-01_coverage.xml
       - codecov/upload:
           file: /tmp/data/ds-sample/test/test-02_coverage.xml
-      # - codecov/upload:
-      #     file: /tmp/data/ds-sample/test/test-03_coverage.xml
+      - codecov/upload:
+          file: /tmp/data/ds-sample/test/test-03_coverage.xml
       - codecov/upload:
           file: /tmp/data/ds-sample/test/test-04_coverage.xml
       - codecov/upload:
@@ -1299,8 +1190,6 @@ jobs:
           file: /tmp/data/ds-sample/test/test-08_coverage.xml
       - codecov/upload:
           file: /tmp/data/ds-sample/test/test-09_coverage.xml
-      - codecov/upload:
-          file: /tmp/data/ds-sample/test/test-10_coverage.xml
 
   build_docs:
     machine:
@@ -1551,17 +1440,15 @@ workflows:
             tags:
               only: /.*/
 
-      # - test3_docker_parcellation:
-      #     requires:
-      #       - get_data
-      #       # - update_cache
-      #       - build_docker
-      #     filters:
-      #       branches:
-      #         ignore:
-      #           - /docs?\/.*/
-      #       tags:
-      #         only: /.*/
+      - test3_docker_dsi_mrtrix:
+          requires:
+            - test1_docker_parcellation
+          filters:
+            branches:
+              ignore:
+                - /docs?\/.*/
+            tags:
+              only: /.*/
 
       - test4_docker_dsi_mrtrix:
           requires:
@@ -1573,7 +1460,7 @@ workflows:
             tags:
               only: /.*/
 
-      - test5_docker_dsi_mrtrix:
+      - test5_docker_dsi_dipy:
           requires:
             - test1_docker_parcellation
           filters:
@@ -1593,7 +1480,7 @@ workflows:
             tags:
               only: /.*/
 
-      - test7_docker_dsi_dipy:
+      - test7_docker_fmri:
           requires:
             - test1_docker_parcellation
           filters:
@@ -1613,17 +1500,7 @@ workflows:
             tags:
               only: /.*/
 
-      - test9_docker_fmri:
-          requires:
-            - test1_docker_parcellation
-          filters:
-            branches:
-              ignore:
-                - /docs?\/.*/
-            tags:
-              only: /.*/
-
-      - test10_singularity_parcellation:
+      - test9_singularity_parcellation:
           requires:
             - get_data
             - build_singularity
@@ -1634,30 +1511,17 @@ workflows:
             tags:
               only: /.*/
 
-      # - test11_singularity_parcellation:
-      #     requires:
-      #       - get_data
-      #       - build_singularity
-      #     filters:
-      #       branches:
-      #         ignore:
-      #           - /docs?\/.*/
-      #       tags:
-      #         only: /.*/
-
       - codacy_coverage_report:
           requires:
-            - test10_singularity_parcellation
-            # - test11_singularity_parcellation
-            - test4_docker_dsi_mrtrix
-            - test5_docker_dsi_mrtrix
-            - test6_docker_dsi_dipy
-            - test7_docker_dsi_dipy
             - test1_docker_parcellation
             - test2_docker_parcellation
-            # - test3_docker_parcellation
+            - test3_docker_dsi_mrtrix
+            - test4_docker_dsi_mrtrix
+            - test5_docker_dsi_dipy
+            - test6_docker_dsi_dipy
+            - test7_docker_fmri
             - test8_docker_fmri
-            - test9_docker_fmri
+            - test9_singularity_parcellation
           filters:
               branches:
                 ignore:
@@ -1667,17 +1531,15 @@ workflows:
 
       - send_codecov_report:
           requires:
-            - test10_singularity_parcellation
-            # - test11_singularity_parcellation
-            - test4_docker_dsi_mrtrix
-            - test5_docker_dsi_mrtrix
-            - test6_docker_dsi_dipy
-            - test7_docker_dsi_dipy
             - test1_docker_parcellation
             - test2_docker_parcellation
-            # - test3_docker_parcellation
+            - test3_docker_dsi_mrtrix
+            - test4_docker_dsi_mrtrix
+            - test5_docker_dsi_dipy
+            - test6_docker_dsi_dipy
+            - test7_docker_fmri
             - test8_docker_fmri
-            - test9_docker_fmri
+            - test9_singularity_parcellation
           filters:
             branches:
               ignore:

@@ -108,10 +108,10 @@ which includes the following changes.
     `.circleci/config.yml` has been dramatically refactored, including:
     *   Use BUILDKIT in docker build to take advantage of the multi-stage build
     *   Reordering and modularization of the tests:
-        *   tests 01-03 (Docker): anatomical pipeline for each parcellation scheme
-        *   tests 04-07 (Docker): diffusion pipeline for dipy/mrtrix deterministic/probabilistic tractography
-        *   tests 08-09 (Docker): fMRI pipeline for FLIRT and BBRegistration registrations
-        *   tests 10-11 (Singularity): anatomical pipeline for NativeFreesurfer and Lausanne2008 schemes
+        *   tests 01-02 (Docker): anatomical pipeline for each parcellation scheme
+        *   tests 03-06 (Docker): diffusion pipeline for dipy/mrtrix deterministic/probabilistic tractography
+        *   tests 07-08 (Docker): fMRI pipeline for FLIRT and BBRegistration registrations
+        *   test 09 (Singularity): anatomical pipeline for Lausanne2018 scheme
     *   Creation of commands for steps that are shared between jobs to reduce code duplication
     (`PR #88 <https://github.com/connectomicslab/connectomemapper3/pull/88>`_)
 
