@@ -146,7 +146,7 @@ How to build the BIDS App locally
 1. Go to the clone directory of your fork and run the script ``build_bidsapp.sh`` ::
 
     cd connectomemapper3
-    sh build_bidsapp.sh
+    sh scripts/build_bidsapp.sh
 
 .. note::
 	Tag of the version of the image is extracted from ``cmp/info.py``. You might want to change the version in this file to not overwrite an other existing image with the same version.
@@ -155,23 +155,31 @@ How to build the BIDS App locally
 
 How to build the documentation locally
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+To generate the documentation:
 
-1. Install the CMP3 conda environment ``py37cmp-gui`` with sphinx and all extensions to generate the documentation::
+    1. Install the CMP3 conda environment ``py37cmp-gui``::
 
-    cd connectomemapper3
-    conda env create -f environment.yml
+        $ cd connectomemapper3
+        $ conda env create -f environment.yml
 
-2. Activate CMP3 conda environment ``py37cmp-gui`` and install ``connectomemapper3`` ::
+    2. Activate CMP3 conda environment ``py37cmp-gui``::
 
-    conda activate py37cmp-gui
-    (py37cmp-gui) python setup.py install
+        $ conda activate py37cmp-gui
 
-3. Run the script ``build_docs.sh`` to generate the HTML documentation in ``docs/_build/html``::
+    3. Install all dependencies such as sphinx and its extensions, required for the build::
 
-    (py37cmp-gui) bash build_docs.sh
+        (py37cmp-gui)$ pip install -r docs/requirements.txt
 
-.. note::
-	Make sure to have activated the conda environment ``py37cmp-gui`` before running the script ``build_docs.sh``.
+    4. Install ``connectomemapper3``::
+
+        (py37cmp-gui)$ pip install .
+
+    5. Run the script ``scripts/build_docs.sh`` to generate the HTML documentation in ``docs/_build/html``::
+
+        (py37cmp-gui)$ sh scripts/build_docs.sh
+
+    .. note::
+        Make sure to have (1) activated the conda environment ``py37cmp-gui`` and (2) reinstalled ``connectomemapper3`` with ``pip`` before running ``build_docs.sh``.
 
 ------------
 

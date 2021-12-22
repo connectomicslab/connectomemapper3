@@ -13,7 +13,10 @@ import subprocess
 
 # from cmp.bidsappmanager.stages.common import Stage
 
-from cmp.stages.preprocessing.preprocessing import PreprocessingConfig, PreprocessingStage
+from cmp.stages.preprocessing.preprocessing import (
+    PreprocessingConfig,
+    PreprocessingStage,
+)
 
 
 class PreprocessingConfigUI(PreprocessingConfig):
@@ -34,35 +37,60 @@ class PreprocessingConfigUI(PreprocessingConfig):
         VGroup(
             VGroup(
                 HGroup(
-                    Item('denoising'),
-                    Item('denoising_algo', label='Tool:',
-                         visible_when='denoising==True'),
-                    Item('dipy_noise_model', label='Noise model (Dipy):',
-                         visible_when='denoising_algo=="Dipy (NLM)"')),
+                    Item("denoising"),
+                    Item(
+                        "denoising_algo", label="Tool:", visible_when="denoising==True"
+                    ),
+                    Item(
+                        "dipy_noise_model",
+                        label="Noise model (Dipy):",
+                        visible_when='denoising_algo=="Dipy (NLM)"',
+                    ),
+                ),
                 HGroup(
-                    Item('bias_field_correction'),
-                    Item('bias_field_algo', label='Tool:',
-                         visible_when='bias_field_correction==True')),
+                    Item("bias_field_correction"),
+                    Item(
+                        "bias_field_algo",
+                        label="Tool:",
+                        visible_when="bias_field_correction==True",
+                    ),
+                ),
                 VGroup(
                     HGroup(
-                        Item('eddy_current_and_motion_correction'),
-                        Item('eddy_correction_algo',
-                             visible_when='eddy_current_and_motion_correction==True')),
-                    Item('eddy_correct_motion_correction',
-                         label='Motion correction',
-                         visible_when='eddy_current_and_motion_correction==True and eddy_correction_algo=="FSL eddy_correct"'),
-                    Item('total_readout',
-                         label='Total readout time (s):',
-                         visible_when='eddy_current_and_motion_correction==True and eddy_correction_algo=="FSL eddy"')),
-                label='Preprocessing steps'),
+                        Item("eddy_current_and_motion_correction"),
+                        Item(
+                            "eddy_correction_algo",
+                            visible_when="eddy_current_and_motion_correction==True",
+                        ),
+                    ),
+                    Item(
+                        "eddy_correct_motion_correction",
+                        label="Motion correction",
+                        visible_when='eddy_current_and_motion_correction==True and eddy_correction_algo=="FSL eddy_correct"',
+                    ),
+                    Item(
+                        "total_readout",
+                        label="Total readout time (s):",
+                        visible_when='eddy_current_and_motion_correction==True and eddy_correction_algo=="FSL eddy"',
+                    ),
+                ),
+                label="Preprocessing steps",
+            ),
             VGroup(
                 VGroup(
-                    Item('resampling', label='Voxel size (x,y,z)',
-                         editor=TupleEditor(cols=3)),
-                    'interpolation'),
-                label='Final resampling')),
+                    Item(
+                        "resampling",
+                        label="Voxel size (x,y,z)",
+                        editor=TupleEditor(cols=3),
+                    ),
+                    "interpolation",
+                ),
+                label="Final resampling",
+            ),
+        ),
         width=0.5,
-        height=0.5)
+        height=0.5,
+    )
 
 
 class PreprocessingStageUI(PreprocessingStage):
@@ -85,33 +113,46 @@ class PreprocessingStageUI(PreprocessingStage):
     cmp.stages.preprocessing.preprocessing.PreprocessingStage
     """
 
-    inspect_output_button = Button('View')
+    inspect_output_button = Button("View")
 
-    inspect_outputs_view = View(Group(
-        Item('name', editor=TitleEditor(), show_label=False),
+    inspect_outputs_view = View(
         Group(
-            Item('inspect_outputs_enum', show_label=False),
-            Item('inspect_output_button',
-                 enabled_when='inspect_outputs_enum!="Outputs not available"',
-                 show_label=False),
-            label='View outputs', show_border=True)),
+            Item("name", editor=TitleEditor(), show_label=False),
+            Group(
+                Item("inspect_outputs_enum", show_label=False),
+                Item(
+                    "inspect_output_button",
+                    enabled_when='inspect_outputs_enum!="Outputs not available"',
+                    show_label=False,
+                ),
+                label="View outputs",
+                show_border=True,
+            ),
+        ),
         scrollable=True,
         resizable=True,
-        kind='livemodal',
-        title='Inspect stage outputs',
-        buttons=['OK', 'Cancel'])
+        kind="livemodal",
+        title="Inspect stage outputs",
+        buttons=["OK", "Cancel"],
+    )
 
-    config_view = View(Group(
-        Item('name', editor=TitleEditor(), show_label=False),
+    config_view = View(
         Group(
-            Item('config', style='custom', show_label=False),
-            label='Configuration', show_border=True)),
+            Item("name", editor=TitleEditor(), show_label=False),
+            Group(
+                Item("config", style="custom", show_label=False),
+                label="Configuration",
+                show_border=True,
+            ),
+        ),
         scrollable=True,
         resizable=True,
-        height=350, width=650,
-        kind='livemodal',
-        title='Edit stage configuration',
-        buttons=['OK', 'Cancel'])
+        height=350,
+        width=650,
+        kind="livemodal",
+        title="Edit stage configuration",
+        buttons=["OK", "Cancel"],
+    )
 
     # General and UI members
     def __init__(self, bids_dir, output_dir):

@@ -27,7 +27,7 @@ class ConnectomeConfigUI(ConnectomeConfig):
 
     connectivity_metrics : list of string
         A list of connectivity metrics to stored. Valid ``connectivity_metrics`` are
-        'Fiber number', 'Fiber length', 'Fiber density', 'Fiber proportion', 
+        'Fiber number', 'Fiber length', 'Fiber density', 'Fiber proportion',
         'Normalized fiber density', 'ADC', 'gFA'
 
     traits_view : traits.ui.View
@@ -38,22 +38,44 @@ class ConnectomeConfigUI(ConnectomeConfig):
     cmp.stages.connectome.connectome.ConnectomeConfig
     """
 
-    output_types = List(['gPickle'], editor=CheckListEditor(
-        values=['gPickle', 'mat', 'cff', 'graphml'], cols=4))
+    output_types = List(
+        ["gPickle"],
+        editor=CheckListEditor(values=["gPickle", "mat", "cff", "graphml"], cols=4),
+    )
 
     connectivity_metrics = List(
-        ['Fiber number', 'Fiber length', 'Fiber density',
-            'Fiber proportion', 'Normalized fiber density', 'ADC', 'gFA'],
+        [
+            "Fiber number",
+            "Fiber length",
+            "Fiber density",
+            "Fiber proportion",
+            "Normalized fiber density",
+            "ADC",
+            "gFA",
+        ],
         editor=CheckListEditor(
-            values=['Fiber number', 'Fiber length', 'Fiber density', 'Fiber proportion', 'Normalized fiber density',
-                    'ADC', 'gFA'], cols=4))
+            values=[
+                "Fiber number",
+                "Fiber length",
+                "Fiber density",
+                "Fiber proportion",
+                "Normalized fiber density",
+                "ADC",
+                "gFA",
+            ],
+            cols=4,
+        ),
+    )
 
-    traits_view = View(Item('output_types', style='custom'),
-                       Group(
-                           Item('connectivity_metrics',
-                                label='Metrics', style='custom'),
-                           Item('compute_curvature'),
-                           label='Connectivity matrix', show_border=True))
+    traits_view = View(
+        Item("output_types", style="custom"),
+        Group(
+            Item("connectivity_metrics", label="Metrics", style="custom"),
+            Item("compute_curvature"),
+            label="Connectivity matrix",
+            show_border=True,
+        ),
+    )
 
 
 class ConnectomeStageUI(ConnectomeStage):
@@ -62,7 +84,7 @@ class ConnectomeStageUI(ConnectomeStage):
     Attributes
     ----------
     log_visualization : traits.Bool
-        If True, display with a log transformation 
+        If True, display with a log transformation
 
     circular_layout : traits.Bool
         If True, display the connectivity matrix using a circular layout
@@ -84,34 +106,51 @@ class ConnectomeStageUI(ConnectomeStage):
 
     log_visualization = Bool(True)
     circular_layout = Bool(False)
-    inspect_output_button = Button('View')
+    inspect_output_button = Button("View")
 
-    inspect_outputs_view = View(Group(
-        Item('name', editor=TitleEditor(), show_label=False),
+    inspect_outputs_view = View(
         Group(
-            Item('log_visualization', label='Log scale'),
-            Item('circular_layout', label='Circular layout'),
-            label='Visualization', show_border=True
+            Item("name", editor=TitleEditor(), show_label=False),
+            Group(
+                Item("log_visualization", label="Log scale"),
+                Item("circular_layout", label="Circular layout"),
+                label="Visualization",
+                show_border=True,
+            ),
+            Group(
+                Item("inspect_outputs_enum", show_label=False),
+                Item(
+                    "inspect_output_button",
+                    enabled_when='inspect_outputs_enum!="Outputs not available"',
+                    show_label=False,
+                ),
+                label="View outputs",
+                show_border=True,
+            ),
         ),
-        Group(
-            Item('inspect_outputs_enum', show_label=False),
-            Item('inspect_output_button', enabled_when='inspect_outputs_enum!="Outputs not available"',
-                 show_label=False),
-            label='View outputs', show_border=True
-        )
-    ),
-        scrollable=True, resizable=True, kind='livemodal', title='Inspect stage outputs', buttons=['OK', 'Cancel']
+        scrollable=True,
+        resizable=True,
+        kind="livemodal",
+        title="Inspect stage outputs",
+        buttons=["OK", "Cancel"],
     )
 
-    config_view = View(Group(
-        Item('name', editor=TitleEditor(), show_label=False),
+    config_view = View(
         Group(
-            Item('config', style='custom', show_label=False),
-            label='Configuration', show_border=True
+            Item("name", editor=TitleEditor(), show_label=False),
+            Group(
+                Item("config", style="custom", show_label=False),
+                label="Configuration",
+                show_border=True,
+            ),
         ),
-    ),
-        scrollable=True, resizable=True, height=270, width=670, kind='livemodal', title='Edit stage configuration',
-        buttons=['OK', 'Cancel']
+        scrollable=True,
+        resizable=True,
+        height=270,
+        width=670,
+        kind="livemodal",
+        title="Edit stage configuration",
+        buttons=["OK", "Cancel"],
     )
 
     def __init__(self, bids_dir, output_dir):

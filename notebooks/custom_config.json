@@ -1,0 +1,12 @@
+{
+    "CustomBIDSInputs": {
+        "custom_parcellation.suffix": "dseg",
+        "custom_parcellation.atlas": "L2018",
+        "custom_wm_mask.suffix": "dseg",
+        "custom_wm_mask.label": "WM",
+        "custom_gm_mask.suffix": "dseg",
+        "custom_gm_mask.label": "GM",
+        "custom_csf_mask.suffix": "dseg",
+        "custom_csf_mask.label": "CSF"
+    }
+}

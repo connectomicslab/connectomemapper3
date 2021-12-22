@@ -1,0 +1,44 @@
+{
+    "brain" : {
+        "datatype": "anat",
+        "desc": "brain",
+        "suffix": "T1w",
+        "extension": ".nii.gz"
+    },
+    "csf_mask" : {
+        "datatype": "anat",
+        "label": "CSF",
+        "suffix": "dseg",
+        "extension": ".nii.gz"
+    },
+    "gm_mask" : {
+        "datatype": "anat",
+        "label": "GM",
+        "suffix": "dseg",
+        "extension": ".nii.gz"
+    },
+    "wm_mask" : {
+        "datatype": "anat",
+        "label": "WM",
+        "suffix": "dseg",
+        "extension": ".nii.gz"
+    },
+    "roi_volumes" : {
+        "datatype": "anat",
+        "atlas": "L2018",
+        "suffix": "dseg",
+        "extension": ".nii.gz"
+    },
+    "roi_graphMLs" : {
+        "datatype": "anat",
+        "atlas": "L2018",
+        "suffix": "dseg",
+        "extension": ".graphml"
+    },
+    "roi_colorLUTs" : {
+        "datatype": "anat",
+        "atlas": "L2018",
+        "suffix": "FreeSurferColorLUT",
+        "extension": ".txt"
+    }
+}

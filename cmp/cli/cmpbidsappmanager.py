@@ -6,13 +6,15 @@
 """This module defines the `cmpbidsappmanager` script that launches the Graphical User Interface."""
 
 from traits.etsconfig.api import ETSConfig
+
 # Setup Qt5/Pyside2 backend for traitsui
-ETSConfig.toolkit = 'qt'
+ETSConfig.toolkit = "qt"
 
 import os
-os.environ['ETS_TOOLKIT'] = 'qt'
+
+os.environ["ETS_TOOLKIT"] = "qt"
 # os.environ['QT_API'] = 'pyqt5'
-os.environ['QT_API'] = 'pyside2'
+os.environ["QT_API"] = "pyside2"
 
 import sys
 
@@ -25,12 +27,12 @@ from cmtklib.util import print_warning
 def info():
     """Print version and copyright information."""
     print("\nConnectome Mapper {} - BIDS App Manager ".format(__version__))
-    print_warning('------------------------------------------------------')
+    print_warning("------------------------------------------------------")
     print_warning("""{}""".format(__copyright__))
-    print_warning('------------------------------------------------------')
-    print('------------------------------------------------------')
+    print_warning("------------------------------------------------------")
+    print("------------------------------------------------------")
     print("  .. INFO: Use {} for graphical backend".format(ETSConfig.toolkit))
-    print('------------------------------------------------------\n')
+    print("------------------------------------------------------\n")
 
 
 def usage():

@@ -12,7 +12,10 @@ from traits.api import *
 from traitsui.api import *
 
 # Own imports
-from cmp.stages.preprocessing.fmri_preprocessing import PreprocessingConfig, PreprocessingStage
+from cmp.stages.preprocessing.fmri_preprocessing import (
+    PreprocessingConfig,
+    PreprocessingStage,
+)
 
 
 class PreprocessingConfigUI(PreprocessingConfig):
@@ -29,8 +32,13 @@ class PreprocessingConfigUI(PreprocessingConfig):
     cmp.stages.preprocessing.fmri_preprocessing.PreprocessingConfig
     """
 
-    traits_view = View('discard_n_volumes', 'despiking', 'slice_timing',
-                       Item('repetition_time', visible_when='slice_timing!="none"'), 'motion_correction')
+    traits_view = View(
+        "discard_n_volumes",
+        "despiking",
+        "slice_timing",
+        Item("repetition_time", visible_when='slice_timing!="none"'),
+        "motion_correction",
+    )
 
 
 class PreprocessingStageUI(PreprocessingStage):
@@ -53,33 +61,46 @@ class PreprocessingStageUI(PreprocessingStage):
     cmp.stages.preprocessing.fmri_preprocessing.PreprocessingStage
     """
 
-    inspect_output_button = Button('View')
+    inspect_output_button = Button("View")
 
-    inspect_outputs_view = View(Group(
-        Item('name', editor=TitleEditor(), show_label=False),
+    inspect_outputs_view = View(
         Group(
-            Item('inspect_outputs_enum', show_label=False),
-            Item('inspect_output_button', enabled_when='inspect_outputs_enum!="Outputs not available"',
-                 show_label=False),
-            label='View outputs', show_border=True)),
+            Item("name", editor=TitleEditor(), show_label=False),
+            Group(
+                Item("inspect_outputs_enum", show_label=False),
+                Item(
+                    "inspect_output_button",
+                    enabled_when='inspect_outputs_enum!="Outputs not available"',
+                    show_label=False,
+                ),
+                label="View outputs",
+                show_border=True,
+            ),
+        ),
         scrollable=True,
         resizable=True,
-        kind='livemodal',
-        title='Inspect stage outputs',
-        buttons=['OK', 'Cancel'])
+        kind="livemodal",
+        title="Inspect stage outputs",
+        buttons=["OK", "Cancel"],
+    )
 
-    config_view = View(Group(
-        Item('name', editor=TitleEditor(), show_label=False),
+    config_view = View(
         Group(
-            Item('config', style='custom', show_label=False),
-            label='Configuration', show_border=True)),
+            Item("name", editor=TitleEditor(), show_label=False),
+            Group(
+                Item("config", style="custom", show_label=False),
+                label="Configuration",
+                show_border=True,
+            ),
+        ),
         scrollable=True,
         resizable=True,
         height=280,
         width=350,
-        kind='livemodal',
-        title='Edit stage configuration',
-        buttons=['OK', 'Cancel'])
+        kind="livemodal",
+        title="Edit stage configuration",
+        buttons=["OK", "Cancel"],
+    )
 
     # General and UI members
     def __init__(self, bids_dir, output_dir):

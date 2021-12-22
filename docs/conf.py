@@ -13,92 +13,22 @@
 
 import os
 import sys
-
-sys.path.append('../cmp/')
-from info import __minor_version__
-from info import __version__
-from info import __release_date__
-
 import time
-
 from recommonmark.parser import CommonMarkParser
-
-# Use Markdown and reStructuredText in the same Sphinx project
-source_parsers = {
-    '.md': CommonMarkParser,
-}
-source_suffix = ['.rst', '.md']
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-sys.path.insert(0, os.path.abspath('..'))
+sys.path.append('../')  # noqa
+from cmp.info import (
+    __minor_version__,
+    __version__,
+    __release_date__
+)
+
+sys.path.insert(0, os.path.abspath('..'))  # noqa
 
 # -- General configuration -----------------------------------------------------
-
-# If your documentation needs a minimal Sphinx version, state it here.
-# needs_sphinx = '1.0'
-
-# Add any Sphinx extension module names here, as strings. They can be extensions
-# coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autosectionlabel',
-              'sphinx.ext.autodoc',
-              'sphinx.ext.mathjax',
-              'sphinx.ext.viewcode',
-              'sphinxarg.ext',
-              'sphinx.ext.inheritance_diagram',
-              'sphinxcontrib.apidoc',
-              'matplotlib.sphinxext.plot_directive',
-              'nbsphinx',
-              'nipype.sphinxext.plot_workflow',
-              'nipype.sphinxext.apidoc',
-              'nipype.sphinxext.documenter',
-              ]
-
-autodoc_mock_imports = ['graphviz',
-                        'PySide2',
-                        'pyface',
-                        'fslpy',
-                        'fsleyes',
-                        'mne',
-                        'obspy',
-                        'statsmodels',
-                        'pydicom',
-                        'networkx',
-                        'datalad']
-
-# Allow errors in notebooks for doc
-nbsphinx_allow_errors = True
-
-
-# Accept custom section names to be parsed for numpy-style docstrings
-# of parameters.
-# Requires pinning sphinxcontrib-napoleon to a specific commit while
-# https://github.com/sphinx-contrib/napoleon/pull/10 is merged.
-napoleon_use_param = True
-# napoleon_custom_sections = [
-#     ("Inputs", "Parameters"),
-#     ("Outputs", "Parameters"),
-#     ("Attributes", "Parameters"),
-#     ("Mandatory Inputs", "Parameters"),
-#     ("Optional Inputs", "Parameters"),
-# ]
-
-on_rtd = os.environ.get("READTHEDOCS") == "True"
-if on_rtd:
-    extensions.append("readthedocs_ext.readthedocs")
-
-# Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
-
-# The suffix of source filenames.
-source_suffix = ['.rst', '.md']
-
-# The encoding of source files.
-# source_encoding = 'utf-8-sig'
-
-# The master toctree document.
-master_doc = 'index'
 
 # General information about the project.
 project = u'Connectome Mapper 3'
@@ -118,6 +48,87 @@ release = __version__
 rst_prolog = """
 .. |release| replace:: {}
 """.format(release)
+
+# If your documentation needs a minimal Sphinx version, state it here.
+# needs_sphinx = '1.0'
+
+# Add any Sphinx extension module names here, as strings. They can be extensions
+# coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
+extensions = [
+    'sphinx.ext.autosectionlabel',
+    'sphinx.ext.autodoc',
+    'sphinx.ext.mathjax',
+    'sphinx.ext.viewcode',
+    'sphinxarg.ext',
+    'sphinx.ext.inheritance_diagram',
+    'sphinxcontrib.apidoc',
+    'matplotlib.sphinxext.plot_directive',
+    'nbsphinx',
+    'nipype.sphinxext.plot_workflow',
+    'nipype.sphinxext.apidoc',
+    'nipype.sphinxext.documenter',
+    'sphinx.ext.intersphinx',
+    'recommonmark'
+]
+
+# autodoc_typehints = 'both'
+autodoc_mock_imports = ['graphviz',
+                        'PySide2',
+                        'pyface',
+                        'fslpy',
+                        'fsleyes',
+                        'mne',
+                        'obspy',
+                        'statsmodels',
+                        'pydicom',
+                        'networkx',
+                        'datalad']
+
+# Allow errors in notebooks for doc
+nbsphinx_allow_errors = True
+
+# Suppress label warnings
+suppress_warnings = ['autosectionlabel.*']
+
+# Accept custom section names to be parsed for numpy-style docstrings
+# of parameters.
+# Requires pinning sphinxcontrib-napoleon to a specific commit while
+# https://github.com/sphinx-contrib/napoleon/pull/10 is merged.
+napoleon_use_param = True
+# napoleon_custom_sections = [
+#     ("Inputs", "Parameters"),
+#     ("Outputs", "Parameters"),
+#     ("Attributes", "Parameters"),
+#     ("Mandatory Inputs", "Parameters"),
+#     ("Optional Inputs", "Parameters"),
+# ]
+
+nitpicky = False
+# nitpick_ignore_regex = [
+#     ('py:class', '.*'),
+#     ('py:obj', '.*'),
+#     ('py:mod', '.*'),
+# ]
+
+on_rtd = os.environ.get("READTHEDOCS") == "True"
+if on_rtd:
+    extensions.append("readthedocs_ext.readthedocs")
+
+# Add any paths that contain templates here, relative to this directory.
+templates_path = ['_templates']
+
+# Use Markdown and reStructuredText in the same Sphinx project
+source_parsers = {
+    '.md': CommonMarkParser,
+}
+# The suffix of source filenames.
+source_suffix = ['.rst', '.md']
+
+# The encoding of source files.
+# source_encoding = 'utf-8-sig'
+
+# The master toctree document.
+master_doc = 'index'
 
 # The language for content autogenerated by Sphinx. Refer to documentation
 # for a list of supported languages.
@@ -177,7 +188,7 @@ html_theme_options = {
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
-html_title = 'The Connectome Mapper'
+html_title = 'Connectome Mapper 3'
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
 # html_short_title = None
@@ -342,3 +353,7 @@ apidoc_extra_args = ["--module-first",
                      "-e",
                      "-f"]
 
+# -- Options for intersphinx extension ---------------------------------------
+
+# Example configuration for intersphinx: refer to the Python standard library.
+intersphinx_mapping = {"http://docs.python.org/3": None}
