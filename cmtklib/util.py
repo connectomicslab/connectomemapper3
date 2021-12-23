@@ -9,6 +9,7 @@
 import os
 import warnings
 from glob import glob
+from pathlib import Path
 
 import json
 import networkx as nx
@@ -581,3 +582,16 @@ def convertList2Tuple(lists):
         Tuple of files containing bvecs and bvals
     """
     return tuple(lists)
+
+
+def check_directory_exists(mandatory_dir):
+    """Makes sure the mandatory directory exists.
+
+    Raises
+    ------
+    FileNotFoundError
+        Raised when the directory is not found.
+    """
+    f_path = Path(mandatory_dir)
+    if not f_path.is_dir():
+        raise FileNotFoundError(f"No directory is found at: {str(f_path)}")
