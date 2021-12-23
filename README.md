@@ -1,4 +1,4 @@
-## Connectome Mapper 3 BIDS App
+## Connectome Mapper 3
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 [![All Contributors](https://img.shields.io/badge/all_contributors-12-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
@@ -142,29 +142,31 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
+Thanks also goes to all these wonderful people that contributed to the two first versions
+of Connectome Mapper:
+
+*   Collaborators from Signal Processing Laboratory (LTS5), EPFL, Lausanne:
+
+    *   Jean-Philippe Thiran
+    *   Leila Cammoun
+    *   Adrien Birbaumer (abirba)
+    *   Alessandro Daducci (daducci)
+    *   Stephan Gerhard (unidesigner)
+    *   Christophe Chênes (Cwis)
+    *   Oscar Esteban (oesteban)
+    *   David Romascano (davidrs06)
+    *   Alia Lemkaddem (allem)
+    *   Xavier Gigandet
+
+
+*   Collaborators from Children's Hospital, Boston:
+
+    *   Ellen Grant
+    *   Daniel Ginsburg (danginsburg)
+    *   Rudolph Pienaar (rudolphpienaar)
+    *   Nicolas Rannou (NicolasRannou)
+
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
-
-### Previous Collaborators
-
-Collaboration Signal Processing Laboratory (LTS5) EPFL Lausanne
-
-*   Jean-Philippe Thiran
-*   Leila Cammoun
-*   Adrien Birbaumer (abirba)
-*   Alessandro Daducci (daducci)
-*   Stephan Gerhard (unidesigner)
-*   Christophe Chênes (Cwis)
-*   Oscar Esteban (oesteban)
-*   David Romascano (davidrs06)
-*   Alia Lemkaddem (allem)
-*   Xavier Gigandet
-
-Collaboration Children's Hospital Boston
-
-*   Ellen Grant
-*   Daniel Ginsburg (danginsburg)
-*   Rudolph Pienaar (rudolphpienaar)
-*   Nicolas Rannou (NicolasRannou)
 
 ### Funding
 
