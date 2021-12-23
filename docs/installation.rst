@@ -18,7 +18,7 @@ The Connectome Mapper 3 is composed of a Docker image, namely the Connectome Map
 * Installation instructions for the Connectome mapper 3 BIDS App Manager are found in :ref:`manual-install-cmpbidsappmanager`.
 
 ..
-	The steps to add the NeuroDebian repository are explained at http://neuro.debian.net/ .
+    The steps to add the NeuroDebian repository are explained at http://neuro.debian.net/ .
 
 Make sure that you have installed the following prerequisites.
 
@@ -130,11 +130,11 @@ The installation of the Connectome Mapper 3 BIDS App Manager (CMPBIDSAPPManager)
 * Create a miniconda3 environment where all python dependencies will be installed::
 
     $ cd connectomemapper3
-    $ conda env create -f environment.yml
+    $ conda env create -f conda/environment.yml
 
 .. important::
   It seems there is no conda package for `git-annex` available on Mac.
-  For your convenience, we created an additional `environment_macosx.yml`
+  For your convenience, we created an additional `conda/environment_macosx.yml`
   miniconda3 environment where the line `- git-annex=XXXXXXX` has been removed.
   Git-annex should be installed on MacOSX using `brew <https://brew.sh/index_fr>`_
   i.e. ``brew install git-annex``. See https://git-annex.branchable.com/install/ for more details.
@@ -151,12 +151,17 @@ The installation of the Connectome Mapper 3 BIDS App Manager (CMPBIDSAPPManager)
 
 * Install the Connectome Mapper BIDS App Manager from the Bash Shell using `pip`::
 
-	(py37cmp-gui)$ cd connectomemapper3/
-	(py37cmp-gui)$ pip install .
+    (py37cmp-gui)$ cd connectomemapper3/
+    (py37cmp-gui)$ pip install .
 
-* You are ready to use the Connectome Mapper 3 BIDS App Manager. See the `dedicated user guide <bidsappmanager.html>`_.
+* You are ready to use the Connectome Mapper 3 (1) via its Graphical User Interface (GUI) aka CMP BIDS App Manager
+  (See :ref:`guiusage` for the user guide), (2) via its python ``connectomemapper3_docker`` and
+  ``connectomemapper3_singularity`` wrappers (See :ref:`wrapperusage` for commandline usage), or (3) by
+  interacting directly with the Docker / Singularity Engine (See :ref:`<containerusage` for commandline usage).
 
-.. note::In the future, if you wish to update Connectome Mapper 3 and the Connectome Mapper 3 BIDS App Manager,
+.. admonition:: In the future
+
+    If you wish to update Connectome Mapper 3 and the Connectome Mapper 3 BIDS App Manager,
     this could be easily done by (1) updating the git repository to a new tag with `git fetch` and
     `git checkout tags/|release| -b |release|` and (2) running `pip install .`.
 

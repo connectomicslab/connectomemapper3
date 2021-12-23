@@ -33,6 +33,9 @@ This neuroimaging processing pipeline software is developed by the Connectomics 
 .. image:: https://app.codacy.com/project/badge/Grade/658266303c3046e8896769670e6988eb
   :target: https://www.codacy.com/gh/connectomicslab/connectomemapper3?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=connectomicslab/connectomemapper3&amp;utm_campaign=Badge_Grade
   :alt: Code Quality Review Status
+.. image:: https://img.shields.io/badge/all_contributors-12-orange.svg?style=flat-square
+  :target: contributors
+  :alt: All-contributors
 
 
 .. warning:: THIS SOFTWARE IS FOR RESEARCH PURPOSES ONLY AND SHALL NOT BE USED FOR ANY CLINICAL USE. THIS SOFTWARE HAS NOT BEEN REVIEWED OR APPROVED BY THE FOOD AND DRUG ADMINISTRATION OR EQUIVALENT AUTHORITY, AND IS FOR NON-CLINICAL, IRB-APPROVED RESEARCH USE ONLY. IN NO EVENT SHALL DATA OR IMAGES GENERATED THROUGH THE USE OF THE SOFTWARE BE USED IN THE PROVISION OF PATIENT CARE.
@@ -46,16 +49,26 @@ About
 	:width: 1000
 	:align: center
 
-``Connectome Mapper 3`` implements full anatomical, diffusion and
-resting-state MRI processing pipelines, from raw Diffusion / T1 /
-T2 / BOLD data to multi-resolution connection matrices.
+Connectome Mapper 3 is an open-source Python3 image processing pipeline software,
+with a Graphical User Interface (GUI), that implements full anatomical, diffusion and
+resting-state MRI processing pipelines, from raw Diffusion / T1 / T2 / BOLD data
+to multi-resolution connection matrices based on a new version of the Lausanne
+parcellation atlas, aka `Lausanne2018`.
 
 ``Connectome Mapper 3`` pipelines use a combination of tools from
 well-known software packages, including FSL_, FreeSurfer_, ANTs_,
 MRtrix3_, Dipy_ and AFNI_, empowered by the Nipype_ dataflow library.
-These pipelines were designed to provide the best software implementation
-for each state of processing, and will be updated as newer and better
-neuroimaging software become available.
+These pipelines are designed to provide the best software implementation
+for each state of processing at the time of conception, and can be
+easily updated as newer and better neuroimaging software become available.
+
+Portability, reproducibility and replicatibility are achieved through the
+distribution of a BIDSApp, a software container image which (1) takes datasets
+organized following the Brain Imaging Data Structure (BIDS) standard, and which
+(2) provides a frozen computing environment where versions of all external
+softwares and libraries are fixed. Accessibility has been improved to a greater extend
+by providing an interactive GUI which supports the user in a the steps involved
+in the configuration and execution of the containerized pipelines.
 
 This tool allows you to easily do the following:
 
@@ -64,14 +77,10 @@ This tool allows you to easily do the following:
     connection matrices.
   * Implement tools from different software packages.
   * Achieve optimal data processing quality by using the best tools available
-  * Automate and parallelize processing steps, which provides a significant
+  * Automate and parallelize processing steps with Nipype, which provides a significant
     speed-up from typical linear, manual processing.
-
-Portability, reproducibility and replicatibility are achieved through the
-distribution of a BIDSApp, a software container image which (1) takes datasets
-organized following the Brain Imaging Data Structure (BIDS) standard, and which
-(2) provides a frozen computing environment where versions of all external
-softwares and libraries are fixed.
+  * Easily configure the pipelines and control the execution and outputs of the processing
+    with a GUI.
 
 .. _FSL: https://fsl.fmrib.ox.ac.uk/fsl/fslwiki
 
@@ -170,6 +179,7 @@ Contents
    LICENSE
    changes
    citing
+   contributors
    contributing
    support
 

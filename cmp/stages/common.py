@@ -19,6 +19,12 @@ class Stage(HasTraits):
 
     Attributes
     ----------
+    bids_subject_label : traits.Str
+        BIDS subject (participant) label
+
+    bids_session_label : traits.Str
+        BIDS session label
+
     bids_dir : traits.Str
         BIDS dataset root directory
 
@@ -51,10 +57,12 @@ class Stage(HasTraits):
     cmp.stages.connectome.fmri_connectome.ConnectomeStage
     """
 
+    bids_subject_label = Str(desc="BIDS subject (participant) label")
+    bids_session_label = Str("", desc="BIDS session label")
     bids_dir = Str
     output_dir = Str
-    inspect_outputs = ['Outputs not available']
-    inspect_outputs_enum = Enum(values='inspect_outputs')
+    inspect_outputs = ["Outputs not available"]
+    inspect_outputs_enum = Enum(values="inspect_outputs")
     inspect_outputs_dict = Dict
     enabled = True
     config = Instance(HasTraits)
@@ -67,8 +75,11 @@ class Stage(HasTraits):
         nb_of_unfinished_files : int
             Number of unfinished files in the stage
         """
-        unfinished_files = [os.path.join(dirpath, f)
-                            for dirpath, dirnames, files in os.walk(self.stage_dir)
-                            for f in files if f.endswith('_unfinished.json')]
+        unfinished_files = [
+            os.path.join(dirpath, f)
+            for dirpath, dirnames, files in os.walk(self.stage_dir)
+            for f in files
+            if f.endswith("_unfinished.json")
+        ]
         nb_of_unfinished_files = len(unfinished_files)
         return nb_of_unfinished_files

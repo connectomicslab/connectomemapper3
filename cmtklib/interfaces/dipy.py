@@ -52,7 +52,7 @@ class DTIEstimateResponseSH(DipyDiffusionInterface):
     """Uses dipy to compute the single fiber response to be used by spherical deconvolution methods.
 
     The single fiber response is computed in a similar way to MRTrix's command
-    ``estimate_response``.
+        ``estimate_response``.
 
     Example
     -------
@@ -61,7 +61,8 @@ class DTIEstimateResponseSH(DipyDiffusionInterface):
     >>> dti.inputs.in_file = '4d_dwi.nii'
     >>> dti.inputs.in_bval = 'bvals'
     >>> dti.inputs.in_bvec = 'bvecs'
-    >>> res = dti.run() # doctest: +SKIP
+    >>> res = dti.run()  # doctest: +SKIP
+
     """
 
     input_spec = DTIEstimateResponseSHInputSpec
@@ -200,8 +201,8 @@ class CSDOutputSpec(TraitedSpec):
 class CSD(DipyDiffusionInterface):
     """Uses CSD [Tournier2007]_ to generate the fODF of DWIs.
 
-    The interface uses :py:mod:`dipy`, as explained in `dipy's CSD example
-    <http://nipy.org/dipy/examples_built/reconst_csd.html>`_.
+    The interface uses :py:mod:`dipy`, as explained in
+        `dipy's CSD example <http://nipy.org/dipy/examples_built/reconst_csd.html>`_.
 
     References
     ----------
@@ -216,7 +217,8 @@ class CSD(DipyDiffusionInterface):
     >>> csd.inputs.in_file = '4d_dwi.nii'
     >>> csd.inputs.in_bval = 'bvals'
     >>> csd.inputs.in_bvec = 'bvecs'
-    >>> res = csd.run() # doctest: +SKIP
+    >>> res = csd.run()  # doctest: +SKIP
+
     """
 
     input_spec = CSDInputSpec
@@ -376,15 +378,15 @@ class SHOREOutputSpec(TraitedSpec):
 
 
 class SHORE(DipyDiffusionInterface):
-    """Uses SHORE [Merlet13]_ to generate the fODF of DWIs.
+    """Uses SHORE [Merlet2013]_ to generate the fODF of DWIs.
 
-    The interface uses :py:mod:`dipy`, as explained in `dipy's SHORE example
-    <http://nipy.org/dipy/examples_built/reconst_shore.html#merlet2013>`_.
+    The interface uses :py:mod:`dipy`, as explained in
+        `dipy's SHORE example <http://nipy.org/dipy/examples_built/reconst_shore.html#merlet2013>`_.
 
     References
     ----------
     .. [Merlet2013]	Merlet S. et. al, Medical Image Analysis, 2013.
-    “Continuous diffusion signal, EAP and ODF estimation via Compressive Sensing in diffusion MRI”
+        “Continuous diffusion signal, EAP and ODF estimation via Compressive Sensing in diffusion MRI”
 
     Example
     -------
@@ -393,7 +395,8 @@ class SHORE(DipyDiffusionInterface):
     >>> asm.inputs.in_file = '4d_dwi.nii'
     >>> asm.inputs.in_bval = 'bvals'
     >>> asm.inputs.in_bvec = 'bvecs'
-    >>> res = asm.run() # doctest: +SKIP
+    >>> res = asm.run()  # doctest: +SKIP
+
     """
 
     input_spec = SHOREInputSpec
@@ -553,7 +556,8 @@ class TensorInformedEudXTractography(DipyBaseInterface):
     >>> track.inputs.in_file = '4d_dwi.nii'
     >>> track.inputs.in_model = 'model.pklz'
     >>> track.inputs.tracking_mask = 'dilated_wm_mask.nii'
-    >>> res = track.run() # doctest: +SKIP
+    >>> res = track.run()  # doctest: +SKIP
+
     """
 
     input_spec = TensorInformedEudXTractographyInputSpec
@@ -784,7 +788,8 @@ class DirectionGetterTractography(DipyBaseInterface):
     >>> track.inputs.in_file = '4d_dwi.nii'
     >>> track.inputs.in_model = 'model.pklz'
     >>> track.inputs.tracking_mask = 'dilated_wm_mask.nii'
-    >>> res = track.run() # doctest: +SKIP
+    >>> res = track.run()  # doctest: +SKIP
+
     """
 
     input_spec = DirectionGetterTractographyInputSpec
@@ -1115,8 +1120,7 @@ class MAPMRIOutputSpec(TraitedSpec):
 class MAPMRI(DipyDiffusionInterface):
     """Computes the MAP MRI model.
 
-    .. check http://nipy.org/dipy/examples_built/reconst_mapmri.html#example-reconst-mapmri
-    for reference on the settings
+    .. check http://nipy.org/dipy/examples_built/reconst_mapmri.html#example-reconst-mapmri for reference on the settings
 
     Example
     -------
@@ -1125,7 +1129,8 @@ class MAPMRI(DipyDiffusionInterface):
     >>> mapmri.inputs.in_file = '4d_dwi.nii'
     >>> mapmri.inputs.in_bval = 'bvals'
     >>> mapmri.inputs.in_bvec = 'bvecs'
-    >>> res = mapmri.run() # doctest: +SKIP
+    >>> res = mapmri.run()  # doctest: +SKIP
+
     """
 
     input_spec = MAPMRIInputSpec

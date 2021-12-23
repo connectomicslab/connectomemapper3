@@ -57,6 +57,8 @@ try:
 except ImportError:
     print("BIDS not available. Can not read BIDS dataset")
 
+from cmtklib.bids.io import __cmp_directory__
+
 """
 ====================End of Importing Libraries ===========================
 
@@ -84,7 +86,7 @@ def main(bids_dir):
         sys.exit(1)
 
     c = canvas.Canvas(os.path.join(bids_dir, 'derivatives',
-                                   'cmp', 'report.pdf'), pagesize=A4)
+                                   __cmp_directory__, 'report.pdf'), pagesize=A4)
     width, height = A4
 
     print("Page size : %s x %s" % (width, height))
@@ -103,8 +105,8 @@ def main(bids_dir):
         if len(sessions) > 0:
             print("Warning: multiple sessions")
             for ses in sessions:
-                gpickle_fn = os.path.join(bids_dir, 'derivatives', 'cmp', 'sub-' + str(subj), 'ses-' + str(ses), 'dwi',
-                                          'sub-%s_ses-%s_dwi_connectome_scale1.gpickle' % (str(subj), str(ses)))
+                gpickle_fn = os.path.join(bids_dir, 'derivatives', __cmp_directory__, 'sub-' + str(subj), 'ses-' + str(ses), 'dwi',
+                                          'sub-%s_ses-%s_label-L2008_res-scale1_conndata-snetwork_connectivity.gpickle' % (str(subj), str(ses)))
                 if os.path.isfile(gpickle_fn):
                     # c.drawString(10,20+offset,'Subject: %s / Session: %s '%(str(subj),str(sess)))
                     G = nx.read_gpickle(gpickle_fn)
@@ -138,8 +140,8 @@ def main(bids_dir):
 
         else:
             print("No session")
-            gpickle_fn = os.path.join(bids_dir, 'derivatives', 'cmp', 'sub-' + str(subj), 'connectivity',
-                                      'sub-%s_label-L2008_desc-scale1_conndata-snetwork_connectivity.gpickle' % (
+            gpickle_fn = os.path.join(bids_dir, 'derivatives', __cmp_directory__, 'sub-' + str(subj), 'connectivity',
+                                      'sub-%s_label-L2008_res-scale1_conndata-snetwork_connectivity.gpickle' % (
                                           str(subj)))
             if os.path.isfile(gpickle_fn):
                 # c.drawString(10,20+offset,'Subject : %s '%str(subj))

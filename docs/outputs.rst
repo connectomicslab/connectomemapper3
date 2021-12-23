@@ -80,10 +80,13 @@ Anatomical derivatives
           - ``<scale_label>``: ``scale1``, ``scale2``, ``scale3``, ``scale4``, ``scale5``
             corresponds to the parcellation scale if applicable
 
-        with the description of parcel labels and the updated FreeSurfer color lookup table:
+        with two `.tsv` side-car files that follow the `BIDS derivatives <https://bids-specification.readthedocs.io/en/stable/05-derivatives/03-imaging.html#common-image-derived-labels>`_, one describing the parcel label/index mapping (`_dseg.tsv`), one reporting volumetry of the different parcels (`_stats.tsv`), and two files used internally by CMP3, one describing the parcel labels in `.graphml` format (`dseg.graphml`), one providing the color lookup table of the parcel labels in Freesurfer format which can used directly in `freeview` (`_FreeSurferColorLUT.txt`):
 
+        - ``anat/sub-<subject_label>_atlas-<atlas_label>[_res-<scale_label>]_dseg.tsv``
+        - ``anat/sub-<subject_label>_atlas-<atlas_label>[_res-<scale_label>]_stats.tsv``
         - ``anat/sub-<subject_label>_atlas-<atlas_label>[_res-<scale_label>]_dseg.graphml``
         - ``anat/sub-<subject_label>_atlas-<atlas_label>[_res-<scale_label>]_FreeSurferColorLUT.txt``
+
 
 * Anatomical derivatives in the ``DWI`` space produced by the diffusion pipeline are placed in
   each subject's ``anat/`` subfolder, including:

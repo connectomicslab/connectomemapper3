@@ -1,0 +1,14 @@
+{
+    "brain_mask": {
+        "datatype": "anat",
+        "desc": "brain",
+        "suffix": "mask",
+        "extension": ".nii.gz"
+    },
+    "wm_mask": {
+        "datatype": "anat",
+        "label": "WM",
+        "suffix": "dseg",
+        "extension": ".nii.gz"
+    }
+}
