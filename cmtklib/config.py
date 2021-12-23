@@ -132,7 +132,7 @@ def save_configparser_as_json(config, config_json_path, ini_mode=False, debug=Fa
                             print_warning(f"  .. DEBUG: Skip parameter {section} / {name}")
                         continue
                 else:
-                    if "custom" in name:
+                    if "custom" in name or "freesurfer_subjects_dir" in name or "freesurfer_subject_id" in name:
                         if debug:
                             print_warning(f"  .. DEBUG: Skip parameter {section} / {name}")
                         continue
