@@ -111,48 +111,6 @@ This BIDS App has the following command line arguments:
                                 App execution, which is enabled by default.
           -v, --version         show program's version number and exit
 
-
-### Credits
-
-*   Sebastien Tourbier (sebastientourbier)
-*   Yasser Aleman-Gomez (yasseraleman)
-*   Alessandra Griffa (agriffa)
-*   Adrien Birbaumer (abirba)
-*   Patric Hagmann (pahagman)
-*   Meritxell Bach Cuadra (meribach)
-
-### Collaborators
-
-Collaboration Signal Processing Laboratory (LTS5) EPFL Lausanne
-
-*   Jean-Philippe Thiran
-*   Xavier Gigandet
-*   Leila Cammoun
-*   Alia Lemkaddem (allem)
-*   Alessandro Daducci (daducci)
-*   David Romascano (davidrs06)
-*   Stephan Gerhard (unidesigner)
-*   Christophe Chênes (Cwis)
-*   Oscar Esteban (oesteban)
-
-Collaboration Children's Hospital Boston
-
-*   Ellen Grant
-*   Daniel Ginsburg (danginsburg)
-*   Rudolph Pienaar (rudolphpienaar)
-*   Nicolas Rannou (NicolasRannou)
-
-### Funding
-
-Work supported by the [Sinergia SNFNS-170873 Grant](http://p3.snf.ch/Project-170873).
-
-### License
-This software is distributed under the open-source license Modified BSD. See [license](docs/LICENSE) for more details.
-
-All trademarks referenced herein are property of their respective holders.
-
-Copyright (C) 2009-2021, Hospital Center and University of Lausanne (UNIL-CHUV), Ecole Polytechnique Fédérale de Lausanne (EPFL), Switzerland & Contributors.
-
 ## Contributors ✨
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
@@ -185,3 +143,36 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
+
+### Previous Collaborators
+
+Collaboration Signal Processing Laboratory (LTS5) EPFL Lausanne
+
+*   Jean-Philippe Thiran
+*   Leila Cammoun
+*   Adrien Birbaumer (abirba)
+*   Alessandro Daducci (daducci)
+*   Stephan Gerhard (unidesigner)
+*   Christophe Chênes (Cwis)
+*   Oscar Esteban (oesteban)
+*   David Romascano (davidrs06)
+*   Alia Lemkaddem (allem)
+*   Xavier Gigandet
+
+Collaboration Children's Hospital Boston
+
+*   Ellen Grant
+*   Daniel Ginsburg (danginsburg)
+*   Rudolph Pienaar (rudolphpienaar)
+*   Nicolas Rannou (NicolasRannou)
+
+### Funding
+
+Work supported by the [Sinergia SNFNS-170873 Grant](http://p3.snf.ch/Project-170873).
+
+### License
+This software is distributed under the open-source license Modified BSD. See [license](docs/LICENSE) for more details.
+
+All trademarks referenced herein are property of their respective holders.
+
+Copyright (C) 2009-2021, Hospital Center and University of Lausanne (UNIL-CHUV), Ecole Polytechnique Fédérale de Lausanne (EPFL), Switzerland & Contributors.
