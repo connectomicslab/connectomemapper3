@@ -6,7 +6,7 @@ Changes
 Version 3.0.0
 ****************************
 
-Date: Dec XX, 2021
+Date: Dec 23, 2021
 
 This version corresponds to the first official release of Connectome Mapper 3 (CMP3).
 It incorporates `Pull Request #88 <https://github.com/connectomicslab/connectomemapper3/pull/88>`_ (>450 commits)

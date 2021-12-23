@@ -4,14 +4,14 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-"""This module defines the `connectome_mapper_singularity` script that wraps calls to the Singularity BIDS APP image."""
+"""This module defines the `connectomemapper3_singularity` script that wraps calls to the Singularity BIDS APP image."""
 
 # General imports
 import sys
 
 # Own imports
 from cmp.parser import get_singularity_wrapper_parser
-from cmp.input_validator import check_directory_exists
+from cmtklib.util import check_directory_exists
 from cmtklib.process import run
 
 

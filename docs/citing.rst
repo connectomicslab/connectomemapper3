@@ -7,7 +7,7 @@ Citing
 .. important::
   * If your are using the Connectome Mapper 3 in your work, a manuscript is in preparation, but for now, please acknowledge this software with the following two entries:
 
-  1. Tourbier S, Aleman-Gomez Y, Mullier E, Griffa A, Bach Cuadra M, Hagmann P (2020). connectomicslab/connectomemapper3: Connectome Mapper |release| (Version  |release|). Zenodo. http://doi.org/10.5281/zenodo.3475969.
+  1. Tourbier S, Aleman-Gomez Y, Mullier E, Griffa A, Bach Cuadra M, Hagmann P (2021). connectomicslab/connectomemapper3: Connectome Mapper |release| (Version  |release|). Zenodo. http://doi.org/10.5281/zenodo.3475969.
 
   2. Tourbier S, Aleman-Gomez Y, Mullier E, Griffa A, Bach Cuadra M, Hagmann P (2020, June). Connectome Mapper 3: a software pipeline for multi-scale connectome mapping of multimodal MR data. 26th Annual Meeting of the Organization for Human Brain Mapping (OHBM), abstract #1174, poster #1892.
 

@@ -1,5 +1,7 @@
-## Connectome Mapper 3 BIDS App
-
+## Connectome Mapper 3
+<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+[![All Contributors](https://img.shields.io/badge/all_contributors-12-orange.svg?style=flat-square)](#contributors-)
+<!-- ALL-CONTRIBUTORS-BADGE:END -->
 This neuroimaging processing pipeline software is developed by the Connectomics Lab at the University Hospital of Lausanne (CHUV) for use within the [SNF Sinergia Project 170873](http://p3.snf.ch/project-170873), as well as for open-source software distribution.
 
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/connectomicslab/connectomemapper3) ![GitHub Release Date](https://img.shields.io/github/release-date/connectomicslab/connectomemapper3?color=orange) [![DOI](https://zenodo.org/badge/183162514.svg)](https://zenodo.org/badge/latestdoi/183162514) ![Docker Image Version (latest semver)](https://img.shields.io/docker/v/sebastientourbier/connectomemapper-bidsapp?color=orange&label=docker%20version) [![Docker Pulls](https://img.shields.io/docker/pulls/sebastientourbier/connectomemapper-bidsapp)](https://hub.docker.com/r/sebastientourbier/connectomemapper-bidsapp) [![CircleCI](https://circleci.com/gh/connectomicslab/connectomemapper3.svg?style=shield)](https://circleci.com/gh/connectomicslab/connectomemapper3) [![Code Coverage](https://app.codacy.com/project/badge/Coverage/658266303c3046e8896769670e6988eb)](https://www.codacy.com/gh/connectomicslab/connectomemapper3?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=connectomicslab/connectomemapper3&amp;utm_campaign=Badge_Coverage) [![Documentation Status](https://readthedocs.org/projects/connectome-mapper-3/badge/?version=latest)](https://connectome-mapper-3.readthedocs.io/en/latest/?badge=latest) [![Code Quality Review](https://app.codacy.com/project/badge/Grade/658266303c3046e8896769670e6988eb)](https://www.codacy.com/gh/connectomicslab/connectomemapper3?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=connectomicslab/connectomemapper3&amp;utm_campaign=Badge_Grade) [![All Contributors](https://img.shields.io/badge/all_contributors-12-orange.svg?style=flat-square)](#contributors-)
@@ -109,48 +111,6 @@ This BIDS App has the following command line arguments:
                                 App execution, which is enabled by default.
           -v, --version         show program's version number and exit
 
-
-### Credits
-
-*   Sebastien Tourbier (sebastientourbier)
-*   Yasser Aleman-Gomez (yasseraleman)
-*   Alessandra Griffa (agriffa)
-*   Adrien Birbaumer (abirba)
-*   Patric Hagmann (pahagman)
-*   Meritxell Bach Cuadra (meribach)
-
-### Collaborators
-
-Collaboration Signal Processing Laboratory (LTS5) EPFL Lausanne
-
-*   Jean-Philippe Thiran
-*   Xavier Gigandet
-*   Leila Cammoun
-*   Alia Lemkaddem (allem)
-*   Alessandro Daducci (daducci)
-*   David Romascano (davidrs06)
-*   Stephan Gerhard (unidesigner)
-*   Christophe Chênes (Cwis)
-*   Oscar Esteban (oesteban)
-
-Collaboration Children's Hospital Boston
-
-*   Ellen Grant
-*   Daniel Ginsburg (danginsburg)
-*   Rudolph Pienaar (rudolphpienaar)
-*   Nicolas Rannou (NicolasRannou)
-
-### Funding
-
-Work supported by the [Sinergia SNFNS-170873 Grant](http://p3.snf.ch/Project-170873).
-
-### License
-This software is distributed under the open-source license Modified BSD. See [license](docs/LICENSE) for more details.
-
-All trademarks referenced herein are property of their respective holders.
-
-Copyright (C) 2009-2021, Hospital Center and University of Lausanne (UNIL-CHUV), Ecole Polytechnique Fédérale de Lausanne (EPFL), Switzerland & Contributors.
-
 ## Contributors ✨
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
@@ -182,4 +142,40 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
+Thanks also goes to all these wonderful people that contributed to the two first versions
+of Connectome Mapper:
+
+*   Collaborators from Signal Processing Laboratory (LTS5), EPFL, Lausanne:
+
+    *   Jean-Philippe Thiran
+    *   Leila Cammoun
+    *   Adrien Birbaumer (abirba)
+    *   Alessandro Daducci (daducci)
+    *   Stephan Gerhard (unidesigner)
+    *   Christophe Chênes (Cwis)
+    *   Oscar Esteban (oesteban)
+    *   David Romascano (davidrs06)
+    *   Alia Lemkaddem (allem)
+    *   Xavier Gigandet
+
+
+*   Collaborators from Children's Hospital, Boston:
+
+    *   Ellen Grant
+    *   Daniel Ginsburg (danginsburg)
+    *   Rudolph Pienaar (rudolphpienaar)
+    *   Nicolas Rannou (NicolasRannou)
+
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
+
+### Funding
+
+Work supported by the [Sinergia SNFNS-170873 Grant](http://p3.snf.ch/Project-170873).
+
+### License
+
+This software is distributed under the open-source license Modified BSD. See [license](docs/LICENSE) for more details.
+
+All trademarks referenced herein are property of their respective holders.
+
+Copyright (C) 2009-2021, Hospital Center and University of Lausanne (UNIL-CHUV), Ecole Polytechnique Fédérale de Lausanne (EPFL), Switzerland & Contributors.
