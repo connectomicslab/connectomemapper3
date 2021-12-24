@@ -1585,14 +1585,14 @@ workflows:
             # - build_docs
             - codacy_coverage_report
             - send_codecov_report
-            filters:
-              # ignore any commit on any branch by default
-              branches:
-                ignore: /.*/
-                # only: master
-              # only act on version tags
-              tags:
-                only: /^v.*/
+          filters:
+            # ignore any commit on any branch by default
+            branches:
+              ignore: /.*/
+              # only: master
+            # only act on version tags
+            tags:
+              only: /^v.*/
 
       - deploy_docker_release:
           requires:
