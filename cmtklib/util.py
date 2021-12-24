@@ -567,7 +567,7 @@ def get_node_dictionary_outputs(node_report, local_output_dir=None, debug=False)
     return dict_outputs
 
 
-def convertList2Tuple(lists):
+def convert_list_to_tuple(lists):
     """Convert list of files to tuple of files.
 
     (Duplicated with preprocessing, could be moved to utils in the future)
