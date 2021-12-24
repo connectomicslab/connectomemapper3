@@ -28,9 +28,9 @@ Thanks goes to these wonderful people (`emoji key <https://allcontributors.org/d
   </table>
 
   <!-- ALL-CONTRIBUTORS-LIST:END -->
+  <br>
 
-Thanks also goes to all these wonderful people that contributed to the two first versions
-of Connectome Mapper:
+Thanks also goes to all these wonderful people that contributed to the two first versions of Connectome Mapper:
 
 *   Collaborators from Signal Processing Laboratory (LTS5), EPFL, Lausanne:
 
