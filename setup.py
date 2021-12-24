@@ -132,7 +132,7 @@ def main():
     setuptools.setup(
         name="cmp",
         version=__version__,
-        description="Connectome Mapper 3: A software pipeline for multi-scale connectome mapping of multimodal data",
+        description="Connectome Mapper 3: A Flexible and Open-Source Pipeline Software for Multiscale Multimodal Human Connectome Mapping",
         long_description=long_description,
         author="Sebastien Tourbier",
         author_email="sebastien.tourbier@alumni.epfl.ch",
@@ -148,7 +148,7 @@ def main():
         },
         license="BSD-3-Clause",
         classifiers=[
-            "Development Status :: 4 - Beta",
+            "Development Status :: 5 - Production/Stable",
             "Intended Audience :: Science/Research",
             "Intended Audience :: Developers",
             "License :: OSI Approved",
