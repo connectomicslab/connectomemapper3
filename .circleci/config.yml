@@ -428,6 +428,35 @@ jobs:
             python --version
             pip3 install cmp
 
+  deploy-pypi-release:
+    docker:
+      - image: cimg/python:3.7
+    steps:
+      - checkout
+      - run:
+          name: "Install dependencies"
+          command: |
+            python --version
+            pip3 install twine
+      - run:
+          name: "Verify git tag vs. version"
+          command: |
+            python3 setup_pypi.py verify
+      - run:
+          name: "init .pypirc"
+          command: |
+            echo -e "[pypi]" >> ~/.pypirc
+            echo -e "username = $PYPI_USER" >> ~/.pypirc
+            echo -e "password = $PYPI_TOKEN" >> ~/.pypirc
+      - run:
+          name: "Create distribution wheel"
+          command: |
+            python3 setup_pypi.py sdist bdist_wheel
+      - run:
+          name: "Upload to pypi"
+          command: |
+            twine upload dist/*
+
   build_docker:
     environment:
       TZ: "/usr/share/zoneinfo/Europe/Zurich"
@@ -1550,6 +1579,20 @@ workflows:
                 - /docs?\/.*/
             tags:
               only: /.*/
+
+      - deploy-pypi-release:
+          requires:
+            # - build_docs
+            - codacy_coverage_report
+            - send_codecov_report
+            filters:
+              # ignore any commit on any branch by default
+              branches:
+                ignore: /.*/
+                # only: master
+              # only act on version tags
+              tags:
+                only: /^v.*/
 
       - deploy_docker_release:
           requires:
