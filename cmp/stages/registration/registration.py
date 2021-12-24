@@ -26,7 +26,7 @@ from cmtklib.interfaces.fsl import ApplymultipleXfm, ApplymultipleWarp
 import cmtklib.interfaces.freesurfer as cmp_fs
 import cmtklib.interfaces.fsl as cmp_fsl
 from cmtklib.interfaces.ants import MultipleANTsApplyTransforms
-from cmtklib.util import get_pipeline_dictionary_outputs, convertList2Tuple
+from cmtklib.util import get_pipeline_dictionary_outputs, convert_list_to_tuple
 
 
 class RegistrationConfig(HasTraits):
@@ -428,7 +428,7 @@ class RegistrationStage(Stage):
                 [
                     (inputnode, concatnode, [("bvecs", "in1")]),
                     (inputnode, concatnode, [("bvals", "in2")]),
-                    (concatnode, mr_convert, [(("out", convertList2Tuple), "grad_fsl")],),
+                    (concatnode, mr_convert, [(("out", convert_list_to_tuple), "grad_fsl")],),
                     (inputnode, mr_convert, [("target", "in_file")]),
                 ]
             )
@@ -1211,7 +1211,7 @@ class RegistrationStage(Stage):
                 [
                     (inputnode, concatnode, [("bvecs", "in1")]),
                     (inputnode, concatnode, [("bvals", "in2")]),
-                    (concatnode, mr_convert, [(("out", convertList2Tuple), "grad_fsl")],),
+                    (concatnode, mr_convert, [(("out", convert_list_to_tuple), "grad_fsl")],),
                     (inputnode, mr_convert, [("target", "in_file")]),
                 ]
             )
