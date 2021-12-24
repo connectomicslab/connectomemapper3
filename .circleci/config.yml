@@ -430,7 +430,7 @@ jobs:
 
   deploy-pypi-release:
     docker:
-      - image: cimg/python:3.7
+      - image: circleci/python:3.7
     steps:
       - checkout
       - run:
