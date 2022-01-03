@@ -37,7 +37,7 @@ from cmtklib.bids.io import (
     __freesurfer_directory__,
     __nipype_directory__
 )
-from cmp.project import CMP_Project_Info, run_individual
+from cmp.project import ProjectInfo, run_individual
 
 warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
@@ -84,7 +84,7 @@ def create_cmp_command(project, run_anat, run_dmri, run_fmri, number_of_threads=
 
     Parameters
     ----------
-    project : cmp.project.CMP_Project_Info
+    project : cmp.project.ProjectInfo
         Instance of `cmp.project.CMP_Project_Info`
 
     run_anat : bool
@@ -424,7 +424,7 @@ if args.analysis_level == "participant":
     # find all T1s and skullstrip them
     for subject_label in subjects_to_analyze:
 
-        project = CMP_Project_Info()
+        project = ProjectInfo()
         project.base_directory = args.bids_dir
         project.output_directory = args.output_dir
 

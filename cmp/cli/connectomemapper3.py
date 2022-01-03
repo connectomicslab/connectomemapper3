@@ -184,7 +184,7 @@ def main():
     # Version and copyright message
     info()
 
-    project = cmp.project.CMP_Project_Info()
+    project = cmp.project.ProjectInfo()
     project.base_directory = os.path.abspath(args.bids_dir)
     project.output_directory = os.path.abspath(args.output_dir)
     project.subjects = ["{}".format(args.participant_label)]

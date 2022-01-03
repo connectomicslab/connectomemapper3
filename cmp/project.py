@@ -46,7 +46,7 @@ warnings.filterwarnings(
 )
 
 
-class CMP_Project_Info(HasTraits):
+class ProjectInfo(HasTraits):
     """Class used to store all properties of a processing project.
 
     Attributes
@@ -323,7 +323,7 @@ def init_dmri_project(project_info, bids_layout, is_new_project, gui=True, debug
 
     Parameters
     ----------
-    project_info : cmp.project.CMP_Project_Info
+    project_info : cmp.project.ProjectInfo
         Instance of ``cmp.project.CMP_Project_Info`` object
 
     bids_layout : bids.BIDSLayout
@@ -434,7 +434,7 @@ def init_fmri_project(project_info, bids_layout, is_new_project, gui=True, debug
 
     Parameters
     ----------
-    project_info : cmp.project.CMP_Project_Info
+    project_info : cmp.project.ProjectInfo
         Instance of ``cmp.project.CMP_Project_Info`` object
 
     bids_layout : bids.BIDSLayout
@@ -542,7 +542,7 @@ def init_anat_project(project_info, is_new_project, debug=False):
 
     Parameters
     ----------
-    project_info : cmp.project.CMP_Project_Info
+    project_info : cmp.project.ProjectInfo
         Instance of ``cmp.project.CMP_Project_Info`` object
 
     is_new_project : bool
@@ -638,7 +638,7 @@ def update_anat_last_processed(project_info, pipeline):
 
     Parameters
     ----------
-    project_info : cmp.project.CMP_Project_Info
+    project_info : cmp.project.ProjectInfo
         Instance of `CMP_Project_Info` object
 
     pipeline : cmp.pipelines.anatomical.anatomical.AnatomicalPipeline
@@ -698,7 +698,7 @@ def update_dmri_last_processed(project_info, pipeline):
 
     Parameters
     ----------
-    project_info : cmp.project.CMP_Project_Info
+    project_info : cmp.project.ProjectInfo
         Instance of `CMP_Project_Info` object
 
     pipeline : cmp.pipelines.diffusion.diffusion.DiffusionPipeline
@@ -754,7 +754,7 @@ def update_fmri_last_processed(project_info, pipeline):
 
     Parameters
     ----------
-    project_info : cmp.project.CMP_Project_Info
+    project_info : cmp.project.ProjectInfo
         Instance of `CMP_Project_Info` object
 
     pipeline : cmp.pipelines.functional.fMRI.fMRIPipeline
@@ -843,7 +843,7 @@ def run_individual(
     number_of_threads : int
         Number of threads used by programs relying on the OpenMP library
     """
-    project = CMP_Project_Info()
+    project = ProjectInfo()
     project.base_directory = os.path.abspath(bids_dir)
     project.output_directory = os.path.abspath(output_dir)
     project.subjects = ["{}".format(participant_label)]

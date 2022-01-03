@@ -158,7 +158,7 @@ class DiffusionPipelineUI(DiffusionPipeline):
 
         Parameters
         -----------
-        project_info : cmp.project.CMP_Project_Info
+        project_info : cmp.project.ProjectInfo
             CMP_Project_Info object that stores general information
             such as the BIDS root and output directories (see
             :class_`cmp.project.CMP_Project_Info` for more details)
