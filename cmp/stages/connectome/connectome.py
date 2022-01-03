@@ -135,7 +135,7 @@ class ConnectomeStage(Stage):
             Identity interface describing the outputs of the stage
         """
         cmtk_cmat = pe.Node(
-            interface=cmtklib.connectome.CMTK_cmat(), name="compute_matrice"
+            interface=cmtklib.connectome.DmriCmat(), name="compute_matrice"
         )
         cmtk_cmat.inputs.compute_curvature = self.config.compute_curvature
         cmtk_cmat.inputs.output_types = self.config.output_types

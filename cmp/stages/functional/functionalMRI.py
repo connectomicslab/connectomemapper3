@@ -20,7 +20,7 @@ from nipype.interfaces import afni
 
 # Own imports
 from cmp.stages.common import Stage
-from cmtklib.functionalMRI import Scrubbing, Detrending, Nuisance_regression
+from cmtklib.functionalMRI import Scrubbing, Detrending, NuisanceRegression
 
 
 class FunctionalMRIConfig(HasTraits):
@@ -183,7 +183,7 @@ class FunctionalMRIStage(Stage):
             or self.config.motion
         ):
             nuisance = pe.Node(
-                interface=Nuisance_regression(), name="nuisance_regression"
+                interface=NuisanceRegression(), name="nuisance_regression"
             )
             nuisance.inputs.global_nuisance = self.config.global_nuisance
             nuisance.inputs.csf_nuisance = self.config.csf

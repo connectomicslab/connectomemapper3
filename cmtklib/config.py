@@ -293,7 +293,7 @@ def create_subject_configuration_from_ref(
 
     Parameters
     ----------
-    project : cmp.project.CMP_Project_Info
+    project : cmp.project.ProjectInfo
         Instance of `cmp.project.CMP_Project_Info`
 
     ref_conf_file : string
@@ -372,8 +372,8 @@ def get_process_detail_json(project_info, section, detail):
 
     Parameters
     ----------
-    project_info : Instance(cmp.project.CMP_Project_Info)
-        Instance of :class:`cmp.project.CMP_Project_Info` class
+    project_info : Instance(cmp.project.ProjectInfo)
+        Instance of :class:`cmp.project.ProjectInfo` class
 
     section : string
         Stage section name
@@ -395,8 +395,8 @@ def get_anat_process_detail_json(project_info, section, detail):
 
     Parameters
     ----------
-    project_info : Instance(cmp.project.CMP_Project_Info)
-        Instance of :class:`cmp.project.CMP_Project_Info` class
+    project_info : Instance(cmp.project.ProjectInfo)
+        Instance of :class:`cmp.project.ProjectInfo` class
 
     section : string
         Stage section name
@@ -423,8 +423,8 @@ def get_dmri_process_detail_json(project_info, section, detail):
 
     Parameters
     ----------
-    project_info : Instance(cmp.project.CMP_Project_Info)
-        Instance of :class:`cmp.project.CMP_Project_Info` class
+    project_info : Instance(cmp.project.ProjectInfo)
+        Instance of :class:`cmp.project.ProjectInfo` class
 
     section : string
         Stage section name
@@ -446,8 +446,8 @@ def get_fmri_process_detail_json(project_info, section, detail):
 
     Parameters
     ----------
-    project_info : Instance(cmp.project.CMP_Project_Info)
-        Instance of :class:`cmp.project.CMP_Project_Info` class
+    project_info : Instance(cmp.project.ProjectInfo)
+        Instance of :class:`cmp.project.ProjectInfo` class
 
     section : string
         Stage section name

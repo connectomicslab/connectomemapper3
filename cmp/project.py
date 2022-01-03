@@ -19,15 +19,10 @@ from traits.api import *
 from bids import BIDSLayout
 
 # Own imports
-from cmtklib.bids.io import (
-    __cmp_directory__,
-    __nipype_directory__,
-    __freesurfer_directory__
-)
-from cmtklib.bids.utils import write_derivative_description
 from cmp.pipelines.anatomical import anatomical as Anatomical_pipeline
 from cmp.pipelines.diffusion import diffusion as Diffusion_pipeline
 from cmp.pipelines.functional import fMRI as FMRI_pipeline
+
 from cmtklib.config import (
     anat_load_config_json,
     anat_save_config,
@@ -36,6 +31,12 @@ from cmtklib.config import (
     fmri_load_config_json,
     fmri_save_config,
 )
+from cmtklib.bids.io import (
+    __cmp_directory__,
+    __nipype_directory__,
+    __freesurfer_directory__
+)
+from cmtklib.bids.utils import write_derivative_description
 
 # Ignore some warnings
 warnings.filterwarnings(

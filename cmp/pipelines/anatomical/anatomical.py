@@ -28,7 +28,7 @@ from cmp.stages.segmentation.segmentation import SegmentationStage
 from cmp.stages.parcellation.parcellation import ParcellationStage
 
 
-class Global_Configuration(HasTraits):
+class GlobalConfiguration(HasTraits):
     """Global pipeline configurations.
 
     Attributes
@@ -50,15 +50,6 @@ class Global_Configuration(HasTraits):
     subjects = List(trait=Str)
     subject = Str
     subject_session = Str
-
-
-class Check_Input_Notification(HasTraits):
-    message = Str
-    diffusion_imaging_model_options = List(["DSI", "DTI", "HARDI"])
-    diffusion_imaging_model = Str
-    diffusion_imaging_model_message = Str(
-        "\nMultiple diffusion inputs available. Please select desired diffusion modality."
-    )
 
 
 class AnatomicalPipeline(cmp_common.Pipeline):
@@ -84,7 +75,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
     derivatives_directory = Directory
     ordered_stage_list = ["Segmentation", "Parcellation"]
     custom_last_stage = Enum("Parcellation", ["Segmentation", "Parcellation"])
-    global_conf = Global_Configuration()
+    global_conf = GlobalConfiguration()
     config_file = Str
     flow = Instance(pe.Workflow)
 
@@ -93,7 +84,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
 
         Parameters
         ----------
-        project_info : cmp.project.CMP_Project_Info
+        project_info : cmp.project.ProjectInfo
             Instance of `CMP_Project_Info` object.
 
         See Also

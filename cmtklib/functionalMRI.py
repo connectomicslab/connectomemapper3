@@ -20,23 +20,23 @@ from nipype.interfaces.base import (
 )
 
 
-class Discard_tp_InputSpec(BaseInterfaceInputSpec):
+class DiscardTPInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc="Input 4D fMRI image")
 
     n_discard = Int(mandatory=True, desc="Number of n first frames to discard")
 
 
-class Discard_tp_OutputSpec(TraitedSpec):
+class DiscardTPOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc="Output 4D fMRI image with discarded frames")
 
 
-class Discard_tp(BaseInterface):
+class DiscardTP(BaseInterface):
     """Discards the n first time frame in functional MRI data.
 
     Examples
     --------
-    >>> from cmtklib.functionalMRI import Discard_tp
-    >>> discard = Discard_tp()
+    >>> from cmtklib.functionalMRI import DiscardTP
+    >>> discard = DiscardTP()
     >>> discard.inputs.base_dir = '/my_directory'
     >>> discard.inputs.in_file = '/path/to/sub-01_task-rest_desc-preproc_bold.nii.gz'
     >>> discard.inputs.n_discard = 5
@@ -44,8 +44,8 @@ class Discard_tp(BaseInterface):
 
     """
 
-    input_spec = Discard_tp_InputSpec
-    output_spec = Discard_tp_OutputSpec
+    input_spec = DiscardTPInputSpec
+    output_spec = DiscardTPOutputSpec
 
     def _run_interface(self, runtime):
         dataimg = nib.load(self.inputs.in_file)
@@ -75,7 +75,7 @@ class Discard_tp(BaseInterface):
         return outputs
 
 
-class Nuisance_InputSpec(BaseInterfaceInputSpec):
+class NuisanceRegressionInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, desc="Input fMRI volume")
 
     brainfile = File(desc="Eroded brain mask registered to fMRI space")
@@ -105,7 +105,7 @@ class Nuisance_InputSpec(BaseInterfaceInputSpec):
     )
 
 
-class Nuisance_OutputSpec(TraitedSpec):
+class NuisanceRegressionOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc="Output fMRI Volume")
 
     averageGlobal_npy = File(desc="Output of global regression in `.npy` format")
@@ -121,13 +121,13 @@ class Nuisance_OutputSpec(TraitedSpec):
     averageWM_mat = File(desc="Output matrix of WM regression")
 
 
-class Nuisance_regression(BaseInterface):
+class NuisanceRegression(BaseInterface):
     """Regress out nuisance signals (WM, CSF, movements) through GLM.
 
     Examples
     --------
-    >>> from cmtklib.functionalMRI import Nuisance_regression
-    >>> nuisance = Nuisance_regression()
+    >>> from cmtklib.functionalMRI import NuisanceRegression
+    >>> nuisance = NuisanceRegression()
     >>> nuisance.inputs.base_dir = '/my_directory'
     >>> nuisance.inputs.in_file = '/path/to/sub-01_task-rest_desc-preproc_bold.nii.gz'
     >>> nuisance.inputs.wm_file = '/path/to/sub-01_task-rest_desc-preproc_bold.nii.gz'
@@ -148,8 +148,8 @@ class Nuisance_regression(BaseInterface):
 
     """
 
-    input_spec = Nuisance_InputSpec
-    output_spec = Nuisance_OutputSpec
+    input_spec = NuisanceRegressionInputSpec
+    output_spec = NuisanceRegressionOutputSpec
 
     def _run_interface(self, runtime):
         # Output from previous preprocessing step
@@ -321,7 +321,7 @@ class Nuisance_regression(BaseInterface):
         return outputs
 
 
-class Detrending_InputSpec(BaseInterfaceInputSpec):
+class DetrendingInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc="fMRI volume to detrend")
 
     gm_file = InputMultiPath(
@@ -331,7 +331,7 @@ class Detrending_InputSpec(BaseInterfaceInputSpec):
     mode = Enum(["linear", "quadratic", "cubic"], desc="Detrending order")
 
 
-class Detrending_OutputSpec(TraitedSpec):
+class DetrendingOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc="Detrended fMRI volume")
 
 
@@ -354,8 +354,8 @@ class Detrending(BaseInterface):
 
     """
 
-    input_spec = Detrending_InputSpec
-    output_spec = Detrending_OutputSpec
+    input_spec = DetrendingInputSpec
+    output_spec = DetrendingOutputSpec
 
     def _run_interface(self, runtime):
         print("Linear detrending")
@@ -432,7 +432,7 @@ class Detrending(BaseInterface):
         return outputs
 
 
-class Scrubbing_InputSpec(BaseInterfaceInputSpec):
+class ScrubbingInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc="fMRI volume to scrubb")
 
     wm_mask = File(exists=True, desc="WM mask registered to fMRI space")
@@ -446,7 +446,7 @@ class Scrubbing_InputSpec(BaseInterfaceInputSpec):
     )
 
 
-class Scrubbing_OutputSpec(TraitedSpec):
+class ScrubbingOutputSpec(TraitedSpec):
     fd_mat = File(exists=True, desc="FD matrix for scrubbing")
 
     dvars_mat = File(exists=True, desc="DVARS matrix for scrubbing")
@@ -477,8 +477,8 @@ class Scrubbing(BaseInterface):
 
     """
 
-    input_spec = Scrubbing_InputSpec
-    output_spec = Scrubbing_OutputSpec
+    input_spec = ScrubbingInputSpec
+    output_spec = ScrubbingOutputSpec
 
     def _run_interface(self, runtime):
         print("Precompute FD and DVARS for scrubbing")

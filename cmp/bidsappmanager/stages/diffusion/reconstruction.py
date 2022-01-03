@@ -15,12 +15,12 @@ from traits.api import *
 from traitsui.api import *
 
 # Own imports
-from cmp.stages.diffusion.reconstruction import Dipy_recon_config, MRtrix_recon_config
+from cmp.stages.diffusion.reconstruction import DipyReconConfig, MRtrixReconConfig
 
 
 # Reconstruction configuration
-class Dipy_recon_configUI(Dipy_recon_config):
-    """Class that extends the :class:`Dipy_recon_config` with graphical components.
+class Dipy_recon_configUI(DipyReconConfig):
+    """Class that extends the :class:`DipyReconConfig` with graphical components.
 
     Attributes
     ----------
@@ -34,7 +34,7 @@ class Dipy_recon_configUI(Dipy_recon_config):
 
     See also
     ---------
-    cmp.stages.diffusion.reconstruction.Dipy_recon_config
+    cmp.stages.diffusion.reconstruction.DipyReconConfig
     """
 
     flip_table_axis = List(editor=CheckListEditor(values=["x", "y", "z"], cols=3))
@@ -84,8 +84,8 @@ class Dipy_recon_configUI(Dipy_recon_config):
     )
 
 
-class MRtrix_recon_configUI(MRtrix_recon_config):
-    """Class that extends the :class:`MRtrix_recon_config` with graphical components.
+class MRtrix_recon_configUI(MRtrixReconConfig):
+    """Class that extends the :class:`MRtrixReconConfig` with graphical components.
 
     Attributes
     ----------
@@ -99,7 +99,7 @@ class MRtrix_recon_configUI(MRtrix_recon_config):
 
     See also
     ---------
-    cmp.stages.diffusion.reconstruction.MRtrix_recon_config
+    cmp.stages.diffusion.reconstruction.MRtrixReconConfig
     """
 
     flip_table_axis = List(editor=CheckListEditor(values=["x", "y", "z"], cols=3))
