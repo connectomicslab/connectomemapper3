@@ -410,530 +410,7 @@ class RegistrationStage(Stage):
             # fmt:on
 
         if self.config.registration_mode == "ANTs":
-            # [SUB-STEP 1] Linear register "T1" onto"Target_FA_resampled"
-            # [1.1] Convert diffusion data to mrtrix format using rotated bvecs
-            mr_convert = pe.Node(
-                interface=MRConvert(
-                    out_filename="diffusion.mif", stride=[+1, +2, +3, +4]
-                ),
-                name="mr_convert",
-            )
-            mr_convert.inputs.quiet = True
-            mr_convert.inputs.force_writing = True
-
-            concatnode = pe.Node(interface=util.Merge(2), name="concatnode")
-
-            # fmt:off
-            flow.connect(
-                [
-                    (inputnode, concatnode, [("bvecs", "in1")]),
-                    (inputnode, concatnode, [("bvals", "in2")]),
-                    (concatnode, mr_convert, [(("out", convert_list_to_tuple), "grad_fsl")],),
-                    (inputnode, mr_convert, [("target", "in_file")]),
-                ]
-            )
-            # fmt:on
-
-            grad_mrtrix = pe.Node(
-                ExtractMRTrixGrad(out_grad_mrtrix="grad.txt"), name="extract_grad"
-            )
-
-            # fmt:off
-            flow.connect(
-                [
-                    (mr_convert, grad_mrtrix, [("converted", "in_file")]),
-                    (grad_mrtrix, outputnode, [("out_grad_mrtrix", "grad")]),
-                ]
-            )
-            # fmt:on
-
-            mr_convert_b0 = pe.Node(
-                interface=MRConvert(out_filename="b0.nii.gz", stride=[+1, +2, +3]),
-                name="mr_convert_b0",
-            )
-            mr_convert_b0.inputs.extract_at_axis = 3
-            mr_convert_b0.inputs.extract_at_coordinate = [0]
-
-            flow.connect([(inputnode, mr_convert_b0, [("target", "in_file")])])
-
-            dwi2tensor = pe.Node(
-                interface=DWI2Tensor(out_filename="dt_corrected.mif"), name="dwi2tensor"
-            )
-            dwi2tensor_unmasked = pe.Node(
-                interface=DWI2Tensor(out_filename="dt_corrected_unmasked.mif"),
-                name="dwi2tensor_unmasked",
-            )
-
-            tensor2FA = pe.Node(
-                interface=TensorMetrics(out_fa="fa_corrected.mif"), name="tensor2FA"
-            )
-            tensor2FA_unmasked = pe.Node(
-                interface=TensorMetrics(out_fa="fa_corrected_unmasked.mif"),
-                name="tensor2FA_unmasked",
-            )
-
-            mr_convert_FA = pe.Node(
-                interface=MRConvert(
-                    out_filename="fa_corrected.nii.gz", stride=[+1, +2, +3]
-                ),
-                name="mr_convert_FA",
-            )
-            mr_convert_FA_unmasked = pe.Node(
-                interface=MRConvert(
-                    out_filename="fa_corrected_unmasked.nii.gz", stride=[+1, +2, +3]
-                ),
-                name="mr_convert_FA_unmasked",
-            )
-
-            FA_noNaN = pe.Node(
-                interface=cmp_fsl.MathsCommand(
-                    out_file="fa_corrected_nonan.nii.gz", nan2zeros=True
-                ),
-                name="FA_noNaN",
-            )
-            FA_noNaN_unmasked = pe.Node(
-                interface=cmp_fsl.MathsCommand(
-                    out_file="fa_corrected_unmasked_nonan.nii.gz", nan2zeros=True
-                ),
-                name="FA_noNaN_unmasked",
-            )
-
-            # fmt:off
-            flow.connect(
-                [
-                    (mr_convert, dwi2tensor, [("converted", "in_file")]),
-                    (inputnode, dwi2tensor, [("target_mask", "in_mask_file")]),
-                    (dwi2tensor, tensor2FA, [("tensor", "in_file")]),
-                    (inputnode, tensor2FA, [("target_mask", "in_mask")]),
-                    (tensor2FA, mr_convert_FA, [("out_fa", "in_file")]),
-                    (mr_convert_FA, FA_noNaN, [("converted", "in_file")]),
-                    (mr_convert, dwi2tensor_unmasked, [("converted", "in_file")]),
-                    (dwi2tensor_unmasked, tensor2FA_unmasked, [("tensor", "in_file")]),
-                    (tensor2FA_unmasked, mr_convert_FA_unmasked, [("out_fa", "in_file")],),
-                    (mr_convert_FA_unmasked, FA_noNaN_unmasked, [("converted", "in_file")],),
-                ]
-            )
-            # fmt:on
-
-            b0_masking = pe.Node(
-                interface=ApplyMask(out_file="b0_masked.nii.gz"), name="b0_masking"
-            )
-
-            # fmt:off
-            flow.connect(
-                [
-                    (mr_convert_b0, b0_masking, [("converted", "in_file")]),
-                    (inputnode, b0_masking, [("target_mask", "mask_file")]),
-                ]
-            )
-            # fmt:on
-
-            # [1.2] Linear registration of the DW data to the T1 data
-            affine_registration = pe.Node(
-                interface=ants.Registration(), name="linear_registration"
-            )
-            affine_registration.inputs.collapse_output_transforms = True
-            affine_registration.inputs.initial_moving_transform_com = True
-            affine_registration.inputs.output_transform_prefix = "initial"
-            affine_registration.inputs.num_threads = 8
-            affine_registration.inputs.output_inverse_warped_image = True
-            affine_registration.inputs.output_warped_image = (
-                "linear_warped_image.nii.gz"
-            )
-            affine_registration.inputs.sigma_units = ["vox"] * 2
-            affine_registration.inputs.transforms = ["Rigid", "Affine"]
-
-            affine_registration.inputs.interpolation = self.config.ants_interpolation
-            if self.config.ants_interpolation == "BSpline":
-                affine_registration.inputs.interpolation_parameters = (
-                    self.config.ants_bspline_interpolation_parameters
-                )  # Default: (3,)
-            elif self.config.ants_interpolation == "Gaussian":
-                affine_registration.inputs.interpolation_parameters = (
-                    self.config.ants_gauss_interpolation_parameters
-                )  # Default: (5,5,)
-            elif self.config.ants_interpolation == "MultiLabel":
-                affine_registration.inputs.interpolation_parameters = (
-                    self.config.ants_multilab_interpolation_parameters
-                )  # Default: (5,5,)
-
-            affine_registration.inputs.winsorize_lower_quantile = (
-                self.config.ants_lower_quantile
-            )  # Default: 0.005
-            affine_registration.inputs.winsorize_upper_quantile = (
-                self.config.ants_upper_quantile
-            )  # Default: 0.995
-            affine_registration.inputs.convergence_threshold = [
-                self.config.ants_convergence_thresh
-            ] * 2  # Default: [1e-06]*2
-            affine_registration.inputs.convergence_window_size = [
-                self.config.ants_convergence_winsize
-            ] * 2  # Default: [10]*2
-            affine_registration.inputs.metric = [
-                self.config.ants_linear_cost,
-                self.config.ants_linear_cost,
-            ]  # Default: ['MI','MI']
-            affine_registration.inputs.metric_weight = [1.0] * 2
-            affine_registration.inputs.number_of_iterations = [
-                [1000, 500, 250, 100],
-                [1000, 500, 250, 100],
-            ]
-            affine_registration.inputs.radius_or_number_of_bins = [32, 32]
-            affine_registration.inputs.sampling_percentage = [
-                self.config.ants_linear_sampling_perc,
-                self.config.ants_linear_sampling_perc,
-            ]  # Default: [0.25, 0.25]
-            affine_registration.inputs.sampling_strategy = [
-                self.config.ants_linear_sampling_strategy,
-                self.config.ants_linear_sampling_strategy,
-            ]  # Default: ['Regular','Regular']
-            affine_registration.inputs.shrink_factors = [[8, 4, 2, 1]] * 2
-            affine_registration.inputs.smoothing_sigmas = [[3, 2, 1, 0]] * 2
-            affine_registration.inputs.transform_parameters = [
-                (self.config.ants_linear_gradient_step,),
-                (self.config.ants_linear_gradient_step,),
-            ]  # Default: [(0.1,),(0.1,)]
-            affine_registration.inputs.use_histogram_matching = True
-            if self.config.ants_perform_syn:
-                affine_registration.inputs.write_composite_transform = True
-            affine_registration.inputs.verbose = True
-
-            affine_registration.inputs.float = self.config.use_float_precision
-
-            # fmt:off
-            flow.connect(
-                [
-                    (b0_masking, affine_registration, [("out_file", "fixed_image")]),
-                    (inputnode, affine_registration, [("brain", "moving_image")])
-                ]
-            )
-            # fmt:on
-
-            SyN_registration = pe.Node(
-                interface=ants.Registration(), name="SyN_registration"
-            )
-
-            if self.config.ants_perform_syn:
-
-                SyN_registration.inputs.collapse_output_transforms = True
-                SyN_registration.inputs.write_composite_transform = False
-                SyN_registration.inputs.output_transform_prefix = "final"
-                SyN_registration.inputs.num_threads = 8
-                SyN_registration.inputs.output_inverse_warped_image = True
-                SyN_registration.inputs.output_warped_image = "Syn_warped_image.nii.gz"
-                SyN_registration.inputs.sigma_units = ["vox"] * 1
-                SyN_registration.inputs.transforms = ["SyN"]
-                SyN_registration.inputs.restrict_deformation = [[0, 1, 0]]
-
-                SyN_registration.inputs.interpolation = (
-                    self.config.ants_interpolation
-                )  # Default: 'BSpline'
-                if self.config.ants_interpolation == "BSpline":
-                    SyN_registration.inputs.interpolation_parameters = (
-                        self.config.ants_bspline_interpolation_parameters
-                    )  # Default: (3,)
-                elif self.config.ants_interpolation == "Gaussian":
-                    SyN_registration.inputs.interpolation_parameters = (
-                        self.config.ants_gauss_interpolation_parameters
-                    )  # Default: (5,5,)
-                elif self.config.ants_interpolation == "MultiLabel":
-                    SyN_registration.inputs.interpolation_parameters = (
-                        self.config.ants_multilab_interpolation_parameters
-                    )  # Default: (5,5,)
-
-                SyN_registration.inputs.winsorize_lower_quantile = (
-                    self.config.ants_lower_quantile
-                )  # Default: 0.005
-                SyN_registration.inputs.winsorize_upper_quantile = (
-                    self.config.ants_upper_quantile
-                )  # Default: 0.995
-                SyN_registration.inputs.convergence_threshold = [
-                    self.config.ants_convergence_thresh
-                ] * 1  # Default: [1e-06]*1
-                SyN_registration.inputs.convergence_window_size = [
-                    self.config.ants_convergence_winsize
-                ] * 1  # Default: [10]*1
-                SyN_registration.inputs.metric = [
-                    self.config.ants_nonlinear_cost
-                ]  # Default: ['CC']
-                SyN_registration.inputs.metric_weight = [1.0] * 1
-                SyN_registration.inputs.number_of_iterations = [[20]]
-                SyN_registration.inputs.radius_or_number_of_bins = [4]
-                SyN_registration.inputs.sampling_percentage = [1]
-                SyN_registration.inputs.sampling_strategy = ["None"]
-                SyN_registration.inputs.shrink_factors = [[1]] * 1
-                SyN_registration.inputs.smoothing_sigmas = [[0]] * 1
-                SyN_registration.inputs.transform_parameters = [
-                    (
-                        self.config.ants_nonlinear_gradient_step,
-                        self.config.ants_nonlinear_update_field_variance,
-                        self.config.ants_nonlinear_total_field_variance,
-                    )
-                ]  # Default: [(0.1, 3.0, 0.0)]
-                SyN_registration.inputs.use_histogram_matching = True
-                SyN_registration.inputs.verbose = True
-
-                SyN_registration.inputs.float = self.config.use_float_precision
-
-                # fmt:off
-                flow.connect(
-                    [
-                        (
-                            affine_registration,
-                            SyN_registration,
-                            [("composite_transform", "initial_moving_transform")],
-                        ),
-                        (b0_masking, SyN_registration, [("out_file", "fixed_image")]),
-                        (inputnode, SyN_registration, [("brain", "moving_image")])
-                    ]
-                )
-                # fmt:on
-
-            ants_applywarp_T1 = pe.Node(
-                interface=ants.ApplyTransforms(
-                    default_value=0, interpolation="Gaussian", out_postfix="_warped"
-                ),
-                name="apply_warp_T1",
-            )
-            ants_applywarp_brain = pe.Node(
-                interface=ants.ApplyTransforms(
-                    default_value=0, interpolation="Gaussian", out_postfix="_warped"
-                ),
-                name="apply_warp_brain",
-            )
-            ants_applywarp_brainmask = pe.Node(
-                interface=ants.ApplyTransforms(
-                    default_value=0,
-                    interpolation="NearestNeighbor",
-                    out_postfix="_warped",
-                ),
-                name="apply_warp_brainmask",
-            )
-            ants_applywarp_wm = pe.Node(
-                interface=ants.ApplyTransforms(
-                    default_value=0,
-                    interpolation="NearestNeighbor",
-                    out_postfix="_warped",
-                ),
-                name="apply_warp_wm",
-            )
-            ants_applywarp_rois = pe.Node(
-                interface=MultipleANTsApplyTransforms(
-                    interpolation="NearestNeighbor",
-                    default_value=0,
-                    out_postfix="_warped",
-                ),
-                name="apply_warp_roivs",
-            )
-
-            if self.config.act_tracking:
-                ants_applywarp_5tt = pe.Node(
-                    interface=ants.ApplyTransforms(
-                        default_value=0, interpolation="Gaussian", out_postfix="_warped"
-                    ),
-                    name="apply_warp_5tt",
-                )
-                ants_applywarp_5tt.inputs.dimension = 3
-                ants_applywarp_5tt.inputs.input_image_type = 3
-                ants_applywarp_5tt.inputs.float = True
-
-                if self.config.tracking_tool == "Dipy":
-                    ants_applywarp_pves = pe.Node(
-                        interface=MultipleANTsApplyTransforms(
-                            interpolation="Gaussian", default_value=0, out_postfix="_warped"
-                        ),
-                        name="apply_warp_pves",
-                    )
-
-                if self.config.gmwmi_seeding:
-                    ants_applywarp_gmwmi = pe.Node(
-                        interface=ants.ApplyTransforms(
-                            default_value=0, interpolation="Gaussian", out_postfix="_warped"
-                        ),
-                        name="apply_warp_gmwmi",
-                    )
-                    ants_applywarp_gmwmi.inputs.dimension = 3
-                    ants_applywarp_gmwmi.inputs.input_image_type = 3
-                    ants_applywarp_gmwmi.inputs.float = True
-
-            def reverse_order_transforms(transforms):
-                """Reverse the order of the transformations estimated by linear and SyN registration.
-
-                Parameters
-                ----------
-                transforms : list of File
-                    List of transformation files
-
-                Returns
-                -------
-                out_transforms : list of File
-                    Reversed list of transformation files
-                    (``transforms[::-1]``)
-                """
-                out_transforms = transforms[::-1]
-                return out_transforms
-
-            def extract_affine_transform(transforms):
-                """Extract affine transformation file from a list a transformation files generated by linear and SyN registration.
-
-                Parameters
-                ----------
-                transforms : list of File
-                    List of transformation files
-
-                Returns
-                -------
-                t : File
-                    Affine transformation file
-                """
-                for t in transforms:
-                    if "Affine" in t:
-                        return t
-
-            def extract_warp_field(transforms):
-                """Extract the warpfield file from a list a transformation files generated by linear and SyN registration.
-
-                Parameters
-                ----------
-                transforms : list of File
-                    List of transformation files
-
-                Returns
-                -------
-                t : File
-                    Warp field (Non-linear transformation) file
-                """
-                for t in transforms:
-                    if "Warp" in t:
-                        return t
-
-            if self.config.ants_perform_syn:
-                # fmt:off
-                flow.connect(
-                    [
-                        (SyN_registration, ants_applywarp_T1, [(("forward_transforms", reverse_order_transforms), "transforms")]),
-                        (SyN_registration, ants_applywarp_brain, [(("forward_transforms", reverse_order_transforms), "transforms")]),
-                        (SyN_registration, ants_applywarp_brainmask, [(("forward_transforms", reverse_order_transforms), "transforms")]),
-                        (SyN_registration, ants_applywarp_wm, [(("forward_transforms", reverse_order_transforms), "transforms")]),
-                        (SyN_registration, ants_applywarp_rois, [(("forward_transforms", reverse_order_transforms), "transforms")]),
-                        (SyN_registration, outputnode, [(("forward_transforms", extract_affine_transform), "affine_transform")]),
-                        (SyN_registration, outputnode, [(("forward_transforms", extract_warp_field), "warp_field")]),
-                    ]
-                )
-                # fmt:on
-                if self.config.act_tracking:
-                    # fmt:off
-                    flow.connect(
-                        [
-                            (SyN_registration, ants_applywarp_5tt, [(("forward_transforms", reverse_order_transforms), "transforms")]),
-                        ]
-                    )
-                    # fmt:on
-                    if self.config.tracking_tool == "Dipy":
-                        # fmt:off
-                        flow.connect(
-                            [
-                                (SyN_registration, ants_applywarp_pves, [(("forward_transforms", reverse_order_transforms), "transforms")]),
-                            ]
-                        )
-                        # fmt:on
-                    if self.config.gmwmi_seeding:
-                        # fmt:off
-                        flow.connect(
-                            [
-                                (SyN_registration, ants_applywarp_gmwmi, [(("forward_transforms", reverse_order_transforms), "transforms")]),
-                            ]
-                        )
-                        # fmt:on
-            else:
-                # fmt:off
-                flow.connect(
-                    [
-                        (affine_registration, ants_applywarp_T1, [(("forward_transforms", reverse_order_transforms), "transforms")]),
-                        (affine_registration, ants_applywarp_brain, [(("forward_transforms", reverse_order_transforms), "transforms")]),
-                        (affine_registration, ants_applywarp_brainmask, [(("forward_transforms", reverse_order_transforms), "transforms")]),
-                        (affine_registration, ants_applywarp_wm, [(("forward_transforms", reverse_order_transforms), "transforms")]),
-                        (affine_registration, ants_applywarp_rois, [(("forward_transforms", reverse_order_transforms), "transforms")]),
-                        (affine_registration, outputnode, [(("forward_transforms", extract_affine_transform), "affine_transform")]),
-                    ]
-                )
-                # fmt:on
-                if self.config.act_tracking:
-                    # fmt:off
-                    flow.connect(
-                        [
-                            (affine_registration, ants_applywarp_5tt, [(("forward_transforms", reverse_order_transforms), "transforms")])
-                        ]
-                    )
-                    # fmt:on
-                    if self.config.tracking_tool == "Dipy":
-                        # fmt:off
-                        flow.connect(
-                            [
-                                (affine_registration, ants_applywarp_pves, [(("forward_transforms", reverse_order_transforms), "transforms")])
-                            ]
-                        )
-                        # fmt:on
-                    if self.config.gmwmi_seeding:
-                        # fmt:off
-                        flow.connect(
-                            [
-                                (affine_registration, ants_applywarp_gmwmi, [(("forward_transforms", reverse_order_transforms), "transforms")])
-                            ]
-                        )
-                        # fmt:on
-
-            # fmt:off
-            flow.connect(
-                [
-                    (inputnode, ants_applywarp_T1, [("T1", "input_image")]),
-                    (mr_convert_b0, ants_applywarp_T1, [("converted", "reference_image")],),
-                    (ants_applywarp_T1, outputnode, [("output_image", "T1_registered_crop")],),
-                    (inputnode, ants_applywarp_brain, [("brain", "input_image")]),
-                    (mr_convert_b0, ants_applywarp_brain, [("converted", "reference_image")],),
-                    (ants_applywarp_brain, outputnode, [("output_image", "brain_registered_crop")],),
-                    (inputnode, ants_applywarp_brainmask, [("brain_mask", "input_image")],),
-                    (mr_convert_b0, ants_applywarp_brainmask, [("converted", "reference_image")],),
-                    (ants_applywarp_brainmask, outputnode, [("output_image", "brain_mask_registered_crop")],),
-                    (inputnode, ants_applywarp_wm, [("wm_mask", "input_image")]),
-                    (mr_convert_b0, ants_applywarp_wm, [("converted", "reference_image")],),
-                    (ants_applywarp_wm, outputnode, [("output_image", "wm_mask_registered_crop")],),
-                    (inputnode, ants_applywarp_rois, [("roi_volumes", "input_images")]),
-                    (mr_convert_b0, ants_applywarp_rois, [("converted", "reference_image")],),
-                    (ants_applywarp_rois, outputnode, [("output_images", "roi_volumes_registered_crop")],),
-                ]
-            )
-            # fmt:on
-            if self.config.act_tracking:
-                # fmt:off
-                flow.connect(
-                    [
-                        (inputnode, ants_applywarp_5tt, [("act_5TT", "input_image")]),
-                        (mr_convert_b0, ants_applywarp_5tt, [("converted", "reference_image")]),
-                        (ants_applywarp_5tt, outputnode, [("output_image", "act_5tt_registered_crop")]),
-                    ]
-                )
-                # fmt:on
-                if self.config.tracking_tool == "Dipy":
-                    # fmt:off
-                    flow.connect(
-                        [
-                            (inputnode, ants_applywarp_pves, [("partial_volume_files", "input_images")]),
-                            (mr_convert_b0, ants_applywarp_pves, [("converted", "reference_image")]),
-                            (ants_applywarp_pves, outputnode, [("output_images", "partial_volumes_registered_crop")])
-                        ]
-                    )
-                    # fmt:on
-                if self.config.gmwmi_seeding:
-                    # fmt:off
-                    flow.connect(
-                        [
-                            (inputnode, ants_applywarp_gmwmi, [("gmwmi", "input_image")]),
-                            (mr_convert_b0, ants_applywarp_gmwmi, [("converted", "reference_image")]),
-                            (ants_applywarp_gmwmi, outputnode, [("output_image", "gmwmi_registered_crop")]),
-                        ]
-                    )
-                    # fmt:on
+            flow = self.create_ants_workflow(flow, inputnode, outputnode)
 
         if self.config.registration_mode == "FSL (Linear)":
             fsl_flirt = pe.Node(
@@ -1530,6 +1007,559 @@ class RegistrationStage(Stage):
                         ]
                     )
                     # fmt:on
+
+    def create_ants_workflow(self, flow, inputnode, outputnode):
+        """Create the registration workflow using ANTS.
+
+        Parameters
+        ----------
+        flow : nipype.pipeline.engine.Workflow
+            The nipype.pipeline.engine.Workflow instance of the
+            Diffusion pipeline
+
+        inputnode : nipype.interfaces.utility.IdentityInterface
+            Identity interface describing the inputs of the stage
+
+        outputnode : nipype.interfaces.utility.IdentityInterface
+            Identity interface describing the outputs of the stage
+        """
+        # [SUB-STEP 1] Linear register "T1" onto"Target_FA_resampled"
+        # [1.1] Convert diffusion data to mrtrix format using rotated bvecs
+        mr_convert = pe.Node(
+            interface=MRConvert(
+                out_filename="diffusion.mif", stride=[+1, +2, +3, +4]
+            ),
+            name="mr_convert",
+        )
+        mr_convert.inputs.quiet = True
+        mr_convert.inputs.force_writing = True
+
+        concatnode = pe.Node(interface=util.Merge(2), name="concatnode")
+
+        # fmt:off
+        flow.connect(
+            [
+                (inputnode, concatnode, [("bvecs", "in1")]),
+                (inputnode, concatnode, [("bvals", "in2")]),
+                (concatnode, mr_convert, [(("out", convert_list_to_tuple), "grad_fsl")],),
+                (inputnode, mr_convert, [("target", "in_file")]),
+            ]
+        )
+        # fmt:on
+
+        grad_mrtrix = pe.Node(
+            ExtractMRTrixGrad(out_grad_mrtrix="grad.txt"), name="extract_grad"
+        )
+
+        # fmt:off
+        flow.connect(
+            [
+                (mr_convert, grad_mrtrix, [("converted", "in_file")]),
+                (grad_mrtrix, outputnode, [("out_grad_mrtrix", "grad")]),
+            ]
+        )
+        # fmt:on
+
+        mr_convert_b0 = pe.Node(
+            interface=MRConvert(out_filename="b0.nii.gz", stride=[+1, +2, +3]),
+            name="mr_convert_b0",
+        )
+        mr_convert_b0.inputs.extract_at_axis = 3
+        mr_convert_b0.inputs.extract_at_coordinate = [0]
+
+        flow.connect([(inputnode, mr_convert_b0, [("target", "in_file")])])
+
+        dwi2tensor = pe.Node(
+            interface=DWI2Tensor(out_filename="dt_corrected.mif"), name="dwi2tensor"
+        )
+        dwi2tensor_unmasked = pe.Node(
+            interface=DWI2Tensor(out_filename="dt_corrected_unmasked.mif"),
+            name="dwi2tensor_unmasked",
+        )
+
+        tensor2FA = pe.Node(
+            interface=TensorMetrics(out_fa="fa_corrected.mif"), name="tensor2FA"
+        )
+        tensor2FA_unmasked = pe.Node(
+            interface=TensorMetrics(out_fa="fa_corrected_unmasked.mif"),
+            name="tensor2FA_unmasked",
+        )
+
+        mr_convert_FA = pe.Node(
+            interface=MRConvert(
+                out_filename="fa_corrected.nii.gz", stride=[+1, +2, +3]
+            ),
+            name="mr_convert_FA",
+        )
+        mr_convert_FA_unmasked = pe.Node(
+            interface=MRConvert(
+                out_filename="fa_corrected_unmasked.nii.gz", stride=[+1, +2, +3]
+            ),
+            name="mr_convert_FA_unmasked",
+        )
+
+        FA_noNaN = pe.Node(
+            interface=cmp_fsl.MathsCommand(
+                out_file="fa_corrected_nonan.nii.gz", nan2zeros=True
+            ),
+            name="FA_noNaN",
+        )
+        FA_noNaN_unmasked = pe.Node(
+            interface=cmp_fsl.MathsCommand(
+                out_file="fa_corrected_unmasked_nonan.nii.gz", nan2zeros=True
+            ),
+            name="FA_noNaN_unmasked",
+        )
+
+        # fmt:off
+        flow.connect(
+            [
+                (mr_convert, dwi2tensor, [("converted", "in_file")]),
+                (inputnode, dwi2tensor, [("target_mask", "in_mask_file")]),
+                (dwi2tensor, tensor2FA, [("tensor", "in_file")]),
+                (inputnode, tensor2FA, [("target_mask", "in_mask")]),
+                (tensor2FA, mr_convert_FA, [("out_fa", "in_file")]),
+                (mr_convert_FA, FA_noNaN, [("converted", "in_file")]),
+                (mr_convert, dwi2tensor_unmasked, [("converted", "in_file")]),
+                (dwi2tensor_unmasked, tensor2FA_unmasked, [("tensor", "in_file")]),
+                (tensor2FA_unmasked, mr_convert_FA_unmasked, [("out_fa", "in_file")],),
+                (mr_convert_FA_unmasked, FA_noNaN_unmasked, [("converted", "in_file")],),
+            ]
+        )
+        # fmt:on
+
+        b0_masking = pe.Node(
+            interface=ApplyMask(out_file="b0_masked.nii.gz"), name="b0_masking"
+        )
+
+        # fmt:off
+        flow.connect(
+            [
+                (mr_convert_b0, b0_masking, [("converted", "in_file")]),
+                (inputnode, b0_masking, [("target_mask", "mask_file")]),
+            ]
+        )
+        # fmt:on
+
+        # [1.2] Linear registration of the DW data to the T1 data
+        affine_registration = pe.Node(
+            interface=ants.Registration(), name="linear_registration"
+        )
+        affine_registration.inputs.collapse_output_transforms = True
+        affine_registration.inputs.initial_moving_transform_com = True
+        affine_registration.inputs.output_transform_prefix = "initial"
+        affine_registration.inputs.num_threads = 8
+        affine_registration.inputs.output_inverse_warped_image = True
+        affine_registration.inputs.output_warped_image = (
+                "linear_warped_image.nii.gz"
+        )
+        affine_registration.inputs.sigma_units = ["vox"] * 2
+        affine_registration.inputs.transforms = ["Rigid", "Affine"]
+
+        affine_registration.inputs.interpolation = self.config.ants_interpolation
+        if self.config.ants_interpolation == "BSpline":
+            affine_registration.inputs.interpolation_parameters = (
+                    self.config.ants_bspline_interpolation_parameters
+            )  # Default: (3,)
+        elif self.config.ants_interpolation == "Gaussian":
+            affine_registration.inputs.interpolation_parameters = (
+                    self.config.ants_gauss_interpolation_parameters
+            )  # Default: (5,5,)
+        elif self.config.ants_interpolation == "MultiLabel":
+            affine_registration.inputs.interpolation_parameters = (
+                    self.config.ants_multilab_interpolation_parameters
+            )  # Default: (5,5,)
+
+        affine_registration.inputs.winsorize_lower_quantile = (self.config.ants_lower_quantile)  # Default: 0.005
+        affine_registration.inputs.winsorize_upper_quantile = (self.config.ants_upper_quantile)  # Default: 0.995
+        affine_registration.inputs.convergence_threshold = [self.config.ants_convergence_thresh] * 2  # Default: [1e-06]*2
+        affine_registration.inputs.convergence_window_size = [self.config.ants_convergence_winsize] * 2  # Default: [10]*2
+        affine_registration.inputs.metric = [
+            self.config.ants_linear_cost,
+            self.config.ants_linear_cost,
+        ]  # Default: ['MI','MI']
+        affine_registration.inputs.metric_weight = [1.0] * 2
+        affine_registration.inputs.number_of_iterations = [
+            [1000, 500, 250, 100],
+            [1000, 500, 250, 100],
+        ]
+        affine_registration.inputs.radius_or_number_of_bins = [32, 32]
+        affine_registration.inputs.sampling_percentage = [
+            self.config.ants_linear_sampling_perc,
+            self.config.ants_linear_sampling_perc,
+        ]  # Default: [0.25, 0.25]
+        affine_registration.inputs.sampling_strategy = [
+            self.config.ants_linear_sampling_strategy,
+            self.config.ants_linear_sampling_strategy,
+        ]  # Default: ['Regular','Regular']
+        affine_registration.inputs.shrink_factors = [[8, 4, 2, 1]] * 2
+        affine_registration.inputs.smoothing_sigmas = [[3, 2, 1, 0]] * 2
+        affine_registration.inputs.transform_parameters = [
+            (self.config.ants_linear_gradient_step,),
+            (self.config.ants_linear_gradient_step,),
+        ]  # Default: [(0.1,),(0.1,)]
+        affine_registration.inputs.use_histogram_matching = True
+        if self.config.ants_perform_syn:
+            affine_registration.inputs.write_composite_transform = True
+        affine_registration.inputs.verbose = True
+
+        affine_registration.inputs.float = self.config.use_float_precision
+
+        # fmt:off
+        flow.connect(
+            [
+                (b0_masking, affine_registration, [("out_file", "fixed_image")]),
+                (inputnode, affine_registration, [("brain", "moving_image")])
+            ]
+        )
+        # fmt:on
+
+        SyN_registration = pe.Node(
+                interface=ants.Registration(), name="SyN_registration"
+        )
+
+        if self.config.ants_perform_syn:
+
+            SyN_registration.inputs.collapse_output_transforms = True
+            SyN_registration.inputs.write_composite_transform = False
+            SyN_registration.inputs.output_transform_prefix = "final"
+            SyN_registration.inputs.num_threads = 8
+            SyN_registration.inputs.output_inverse_warped_image = True
+            SyN_registration.inputs.output_warped_image = "Syn_warped_image.nii.gz"
+            SyN_registration.inputs.sigma_units = ["vox"] * 1
+            SyN_registration.inputs.transforms = ["SyN"]
+            SyN_registration.inputs.restrict_deformation = [[0, 1, 0]]
+
+            SyN_registration.inputs.interpolation = (
+                    self.config.ants_interpolation
+            )  # Default: 'BSpline'
+            if self.config.ants_interpolation == "BSpline":
+                SyN_registration.inputs.interpolation_parameters = (
+                        self.config.ants_bspline_interpolation_parameters
+                )  # Default: (3,)
+            elif self.config.ants_interpolation == "Gaussian":
+                SyN_registration.inputs.interpolation_parameters = (
+                        self.config.ants_gauss_interpolation_parameters
+                )  # Default: (5,5,)
+            elif self.config.ants_interpolation == "MultiLabel":
+                SyN_registration.inputs.interpolation_parameters = (
+                        self.config.ants_multilab_interpolation_parameters
+                )  # Default: (5,5,)
+
+            SyN_registration.inputs.winsorize_lower_quantile = (self.config.ants_lower_quantile)  # Default: 0.005
+            SyN_registration.inputs.winsorize_upper_quantile = (self.config.ants_upper_quantile)  # Default: 0.995
+            SyN_registration.inputs.convergence_threshold = [self.config.ants_convergence_thresh] * 1  # Default: [1e-06]*1
+            SyN_registration.inputs.convergence_window_size = [self.config.ants_convergence_winsize] * 1  # Default: [10]*1
+            SyN_registration.inputs.metric = [self.config.ants_nonlinear_cost]  # Default: ['CC']
+            SyN_registration.inputs.metric_weight = [1.0] * 1
+            SyN_registration.inputs.number_of_iterations = [[20]]
+            SyN_registration.inputs.radius_or_number_of_bins = [4]
+            SyN_registration.inputs.sampling_percentage = [1]
+            SyN_registration.inputs.sampling_strategy = ["None"]
+            SyN_registration.inputs.shrink_factors = [[1]] * 1
+            SyN_registration.inputs.smoothing_sigmas = [[0]] * 1
+            SyN_registration.inputs.transform_parameters = [
+                (
+                    self.config.ants_nonlinear_gradient_step,
+                    self.config.ants_nonlinear_update_field_variance,
+                    self.config.ants_nonlinear_total_field_variance,
+                )
+            ]  # Default: [(0.1, 3.0, 0.0)]
+            SyN_registration.inputs.use_histogram_matching = True
+            SyN_registration.inputs.verbose = True
+
+            SyN_registration.inputs.float = self.config.use_float_precision
+
+            # fmt:off
+            flow.connect(
+                [
+                    (affine_registration, SyN_registration, [("composite_transform", "initial_moving_transform")]),
+                    (b0_masking, SyN_registration, [("out_file", "fixed_image")]),
+                    (inputnode, SyN_registration, [("brain", "moving_image")])
+                ]
+            )
+            # fmt:on
+
+        ants_applywarp_T1 = pe.Node(
+            interface=ants.ApplyTransforms(
+                default_value=0, interpolation="Gaussian", out_postfix="_warped"
+            ),
+            name="apply_warp_T1",
+        )
+        ants_applywarp_brain = pe.Node(
+            interface=ants.ApplyTransforms(
+                default_value=0, interpolation="Gaussian", out_postfix="_warped"
+            ),
+            name="apply_warp_brain",
+        )
+        ants_applywarp_brainmask = pe.Node(
+            interface=ants.ApplyTransforms(
+                default_value=0,
+                interpolation="NearestNeighbor",
+                out_postfix="_warped",
+            ),
+            name="apply_warp_brainmask",
+        )
+        ants_applywarp_wm = pe.Node(
+                interface=ants.ApplyTransforms(
+                        default_value=0,
+                        interpolation="NearestNeighbor",
+                        out_postfix="_warped",
+                ),
+                name="apply_warp_wm",
+        )
+        ants_applywarp_rois = pe.Node(
+                interface=MultipleANTsApplyTransforms(
+                        interpolation="NearestNeighbor",
+                        default_value=0,
+                        out_postfix="_warped",
+                ),
+                name="apply_warp_roivs",
+        )
+
+        if self.config.act_tracking:
+            ants_applywarp_5tt = pe.Node(
+                    interface=ants.ApplyTransforms(
+                            default_value=0, interpolation="Gaussian", out_postfix="_warped"
+                    ),
+                    name="apply_warp_5tt",
+            )
+            ants_applywarp_5tt.inputs.dimension = 3
+            ants_applywarp_5tt.inputs.input_image_type = 3
+            ants_applywarp_5tt.inputs.float = True
+
+            if self.config.tracking_tool == "Dipy":
+                ants_applywarp_pves = pe.Node(
+                        interface=MultipleANTsApplyTransforms(
+                                interpolation="Gaussian", default_value=0, out_postfix="_warped"
+                        ),
+                        name="apply_warp_pves",
+                )
+
+            if self.config.gmwmi_seeding:
+                ants_applywarp_gmwmi = pe.Node(
+                        interface=ants.ApplyTransforms(
+                                default_value=0, interpolation="Gaussian", out_postfix="_warped"
+                        ),
+                        name="apply_warp_gmwmi",
+                )
+                ants_applywarp_gmwmi.inputs.dimension = 3
+                ants_applywarp_gmwmi.inputs.input_image_type = 3
+                ants_applywarp_gmwmi.inputs.float = True
+
+        def reverse_order_transforms(transforms):
+            """Reverse the order of the transformations estimated by linear and SyN registration.
+
+            Parameters
+            ----------
+            transforms : list of File
+                List of transformation files
+
+            Returns
+            -------
+            out_transforms : list of File
+                Reversed list of transformation files
+                (``transforms[::-1]``)
+            """
+            out_transforms = transforms[::-1]
+            return out_transforms
+
+        def extract_affine_transform(transforms):
+            """Extract affine transformation file from a list a transformation files generated by linear and SyN registration.
+
+            Parameters
+            ----------
+            transforms : list of File
+                List of transformation files
+
+            Returns
+            -------
+            t : File
+                Affine transformation file
+            """
+            for t in transforms:
+                if "Affine" in t:
+                    return t
+
+        def extract_warp_field(transforms):
+            """Extract the warpfield file from a list a transformation files generated by linear and SyN registration.
+
+            Parameters
+            ----------
+            transforms : list of File
+                List of transformation files
+
+            Returns
+            -------
+            t : File
+                Warp field (Non-linear transformation) file
+            """
+            for t in transforms:
+                if "Warp" in t:
+                    return t
+
+        if self.config.ants_perform_syn:
+            # fmt:off
+            flow.connect(
+                [
+                    (SyN_registration, ants_applywarp_T1, [(("forward_transforms", reverse_order_transforms), "transforms")]),
+                    (SyN_registration, ants_applywarp_brain, [(("forward_transforms", reverse_order_transforms), "transforms")]),
+                    (SyN_registration, ants_applywarp_brainmask, [(("forward_transforms", reverse_order_transforms), "transforms")]),
+                    (SyN_registration, ants_applywarp_wm, [(("forward_transforms", reverse_order_transforms), "transforms")]),
+                    (SyN_registration, ants_applywarp_rois, [(("forward_transforms", reverse_order_transforms), "transforms")]),
+                    (SyN_registration, outputnode, [(("forward_transforms", extract_affine_transform), "affine_transform")]),
+                    (SyN_registration, outputnode, [(("forward_transforms", extract_warp_field), "warp_field")]),
+                ]
+            )
+            # fmt:on
+            if self.config.act_tracking:
+                # fmt:off
+                flow.connect(
+                    [
+                        (SyN_registration, ants_applywarp_5tt, [(("forward_transforms", reverse_order_transforms), "transforms")]),
+                    ]
+                )
+                # fmt:on
+                if self.config.tracking_tool == "Dipy":
+                    # fmt:off
+                    flow.connect(
+                        [
+                            (SyN_registration, ants_applywarp_pves, [(("forward_transforms", reverse_order_transforms), "transforms")]),
+                        ]
+                    )
+                    # fmt:on
+                if self.config.gmwmi_seeding:
+                    # fmt:off
+                    flow.connect(
+                        [
+                            (SyN_registration, ants_applywarp_gmwmi, [(("forward_transforms", reverse_order_transforms), "transforms")]),
+                        ]
+                    )
+                    # fmt:on
+        else:
+            # fmt:off
+            flow.connect(
+                [
+                    (affine_registration, ants_applywarp_T1, [(("forward_transforms", reverse_order_transforms), "transforms")]),
+                    (affine_registration, ants_applywarp_brain, [(("forward_transforms", reverse_order_transforms), "transforms")]),
+                    (affine_registration, ants_applywarp_brainmask, [(("forward_transforms", reverse_order_transforms), "transforms")]),
+                    (affine_registration, ants_applywarp_wm, [(("forward_transforms", reverse_order_transforms), "transforms")]),
+                    (affine_registration, ants_applywarp_rois, [(("forward_transforms", reverse_order_transforms), "transforms")]),
+                    (affine_registration, outputnode, [(("forward_transforms", extract_affine_transform), "affine_transform")]),
+                ]
+            )
+            # fmt:on
+            if self.config.act_tracking:
+                # fmt:off
+                flow.connect(
+                    [
+                        (affine_registration, ants_applywarp_5tt, [(("forward_transforms", reverse_order_transforms), "transforms")])
+                    ]
+                )
+                # fmt:on
+                if self.config.tracking_tool == "Dipy":
+                    # fmt:off
+                    flow.connect(
+                        [
+                           (affine_registration, ants_applywarp_pves, [(("forward_transforms", reverse_order_transforms), "transforms")])
+                        ]
+                    )
+                    # fmt:on
+                if self.config.gmwmi_seeding:
+                    # fmt:off
+                    flow.connect(
+                        [
+                            (affine_registration, ants_applywarp_gmwmi, [(("forward_transforms", reverse_order_transforms), "transforms")])
+                        ]
+                    )
+                    # fmt:on
+
+        # fmt:off
+        flow.connect(
+            [
+                (inputnode, ants_applywarp_T1, [("T1", "input_image")]),
+                (mr_convert_b0, ants_applywarp_T1, [("converted", "reference_image")],),
+                (ants_applywarp_T1, outputnode, [("output_image", "T1_registered_crop")],),
+                (inputnode, ants_applywarp_brain, [("brain", "input_image")]),
+                (mr_convert_b0, ants_applywarp_brain, [("converted", "reference_image")],),
+                (ants_applywarp_brain, outputnode, [("output_image", "brain_registered_crop")],),
+                (inputnode, ants_applywarp_brainmask, [("brain_mask", "input_image")],),
+                (mr_convert_b0, ants_applywarp_brainmask, [("converted", "reference_image")],),
+                (ants_applywarp_brainmask, outputnode, [("output_image", "brain_mask_registered_crop")],),
+                (inputnode, ants_applywarp_wm, [("wm_mask", "input_image")]),
+                (mr_convert_b0, ants_applywarp_wm, [("converted", "reference_image")],),
+                (ants_applywarp_wm, outputnode, [("output_image", "wm_mask_registered_crop")],),
+                (inputnode, ants_applywarp_rois, [("roi_volumes", "input_images")]),
+                (mr_convert_b0, ants_applywarp_rois, [("converted", "reference_image")],),
+                (ants_applywarp_rois, outputnode, [("output_images", "roi_volumes_registered_crop")],),
+            ]
+        )
+        # fmt:on
+        if self.config.act_tracking:
+            # fmt:off
+            flow.connect(
+                [
+                    (inputnode, ants_applywarp_5tt, [("act_5TT", "input_image")]),
+                    (mr_convert_b0, ants_applywarp_5tt, [("converted", "reference_image")]),
+                    (ants_applywarp_5tt, outputnode, [("output_image", "act_5tt_registered_crop")]),
+                ]
+            )
+            # fmt:on
+            if self.config.tracking_tool == "Dipy":
+                # fmt:off
+                flow.connect(
+                    [
+                        (inputnode, ants_applywarp_pves, [("partial_volume_files", "input_images")]),
+                        (mr_convert_b0, ants_applywarp_pves, [("converted", "reference_image")]),
+                        (ants_applywarp_pves, outputnode, [("output_images", "partial_volumes_registered_crop")])
+                    ]
+                )
+                # fmt:on
+            if self.config.gmwmi_seeding:
+                # fmt:off
+                flow.connect(
+                    [
+                        (inputnode, ants_applywarp_gmwmi, [("gmwmi", "input_image")]),
+                        (mr_convert_b0, ants_applywarp_gmwmi, [("converted", "reference_image")]),
+                        (ants_applywarp_gmwmi, outputnode, [("output_image", "gmwmi_registered_crop")]),
+                    ]
+                )
+                # fmt:on
+        return flow
+
+    # def create_flirt_workflow(self, flow, inputnode, outputnode):
+    #     """Create the workflow of the registration stage using FSL FLIRT.
+    #
+    #     Parameters
+    #     ----------
+    #     flow : nipype.pipeline.engine.Workflow
+    #         The nipype.pipeline.engine.Workflow instance of either the
+    #         Diffusion pipeline or the fMRI pipeline
+    #
+    #     inputnode : nipype.interfaces.utility.IdentityInterface
+    #         Identity interface describing the inputs of the stage
+    #
+    #     outputnode : nipype.interfaces.utility.IdentityInterface
+    #         Identity interface describing the outputs of the stage
+    #     """
+    #     return NotImplementedError
+    #
+    # def create_bbregister_workflow(self, flow, inputnode, outputnode):
+    #     """Create the workflow of the registration stage using FreeSurfer BBRegister.
+    #
+    #     Parameters
+    #     ----------
+    #     flow : nipype.pipeline.engine.Workflow
+    #         The nipype.pipeline.engine.Workflow instance of the
+    #         fMRI pipeline
+    #
+    #     inputnode : nipype.interfaces.utility.IdentityInterface
+    #         Identity interface describing the inputs of the stage
+    #
+    #     outputnode : nipype.interfaces.utility.IdentityInterface
+    #         Identity interface describing the outputs of the stage
+    #     """
+    #     return NotImplementedError
 
     def define_inspect_outputs(self):
         """Update the `inspect_outputs` class attribute.
