@@ -372,14 +372,12 @@ class RegistrationStage(Stage):
         outputnode : nipype.interfaces.utility.IdentityInterface
             Identity interface describing the outputs of the stage
         """
-        if self.config.registration_mode == "ANTs":
-            flow = self.create_ants_workflow(flow, inputnode, outputnode)
-
-        if self.config.registration_mode == "FSL (Linear)":
-            flow = self.create_flirt_workflow(flow, inputnode, outputnode)
-
         if (self.config.pipeline == "fMRI") and (self.config.registration_mode == "BBregister (FS)"):
             flow = self.create_bbregister_workflow(flow, inputnode, outputnode)
+        elif self.config.registration_mode == "ANTs":
+            flow = self.create_ants_workflow(flow, inputnode, outputnode)
+        elif self.config.registration_mode == "FSL (Linear)":
+            flow = self.create_flirt_workflow(flow, inputnode, outputnode)
 
         return flow
 
@@ -901,6 +899,16 @@ class RegistrationStage(Stage):
                     ]
                 )
                 # fmt:on
+
+        # fmt:off
+        flow.connect(
+            [
+                (inputnode, outputnode, [("target", "target_epicorrected")]),
+                (inputnode, outputnode, [("bvals", "bvals"),
+                                         ("bvecs", "bvecs")]),
+            ]
+        )
+        # fmt:on
         return flow
 
     def create_flirt_workflow(self, flow, inputnode, outputnode):
