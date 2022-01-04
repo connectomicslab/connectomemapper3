@@ -1100,12 +1100,6 @@ nipype-1.7.0/sub-01/ses-01/diffusion_pipeline/registration_stage/dwi2tensor_unma
 nipype-1.7.0/sub-01/ses-01/diffusion_pipeline/registration_stage/dwi2tensor_unmasked/_node.pklz
 nipype-1.7.0/sub-01/ses-01/diffusion_pipeline/registration_stage/dwi2tensor_unmasked/_report/report.rst
 nipype-1.7.0/sub-01/ses-01/diffusion_pipeline/registration_stage/dwi2tensor_unmasked/result_dwi2tensor_unmasked.pklz
-nipype-1.7.0/sub-01/ses-01/diffusion_pipeline/registration_stage/extract_first/command.txt
-nipype-1.7.0/sub-01/ses-01/diffusion_pipeline/registration_stage/extract_first/first.nii.gz
-nipype-1.7.0/sub-01/ses-01/diffusion_pipeline/registration_stage/extract_first/_inputs.pklz
-nipype-1.7.0/sub-01/ses-01/diffusion_pipeline/registration_stage/extract_first/_node.pklz
-nipype-1.7.0/sub-01/ses-01/diffusion_pipeline/registration_stage/extract_first/_report/report.rst
-nipype-1.7.0/sub-01/ses-01/diffusion_pipeline/registration_stage/extract_first/result_extract_first.pklz
 nipype-1.7.0/sub-01/ses-01/diffusion_pipeline/registration_stage/extract_grad/command.txt
 nipype-1.7.0/sub-01/ses-01/diffusion_pipeline/registration_stage/extract_grad/grad.txt
 nipype-1.7.0/sub-01/ses-01/diffusion_pipeline/registration_stage/extract_grad/_inputs.pklz
@@ -1167,12 +1161,6 @@ nipype-1.7.0/sub-01/ses-01/diffusion_pipeline/registration_stage/SyN_registratio
 nipype-1.7.0/sub-01/ses-01/diffusion_pipeline/registration_stage/SyN_registration/_report/report.rst
 nipype-1.7.0/sub-01/ses-01/diffusion_pipeline/registration_stage/SyN_registration/result_SyN_registration.pklz
 nipype-1.7.0/sub-01/ses-01/diffusion_pipeline/registration_stage/SyN_registration/Syn_warped_image.nii.gz
-nipype-1.7.0/sub-01/ses-01/diffusion_pipeline/registration_stage/target_resample/command.txt
-nipype-1.7.0/sub-01/ses-01/diffusion_pipeline/registration_stage/target_resample/_inputs.pklz
-nipype-1.7.0/sub-01/ses-01/diffusion_pipeline/registration_stage/target_resample/_node.pklz
-nipype-1.7.0/sub-01/ses-01/diffusion_pipeline/registration_stage/target_resample/_report/report.rst
-nipype-1.7.0/sub-01/ses-01/diffusion_pipeline/registration_stage/target_resample/result_target_resample.pklz
-nipype-1.7.0/sub-01/ses-01/diffusion_pipeline/registration_stage/target_resample/target_first.nii.gz
 nipype-1.7.0/sub-01/ses-01/diffusion_pipeline/registration_stage/tensor2FA/command.txt
 nipype-1.7.0/sub-01/ses-01/diffusion_pipeline/registration_stage/tensor2FA/fa_corrected.mif
 nipype-1.7.0/sub-01/ses-01/diffusion_pipeline/registration_stage/tensor2FA/_inputs.pklz
