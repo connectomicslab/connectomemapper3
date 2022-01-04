@@ -4,5 +4,4 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-""" EEG pipeline Class definition
-"""
+"""Module that provides the definition of all classes, functions, and variables dedicated to the GUI of Connectome Mapper 3."""

@@ -1,4 +1,4 @@
-# Copyright (C) 2009-2021, Ecole Polytechnique Federale de Lausanne (EPFL) and
+# Copyright (C) 2009-2022, Ecole Polytechnique Federale de Lausanne (EPFL) and
 # Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland, and CMP3 contributors
 # All rights reserved.
 #
@@ -27,7 +27,7 @@ from cmtklib.diffusion import Tck2Trk
 iflogger = logging.getLogger("nipype.interface")
 
 
-class Dipy_tracking_config(HasTraits):
+class DipyTrackingConfig(HasTraits):
     """Class used to store Dipy diffusion reconstruction sub-workflow configuration parameters.
 
     Attributes
@@ -160,7 +160,7 @@ class Dipy_tracking_config(HasTraits):
             self.seed_from_gmwmi = False
 
 
-class MRtrix_tracking_config(HasTraits):
+class MRtrixTrackingConfig(HasTraits):
     """Class used to store Dipy diffusion reconstruction sub-workflow configuration parameters.
 
     Attributes
@@ -303,7 +303,7 @@ def create_dipy_tracking_flow(config):
 
     Parameters
     ----------
-    config : Dipy_tracking_config
+    config : DipyTrackingConfig
         Sub-workflow configuration object
 
     Returns
@@ -470,7 +470,7 @@ def create_mrtrix_tracking_flow(config):
 
     Parameters
     ----------
-    config : MRtrix_tracking_config
+    config : MRtrixTrackingConfig
         Sub-workflow configuration object
 
     Returns

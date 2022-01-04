@@ -1,4 +1,4 @@
-# Copyright (C) 2009-2021, Ecole Polytechnique Federale de Lausanne (EPFL) and
+# Copyright (C) 2009-2022, Ecole Polytechnique Federale de Lausanne (EPFL) and
 # Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland, and CMP3 contributors
 # All rights reserved.
 #
@@ -24,7 +24,7 @@ from cmp.stages.preprocessing.preprocessing import PreprocessingStage
 from cmp.stages.registration.registration import RegistrationStage
 
 
-class Global_Configuration(HasTraits):
+class GlobalConfiguration(HasTraits):
     """Global pipeline configurations.
 
     Attributes
@@ -90,7 +90,7 @@ class DiffusionPipeline(Pipeline):
     custom_atlas_name = Str
     custom_atlas_res = Str
     atlas_info = Dict()
-    global_conf = Global_Configuration()
+    global_conf = GlobalConfiguration()
     config_file = Str
 
     def __init__(self, project_info):
@@ -98,7 +98,7 @@ class DiffusionPipeline(Pipeline):
 
         Parameters
         ----------
-        project_info : cmp.project.CMP_Project_Info
+        project_info : cmp.project.ProjectInfo
             Instance of `CMP_Project_Info` object.
 
         See Also

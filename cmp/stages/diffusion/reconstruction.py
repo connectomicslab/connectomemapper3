@@ -1,4 +1,4 @@
-# Copyright (C) 2009-2021, Ecole Polytechnique Federale de Lausanne (EPFL) and
+# Copyright (C) 2009-2022, Ecole Polytechnique Federale de Lausanne (EPFL) and
 # Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland, and CMP3 contributors
 # All rights reserved.
 #
@@ -39,7 +39,7 @@ from cmtklib.interfaces.dipy import DTIEstimateResponseSH, CSD, SHORE, MAPMRI
 iflogger = logging.getLogger("nipype.interface")
 
 
-class Dipy_recon_config(HasTraits):
+class DipyReconConfig(HasTraits):
     """Class used to store Dipy diffusion reconstruction sub-workflow configuration parameters.
 
     Attributes
@@ -234,7 +234,7 @@ class Dipy_recon_config(HasTraits):
             }
 
 
-class MRtrix_recon_config(HasTraits):
+class MRtrixReconConfig(HasTraits):
     """Class used to store Dipy diffusion reconstruction sub-workflow configuration parameters.
 
     Attributes
@@ -310,7 +310,7 @@ def create_dipy_recon_flow(config):
 
     Parameters
     ----------
-    config : Dipy_recon_config
+    config : DipyReconConfig
         Workflow configuration
 
     Returns
@@ -526,7 +526,7 @@ def create_mrtrix_recon_flow(config):
 
     Parameters
     ----------
-    config : Dipy_recon_config
+    config : DipyReconConfig
         Workflow configuration
 
     Returns

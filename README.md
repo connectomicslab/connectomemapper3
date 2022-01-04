@@ -12,14 +12,28 @@ Connectome Mapper 3 is an open-source Python3 image processing pipeline software
 
 Connectome Mapper 3 pipelines use a combination of tools from well-known software packages, including [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki), [FreeSurfer](https://surfer.nmr.mgh.harvard.edu/fswiki/FreeSurferWiki), [ANTs](http://stnava.github.io/ANTs/), [MRtrix3](http://www.mrtrix.org/), [Dipy](https://nipy.org/dipy/) and [AFNI](https://afni.nimh.nih.gov/), orchestrated by the [Nipype](https://nipype.readthedocs.io/en/latest/) dataflow library. These pipelines were designed to provide the best software implementation for each state of processing at the time conceptualization, and can be updated as newer and better neuroimaging software become available.
 
-Reproducibility and replicatibility is achieved through the distribution of a BIDSApp, a software container image which takes BIDS datasets as inputs and which provides a frozen environment where versions of all external softwares and libraries are fixed. Accessibility has been improved to a greater extend by providing an interactive GUI which supports the user in a the steps involved in the configuration and execution of the containerized pipelines.
+To enhance reproducibility and replicatibility, the processing pipelines with all dependencies are encapsulated in a Docker image container, which handles datasets organized following the BIDS standard and is distributed as a `BIDS App` @ Docker Hub. For execution on high-performance computing cluster, a Singularity image is also made freely available @ Sylabs Cloud.
 
-This tool allows you to easily do the following:
+To enhanced accessibility and reduce the risk of misconfiguration, Connectome Mapper 3 comes with an interactive GUI, aka `cmpbidsappmanager`, which supports the user in all the steps involved in the configuration of the pipelines, the configuration and execution of the BIDS App, and the control of the output quality. In addition, to facilitate the use by users not familiar with Docker and Singularity containers, Connectome Mapper 3 provides two Python commandline wrappers (`connectomemapper3_docker` and `connectomemapper3_singularity`) that will generate and run the appropriate command.
 
-  * Take T1 / Diffusion / resting-state MRI data from raw to multi-resolution connection matrices.
-  * Implement tools from different software packages.
-  * Achieve optimal data processing quality by using the best tools available
-  * Automate and parallelize processing steps, providing a significant speed-up from typical linear, manual processing.
+### How to install the python wrappers and the GUI?
+
+You need to have first either Docker or Singularity engine and miniconda installed. We refer to the [dedicated documentation page](https://connectome-mapper-3.readthedocs.io/en/latest/installation.html) for more instruction details.
+
+Then, download the appropriate [environment.yml](https://github.com/connectomicslab/connectomemapper3/raw/master/conda/environment.yml) / [environment_macosx.yml](https://github.com/connectomicslab/connectomemapper3/raw/master/conda/environment_macosx.yml) and create a conda environment `py37cmp-gui` with the following command:
+
+```bash
+$ conda create env -f /path/to/environment[_macosx].yml
+```
+
+Once the environment is created, activate it and install Connectome Mapper 3 with `PyPI` as follows:
+
+```bash
+$ conda activate py37cmp-gui
+(py37cmp-gui)$ pip install connectomemapper
+```
+
+You are ready to use Connectome Mapper 3!
 
 ### Resources
 
@@ -30,11 +44,11 @@ This tool allows you to easily do the following:
 
 ### Usage
 
-This BIDS App has the following command line arguments:
+Having the `py37cmp-gui` conda environment previously installed activated, the BIDS App can easily be run using `connectomemapper3_docker`, the python wrapper for Docker, as follows:
 
-        $ docker run -it sebastientourbier/connectomemapper-bidsapp -h
+        (py37cmp-gui)$ connectomemapper3_docker -h
 
-        usage: run.py [-h]
+        usage: connectomemapper3_docker [-h]
               [--participant_label PARTICIPANT_LABEL [PARTICIPANT_LABEL ...]]
               [--session_label SESSION_LABEL [SESSION_LABEL ...]]
               [--anat_pipeline_config ANAT_PIPELINE_CONFIG]
@@ -48,7 +62,7 @@ This BIDS App has the following command line arguments:
               [--fs_license FS_LICENSE] [--coverage] [--notrack] [-v]
               bids_dir output_dir {participant,group}
 
-        Entrypoint script of the BIDS-App Connectome Mapper version v3.0.0-RC3
+        Entrypoint script of the BIDS-App Connectome Mapper version v3.0.1 via Docker
 
         positional arguments:
           bids_dir              The directory with the input dataset formatted
@@ -140,8 +154,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
-Thanks also goes to all these wonderful people that contributed to the two first versions
-of Connectome Mapper:
+Thanks also goes to all these wonderful people that contributed to Connectome Mapper 1 and 2:
 
 *   Collaborators from Signal Processing Laboratory (LTS5), EPFL, Lausanne:
 
@@ -176,4 +189,4 @@ This software is distributed under the open-source license Modified BSD. See [li
 
 All trademarks referenced herein are property of their respective holders.
 
-Copyright (C) 2009-2021, Hospital Center and University of Lausanne (UNIL-CHUV), Ecole Polytechnique Fédérale de Lausanne (EPFL), Switzerland & Contributors.
+Copyright (C) 2009-2022, Hospital Center and University of Lausanne (UNIL-CHUV), Ecole Polytechnique Fédérale de Lausanne (EPFL), Switzerland & Contributors.

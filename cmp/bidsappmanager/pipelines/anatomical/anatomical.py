@@ -1,4 +1,4 @@
-# Copyright (C) 2009-2021, Ecole Polytechnique Federale de Lausanne (EPFL) and
+# Copyright (C) 2009-2022, Ecole Polytechnique Federale de Lausanne (EPFL) and
 # Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland, and CMP3 contributors
 # All rights reserved.
 #
@@ -104,7 +104,7 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
 
         Parameters
         -----------
-        project_info : cmp.project.CMP_Project_Info
+        project_info : cmp.project.ProjectInfo
             CMP_Project_Info object that stores general information
             such as the BIDS root and output directories (see
             :class_`cmp.project.CMP_Project_Info` for more details)

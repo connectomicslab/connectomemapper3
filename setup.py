@@ -48,6 +48,7 @@ packages = [
     "cmp.pipelines.diffusion",
     "cmp.pipelines.functional",
     "cmp.bidsappmanager",
+    "cmp.bidsappmanager.gui",
     "cmp.bidsappmanager.stages",
     "cmp.bidsappmanager.stages.preprocessing",
     "cmp.bidsappmanager.stages.segmentation",
@@ -130,7 +131,7 @@ def main():
     """Main function of CMP3 ``setup.py``"""
     # Setup configuration
     setuptools.setup(
-        name="cmp",
+        name="connectomemapper",
         version=__version__,
         description="Connectome Mapper 3: A Flexible and Open-Source Pipeline Software for Multiscale Multimodal Human Connectome Mapping",
         long_description=long_description,
