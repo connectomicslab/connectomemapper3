@@ -176,4 +176,4 @@ This software is distributed under the open-source license Modified BSD. See [li
 
 All trademarks referenced herein are property of their respective holders.
 
-Copyright (C) 2009-2021, Hospital Center and University of Lausanne (UNIL-CHUV), Ecole Polytechnique Fédérale de Lausanne (EPFL), Switzerland & Contributors.
+Copyright (C) 2009-2022, Hospital Center and University of Lausanne (UNIL-CHUV), Ecole Polytechnique Fédérale de Lausanne (EPFL), Switzerland & Contributors.
