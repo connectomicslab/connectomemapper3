@@ -12,14 +12,28 @@ Connectome Mapper 3 is an open-source Python3 image processing pipeline software
 
 Connectome Mapper 3 pipelines use a combination of tools from well-known software packages, including [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki), [FreeSurfer](https://surfer.nmr.mgh.harvard.edu/fswiki/FreeSurferWiki), [ANTs](http://stnava.github.io/ANTs/), [MRtrix3](http://www.mrtrix.org/), [Dipy](https://nipy.org/dipy/) and [AFNI](https://afni.nimh.nih.gov/), orchestrated by the [Nipype](https://nipype.readthedocs.io/en/latest/) dataflow library. These pipelines were designed to provide the best software implementation for each state of processing at the time conceptualization, and can be updated as newer and better neuroimaging software become available.
 
-Reproducibility and replicatibility is achieved through the distribution of a BIDSApp, a software container image which takes BIDS datasets as inputs and which provides a frozen environment where versions of all external softwares and libraries are fixed. Accessibility has been improved to a greater extend by providing an interactive GUI which supports the user in a the steps involved in the configuration and execution of the containerized pipelines.
+To enhance reproducibility and replicatibility, the processing pipelines with all dependencies are encapsulated in a Docker image container, which handles datasets organized following the BIDS standard and is distributed as a `BIDS App` @ Docker Hub. For execution on high-performance computing cluster, a Singularity image is also made freely available @ Sylabs Cloud.
 
-This tool allows you to easily do the following:
+To enhanced accessibility and reduce the risk of misconfiguration, Connectome Mapper 3 comes with an interactive GUI, aka `cmpbidsappmanager`, which supports the user in all the steps involved in the configuration of the pipelines, the configuration and execution of the BIDS App, and the control of the output quality. In addition, to facilitate the use by users not familiar with Docker and Singularity containers, Connectome Mapper 3 provides two Python commandline wrappers (`connectomemapper3_docker` and `connectomemapper3_singularity`) that will generate and run the appropriate command.
 
-  * Take T1 / Diffusion / resting-state MRI data from raw to multi-resolution connection matrices.
-  * Implement tools from different software packages.
-  * Achieve optimal data processing quality by using the best tools available
-  * Automate and parallelize processing steps, providing a significant speed-up from typical linear, manual processing.
+### How to install the python wrappers and the GUI?
+
+You need to have either Docker or Singularity engine installed and miniconda installed. We refer to the [dedicated documentation page](https://connectome-mapper-3.readthedocs.io/en/latest/installation.html).
+
+Then, download the appropriate [environment.yml](https://github.com/connectomicslab/connectomemapper3/raw/master/conda/environment.yml) / [environment_macosx.yml](https://github.com/connectomicslab/connectomemapper3/raw/master/conda/environment_macosx.yml) and create a conda environment `py37cmp-gui` with the following command:
+
+```bash
+$ conda create env -f /path/to/environment[_macosx].yml
+```
+
+Once the environment is created, activate it and install Connectome Mapper 3 with `PyPI` as follows:
+
+```bash
+$ conda activate py37cmp-gui
+(py37cmp-gui)$ pip install connectomemapper
+```
+
+You are ready to use Connectome Mapper 3!
 
 ### Resources
 

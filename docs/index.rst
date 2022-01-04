@@ -62,25 +62,23 @@ These pipelines are designed to provide the best software implementation
 for each state of processing at the time of conception, and can be
 easily updated as newer and better neuroimaging software become available.
 
-Portability, reproducibility and replicatibility are achieved through the
-distribution of a BIDSApp, a software container image which (1) takes datasets
-organized following the Brain Imaging Data Structure (BIDS) standard, and which
-(2) provides a frozen computing environment where versions of all external
-softwares and libraries are fixed. Accessibility has been improved to a greater extend
-by providing an interactive GUI which supports the user in a the steps involved
-in the configuration and execution of the containerized pipelines.
+To enhance reproducibility and replicatibility, the processing pipelines
+with all dependencies in a Docker image container, which handles datasets
+organized following the BIDS standard and is distributed as a BIDS App @
+`Docker Hub <https://hub.docker.com/r/sebastientourbier/connectomemapper-bidsapp>`_. For execution on high-performance computing cluster, a
+Singularity image is also made freely available @
+`Sylabs Cloud <https://cloud.sylabs.io/library/_container/5fe4e971bccfe9cf45792495>`_.
 
-This tool allows you to easily do the following:
+To enhanced accessibility and reduce the risk of misconfiguration,
+Connectome Mapper 3 comes with an interactive GUI, aka `cmpbidsappmanager`,
+which supports the user in all the steps involved in the configuration of
+the pipelines, the configuration and execution of the BIDS App, and
+the control of the output quality. In addition, to facilitate the use
+by users not familiar with Docker and Singularity containers,
+Connectome Mapper 3 provides two Python commandline wrappers
+(`connectomemapper3_docker` and `connectomemapper3_singularity`) that will
+generate and run the appropriate command.
 
-  * Handle T1 / Diffusion / resting-state MRI data, organized following the
-    Brain Imaging Data Structure (BIDS) standard, from raw to multi-resolution
-    connection matrices.
-  * Implement tools from different software packages.
-  * Achieve optimal data processing quality by using the best tools available
-  * Automate and parallelize processing steps with Nipype, which provides a significant
-    speed-up from typical linear, manual processing.
-  * Easily configure the pipelines and control the execution and outputs of the processing
-    with a GUI.
 
 .. _FSL: https://fsl.fmrib.ox.ac.uk/fsl/fslwiki
 
@@ -95,7 +93,6 @@ This tool allows you to easily do the following:
 .. _AFNI: https://afni.nimh.nih.gov/
 
 .. _Nipype: https://nipype.readthedocs.io/en/latest/
-
 
 *******************
 License information
