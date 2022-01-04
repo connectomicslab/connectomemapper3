@@ -44,11 +44,11 @@ You are ready to use Connectome Mapper 3!
 
 ### Usage
 
-This BIDS App has the following command line arguments:
+Having the `py37cmp-gui` conda environment previously installed activated, the BIDS App can easily be run using `connectomemapper3_docker`, the python wrapper for Docker, as follows:
 
-        $ docker run -it sebastientourbier/connectomemapper-bidsapp -h
+        (py37cmp-gui)$ connectomemapper3_docker -h
 
-        usage: run.py [-h]
+        usage: connectomemapper3_docker [-h]
               [--participant_label PARTICIPANT_LABEL [PARTICIPANT_LABEL ...]]
               [--session_label SESSION_LABEL [SESSION_LABEL ...]]
               [--anat_pipeline_config ANAT_PIPELINE_CONFIG]
@@ -62,7 +62,7 @@ This BIDS App has the following command line arguments:
               [--fs_license FS_LICENSE] [--coverage] [--notrack] [-v]
               bids_dir output_dir {participant,group}
 
-        Entrypoint script of the BIDS-App Connectome Mapper version v3.0.0-RC3
+        Entrypoint script of the BIDS-App Connectome Mapper version v3.0.1 via Docker
 
         positional arguments:
           bids_dir              The directory with the input dataset formatted
@@ -154,8 +154,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
-Thanks also goes to all these wonderful people that contributed to the two first versions
-of Connectome Mapper:
+Thanks also goes to all these wonderful people that contributed to Connectome Mapper 1 and 2:
 
 *   Collaborators from Signal Processing Laboratory (LTS5), EPFL, Lausanne:
 
