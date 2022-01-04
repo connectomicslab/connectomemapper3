@@ -21,6 +21,9 @@ It incorporates `Pull Request #132 <https://github.com/connectomicslab/connectom
 *   Make `cmp.bidsappmanager.gui.py` more lightweight by splitting the classes defined there in different files.
     (See `Issue #129 <https://github.com/connectomicslab/connectomemapper3/issues/129>`_ for more discussion details)
 
+*   Split the `create_workflow()` method of the `RegistrationStage` into the `create_ants_workflow()`, `create_flirt_workflow()`, and `create_bbregister_workflow()`.
+    (See `Issue #95 <https://github.com/connectomicslab/connectomemapper3/issues/95>`_ for more discussion details)
+
 *Code style*
 
 *   Correct a number of code style issues with class names
