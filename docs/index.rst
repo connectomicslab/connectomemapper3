@@ -66,8 +66,8 @@ for each state of processing at the time of conception, and can be
 easily updated as newer and better neuroimaging software become available.
 
 To enhance reproducibility and replicatibility, the processing pipelines
-with all dependencies in a Docker image container, which handles datasets
-organized following the BIDS standard and is distributed as a BIDS App @
+with all dependencies are encapsulated in a Docker image container, which handles datasets
+organized following the BIDS standard and is distributed as a `BIDS App`_ @
 `Docker Hub <https://hub.docker.com/r/sebastientourbier/connectomemapper-bidsapp>`_. For execution on high-performance computing cluster, a
 Singularity image is also made freely available @
 `Sylabs Cloud <https://cloud.sylabs.io/library/_container/5fe4e971bccfe9cf45792495>`_.
@@ -82,7 +82,6 @@ Connectome Mapper 3 provides two Python commandline wrappers
 (`connectomemapper3_docker` and `connectomemapper3_singularity`) that will
 generate and run the appropriate command.
 
-
 .. _FSL: https://fsl.fmrib.ox.ac.uk/fsl/fslwiki
 
 .. _FreeSurfer: https://surfer.nmr.mgh.harvard.edu/fswiki/FreeSurferWiki
@@ -96,6 +95,8 @@ generate and run the appropriate command.
 .. _AFNI: https://afni.nimh.nih.gov/
 
 .. _Nipype: https://nipype.readthedocs.io/en/latest/
+
+.. _BIDS App: https://bids-apps.neuroimaging.io/
 
 *******************
 License information
