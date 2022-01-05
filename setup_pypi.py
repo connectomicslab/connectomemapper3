@@ -125,6 +125,7 @@ def main():
         version=__version__,
         description="Connectome Mapper 3: A Flexible and Open-Source Pipeline Software for Multiscale Multimodal Human Connectome Mapping",
         long_description=long_description,
+        long_description_content_type="text/markdown",
         author="Sebastien Tourbier",
         author_email="sebastien.tourbier@alumni.epfl.ch",
         url="https://github.com/connectomicslab/connectomemapper3",
