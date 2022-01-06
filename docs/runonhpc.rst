@@ -52,7 +52,7 @@ root directory is located at ``${localDir}``::
 
     $ singularity run --containall \
             --bind ${localDir}:/bids_dir --bind ${localDir}/derivatives:/output_dir \
-	        library://connectomicslab/default/connectomemapper-bidsapp:latest \
+	        library://connectomicslab/default/connectomemapper-bidsapp:|release| \
 	        /bids_dir /output_dir participant --participant_label 01 02 03 \
 	        --anat_pipeline_config /bids_dir/code/ref_anatomical_config.json \
 	        --dwi_pipeline_config /bids_dir/code/ref_diffusion_config.json \

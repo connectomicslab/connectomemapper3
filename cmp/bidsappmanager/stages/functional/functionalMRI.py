@@ -1,4 +1,4 @@
-# Copyright (C) 2009-2021, Ecole Polytechnique Federale de Lausanne (EPFL) and
+# Copyright (C) 2009-2022, Ecole Polytechnique Federale de Lausanne (EPFL) and
 # Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland, and CMP3 contributors
 # All rights reserved.
 #
@@ -32,19 +32,26 @@ class FunctionalMRIConfigUI(FunctionalMRIConfig):
     traits_view = View(  # Item('smoothing'),
         # Item('discard_n_volumes'),
         HGroup(
-            Item('detrending'), Item(
-                'detrending_mode', visible_when='detrending'),
-            label='Detrending', show_border=True),
+            Item("detrending"),
+            Item("detrending_mode", visible_when="detrending"),
+            label="Detrending",
+            show_border=True,
+        ),
         HGroup(
-            Item('global_nuisance', label="Global"),
-            Item('csf'),
-            Item('wm'),
-            Item('motion'),
-            label='Nuisance factors', show_border=True),
+            Item("global_nuisance", label="Global"),
+            Item("csf"),
+            Item("wm"),
+            Item("motion"),
+            label="Nuisance factors",
+            show_border=True,
+        ),
         HGroup(
-            Item('lowpass_filter', label='Low cutoff (volumes)'),
-            Item('highpass_filter', label='High cutoff (volumes)'),
-            label="Bandpass filtering", show_border=True))
+            Item("lowpass_filter", label="Low cutoff (volumes)"),
+            Item("highpass_filter", label="High cutoff (volumes)"),
+            label="Bandpass filtering",
+            show_border=True,
+        ),
+    )
 
 
 class FunctionalMRIStageUI(FunctionalMRIStage):
@@ -67,34 +74,46 @@ class FunctionalMRIStageUI(FunctionalMRIStage):
     cmp.stages.functional.functionalMRI.FunctionalMRIStage
     """
 
-    inspect_output_button = Button('View')
+    inspect_output_button = Button("View")
 
-    inspect_outputs_view = View(Group(
-        Item('name', editor=TitleEditor(), show_label=False),
+    inspect_outputs_view = View(
         Group(
-            Item('inspect_outputs_enum', show_label=False),
-            Item('inspect_output_button', enabled_when='inspect_outputs_enum!="Outputs not available"',
-                 show_label=False),
-            label='View outputs',
-            show_border=True)),
+            Item("name", editor=TitleEditor(), show_label=False),
+            Group(
+                Item("inspect_outputs_enum", show_label=False),
+                Item(
+                    "inspect_output_button",
+                    enabled_when='inspect_outputs_enum!="Outputs not available"',
+                    show_label=False,
+                ),
+                label="View outputs",
+                show_border=True,
+            ),
+        ),
         scrollable=True,
         resizable=True,
-        kind='livemodal',
-        title='Inspect stage outputs',
-        buttons=['OK', 'Cancel'])
+        kind="livemodal",
+        title="Inspect stage outputs",
+        buttons=["OK", "Cancel"],
+    )
 
-    config_view = View(Group(
-        Item('name', editor=TitleEditor(), show_label=False),
+    config_view = View(
         Group(
-            Item('config', style='custom', show_label=False),
-            label='Configuration', show_border=True)),
+            Item("name", editor=TitleEditor(), show_label=False),
+            Group(
+                Item("config", style="custom", show_label=False),
+                label="Configuration",
+                show_border=True,
+            ),
+        ),
         scrollable=True,
         resizable=True,
         height=528,
         width=608,
-        kind='livemodal',
-        title='Edit stage configuration',
-        buttons=['OK', 'Cancel'])
+        kind="livemodal",
+        title="Edit stage configuration",
+        buttons=["OK", "Cancel"],
+    )
 
     def __init__(self, bids_dir, output_dir):
         """Constructor of the FunctionalMRIStageUI class.

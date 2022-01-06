@@ -1,24 +1,39 @@
-## Connectome Mapper 3 BIDS App
+## Connectome Mapper 3
 
 This neuroimaging processing pipeline software is developed by the Connectomics Lab at the University Hospital of Lausanne (CHUV) for use within the [SNF Sinergia Project 170873](http://p3.snf.ch/project-170873), as well as for open-source software distribution.
 
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/connectomicslab/connectomemapper3) ![GitHub Release Date](https://img.shields.io/github/release-date/connectomicslab/connectomemapper3?color=orange) [![DOI](https://zenodo.org/badge/183162514.svg)](https://zenodo.org/badge/latestdoi/183162514) ![Docker Image Version (latest semver)](https://img.shields.io/docker/v/sebastientourbier/connectomemapper-bidsapp?color=orange&label=docker%20version) [![Docker Pulls](https://img.shields.io/docker/pulls/sebastientourbier/connectomemapper-bidsapp)](https://hub.docker.com/r/sebastientourbier/connectomemapper-bidsapp) [![CircleCI](https://circleci.com/gh/connectomicslab/connectomemapper3.svg?style=shield)](https://circleci.com/gh/connectomicslab/connectomemapper3) [![Code Coverage](https://app.codacy.com/project/badge/Coverage/658266303c3046e8896769670e6988eb)](https://www.codacy.com/gh/connectomicslab/connectomemapper3?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=connectomicslab/connectomemapper3&amp;utm_campaign=Badge_Coverage) [![Documentation Status](https://readthedocs.org/projects/connectome-mapper-3/badge/?version=latest)](https://connectome-mapper-3.readthedocs.io/en/latest/?badge=latest) [![Code Quality Review](https://app.codacy.com/project/badge/Grade/658266303c3046e8896769670e6988eb)](https://www.codacy.com/gh/connectomicslab/connectomemapper3?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=connectomicslab/connectomemapper3&amp;utm_campaign=Badge_Grade) [![All Contributors](https://img.shields.io/badge/all_contributors-12-orange.svg?style=flat-square)](#contributors-)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/connectomicslab/connectomemapper3) ![GitHub Release Date](https://img.shields.io/github/release-date/connectomicslab/connectomemapper3?color=orange) [![DOI](https://zenodo.org/badge/183162514.svg)](https://zenodo.org/badge/latestdoi/183162514) [![PyPI](https://img.shields.io/pypi/v/connectomemapper?color=orange)](https://pypi.org/project/connectomemapper/) ![Docker Image Version (latest semver)](https://img.shields.io/docker/v/sebastientourbier/connectomemapper-bidsapp?color=blue&label=docker%20version) [![Docker Pulls](https://img.shields.io/docker/pulls/sebastientourbier/connectomemapper-bidsapp?color=orange)](https://hub.docker.com/r/sebastientourbier/connectomemapper-bidsapp) [![CircleCI](https://circleci.com/gh/connectomicslab/connectomemapper3.svg?style=shield)](https://circleci.com/gh/connectomicslab/connectomemapper3) [![Code Coverage](https://app.codacy.com/project/badge/Coverage/658266303c3046e8896769670e6988eb)](https://www.codacy.com/gh/connectomicslab/connectomemapper3?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=connectomicslab/connectomemapper3&amp;utm_campaign=Badge_Coverage) [![Documentation Status](https://readthedocs.org/projects/connectome-mapper-3/badge/?version=latest)](https://connectome-mapper-3.readthedocs.io/en/latest/?badge=latest) [![Code Quality Review](https://app.codacy.com/project/badge/Grade/658266303c3046e8896769670e6988eb)](https://www.codacy.com/gh/connectomicslab/connectomemapper3?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=connectomicslab/connectomemapper3&amp;utm_campaign=Badge_Grade) [![All Contributors](https://img.shields.io/badge/all_contributors-12-orange.svg?style=flat-square)](#contributors-)
 
 ### Description
-Connectome Mapper 3 is an open-source Python3 image processing pipeline software that implements full anatomical, diffusion and resting-state MRI processing pipelines, from raw Diffusion / T1 / T2 / BOLD data to multi-resolution connection matrices.
 
-![Image not found](https://connectome-mapper-3.readthedocs.io/en/latest/_images/flowchart_bidsapp.png)
+Connectome Mapper 3 is an open-source Python3 image processing pipeline software, with a Graphical User Interface, that implements full anatomical, diffusion and resting-state MRI processing pipelines, from raw Diffusion / T1 / T2 / BOLD data to multi-resolution connection matrices, based on a new version of the Lausanne parcellation atlas, aka `Lausanne2018`.
 
-Connectome Mapper 3 pipelines use a combination of tools from well-known software packages, including [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki), [FreeSurfer](https://surfer.nmr.mgh.harvard.edu/fswiki/FreeSurferWiki), [ANTs](http://stnava.github.io/ANTs/), [MRtrix3](http://www.mrtrix.org/), [Dipy](https://nipy.org/dipy/) and [AFNI](https://afni.nimh.nih.gov/), orchestrated by the [Nipype](https://nipype.readthedocs.io/en/latest/) dataflow library. These pipelines were designed to provide the best software implementation for each state of processing, and will be updated as newer and better neuroimaging software become available.
+![Image not found](https://github.com/connectomicslab/connectomemapper3/raw/master/docs/images/flowchart_bidsapp.png)
 
-This tool allows you to easily do the following:
+Connectome Mapper 3 pipelines use a combination of tools from well-known software packages, including [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki), [FreeSurfer](https://surfer.nmr.mgh.harvard.edu/fswiki/FreeSurferWiki), [ANTs](http://stnava.github.io/ANTs/), [MRtrix3](http://www.mrtrix.org/), [Dipy](https://nipy.org/dipy/) and [AFNI](https://afni.nimh.nih.gov/), orchestrated by the [Nipype](https://nipype.readthedocs.io/en/latest/) dataflow library. These pipelines were designed to provide the best software implementation for each state of processing at the time conceptualization, and can be updated as newer and better neuroimaging software become available.
 
-  * Take T1 / Diffusion / resting-state MRI data from raw to multi-resolution connection matrices.
-  * Implement tools from different software packages.
-  * Achieve optimal data processing quality by using the best tools available
-  * Automate and parallelize processing steps, providing a significant speed-up from typical linear, manual processing.
+To enhance reproducibility and replicatibility, the processing pipelines with all dependencies are encapsulated in a Docker image container, which handles datasets organized following the BIDS standard and is distributed as a `BIDS App` @ [Docker Hub](https://hub.docker.com/r/sebastientourbier/connectomemapper-bidsapp). For execution on high-performance computing cluster, a Singularity image is also made freely available @ [Sylabs Cloud](https://cloud.sylabs.io/library/_container/5fe4e971bccfe9cf45792495).
 
-Reproducibility and replicatibility is achieved through the distribution of a BIDSApp, a software container image which takes BIDS datasets as inputs and which provides a frozen environment where versions of all external softwares and libraries are fixed.
+To reduce the risk of misconfiguration and improve accessibility, Connectome Mapper 3 comes with an interactive GUI, aka `cmpbidsappmanager`, which supports the user in all the steps involved in the configuration of the pipelines, the configuration and execution of the BIDS App, and the control of the output quality. In addition, to facilitate the use by users not familiar with Docker and Singularity containers, Connectome Mapper 3 provides two Python commandline wrappers (`connectomemapper3_docker` and `connectomemapper3_singularity`) that will generate and run the appropriate command.
+
+### How to install the python wrappers and the GUI?
+
+You need to have first either Docker or Singularity engine and miniconda installed. We refer to the [dedicated documentation page](https://connectome-mapper-3.readthedocs.io/en/latest/installation.html) for more instruction details.
+
+Then, download the appropriate [environment.yml](https://github.com/connectomicslab/connectomemapper3/raw/master/conda/environment.yml) / [environment_macosx.yml](https://github.com/connectomicslab/connectomemapper3/raw/master/conda/environment_macosx.yml) and create a conda environment `py37cmp-gui` with the following command:
+
+```bash
+$ conda create env -f /path/to/environment[_macosx].yml
+```
+
+Once the environment is created, activate it and install Connectome Mapper 3 with `PyPI` as follows:
+
+```bash
+$ conda activate py37cmp-gui
+(py37cmp-gui)$ pip install connectomemapper
+```
+
+You are ready to use Connectome Mapper 3!
 
 ### Resources
 
@@ -28,11 +43,12 @@ Reproducibility and replicatibility is achieved through the distribution of a BI
   * **Bug reports:** [https://github.com/connectomicslab/connectomemapper3/issues](https://github.com/connectomicslab/connectomemapper3/issues)
 
 ### Usage
-This BIDS App has the following command line arguments:
 
-        $ docker run -it sebastientourbier/connectomemapper-bidsapp -h
+Having the `py37cmp-gui` conda environment previously installed activated, the BIDS App can easily be run using `connectomemapper3_docker`, the python wrapper for Docker, as follows:
 
-        usage: run.py [-h]
+        (py37cmp-gui)$ connectomemapper3_docker -h
+
+        usage: connectomemapper3_docker [-h]
               [--participant_label PARTICIPANT_LABEL [PARTICIPANT_LABEL ...]]
               [--session_label SESSION_LABEL [SESSION_LABEL ...]]
               [--anat_pipeline_config ANAT_PIPELINE_CONFIG]
@@ -46,7 +62,7 @@ This BIDS App has the following command line arguments:
               [--fs_license FS_LICENSE] [--coverage] [--notrack] [-v]
               bids_dir output_dir {participant,group}
 
-        Entrypoint script of the BIDS-App Connectome Mapper version v3.0.0-RC3
+        Entrypoint script of the BIDS-App Connectome Mapper version v3.0.1 via Docker
 
         positional arguments:
           bids_dir              The directory with the input dataset formatted
@@ -107,48 +123,6 @@ This BIDS App has the following command line arguments:
                                 App execution, which is enabled by default.
           -v, --version         show program's version number and exit
 
-
-### Credits
-
-*   Sebastien Tourbier (sebastientourbier)
-*   Yasser Aleman-Gomez (yasseraleman)
-*   Alessandra Griffa (agriffa)
-*   Adrien Birbaumer (abirba)
-*   Patric Hagmann (pahagman)
-*   Meritxell Bach Cuadra (meribach)
-
-### Collaborators
-
-Collaboration Signal Processing Laboratory (LTS5) EPFL Lausanne
-
-*   Jean-Philippe Thiran
-*   Xavier Gigandet
-*   Leila Cammoun
-*   Alia Lemkaddem (allem)
-*   Alessandro Daducci (daducci)
-*   David Romascano (davidrs06)
-*   Stephan Gerhard (unidesigner)
-*   Christophe Chênes (Cwis)
-*   Oscar Esteban (oesteban)
-
-Collaboration Children's Hospital Boston
-
-*   Ellen Grant
-*   Daniel Ginsburg (danginsburg)
-*   Rudolph Pienaar (rudolphpienaar)
-*   Nicolas Rannou (NicolasRannou)
-
-### Funding
-
-Work supported by the [Sinergia SNFNS-170873 Grant](http://p3.snf.ch/Project-170873).
-
-### License
-This software is distributed under the open-source license Modified BSD. See [license](docs/LICENSE) for more details.
-
-All trademarks referenced herein are property of their respective holders.
-
-Copyright (C) 2009-2021, Hospital Center and University of Lausanne (UNIL-CHUV), Ecole Polytechnique Fédérale de Lausanne (EPFL), Switzerland & Contributors.
-
 ## Contributors ✨
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
@@ -180,4 +154,39 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
+Thanks also goes to all these wonderful people that contributed to Connectome Mapper 1 and 2:
+
+*   Collaborators from Signal Processing Laboratory (LTS5), EPFL, Lausanne:
+
+    *   Jean-Philippe Thiran
+    *   Leila Cammoun
+    *   Adrien Birbaumer (abirba)
+    *   Alessandro Daducci (daducci)
+    *   Stephan Gerhard (unidesigner)
+    *   Christophe Chênes (Cwis)
+    *   Oscar Esteban (oesteban)
+    *   David Romascano (davidrs06)
+    *   Alia Lemkaddem (allem)
+    *   Xavier Gigandet
+
+
+*   Collaborators from Children's Hospital, Boston:
+
+    *   Ellen Grant
+    *   Daniel Ginsburg (danginsburg)
+    *   Rudolph Pienaar (rudolphpienaar)
+    *   Nicolas Rannou (NicolasRannou)
+
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
+
+### Funding
+
+Work supported by the [Sinergia SNFNS-170873 Grant](http://p3.snf.ch/Project-170873).
+
+### License
+
+This software is distributed under the open-source license Modified BSD. See [license](docs/LICENSE) for more details.
+
+All trademarks referenced herein are property of their respective holders.
+
+Copyright (C) 2009-2022, Hospital Center and University of Lausanne (UNIL-CHUV), Ecole Polytechnique Fédérale de Lausanne (EPFL), Switzerland & Contributors.

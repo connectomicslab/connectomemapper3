@@ -1,0 +1,45 @@
+{
+    "Global": {
+        "process_type": "anatomical",
+        "subjects": [
+            "sub-01"
+        ],
+        "subject": "sub-01",
+        "subject_session": "ses-01",
+        "version": "v3.0.0"
+    },
+    "segmentation_stage": {
+        "seg_tool": "Custom segmentation",
+        "custom_brainmask.toolbox_derivatives_dir": "cmp-custom",
+        "custom_brainmask.suffix": "mask",
+        "custom_brainmask.extension": "nii.gz",
+        "custom_brainmask.desc": "brain",
+        "custom_wm_mask.toolbox_derivatives_dir": "cmp-custom",
+        "custom_wm_mask.suffix": "dseg",
+        "custom_wm_mask.extension": "nii.gz",
+        "custom_wm_mask.label": "WM",
+        "custom_gm_mask.toolbox_derivatives_dir": "cmp-custom",
+        "custom_gm_mask.suffix": "dseg",
+        "custom_gm_mask.extension": "nii.gz",
+        "custom_gm_mask.label": "GM",
+        "custom_csf_mask.toolbox_derivatives_dir": "cmp-custom",
+        "custom_csf_mask.suffix": "dseg",
+        "custom_csf_mask.extension": "nii.gz",
+        "custom_csf_mask.label": "CSF",
+        "custom_aparcaseg.toolbox_derivatives_dir": "cmp-custom",
+        "custom_aparcaseg.suffix": "dseg",
+        "custom_aparcaseg.extension": "nii.gz",
+        "custom_aparcaseg.desc": "aparcaseg"
+    },
+    "parcellation_stage": {
+        "parcellation_scheme": "Custom",
+        "custom_parcellation.toolbox_derivatives_dir": "cmp-custom",
+        "custom_parcellation.suffix": "dseg",
+        "custom_parcellation.res": "scale1",
+        "custom_parcellation.extension": "nii.gz",
+        "custom_parcellation.atlas": "L2018"
+    },
+    "Multi-processing": {
+        "number_of_cores": 1
+    }
+}

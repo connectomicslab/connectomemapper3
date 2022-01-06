@@ -1,4 +1,4 @@
-# Copyright (C) 2009-2021, Ecole Polytechnique Federale de Lausanne (EPFL) and
+# Copyright (C) 2009-2022, Ecole Polytechnique Federale de Lausanne (EPFL) and
 # Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland, and CMP3 contributors
 # All rights reserved.
 #
@@ -11,37 +11,47 @@ import os
 import fnmatch
 import glob
 import shutil
-import multiprocessing
-from subprocess import Popen
 
-from traitsui.api import *
-from traits.api import *
 import warnings
 
-from bids import BIDSLayout
-from pyface.api import FileDialog, OK
-
 # Own imports
-from . import core
-from . import gui
+from traits.trait_types import Enum, Bool, String, Password, Directory, List, Button
+from traitsui.editors import EnumEditor
+from traitsui.group import VGroup, HGroup, Group
+from traitsui.include import Include
+from traitsui.item import Item, spring
+from traitsui.qt4.extra.qt_view import QtView
+from traitsui.view import View
+
+import cmp.project
+
+from cmtklib.bids.io import __cmp_directory__, __nipype_directory__, __freesurfer_directory__
+from cmtklib.config import (
+    anat_load_config_json,
+    anat_save_config,
+    dmri_load_config_json,
+    dmri_save_config,
+    fmri_load_config_json,
+    fmri_save_config,
+)
+from cmtklib.util import (
+    print_warning, print_error
+)
+
+from cmp.bidsappmanager.gui.globals import modal_width
 from cmp.bidsappmanager.pipelines.anatomical import anatomical as anatomical_pipeline
 from cmp.bidsappmanager.pipelines.diffusion import diffusion as diffusion_pipeline
 from cmp.bidsappmanager.pipelines.functional import fMRI as fMRI_pipeline
-from cmtklib.config import anat_load_config_json, anat_save_config, \
-    dmri_load_config_json, dmri_save_config, fmri_load_config_json, fmri_save_config, \
-    get_anat_process_detail_json, get_dmri_process_detail_json, get_fmri_process_detail_json, \
-    convert_config_ini_2_json
-from cmtklib.util import print_blue, print_warning, print_error
-
 
 warnings.filterwarnings(
-    "ignore", message="No valid root directory found for domain 'derivatives'.")
+    "ignore", message="No valid root directory found for domain 'derivatives'."
+)
 
 
 def clean_cache(bids_root):
     """Clean cache stored in /tmp.
 
-    Target issue related to that a dataset directory is mounted into /tmp and 
+    Target issue related to that a dataset directory is mounted into /tmp and
     used for caching by java/matlab/matplotlib/xvfb-run in the container image.
 
     Parameters
@@ -49,42 +59,42 @@ def clean_cache(bids_root):
     bids_root : string
         BIDS root dataset directory
     """
-    print_warning('> Clean generated docker image cache')
+    print_warning("> Clean generated docker image cache")
 
-    for d in glob.glob(os.path.join(bids_root, ' hsperfdata_cmp')):
-        print_warning('... DEL: {}'.format(d))
+    for d in glob.glob(os.path.join(bids_root, " hsperfdata_cmp")):
+        print_warning("... DEL: {}".format(d))
         shutil.rmtree(d)
 
-    for f in glob.glob(os.path.join(bids_root, '._java*')):
-        print_warning('... DEL: {}'.format(f))
+    for f in glob.glob(os.path.join(bids_root, "._java*")):
+        print_warning("... DEL: {}".format(f))
         os.remove(f)
 
-    for f in glob.glob(os.path.join(bids_root, 'mri_segstats.tmp*')):
-        print_warning('... DEL: {}'.format(f))
+    for f in glob.glob(os.path.join(bids_root, "mri_segstats.tmp*")):
+        print_warning("... DEL: {}".format(f))
         os.remove(f)
 
-    for d in glob.glob(os.path.join(bids_root, 'MCR_*')):
-        print_warning('... DEL: {}'.format(d))
+    for d in glob.glob(os.path.join(bids_root, "MCR_*")):
+        print_warning("... DEL: {}".format(d))
         shutil.rmtree(d)
 
-    for d in glob.glob(os.path.join(bids_root, 'matplotlib*')):
-        print_warning('... DEL: {}'.format(d))
+    for d in glob.glob(os.path.join(bids_root, "matplotlib*")):
+        print_warning("... DEL: {}".format(d))
         shutil.rmtree(d)
 
-    for d in glob.glob(os.path.join(bids_root, 'xvfb-run.*')):
-        print_warning('... DEL: {}'.format(d))
+    for d in glob.glob(os.path.join(bids_root, "xvfb-run.*")):
+        print_warning("... DEL: {}".format(d))
         shutil.rmtree(d)
 
-    for d in glob.glob(os.path.join(bids_root, '.X11*')):
-        print_warning('... DEL: {}'.format(d))
+    for d in glob.glob(os.path.join(bids_root, ".X11*")):
+        print_warning("... DEL: {}".format(d))
         shutil.rmtree(d)
 
-    for d in glob.glob(os.path.join(bids_root, '.X11-unix')):
-        print_warning('... DEL: {}'.format(d))
+    for d in glob.glob(os.path.join(bids_root, ".X11-unix")):
+        print_warning("... DEL: {}".format(d))
         shutil.rmtree(d)
 
-    for f in glob.glob(os.path.join(bids_root, '.X99*')):
-        print_warning('... DEL: {}'.format(f))
+    for f in glob.glob(os.path.join(bids_root, ".X99*")):
+        print_warning("... DEL: {}".format(f))
         os.remove(d)
 
 
@@ -115,26 +125,26 @@ def refresh_folder(derivatives_directory, subject, input_folders, session=None):
     """
     paths = []
 
-    if session is None or session == '':
-        paths.append(os.path.join(
-            derivatives_directory, 'freesurfer', subject))
-        paths.append(os.path.join(derivatives_directory, 'cmp', subject))
-        paths.append(os.path.join(derivatives_directory, 'nipype', subject))
+    if session is None or session == "":
+        paths.append(os.path.join(derivatives_directory, __freesurfer_directory__, subject))
+        paths.append(os.path.join(derivatives_directory, __cmp_directory__, subject))
+        paths.append(os.path.join(derivatives_directory, __nipype_directory__, subject))
 
         for in_f in input_folders:
-            paths.append(os.path.join(
-                derivatives_directory, 'cmp', subject, in_f))
+            paths.append(os.path.join(derivatives_directory, __cmp_directory__, subject, in_f))
     else:
-        paths.append(os.path.join(derivatives_directory,
-                                  'freesurfer', '%s_%s' % (subject, session)))
-        paths.append(os.path.join(
-            derivatives_directory, 'cmp', subject, session))
-        paths.append(os.path.join(derivatives_directory,
-                                  'nipype', subject, session))
+        paths.append(
+            os.path.join(
+                derivatives_directory, __freesurfer_directory__, "%s_%s" % (subject, session)
+            )
+        )
+        paths.append(os.path.join(derivatives_directory, __cmp_directory__, subject, session))
+        paths.append(os.path.join(derivatives_directory, __nipype_directory__, subject, session))
 
         for in_f in input_folders:
-            paths.append(os.path.join(derivatives_directory,
-                                      'cmp', subject, session, in_f))
+            paths.append(
+                os.path.join(derivatives_directory, __cmp_directory__, subject, session, in_f)
+            )
 
     for full_p in paths:
         if not os.path.exists(full_p):
@@ -151,8 +161,8 @@ def init_dmri_project(project_info, bids_layout, is_new_project, gui=True):
 
     Parameters
     ----------
-    project_info : CMP_Project_InfoUI
-        Instance of :class:`CMP_Project_InfoUI` class
+    project_info : ProjectInfoUI
+        Instance of :class:`ProjectInfoUI` class
 
     bids_layout : bids.BIDSLayout
         PyBIDS BIDS Layout object describing the BIDS dataset
@@ -165,21 +175,23 @@ def init_dmri_project(project_info, bids_layout, is_new_project, gui=True):
     """
     dmri_pipeline = diffusion_pipeline.DiffusionPipelineUI(project_info)
 
-    derivatives_directory = os.path.join(
-        project_info.base_directory, 'derivatives')
+    derivatives_directory = os.path.join(project_info.base_directory, "derivatives")
 
-    if (project_info.subject_session != '') and (project_info.subject_session is not None):
-        refresh_folder(derivatives_directory,
-                       project_info.subject,
-                       dmri_pipeline.input_folders,
-                       session=project_info.subject_session)
+    if (project_info.subject_session != "") and (
+        project_info.subject_session is not None
+    ):
+        refresh_folder(
+            derivatives_directory,
+            project_info.subject,
+            dmri_pipeline.input_folders,
+            session=project_info.subject_session,
+        )
     else:
-        refresh_folder(derivatives_directory,
-                       project_info.subject,
-                       dmri_pipeline.input_folders)
+        refresh_folder(
+            derivatives_directory, project_info.subject, dmri_pipeline.input_folders
+        )
 
-    dmri_inputs_checked = dmri_pipeline.check_input(
-        layout=bids_layout, gui=gui)
+    dmri_inputs_checked = dmri_pipeline.check_input(layout=bids_layout, gui=gui)
     if dmri_inputs_checked:
         if is_new_project and dmri_pipeline is not None:
             print("> Initialize dMRI project")
@@ -187,32 +199,47 @@ def init_dmri_project(project_info, bids_layout, is_new_project, gui=True):
                 try:
                     os.makedirs(derivatives_directory)
                 except os.error:
-                    print_warning("  .. INFO: %s was already existing" % derivatives_directory)
+                    print_warning(
+                        "  .. INFO: %s was already existing" % derivatives_directory
+                    )
                 finally:
                     print("  .. INFO: Created directory %s" % derivatives_directory)
 
-            if (project_info.subject_session != '') and (project_info.subject_session is not None):
-                project_info.dmri_config_file = os.path.join(derivatives_directory, '%s_%s_diffusion_config.json' % (
-                    project_info.subject, project_info.subject_session))
+            if (project_info.subject_session != "") and (
+                project_info.subject_session is not None
+            ):
+                project_info.dmri_config_file = os.path.join(
+                    derivatives_directory,
+                    "%s_%s_diffusion_config.json"
+                    % (project_info.subject, project_info.subject_session),
+                )
             else:
-                project_info.dmri_config_file = os.path.join(derivatives_directory,
-                                                             '%s_diffusion_config.json' % project_info.subject)
+                project_info.dmri_config_file = os.path.join(
+                    derivatives_directory,
+                    "%s_diffusion_config.json" % project_info.subject,
+                )
 
             if os.path.exists(project_info.dmri_config_file):
-                warn_res = project_info.configure_traits(view='dmri_warning_view')
+                warn_res = project_info.configure_traits(view="dmri_warning_view")
                 if warn_res:
-                    print("  .. INFO: Read diffusion config file (%s)" %
-                          project_info.dmri_config_file)
+                    print(
+                        "  .. INFO: Read diffusion config file (%s)"
+                        % project_info.dmri_config_file
+                    )
                     dmri_save_config(dmri_pipeline, project_info.dmri_config_file)
                 else:
                     return None
             else:
-                print("  .. INFO: Create diffusion config file (%s)" %
-                      project_info.dmri_config_file)
+                print(
+                    "  .. INFO: Create diffusion config file (%s)"
+                    % project_info.dmri_config_file
+                )
                 dmri_save_config(dmri_pipeline, project_info.dmri_config_file)
         else:
             print("> Load dMRI project")
-            dmri_conf_loaded = dmri_load_config_json(dmri_pipeline, project_info.dmri_config_file)
+            dmri_conf_loaded = dmri_load_config_json(
+                dmri_pipeline, project_info.dmri_config_file
+            )
 
             if not dmri_conf_loaded:
                 return None
@@ -229,8 +256,8 @@ def init_fmri_project(project_info, bids_layout, is_new_project, gui=True):
 
     Parameters
     ----------
-    project_info : CMP_Project_InfoUI
-        Instance of :class:`CMP_Project_InfoUI` class
+    project_info : ProjectInfoUI
+        Instance of :class:`ProjectInfoUI` class
 
     bids_layout : bids.BIDSLayout
         PyBIDS BIDS Layout object describing the BIDS dataset
@@ -243,18 +270,23 @@ def init_fmri_project(project_info, bids_layout, is_new_project, gui=True):
     """
     fmri_pipeline = fMRI_pipeline.fMRIPipelineUI(project_info)
 
-    derivatives_directory = os.path.join(
-        project_info.base_directory, 'derivatives')
+    derivatives_directory = os.path.join(project_info.base_directory, "derivatives")
 
-    if (project_info.subject_session != '') and (project_info.subject_session is not None):
-        refresh_folder(derivatives_directory, project_info.subject, fmri_pipeline.input_folders,
-                       session=project_info.subject_session)
+    if (project_info.subject_session != "") and (
+        project_info.subject_session is not None
+    ):
+        refresh_folder(
+            derivatives_directory,
+            project_info.subject,
+            fmri_pipeline.input_folders,
+            session=project_info.subject_session,
+        )
     else:
-        refresh_folder(derivatives_directory,
-                       project_info.subject, fmri_pipeline.input_folders)
+        refresh_folder(
+            derivatives_directory, project_info.subject, fmri_pipeline.input_folders
+        )
 
-    fmri_inputs_checked = fmri_pipeline.check_input(
-        layout=bids_layout, gui=gui)
+    fmri_inputs_checked = fmri_pipeline.check_input(layout=bids_layout, gui=gui)
     if fmri_inputs_checked:
         if is_new_project and fmri_pipeline is not None:
             print("> Initialize fMRI project")
@@ -266,31 +298,40 @@ def init_fmri_project(project_info, bids_layout, is_new_project, gui=True):
                 finally:
                     print("  .. INFO: Created directory %s" % derivatives_directory)
 
-            if (project_info.subject_session != '') and (project_info.subject_session is not None):
-                project_info.fmri_config_file = os.path.join(derivatives_directory, '%s_%s_fMRI_config.json' % (
-                    project_info.subject, project_info.subject_session))
+            if (project_info.subject_session != "") and (
+                project_info.subject_session is not None
+            ):
+                project_info.fmri_config_file = os.path.join(
+                    derivatives_directory,
+                    "%s_%s_fMRI_config.json"
+                    % (project_info.subject, project_info.subject_session),
+                )
             else:
-                project_info.fmri_config_file = os.path.join(derivatives_directory,
-                                                             '%s_fMRI_config.json' % project_info.subject)
+                project_info.fmri_config_file = os.path.join(
+                    derivatives_directory, "%s_fMRI_config.json" % project_info.subject
+                )
 
             if os.path.exists(project_info.fmri_config_file):
-                warn_res = project_info.configure_traits(
-                    view='fmri_warning_view')
+                warn_res = project_info.configure_traits(view="fmri_warning_view")
                 if warn_res:
-                    print("  .. INFO: Read fMRI config file (%s)" %
-                          project_info.fmri_config_file)
-                    fmri_load_config_json(
-                        fmri_pipeline, project_info.fmri_config_file)
+                    print(
+                        "  .. INFO: Read fMRI config file (%s)"
+                        % project_info.fmri_config_file
+                    )
+                    fmri_load_config_json(fmri_pipeline, project_info.fmri_config_file)
                 else:
                     return None
             else:
-                print("  .. INFO: Create fMRI config file (%s)" %
-                      project_info.fmri_config_file)
+                print(
+                    "  .. INFO: Create fMRI config file (%s)"
+                    % project_info.fmri_config_file
+                )
                 fmri_save_config(fmri_pipeline, project_info.fmri_config_file)
         else:
             print("> Load fMRI project")
             fmri_conf_loaded = fmri_load_config_json(
-                fmri_pipeline, project_info.fmri_config_file)
+                fmri_pipeline, project_info.fmri_config_file
+            )
 
             if not fmri_conf_loaded:
                 return None
@@ -307,15 +348,15 @@ def init_anat_project(project_info, is_new_project):
 
     Parameters
     ----------
-    project_info : CMP_Project_InfoUI
-        Instance of :class:`CMP_Project_InfoUI` class
+    project_info : ProjectInfoUI
+        Instance of :class:`ProjectInfoUI` class
 
     is_new_project : bool
         If True, this is a new project which has been never processed
     """
     anat_pipeline = anatomical_pipeline.AnatomicalPipelineUI(project_info)
 
-    derivatives_directory = os.path.join(project_info.base_directory, 'derivatives')
+    derivatives_directory = os.path.join(project_info.base_directory, "derivatives")
 
     if is_new_project and anat_pipeline is not None:  # and dmri_pipelineis not None:
         print("> Initialize anatomical project")
@@ -327,15 +368,22 @@ def init_anat_project(project_info, is_new_project):
             finally:
                 print("  .. INFO: Created directory %s" % derivatives_directory)
 
-        if (project_info.subject_session != '') and (project_info.subject_session is not None):
-            project_info.anat_config_file = os.path.join(derivatives_directory, '%s_%s_anatomical_config.json' % (
-                project_info.subject, project_info.subject_session))
+        if (project_info.subject_session != "") and (
+            project_info.subject_session is not None
+        ):
+            project_info.anat_config_file = os.path.join(
+                derivatives_directory,
+                "%s_%s_anatomical_config.json"
+                % (project_info.subject, project_info.subject_session),
+            )
         else:
-            project_info.anat_config_file = os.path.join(derivatives_directory,
-                                                         '%s_anatomical_config.json' % project_info.subject)
+            project_info.anat_config_file = os.path.join(
+                derivatives_directory,
+                "%s_anatomical_config.json" % project_info.subject,
+            )
 
         if os.path.exists(project_info.anat_config_file):
-            warn_res = project_info.configure_traits(view='anat_warning_view')
+            warn_res = project_info.configure_traits(view="anat_warning_view")
             if warn_res:
                 anat_save_config(anat_pipeline, project_info.anat_config_file)
             else:
@@ -345,17 +393,26 @@ def init_anat_project(project_info, is_new_project):
 
     else:
         print("> Load anatomical project")
-        anat_conf_loaded = anat_load_config_json(anat_pipeline, project_info.anat_config_file)
+        anat_conf_loaded = anat_load_config_json(
+            anat_pipeline, project_info.anat_config_file
+        )
 
         if not anat_conf_loaded:
             return None
 
-    if (project_info.subject_session != '') and (project_info.subject_session is not None):
-        refresh_folder(derivatives_directory, project_info.subject, anat_pipeline.input_folders,
-                       session=project_info.subject_session)
+    if (project_info.subject_session != "") and (
+        project_info.subject_session is not None
+    ):
+        refresh_folder(
+            derivatives_directory,
+            project_info.subject,
+            anat_pipeline.input_folders,
+            session=project_info.subject_session,
+        )
     else:
-        refresh_folder(derivatives_directory,
-                       project_info.subject, anat_pipeline.input_folders)
+        refresh_folder(
+            derivatives_directory, project_info.subject, anat_pipeline.input_folders
+        )
 
     anat_pipeline.config_file = project_info.anat_config_file
 
@@ -363,18 +420,22 @@ def init_anat_project(project_info, is_new_project):
 
 
 def update_anat_last_processed(project_info, pipeline):
-    """Update anatomical pipeline processing information 
+    """Update anatomical pipeline processing information
 
     Parameters
     ----------
-    project_info : CMP_Project_InfoUI
-        Instance of :class:`CMP_Project_InfoUI` class
+    project_info : ProjectInfoUI
+        Instance of :class:`ProjectInfoUI` class
 
     pipeline : AnatomicalPipelineUI
         Instance of :class:`AnatomicalPipelineUI`
     """
     # last date
-    if os.path.exists(os.path.join(project_info.base_directory, 'derivatives', 'cmp', project_info.subject)):
+    if os.path.exists(
+        os.path.join(
+            project_info.base_directory, "derivatives", __cmp_directory__, project_info.subject
+        )
+    ):
         # out_dirs = os.listdir(os.path.join(
         #    project_info.base_directory, 'derivatives', 'cmp', project_info.subject))
         # for out in out_dirs:
@@ -383,22 +444,39 @@ def update_anat_last_processed(project_info, pipeline):
         #         pipeline.last_date_processed = out
         #         project_info.last_date_processed = out
 
-        if (project_info.anat_last_date_processed == "Not yet processed" or
-                pipeline.now > project_info.anat_last_date_processed):
+        if (
+            project_info.anat_last_date_processed == "Not yet processed"
+            or pipeline.now > project_info.anat_last_date_processed
+        ):
             pipeline.anat_last_date_processed = pipeline.now
             project_info.anat_last_date_processed = pipeline.now
 
     # last stage
-    if os.path.exists(os.path.join(project_info.base_directory, 'derivatives', 'cmp', project_info.subject, 'tmp',
-                                   'anatomical_pipeline')):
+    if os.path.exists(
+        os.path.join(
+            project_info.base_directory,
+            "derivatives",
+            __cmp_directory__,
+            project_info.subject,
+            "tmp",
+            "anatomical_pipeline",
+        )
+    ):
         stage_dirs = []
         for __, dirnames, _ in os.walk(
-                os.path.join(project_info.base_directory, 'derivatives', 'cmp', project_info.subject, 'tmp',
-                             'anatomical_pipeline')):
-            for dirname in fnmatch.filter(dirnames, '*_stage'):
+            os.path.join(
+                project_info.base_directory,
+                "derivatives",
+                __cmp_directory__,
+                project_info.subject,
+                "tmp",
+                "anatomical_pipeline",
+            )
+        ):
+            for dirname in fnmatch.filter(dirnames, "*_stage"):
                 stage_dirs.append(dirname)
         for stage in pipeline.ordered_stage_list:
-            if stage.lower() + '_stage' in stage_dirs:
+            if stage.lower() + "_stage" in stage_dirs:
                 pipeline.last_stage_processed = stage
                 project_info.anat_last_stage_processed = stage
 
@@ -408,18 +486,22 @@ def update_anat_last_processed(project_info, pipeline):
 
 
 def update_dmri_last_processed(project_info, pipeline):
-    """Update diffusion pipeline processing information 
+    """Update diffusion pipeline processing information
 
     Parameters
     ----------
-    project_info : CMP_Project_InfoUI
-        Instance of :class:`CMP_Project_InfoUI` class
+    project_info : ProjectInfoUI
+        Instance of :class:`ProjectInfoUI` class
 
     pipeline : DiffusionPipelineUI
         Instance of :class:`DiffusionPipelineUI`
     """
     # last date
-    if os.path.exists(os.path.join(project_info.base_directory, 'derivatives', 'cmp', project_info.subject)):
+    if os.path.exists(
+        os.path.join(
+            project_info.base_directory, "derivatives", __cmp_directory__, project_info.subject
+        )
+    ):
         # out_dirs = os.listdir(os.path.join(
         #     project_info.base_directory, 'derivatives', 'cmp', project_info.subject))
         # for out in out_dirs:
@@ -428,39 +510,60 @@ def update_dmri_last_processed(project_info, pipeline):
         #         pipeline.last_date_processed = out
         #         project_info.last_date_processed = out
 
-        if (project_info.dmri_last_date_processed == "Not yet processed" or
-                pipeline.now > project_info.dmri_last_date_processed):
+        if (
+            project_info.dmri_last_date_processed == "Not yet processed"
+            or pipeline.now > project_info.dmri_last_date_processed
+        ):
             pipeline.dmri_last_date_processed = pipeline.now
             project_info.dmri_last_date_processed = pipeline.now
 
     # last stage
-    if os.path.exists(os.path.join(project_info.base_directory, 'derivatives', 'cmp', project_info.subject, 'tmp',
-                                   'diffusion_pipeline')):
+    if os.path.exists(
+        os.path.join(
+            project_info.base_directory,
+            "derivatives",
+            __cmp_directory__,
+            project_info.subject,
+            "tmp",
+            "diffusion_pipeline",
+        )
+    ):
         stage_dirs = []
         for _, dirnames, _ in os.walk(
-                os.path.join(project_info.base_directory, 'derivatives', 'cmp', project_info.subject, 'tmp',
-                             'diffusion_pipeline')):
-            for dirname in fnmatch.filter(dirnames, '*_stage'):
+            os.path.join(
+                project_info.base_directory,
+                "derivatives",
+                __cmp_directory__,
+                project_info.subject,
+                "tmp",
+                "diffusion_pipeline",
+            )
+        ):
+            for dirname in fnmatch.filter(dirnames, "*_stage"):
                 stage_dirs.append(dirname)
         for stage in pipeline.ordered_stage_list:
-            if stage.lower() + '_stage' in stage_dirs:
+            if stage.lower() + "_stage" in stage_dirs:
                 pipeline.last_stage_processed = stage
                 project_info.dmri_last_stage_processed = stage
 
 
 def update_fmri_last_processed(project_info, pipeline):
-    """Update functional MRI pipeline processing information 
+    """Update functional MRI pipeline processing information
 
     Parameters
     ----------
-    project_info : CMP_Project_InfoUI
-        Instance of :class:`CMP_Project_InfoUI` class
+    project_info : ProjectInfoUI
+        Instance of :class:`ProjectInfoUI` class
 
     pipeline : fMRIPipelineUI
         Instance of :class:`fMRIPipelineUI`
     """
     # last date
-    if os.path.exists(os.path.join(project_info.base_directory, 'derivatives', 'cmp', project_info.subject)):
+    if os.path.exists(
+        os.path.join(
+            project_info.base_directory, "derivatives", __cmp_directory__, project_info.subject
+        )
+    ):
         # out_dirs = os.listdir(os.path.join(
         #     project_info.base_directory, 'derivatives', 'cmp', project_info.subject))
         # for out in out_dirs:
@@ -469,1621 +572,534 @@ def update_fmri_last_processed(project_info, pipeline):
         #         pipeline.last_date_processed = out
         #         project_info.last_date_processed = out
 
-        if (project_info.fmri_last_date_processed == "Not yet processed" or
-                pipeline.now > project_info.fmri_last_date_processed):
+        if (
+            project_info.fmri_last_date_processed == "Not yet processed"
+            or pipeline.now > project_info.fmri_last_date_processed
+        ):
             pipeline.fmri_last_date_processed = pipeline.now
             project_info.fmri_last_date_processed = pipeline.now
 
     # last stage
-    if os.path.exists(os.path.join(project_info.base_directory, 'derivatives', 'cmp', project_info.subject, 'tmp',
-                                   'fMRI_pipeline')):
+    if os.path.exists(
+        os.path.join(
+            project_info.base_directory,
+            "derivatives",
+            __cmp_directory__,
+            project_info.subject,
+            "tmp",
+            "fMRI_pipeline",
+        )
+    ):
         stage_dirs = []
         for _, dirnames, _ in os.walk(
-                os.path.join(project_info.base_directory, 'derivatives', 'cmp', project_info.subject, 'tmp',
-                             'fMRI_pipeline')):
-            for dirname in fnmatch.filter(dirnames, '*_stage'):
+            os.path.join(
+                project_info.base_directory,
+                "derivatives",
+                __cmp_directory__,
+                project_info.subject,
+                "tmp",
+                "fMRI_pipeline",
+            )
+        ):
+            for dirname in fnmatch.filter(dirnames, "*_stage"):
                 stage_dirs.append(dirname)
         for stage in pipeline.ordered_stage_list:
-            if stage.lower() + '_stage' in stage_dirs:
+            if stage.lower() + "_stage" in stage_dirs:
                 pipeline.last_stage_processed = stage
                 project_info.dmri_last_stage_processed = stage
 
 
-class CMP_ConfigQualityWindowHandler(Handler):
-    """Event handler of the Configurator and Inspector (Quality Control) windows.
+class ProjectInfoUI(cmp.project.ProjectInfo):
+    """Class that extends the :class:`ProjectInfo` with graphical components.
+
+    It supports graphically the setting of all processing properties / attributes
+    of an :class:`ProjectInfo` instance.
 
     Attributes
-    ----------
-    project_loaded : traits.Bool
-        Indicate if project has been successfully loaded
-        (Default: False)
+    -----------
+    creation_mode : traits.Enum
+        Mode for loading the dataset. Valid values are
+        'Load BIDS dataset', 'Install Datalad BIDS dataset'
 
-    anat_pipeline : Instance(HasTraits)
-        Instance of :class:`AnatomicalPipelineUI` class
+    install_datalad_dataset_via_ssh : traits.Bool
+        If set to True install the datalad dataset from a remote server
+        via ssh.(True by default)
 
-    anat_inputs_checked : traits.Bool
-        Indicate if anatomical pipeline inputs are available
-        (Default: False)
+    ssh_user : traits.Str
+        Remote server username.
+        (Required if ``install_datalad_dataset_via_ssh`` is True)
 
-    anat_outputs_checked : traits.Bool
-        Indicate if anatomical pipeline outputs are available
-        (Default: False)
+    ssh_pwd <traits.Password>
+        Remote server password.
+        (Required if ``install_datalad_dataset_via_ssh`` is True)
 
-    anatomical_processed : traits.Bool
-        Indicate if anatomical pipeline was run
-        (Default: False)
+    ssh_remote : traits.Str
+        Remote server IP or URL.
+        (Required if ``install_datalad_dataset_via_ssh`` is True)
 
-    dmri_pipeline : Instance(HasTraits)
-        Instance of :class:`DiffusionPipelineUI` class
+    datalad_dataset_path : traits.Directory
+        Path to the datalad dataset on the remote server.
+        (Required if ``install_datalad_dataset_via_ssh`` is True)
 
-    dmri_inputs_checked : traits.Bool
-        Indicate if diffusion pipeline inputs are available
-        (Default: False)
+    summary_view_button : traits.ui.Button
+        Button that shows the pipeline processing summary table
 
-    dmri_processed : traits.Bool
-        Indicate if diffusion pipeline was run
-        (Default: False)
+    pipeline_processing_summary_view : traits.ui.VGroup
+        TraitsUI VGroup that contains ``Item('pipeline_processing_summary')``
 
-    fmri_pipeline : Instance(HasTraits)
-        Instance of :class:`fMRIPipelineUI` class
+    dataset_view : traits.ui.View
+        TraitsUI View that shows a summary of project settings and
+        modality available for a given subject
 
-    fmri_inputs_checked : traits.Bool
-        Indicate if fMRI pipeline inputs are available
-        (Default: False)
+    traits_view : QtView
+        TraitsUI QtView that includes the View 'dataset_view'
 
-    fmri_processed : traits.Bool
-        Indicate if fMRI pipeline was run
-        (Default: False)
+    create_view : traits.ui.View
+        Dialog view to create a BIDS Dataset
+
+    subject_view : traits.ui.View
+        Dialog view to select of subject
+
+    subject_session_view : traits.ui.View
+        Dialog view to select the subject session
+
+    dmri_bids_acq_view : traits.ui.View
+        Dialog view to select the diffusion acquisition model
+
+    anat_warning_view : traits.ui.View
+        View that displays a warning message regarding
+        the anatomical T1w data
+
+    anat_config_error_view : traits.ui.View
+        Error view that displays an error message regarding
+        the configuration of the anatomical pipeline
+
+    dmri_warning_view : traits.ui.View
+        View that displays a warning message regarding
+        the diffusion MRI data
+
+    dmri_config_error_view : traits.ui.View
+        View that displays an error message regarding
+        the configuration of the diffusion pipeline
+
+    fmri_warning_view : traits.ui.View
+        View that displays a warning message regarding
+        the functional MRI data
+
+    fmri_config_error_view : traits.ui.View
+        View that displays an error message regarding
+        the configuration of the fMRI pipeline
+
+    open_view : traits.ui.View
+        Dialog view to load a BIDS Dataset
+
+    anat_select_config_to_load : traits.ui.View
+        Dialog view to load the configuration file of the anatomical pipeline
+
+    diffusion_imaging_model_select_view : traits.ui.View
+        Dialog view to select the diffusion acquisition model
+
+    dmri_select_config_to_load : traits.ui.View
+        Dialog view to load the configuration file of the diffusion MRI pipeline
+
+    fmri_select_config_to_load : traits.ui.View
+        Dialog view to load the configuration file of the fMRI pipeline
     """
 
-    project_loaded = Bool(False)
-
-    anat_pipeline = Instance(HasTraits)
-    anat_inputs_checked = Bool(False)
-    anat_outputs_checked = Bool(False)
-    anatomical_processed = Bool(False)
-
-    dmri_pipeline = Instance(HasTraits)
-    dmri_inputs_checked = Bool(False)
-    dmri_processed = Bool(False)
-
-    fmri_pipeline = Instance(HasTraits)
-    fmri_inputs_checked = Bool(False)
-    fmri_processed = Bool(False)
-
-    def new_project(self, ui_info):
-        """Function that creates a new :class:`CMP_Project_InfoUI` instance.
-
-        Parameters
-        ----------
-        ui_info : QtView
-            TraitsUI QtView associated with ``self``
-        """
-        print("> Load Project")
-        new_project = gui.CMP_Project_InfoUI()
-        np_res = new_project.configure_traits(view='create_view')
-        ui_info.ui.context["object"].handler = self
-
-        if np_res and os.path.exists(new_project.base_directory):
-            try:
-                bids_layout = BIDSLayout(new_project.base_directory)
-                new_project.bids_layout = bids_layout
-                print(bids_layout)
-
-                for subj in bids_layout.get_subjects():
-                    if 'sub-' + str(subj) not in new_project.subjects:
-                        new_project.subjects.append('sub-' + str(subj))
-
-                print("  .. INFO: Available subjects : ")
-                print(new_project.subjects)
-                new_project.number_of_subjects = len(new_project.subjects)
-
-                np_res = new_project.configure_traits(view='subject_view')
-                print("  .. INFO: Selected subject : " + new_project.subject)
-
-                subject = new_project.subject.split('-')[1]
-                new_project.subject_sessions = ['']
-                new_project.subject_session = ''
-
-                sessions = bids_layout.get(
-                    target='session', return_type='id', subject=subject)
-
-                if len(sessions) > 0:
-                    print("Warning: multiple sessions")
-                    for ses in sessions:
-                        new_project.subject_sessions.append('ses-' + str(ses))
-                    np_res = new_project.configure_traits(
-                        view='subject_session_view')
-                    print("  .. INFO: Selected session : " + new_project.subject_session)
-
-            except Exception as e:
-                msg = "Invalid BIDS dataset. Please see documentation for more details."
-                print_warning(f'  .. EXCEPTION: {msg}')
-                print_error(f'       : {e}')
-                error(
-                    message=msg, title="BIDS error")
-                return
-
-            self.anat_pipeline = init_anat_project(new_project, True)
-            if self.anat_pipeline is not None:
-                anat_inputs_checked = self.anat_pipeline.check_input(
-                    bids_layout)
-                if anat_inputs_checked:
-                    ui_info.ui.context["object"].project_info = new_project
-                    self.anat_pipeline.number_of_cores = new_project.number_of_cores
-                    ui_info.ui.context["object"].anat_pipeline = self.anat_pipeline
-                    self.anat_inputs_checked = anat_inputs_checked
-                    ui_info.ui.context["object"].project_info.t1_available = self.anat_inputs_checked
-
-                    ui_info.ui.context["object"].project_info.on_trait_change(
-                        ui_info.ui.context["object"].update_subject_anat_pipeline, 'subject')
-                    ui_info.ui.context["object"].project_info.on_trait_change(
-                        ui_info.ui.context["object"].update_session_anat_pipeline, 'subject_session')
-                    anat_save_config(
-                        self.anat_pipeline, ui_info.ui.context["object"].project_info.anat_config_file)
-                    self.project_loaded = True
-
-                    ui_info.ui.context["object"].project_info.parcellation_scheme = get_anat_process_detail_json(
-                            new_project, 'parcellation_stage', 'parcellation_scheme')
-                    ui_info.ui.context["object"].project_info.freesurfer_subjects_dir = get_anat_process_detail_json(
-                            new_project, 'segmentation_stage', 'freesurfer_subjects_dir')
-                    ui_info.ui.context["object"].project_info.freesurfer_subject_id = get_anat_process_detail_json(
-                            new_project, 'segmentation_stage', 'freesurfer_subject_id')
-                    
-                    dmri_inputs_checked, self.dmri_pipeline = init_dmri_project(
-                            new_project, bids_layout, True)
-                    if self.dmri_pipeline is not None:
-                        if dmri_inputs_checked:
-                            self.dmri_pipeline.number_of_cores = new_project.number_of_cores
-                            print("  .. INFO: Number of cores (pipeline) = %s" %
-                                  self.dmri_pipeline.number_of_cores)
-                            self.dmri_pipeline.parcellation_scheme = ui_info.ui.context[
-                                "object"].project_info.parcellation_scheme
-                            ui_info.ui.context["object"].dmri_pipeline = self.dmri_pipeline
-                            ui_info.ui.context["object"].project_info.on_trait_change(
-                                ui_info.ui.context["object"].update_subject_dmri_pipeline, 'subject')
-                            ui_info.ui.context["object"].project_info.on_trait_change(
-                                ui_info.ui.context["object"].update_session_dmri_pipeline, 'subject_session')
-                            dmri_save_config(self.dmri_pipeline,
-                                             ui_info.ui.context["object"].project_info.dmri_config_file)
-                            self.dmri_inputs_checked = dmri_inputs_checked
-                            ui_info.ui.context["object"].project_info.dmri_available = self.dmri_inputs_checked
-                            self.project_loaded = True
-                            ui_info.ui.context["object"].project_info.on_trait_change(
-                                ui_info.ui.context["object"].update_diffusion_imaging_model, 'diffusion_imaging_model')
-
-                    fmri_inputs_checked, self.fmri_pipeline = init_fmri_project(
-                        new_project, bids_layout, True)
-                    if self.fmri_pipeline is not None:
-                        if fmri_inputs_checked:
-                            self.fmri_pipeline.number_of_cores = new_project.number_of_cores
-                            print("  .. INFO: Number of cores (pipeline) = %s" %
-                                  self.fmri_pipeline.number_of_cores)
-                            self.fmri_pipeline.parcellation_scheme = ui_info.ui.context[
-                                "object"].project_info.parcellation_scheme
-                            self.fmri_pipeline.subjects_dir = ui_info.ui.context[
-                                "object"].project_info.freesurfer_subjects_dir
-                            self.fmri_pipeline.subject_id = ui_info.ui.context[
-                                "object"].project_info.freesurfer_subject_id
-                            ui_info.ui.context["object"].fmri_pipeline = self.fmri_pipeline
-                            ui_info.ui.context["object"].project_info.on_trait_change(
-                                ui_info.ui.context["object"].update_subject_fmri_pipeline, 'subject')
-                            ui_info.ui.context["object"].project_info.on_trait_change(
-                                ui_info.ui.context["object"].update_session_fmri_pipeline, 'subject_session')
-                            fmri_save_config(self.fmri_pipeline,
-                                             ui_info.ui.context["object"].project_info.fmri_config_file)
-                            self.fmri_inputs_checked = fmri_inputs_checked
-                            ui_info.ui.context["object"].project_info.fmri_available = self.fmri_inputs_checked
-                            self.project_loaded = True
-
-    def load_project(self, ui_info):
-        """Function that creates a new :class:`CMP_Project_InfoUI` instance from an existing project.
-
-        Parameters
-        ----------
-        ui_info : QtView
-            TraitsUI QtView associated with ``self``
-        """
-        print("> Load Project")
-        loaded_project = gui.CMP_Project_InfoUI()
-        np_res = loaded_project.configure_traits(view='open_view')
-        ui_info.ui.context["object"].handler = self
-
-        print("  .. INFO: BIDS directory: %s" % loaded_project.base_directory)
-        try:
-            bids_layout = BIDSLayout(loaded_project.base_directory)
-            loaded_project.bids_layout = bids_layout
-
-            loaded_project.subjects = []
-            for subj in bids_layout.get_subjects():
-                if 'sub-' + str(subj) not in loaded_project.subjects:
-                    loaded_project.subjects.append('sub-' + str(subj))
-            loaded_project.subjects.sort()
-
-            print("  .. INFO: Available subjects : ")
-            print(loaded_project.subjects)
-            loaded_project.number_of_subjects = len(loaded_project.subjects)
-
-        except Exception:
-            error(message="Invalid BIDS dataset. Please see documentation for more details.",
-                  title="BIDS error")
-            return
-
-        self.anat_inputs_checked = False
-
-        if np_res and os.path.exists(loaded_project.base_directory):
-            sessions = []
-            for subj in bids_layout.get_subjects():
-                subj_sessions = bids_layout.get(
-                    target='session', return_type='id', subject=subj)
-                for subj_session in subj_sessions:
-                    sessions.append(subj_session)
-
-            loaded_project.anat_available_config = []
-
-            for subj in bids_layout.get_subjects():
-                subj_sessions = bids_layout.get(
-                    target='session', return_type='id', subject=subj)
-                if len(subj_sessions) > 0:
-                    for subj_session in subj_sessions:
-                        config_file = os.path.join(loaded_project.base_directory, 'derivatives',
-                                                   "sub-%s_ses-%s_anatomical_config.json" % (subj, subj_session))
-                        if os.path.isfile(config_file):
-                            loaded_project.anat_available_config.append(
-                                "sub-%s_ses-%s" % (subj, subj_session))
-                else:
-                    config_file = os.path.join(loaded_project.base_directory, 'derivatives',
-                                               "sub-%s_anatomical_config.json" % subj)
-                    if os.path.isfile(config_file):
-                        loaded_project.anat_available_config.append(
-                            "sub-%s" % subj)
-
-            if len(loaded_project.anat_available_config) > 1:
-                loaded_project.anat_available_config.sort()
-                loaded_project.anat_config_to_load = loaded_project.anat_available_config[0]
-                anat_config_selected = loaded_project.configure_traits(
-                    view='anat_select_config_to_load')
-
-                if not anat_config_selected:
-                    return 0
-            else:
-                loaded_project.anat_config_to_load = loaded_project.anat_available_config[0]
-
-            print("  .. INFO: Anatomical config to load: %s" %
-                  loaded_project.anat_config_to_load)
-            loaded_project.anat_config_file = os.path.join(loaded_project.base_directory, 'derivatives',
-                                                           '%s_anatomical_config.json' % loaded_project.anat_config_to_load)
-            print("  .. INFO: Anatomical config file: %s" %
-                  loaded_project.anat_config_file)
-
-            loaded_project.subject = get_anat_process_detail_json(
-                loaded_project, 'Global', 'subject')
-            loaded_project.subject_sessions = ["ses-%s" % s for s in bids_layout.get(target='session', return_type='id',
-                                                                                     subject=loaded_project.subject.split('-')[
-                                                                                         1])]
-            if len(loaded_project.subject_sessions) > 0:
-                print("  .. INFO: Dataset has session(s)")
-                loaded_project.subject_session = get_anat_process_detail_json(
-                    loaded_project, 'Global', 'subject_session')
-                print("Selected session : " + loaded_project.subject_session)
-            else:
-                loaded_project.subject_sessions = ['']
-                loaded_project.subject_session = ''
-                print("  .. INFO: Dataset has no session")
-
-            loaded_project.parcellation_scheme = get_anat_process_detail_json(
-                    loaded_project, 'parcellation_stage', 'parcellation_scheme')
-            loaded_project.atlas_info = get_anat_process_detail_json(
-                    loaded_project, 'parcellation_stage', 'atlas_info')
-            loaded_project.freesurfer_subjects_dir = get_anat_process_detail_json(
-                    loaded_project, 'segmentation_stage', 'freesurfer_subjects_dir')
-            loaded_project.freesurfer_subject_id = get_anat_process_detail_json(
-                    loaded_project, 'segmentation_stage', 'freesurfer_subject_id')
-
-            self.anat_pipeline = init_anat_project(loaded_project, False)
-            if self.anat_pipeline is not None:
-                anat_inputs_checked = self.anat_pipeline.check_input(
-                    bids_layout)
-                if anat_inputs_checked:
-                    update_anat_last_processed(loaded_project,
-                                               self.anat_pipeline)  # Not required as the project is new, so no update should be done on processing status
-                    ui_info.ui.context["object"].project_info = loaded_project
-                    ui_info.ui.context["object"].project_info.on_trait_change(
-                        ui_info.ui.context["object"].update_subject_anat_pipeline, 'subject')
-                    ui_info.ui.context["object"].project_info.on_trait_change(
-                        ui_info.ui.context["object"].update_session_anat_pipeline, 'subject_session')
-                    ui_info.ui.context["object"].anat_pipeline = self.anat_pipeline
-                    ui_info.ui.context["object"].anat_pipeline.number_of_cores = ui_info.ui.context[
-                        "object"].project_info.number_of_cores
-                    self.anat_inputs_checked = anat_inputs_checked
-                    ui_info.ui.context["object"].project_info.t1_available = self.anat_inputs_checked
-                    anat_save_config(
-                        self.anat_pipeline, ui_info.ui.context["object"].project_info.anat_config_file)
-                    self.project_loaded = True
-                    self.anat_outputs_checked, _ = self.anat_pipeline.check_output()
-                    if self.anat_outputs_checked:
-                        print("  .. INFO: Available outputs")
-
-            loaded_project.dmri_available_config = []
-
-            subjid = loaded_project.subject.split("-")[1]
-            subj_sessions = bids_layout.get(
-                target='session', return_type='id', subject=subjid)
-
-            if len(subj_sessions) > 0:
-                for subj_session in subj_sessions:
-                    config_file = os.path.join(loaded_project.base_directory, 'derivatives',
-                                               "%s_ses-%s_diffusion_config.json" % (
-                                                   loaded_project.subject, subj_session))
-                    if os.path.isfile(config_file) and subj_session == loaded_project.subject_session.split("-")[1]:
-                        loaded_project.dmri_available_config.append(
-                            "%s_ses-%s" % (loaded_project.subject, subj_session))
-            else:
-                config_file = os.path.join(loaded_project.base_directory, 'derivatives',
-                                           "sub-%s_diffusion_config.json" % loaded_project.subject)
-                if os.path.isfile(config_file):
-                    loaded_project.dmri_available_config.append(
-                        "%s" % loaded_project.subject)
-
-            if len(loaded_project.dmri_available_config) > 1:
-                loaded_project.dmri_available_config.sort()
-                loaded_project.dmri_config_to_load = loaded_project.dmri_available_config[0]
-                dmri_config_selected = loaded_project.configure_traits(
-                    view='dmri_select_config_to_load')
-                if not dmri_config_selected:
-                    return 0
-            elif not loaded_project.dmri_available_config:
-                loaded_project.dmri_config_to_load = '%s_diffusion' % loaded_project.subject
-            else:
-                loaded_project.dmri_config_to_load = loaded_project.dmri_available_config[0]
-
-            print("  .. INFO: Diffusion config to load: %s" %
-                  loaded_project.dmri_config_to_load)
-            loaded_project.dmri_config_file = os.path.join(loaded_project.base_directory, 'derivatives',
-                                                           '%s_diffusion_config.json' % loaded_project.dmri_config_to_load)
-            print("  .. INFO: Diffusion config file: %s" %
-                  loaded_project.dmri_config_file)
-
-            if os.path.isfile(loaded_project.dmri_config_file):
-                print("  .. INFO: Load existing diffusion config file")
-                loaded_project.process_type = get_dmri_process_detail_json(
-                        loaded_project, 'Global', 'process_type')
-                loaded_project.diffusion_imaging_model = get_dmri_process_detail_json(
-                        loaded_project, 'Global', 'diffusion_imaging_model')
-
-                dmri_inputs_checked, self.dmri_pipeline = init_dmri_project(
-                    loaded_project, bids_layout, False)
-                if self.dmri_pipeline is not None:
-                    if dmri_inputs_checked:
-                        update_dmri_last_processed(
-                            loaded_project, self.dmri_pipeline)
-                        ui_info.ui.context["object"].project_info = loaded_project
-                        ui_info.ui.context["object"].project_info.on_trait_change(
-                            ui_info.ui.context["object"].update_subject_dmri_pipeline, 'subject')
-                        ui_info.ui.context["object"].project_info.on_trait_change(
-                            ui_info.ui.context["object"].update_session_dmri_pipeline, 'subject_session')
-                        self.dmri_pipeline.parcellation_scheme = loaded_project.parcellation_scheme
-                        self.dmri_pipeline.atlas_info = loaded_project.atlas_info
-                        ui_info.ui.context["object"].dmri_pipeline = self.dmri_pipeline
-                        ui_info.ui.context["object"].dmri_pipeline.number_of_cores = ui_info.ui.context["object"].project_info.number_of_cores
-                        self.dmri_inputs_checked = dmri_inputs_checked
-                        ui_info.ui.context["object"].project_info.dmri_available = self.dmri_inputs_checked
-                        dmri_save_config(
-                            self.dmri_pipeline, ui_info.ui.context["object"].project_info.dmri_config_file)
-                        self.project_loaded = True
-                        ui_info.ui.context["object"].project_info.on_trait_change(
-                            ui_info.ui.context["object"].update_diffusion_imaging_model, 'diffusion_imaging_model')
-            else:
-                dmri_inputs_checked, self.dmri_pipeline = init_dmri_project(
-                    loaded_project, bids_layout, True)
-                print_warning(
-                    "  .. WARNING: No existing config for diffusion pipeline found - " +
-                    "Created new diffusion pipeline with default parameters")
-                if self.dmri_pipeline is not None:  # and self.dmri_pipeline is not None:
-                    if dmri_inputs_checked:
-                        ui_info.ui.context["object"].project_info = loaded_project
-                        ui_info.ui.context["object"].project_info.on_trait_change(
-                            ui_info.ui.context["object"].update_subject_dmri_pipeline, 'subject')
-                        ui_info.ui.context["object"].project_info.on_trait_change(
-                            ui_info.ui.context["object"].update_session_dmri_pipeline, 'subject_session')
-                        self.dmri_pipeline.number_of_cores = loaded_project.number_of_cores
-                        print("  .. INFO: Number of cores (pipeline) = %s" %
-                              self.dmri_pipeline.number_of_cores)
-                        self.dmri_pipeline.parcellation_scheme = loaded_project.parcellation_scheme
-                        self.dmri_pipeline.atlas_info = loaded_project.atlas_info
-                        ui_info.ui.context["object"].dmri_pipeline = self.dmri_pipeline
-                        dmri_save_config(
-                            self.dmri_pipeline, ui_info.ui.context["object"].project_info.dmri_config_file)
-                        self.dmri_inputs_checked = dmri_inputs_checked
-                        ui_info.ui.context["object"].project_info.dmri_available = self.dmri_inputs_checked
-                        self.project_loaded = True
-                        ui_info.ui.context["object"].project_info.on_trait_change(
-                            ui_info.ui.context["object"].update_diffusion_imaging_model, 'diffusion_imaging_model')
-
-            if len(subj_sessions) > 0:
-                for subj_session in subj_sessions:
-                    config_file = os.path.join(loaded_project.base_directory, 'derivatives',
-                                               "%s_ses-%s_fMRI_config.json" % (loaded_project.subject, subj_session))
-                    if os.path.isfile(config_file) and subj_session == loaded_project.subject_session.split("-")[1]:
-                        loaded_project.fmri_available_config.append(
-                            "%s_ses-%s" % (loaded_project.subject, subj_session))
-            else:
-                config_file = os.path.join(loaded_project.base_directory, 'derivatives',
-                                           "sub-%s_fMRI_config.json" % loaded_project.subject)
-                if os.path.isfile(config_file):
-                    loaded_project.fmri_available_config.append(
-                        "sub-%s" % loaded_project.subject)
-
-            if len(loaded_project.fmri_available_config) > 1:
-                loaded_project.fmri_available_config.sort()
-                loaded_project.fmri_config_to_load = loaded_project.fmri_available_config[0]
-                fmri_config_selected = loaded_project.configure_traits(
-                    view='fmri_select_config_to_load')
-                if not fmri_config_selected:
-                    return 0
-            elif not loaded_project.fmri_available_config:
-                loaded_project.fmri_config_to_load = '%s_fMRI' % loaded_project.subject
-            else:
-                loaded_project.fmri_config_to_load = loaded_project.fmri_available_config[0]
-
-            print("  .. INFO: fMRI config to load: %s" %
-                  loaded_project.fmri_config_to_load)
-            loaded_project.fmri_config_file = os.path.join(loaded_project.base_directory, 'derivatives',
-                                                           '%s_fMRI_config.json' % loaded_project.fmri_config_to_load)
-            print("  .. INFO: fMRI config file: %s" % loaded_project.fmri_config_file)
-
-            if os.path.isfile(loaded_project.fmri_config_file):
-                print("  .. INFO: Load existing fmri config file")
-                loaded_project.process_type = get_fmri_process_detail_json(
-                    loaded_project, 'Global', 'process_type')
-
-                fmri_inputs_checked, self.fmri_pipeline = init_fmri_project(loaded_project, bids_layout, False)
-                if self.fmri_pipeline is not None:
-                    if fmri_inputs_checked:
-                        update_fmri_last_processed(
-                            loaded_project, self.fmri_pipeline)
-                        ui_info.ui.context["object"].project_info = loaded_project
-                        ui_info.ui.context["object"].project_info.on_trait_change(
-                            ui_info.ui.context["object"].update_subject_fmri_pipeline, 'subject')
-                        ui_info.ui.context["object"].project_info.on_trait_change(
-                            ui_info.ui.context["object"].update_session_fmri_pipeline, 'subject_session')
-                        self.fmri_pipeline.parcellation_scheme = loaded_project.parcellation_scheme
-                        self.fmri_pipeline.atlas_info = loaded_project.atlas_info
-                        self.fmri_pipeline.subjects_dir = loaded_project.freesurfer_subjects_dir
-                        self.fmri_pipeline.subject_id = loaded_project.freesurfer_subject_id
-                        ui_info.ui.context["object"].fmri_pipeline = self.fmri_pipeline
-                        ui_info.ui.context["object"].fmri_pipeline.number_of_cores = ui_info.ui.context[
-                            "object"].project_info.number_of_cores
-                        self.fmri_inputs_checked = fmri_inputs_checked
-                        ui_info.ui.context["object"].project_info.fmri_available = self.fmri_inputs_checked
-                        fmri_save_config(
-                            self.fmri_pipeline, ui_info.ui.context["object"].project_info.fmri_config_file)
-                        self.project_loaded = True
-            else:
-                fmri_inputs_checked, self.fmri_pipeline = init_fmri_project(loaded_project, bids_layout, True)
-                print_warning(
-                    "  .. WARNING: No existing config for fMRI pipeline found - " +
-                    "Created new fMRI pipeline with default parameters")
-                if self.fmri_pipeline is not None:
-                    if fmri_inputs_checked:
-                        ui_info.ui.context["object"].project_info = loaded_project
-                        ui_info.ui.context["object"].project_info.on_trait_change(
-                            ui_info.ui.context["object"].update_subject_fmri_pipeline, 'subject')
-                        ui_info.ui.context["object"].project_info.on_trait_change(
-                            ui_info.ui.context["object"].update_session_fmri_pipeline, 'subject_session')
-                        self.fmri_pipeline.number_of_cores = loaded_project.number_of_cores
-                        print("  .. INFO: Number of cores (pipeline) = %s" %
-                              self.fmri_pipeline.number_of_cores)
-                        self.fmri_pipeline.parcellation_scheme = loaded_project.parcellation_scheme
-                        self.fmri_pipeline.atlas_info = loaded_project.atlas_info
-                        self.fmri_pipeline.subjects_dir = loaded_project.freesurfer_subjects_dir
-                        self.fmri_pipeline.subject_id = loaded_project.freesurfer_subject_id
-                        ui_info.ui.context["object"].fmri_pipeline = self.fmri_pipeline
-                        fmri_save_config(
-                            self.fmri_pipeline, ui_info.ui.context["object"].project_info.fmri_config_file)
-                        self.fmri_inputs_checked = fmri_inputs_checked
-                        ui_info.ui.context["object"].project_info.fmri_available = self.fmri_inputs_checked
-                        self.project_loaded = True
-
-    def update_subject_anat_pipeline(self, ui_info):
-        """Function that updates attributes of the :class:`AnatomicalPipelineUI` instance.
-
-        Parameters
-        ----------
-        ui_info : QtView
-            TraitsUI QtView associated with ``self``
-        """
-        ui_info.handler = self
-
-        self.anat_pipeline.subject = ui_info.project_info.subject
-        self.anat_pipeline.global_conf.subject = ui_info.project_info.subject
-
-        updated_project = ui_info.project_info
-
-        bids_layout = BIDSLayout(updated_project.base_directory)
-
-        if len(updated_project.subject_sessions) > 0:
-            self.anat_pipeline.global_conf.subject_session = updated_project.subject_session
-            self.anat_pipeline.subject_directory = os.path.join(updated_project.base_directory, updated_project.subject,
-                                                                updated_project.subject_session)
-            updated_project.anat_config_file = os.path.join(updated_project.base_directory, 'derivatives',
-                                                            '%s_%s_anatomical_config.json' % (
-                                                                updated_project.subject, updated_project.subject_session))
-        else:
-            self.anat_pipeline.global_conf.subject_session = ''
-            self.anat_pipeline.subject_directory = os.path.join(
-                updated_project.base_directory, updated_project.subject)
-            updated_project.anat_config_file = os.path.join(updated_project.base_directory, 'derivatives',
-                                                            '%s_anatomical_config.json' % updated_project.subject)
-
-        self.anat_pipeline.derivatives_directory = os.path.join(
-            updated_project.base_directory, 'derivatives')
-
-        if os.path.isfile(updated_project.anat_config_file):
-            print("  .. INFO: Existing anatomical config file for subject %s: %s" % (
-                updated_project.subject, updated_project.anat_config_file))
-
-            updated_project.parcellation_scheme = get_anat_process_detail_json(
-                    updated_project, 'parcellation_stage', 'parcellation_scheme')
-            updated_project.atlas_info = get_anat_process_detail_json(
-                    updated_project, 'parcellation_stage', 'atlas_info')
-            updated_project.freesurfer_subjects_dir = get_anat_process_detail_json(
-                    updated_project, 'segmentation_stage', 'freesurfer_subjects_dir')
-            updated_project.freesurfer_subject_id = get_anat_process_detail_json(
-                    updated_project, 'segmentation_stage', 'freesurfer_subject_id')
-
-            self.anat_pipeline = init_anat_project(updated_project, False)
-            if self.anat_pipeline is not None:
-                anat_inputs_checked = self.anat_pipeline.check_input(
-                    bids_layout)
-                if anat_inputs_checked:
-                    update_anat_last_processed(updated_project,
-                                               self.anat_pipeline)  # Not required as the project is new, so no update should be done on processing status
-                    ui_info.project_info = updated_project
-                    ui_info.project_info.on_trait_change(
-                        ui_info.update_subject_anat_pipeline, 'subject')
-                    ui_info.project_info.on_trait_change(
-                        ui_info.update_session_anat_pipeline, 'subject_session')
-                    ui_info.anat_pipeline = self.anat_pipeline
-                    ui_info.anat_pipeline.number_of_cores = ui_info.project_info.number_of_cores
-                    self.anat_inputs_checked = anat_inputs_checked
-                    ui_info.project_info.t1_available = self.anat_inputs_checked
-                    anat_save_config(self.anat_pipeline,
-                                     ui_info.project_info.anat_config_file)
-                    self.project_loaded = True
-                    self.anat_outputs_checked, msg = self.anat_pipeline.check_output()
-                    if self.anat_outputs_checked:
-                        print("  .. INFO: Available outputs")
-
-        else:
-            print("  .. INFO: Unprocessed anatomical data for subject %s" % updated_project.subject)
-            self.anat_pipeline = init_anat_project(updated_project, True)
-            if self.anat_pipeline is not None:  # and self.dmri_pipeline is not None:
-                anat_inputs_checked = self.anat_pipeline.check_input(
-                    bids_layout)
-                if anat_inputs_checked:
-                    ui_info.project_info = updated_project
-                    ui_info.project_info.on_trait_change(
-                        ui_info.update_subject_anat_pipeline, 'subject')
-                    ui_info.project_info.on_trait_change(
-                        ui_info.update_session_anat_pipeline, 'subject_session')
-                    self.anat_pipeline.number_of_cores = updated_project.number_of_cores
-                    ui_info.anat_pipeline = self.anat_pipeline
-                    self.anat_inputs_checked = anat_inputs_checked
-                    ui_info.project_info.t1_available = self.anat_inputs_checked
-                    anat_save_config(self.anat_pipeline,
-                                     ui_info.project_info.anat_config_file)
-                    self.project_loaded = True
-
-            ui_info.project_info.parcellation_scheme = get_anat_process_detail_json(
-                    updated_project, 'parcellation_stage', 'parcellation_scheme')
-            ui_info.project_info.freesurfer_subjects_dir = get_anat_process_detail_json(
-                    updated_project, 'segmentation_stage', 'freesurfer_subjects_dir')
-            ui_info.project_info.freesurfer_subject_id = get_anat_process_detail_json(
-                    updated_project, 'segmentation_stage', 'freesurfer_subject_id')
-
-        return ui_info
-
-    def update_subject_dmri_pipeline(self, ui_info):
-        """Function that updates attributes of the :class:`DiffusionPipelineUI` instance.
-
-        Parameters
-        ----------
-        ui_info : QtView
-            TraitsUI QtView associated with ``self``
-        """
-        self.dmri_pipeline.subject = ui_info.project_info.subject
-        self.dmri_pipeline.global_conf.subject = ui_info.project_info.subject
-
-        updated_project = ui_info.project_info
-
-        bids_layout = BIDSLayout(updated_project.base_directory)
-
-        if len(updated_project.subject_sessions) > 0:
-            self.dmri_pipeline.global_conf.subject_session = updated_project.subject_session
-            self.dmri_pipeline.subject_directory = os.path.join(updated_project.base_directory, updated_project.subject,
-                                                                updated_project.subject_session)
-            updated_project.dmri_config_file = os.path.join(updated_project.base_directory, 'derivatives',
-                                                            '%s_%s_diffusion_config.json' % (
-                                                                updated_project.subject, updated_project.subject_session))
-        else:
-            self.dmri_pipeline.global_conf.subject_session = ''
-            self.dmri_pipeline.subject_directory = os.path.join(
-                updated_project.base_directory, updated_project.subject)
-            updated_project.dmri_config_file = os.path.join(updated_project.base_directory, 'derivatives',
-                                                            '%s_diffusion_config.json' % updated_project.subject)
-
-        self.dmri_pipeline.derivatives_directory = os.path.join(
-            updated_project.base_directory, 'derivatives')
-
-        if os.path.isfile(updated_project.dmri_config_file):
-            print("  .. INFO: Load existing diffusion config file")
-            updated_project.process_type = get_dmri_process_detail_json(
-                    updated_project, 'Global', 'process_type')
-            updated_project.diffusion_imaging_model = get_dmri_process_detail_json(
-                    updated_project, 'diffusion_stage', 'diffusion_imaging_model')
-
-            dmri_inputs_checked, self.dmri_pipeline = init_dmri_project(updated_project, bids_layout, False)
-            if self.dmri_pipeline is not None:  # and self.dmri_pipeline is not None:
-                if dmri_inputs_checked:
-                    update_dmri_last_processed(
-                        updated_project, self.dmri_pipeline)
-                    ui_info.project_info = updated_project
-                    ui_info.project_info.on_trait_change(
-                        ui_info.update_subject_dmri_pipeline, 'subject')
-                    ui_info.project_info.on_trait_change(
-                        ui_info.update_session_dmri_pipeline, 'subject_session')
-                    self.dmri_pipeline.parcellation_scheme = updated_project.parcellation_scheme
-                    self.dmri_pipeline.atlas_info = updated_project.atlas_info
-                    ui_info.dmri_pipeline = self.dmri_pipeline
-                    ui_info.dmri_pipeline.number_of_cores = ui_info.project_info.number_of_cores
-                    self.dmri_inputs_checked = dmri_inputs_checked
-                    ui_info.project_info.dmri_available = self.dmri_inputs_checked
-                    dmri_save_config(self.dmri_pipeline,
-                                     ui_info.project_info.dmri_config_file)
-                    self.project_loaded = True
-                    ui_info.project_info.on_trait_change(ui_info.update_diffusion_imaging_model,
-                                                         'diffusion_imaging_model')
-        else:
-            dmri_inputs_checked, self.dmri_pipeline = init_dmri_project(updated_project, bids_layout, True)
-            print_warning("  .. WARNING: No existing config for diffusion pipeline found - " +
-                          "Created new diffusion pipeline with default parameters")
-            if self.dmri_pipeline is not None:  # and self.dmri_pipeline is not None:
-                if dmri_inputs_checked:
-                    ui_info.project_info = updated_project
-                    ui_info.project_info.on_trait_change(
-                        ui_info.update_subject_dmri_pipeline, 'subject')
-                    ui_info.project_info.on_trait_change(
-                        ui_info.update_session_dmri_pipeline, 'subject_session')
-                    self.dmri_pipeline.number_of_cores = updated_project.number_of_cores
-                    print("  .. INFO: Number of cores (pipeline) = %s" %
-                          self.dmri_pipeline.number_of_cores)
-                    self.dmri_pipeline.parcellation_scheme = updated_project.parcellation_scheme
-                    self.dmri_pipeline.atlas_info = updated_project.atlas_info
-                    ui_info.dmri_pipeline = self.dmri_pipeline
-                    dmri_save_config(self.dmri_pipeline,
-                                     ui_info.project_info.dmri_config_file)
-                    self.dmri_inputs_checked = dmri_inputs_checked
-                    ui_info.project_info.dmri_available = self.dmri_inputs_checked
-                    self.project_loaded = True
-                    ui_info.project_info.on_trait_change(ui_info.update_diffusion_imaging_model,
-                                                         'diffusion_imaging_model')
-
-        return ui_info
-
-    def update_subject_fmri_pipeline(self, ui_info):
-        """Function that updates attributes of the :class:`fMRIPipelineUI` instance.
-
-        Parameters
-        ----------
-        ui_info : QtView
-            TraitsUI QtView associated with ``self``
-        """
-        ui_info.handler = self
-
-        self.fmri_pipeline.subject = ui_info.project_info.subject
-        self.fmri_pipeline.global_conf.subject = ui_info.project_info.subject
-
-        updated_project = ui_info.project_info
-
-        bids_layout = BIDSLayout(updated_project.base_directory)
-
-        if len(updated_project.subject_sessions) > 0:
-            self.fmri_pipeline.global_conf.subject_session = updated_project.subject_session
-            self.fmri_pipeline.subject_directory = os.path.join(updated_project.base_directory,
-                                                                ui_info.project_info.subject,
-                                                                updated_project.subject_session)
-            updated_project.fmri_config_file = os.path.join(updated_project.base_directory, 'derivatives',
-                                                            '%s_%s_fMRI_config.json' % (
-                                                                updated_project.subject, updated_project.subject_session))
-        else:
-            self.fmri_pipeline.global_conf.subject_session = ''
-            self.fmri_pipeline.subject_directory = os.path.join(updated_project.base_directory,
-                                                                ui_info.project_info.subject)
-            updated_project.fmri_config_file = os.path.join(updated_project.base_directory, 'derivatives',
-                                                            '%s_fMRI_config.json' % updated_project.subject)
-
-        self.fmri_pipeline.derivatives_directory = os.path.join(
-            updated_project.base_directory, 'derivatives')
-
-        print("  .. INFO: fMRI config file loaded/created : %s" %
-              updated_project.fmri_config_file)
-
-        if os.path.isfile(updated_project.fmri_config_file):
-            print("  .. INFO: Load existing fMRI config file for subject %s" %
-                  updated_project.subject)
-            updated_project.process_type = get_fmri_process_detail_json(
-                updated_project, 'Global', 'process_type')
-
-            fmri_inputs_checked, self.fmri_pipeline = init_fmri_project(
-                updated_project, bids_layout, False)
-            if self.fmri_pipeline is not None:
-                if fmri_inputs_checked:
-                    update_fmri_last_processed(
-                        updated_project, self.fmri_pipeline)
-                    ui_info.project_info = updated_project
-                    ui_info.project_info.on_trait_change(
-                        ui_info.update_subject_fmri_pipeline, 'subject')
-                    ui_info.project_info.on_trait_change(
-                        ui_info.update_session_fmri_pipeline, 'subject_session')
-                    self.fmri_pipeline.parcellation_scheme = updated_project.parcellation_scheme
-                    self.fmri_pipeline.atlas_info = updated_project.atlas_info
-                    self.fmri_pipeline.subjects_dir = updated_project.freesurfer_subjects_dir
-                    self.fmri_pipeline.subject_id = updated_project.freesurfer_subject_id
-                    ui_info.fmri_pipeline = self.fmri_pipeline
-
-                    ui_info.fmri_pipeline.number_of_cores = ui_info.project_info.number_of_cores
-                    self.fmri_inputs_checked = fmri_inputs_checked
-                    ui_info.project_info.fmri_available = self.fmri_inputs_checked
-                    fmri_save_config(self.fmri_pipeline,
-                                     ui_info.project_info.fmri_config_file)
-                    self.project_loaded = True
-        else:
-            fmri_inputs_checked, self.fmri_pipeline = init_fmri_project(
-                updated_project, bids_layout, True)
-            print_warning("  .. WARNING: No existing config for fMRI pipeline found but available fMRI data - " +
-                          "Created new fMRI pipeline with default parameters")
-            if self.fmri_pipeline is not None:
-                if fmri_inputs_checked:
-                    ui_info.project_info = updated_project
-                    ui_info.project_info.on_trait_change(
-                        ui_info.update_subject_fmri_pipeline, 'subject')
-                    ui_info.project_info.on_trait_change(
-                        ui_info.update_session_fmri_pipeline, 'subject_session')
-                    self.fmri_pipeline.number_of_cores = updated_project.number_of_cores
-                    print("  .. INFO: Number of cores (pipeline) = %s" %
-                          self.fmri_pipeline.number_of_cores)
-                    self.fmri_pipeline.parcellation_scheme = updated_project.parcellation_scheme
-                    self.fmri_pipeline.atlas_info = updated_project.atlas_info
-                    self.fmri_pipeline.subjects_dir = updated_project.freesurfer_subjects_dir
-                    self.fmri_pipeline.subject_id = updated_project.freesurfer_subject_id
-                    ui_info.fmri_pipeline = self.fmri_pipeline
-                    fmri_save_config(self.fmri_pipeline,
-                                     ui_info.project_info.fmri_config_file)
-                    self.fmri_inputs_checked = fmri_inputs_checked
-                    ui_info.project_info.fmri_available = self.fmri_inputs_checked
-                    self.project_loaded = True
-
-        return ui_info
-
-    @classmethod
-    def show_bidsapp_window(ui_info):
-        """Function that shows the BIDS App Interface Window.
-
-        Parameters
-        ----------
-        ui_info : QtView
-            TraitsUI QtView associated with this handler
-        """
-        print("Show BIDS App interface")
-        ui_info.ui.context["object"].show_bidsapp_interface()
-
-    @classmethod
-    def save_anat_config_file(self, ui_info):
-        """Function that saves the anatomical pipeline configuration file.
-
-        Parameters
-        ----------
-        ui_info : QtView
-            TraitsUI QtView associated with ``self``
-        """
-        print_blue("[Save anatomical pipeline configuration]")
-        dialog = FileDialog(action="save as",
-                            default_filename=os.path.join(ui_info.ui.context["object"].project_info.base_directory,
-                                                          'code', 'ref_anatomical_config.json'))
-        dialog.open()
-        if dialog.return_code == OK:
-            anat_save_config(ui_info.ui.context["object"].anat_pipeline,
-                             ui_info.ui.context["object"].project_info.anat_config_file)
-            if dialog.path != ui_info.ui.context["object"].project_info.anat_config_file:
-                shutil.copy(
-                    ui_info.ui.context["object"].project_info.anat_config_file, dialog.path)
-
-    def load_anat_config_file(self, ui_info):
-        """Function that loads the anatomical pipeline configuration file.
-
-        Parameters
-        ----------
-        ui_info : QtView
-            TraitsUI QtView associated with ``self``
-        """
-        dialog = FileDialog(action="open", wildcard="*anatomical_config.json")
-        dialog.open()
-        if dialog.return_code == OK:
-            if dialog.path != ui_info.ui.context["object"].project_info.anat_config_file:
-                shutil.copy(
-                    dialog.path, ui_info.ui.context["object"].project_info.anat_config_file)
-            anat_load_config_json(
-                self.anat_pipeline, ui_info.ui.context["object"].project_info.anat_config_file)
-            # TODO: load_config (anat_ or dmri_ ?)
-
-    @classmethod
-    def save_dmri_config_file(self, ui_info):
-        """Function that saves the diffusion pipeline configuration file.
-
-        Parameters
-        ----------
-        ui_info : QtView
-            TraitsUI QtView associated with ``self``
-        """
-        print_blue("[Save anatomical pipeline configuration]")
-        dialog = FileDialog(action="save as",
-                            default_filename=os.path.join(ui_info.ui.context["object"].project_info.base_directory,
-                                                          'code', 'ref_diffusion_config.json'))
-        dialog.open()
-        if dialog.return_code == OK:
-            dmri_save_config(ui_info.ui.context["object"].dmri_pipeline,
-                             ui_info.ui.context["object"].project_info.dmri_config_file)
-            if dialog.path != ui_info.ui.context["object"].project_info.dmri_config_file:
-                shutil.copy(
-                    ui_info.ui.context["object"].project_info.dmri_config_file, dialog.path)
-
-    def load_dmri_config_file(self, ui_info):
-        """Function that loads the diffusion pipeline configuration file.
-
-        Parameters
-        ----------
-        ui_info : QtView
-            TraitsUI QtView associated with ``self``
-        """
-        dialog = FileDialog(action="open", wildcard="*diffusion_config.json")
-        dialog.open()
-        if dialog.return_code == OK:
-            if dialog.path != ui_info.ui.context["object"].project_info.dmri_config_file:
-                shutil.copy(
-                    dialog.path, ui_info.ui.context["object"].project_info.dmri_config_file)
-            dmri_load_config_json(
-                self.dmri_pipeline, ui_info.ui.context["object"].project_info.dmri_config_file)
-
-    @classmethod
-    def save_fmri_config_file(self, ui_info):
-        """Function that saves the fMRI pipeline configuration file.
-
-        Parameters
-        ----------
-        ui_info : QtView
-            TraitsUI QtView associated with ``self``
-        """
-        print_blue("[Save anatomical pipeline configuration]")
-        dialog = FileDialog(action="save as",
-                            default_filename=os.path.join(ui_info.ui.context["object"].project_info.base_directory,
-                                                          'code', 'ref_fMRI_config.json'))
-        dialog.open()
-        if dialog.return_code == OK:
-            fmri_save_config(ui_info.ui.context["object"].fmri_pipeline,
-                             ui_info.ui.context["object"].project_info.fmri_config_file)
-            if dialog.path != ui_info.ui.context["object"].project_info.fmri_config_file:
-                shutil.copy(
-                    ui_info.ui.context["object"].project_info.fmri_config_file, dialog.path)
-
-    def load_fmri_config_file(self, ui_info):
-        """Function that loads the fMRI pipeline configuration file.
-
-        Parameters
-        ----------
-        ui_info : QtView
-            TraitsUI QtView associated with ``self``
-        """
-        dialog = FileDialog(action="open", wildcard="*diffusion_config.json")
-        dialog.open()
-        if dialog.return_code == OK:
-            if dialog.path != ui_info.ui.context["object"].project_info.fmri_config_file:
-                shutil.copy(
-                    dialog.path, ui_info.ui.context["object"].project_info.fmri_config_file)
-            fmri_load_config_json(
-                self.fmri_pipeline, ui_info.ui.context["object"].project_info.fmri_config_file)
-
-
-class CMP_MainWindowHandler(Handler):
-    """Event handler of the Configurator and Inspector (Quality Control) windows.
-
-    Attributes
-    ----------
-    project_loaded : traits.Bool
-        Indicate if project has been successfully loaded
-        (Default: False)
-
-    anat_pipeline : Instance(HasTraits)
-        Instance of :class:`AnatomicalPipelineUI` class
-
-    anat_inputs_checked : traits.Bool
-        Indicate if anatomical pipeline inputs are available
-        (Default: False)
-
-    anat_outputs_checked : traits.Bool
-        Indicate if anatomical pipeline outputs are available
-        (Default: False)
-
-    anatomical_processed : traits.Bool
-        Indicate if anatomical pipeline was run
-        (Default: False)
-
-    dmri_pipeline : Instance(HasTraits)
-        Instance of :class:`DiffusionPipelineUI` class
-
-    dmri_inputs_checked : traits.Bool
-        Indicate if diffusion pipeline inputs are available
-        (Default: False)
-
-    dmri_processed : traits.Bool
-        Indicate if diffusion pipeline was run
-        (Default: False)
-
-    fmri_pipeline : Instance(HasTraits)
-        Instance of :class:`fMRIPipelineUI` class
-
-    fmri_inputs_checked : traits.Bool
-        Indicate if fMRI pipeline inputs are available
-        (Default: False)
-
-    fmri_processed : traits.Bool
-        Indicate if fMRI pipeline was run
-        (Default: False)
-    """
-
-    project_loaded = Bool(False)
-
-    anat_pipeline = Instance(HasTraits)
-    anat_inputs_checked = Bool(False)
-    anat_outputs_checked = Bool(False)
-    anatomical_processed = Bool(False)
-
-    dmri_pipeline = Instance(HasTraits)
-    dmri_inputs_checked = Bool(False)
-    dmri_processed = Bool(False)
-
-    fmri_pipeline = Instance(HasTraits)
-    fmri_inputs_checked = Bool(False)
-    fmri_processed = Bool(False)
-
-    def load_dataset(self, ui_info, debug=False):
-        """Function that creates a new :class:`CMP_Project_InfoUI` instance from an existing project.
-
-        Parameters
-        ----------
-        ui_info : QtView
-            TraitsUI QtView associated with ``self``
-
-        debug : bool
-            If True, print more information for debugging
-        """
-        loaded_project = gui.CMP_Project_InfoUI()
-        np_res = loaded_project.configure_traits(view='open_view')
-        loaded_project.output_directory = os.path.join(
-            loaded_project.base_directory, 'derivatives')
-
-        if loaded_project.creation_mode == "Install Datalad BIDS dataset":
-            datalad_is_available = is_tool('datalad')
-
-            if datalad_is_available:
-                print('>>> Datalad dataset installation...')
-                if loaded_project.install_datalad_dataset_via_ssh:
-                    if loaded_project.ssh_pwd != '':
-                        os.environ['REMOTEUSERPWD'] = loaded_project.ssh_pwd
-                        cmd = 'datalad install -D "Dataset {} (remote:{}) installed on {}" -s ssh://{}:$REMOTEUSERPWD@{}:{} {}'.format(
-                            loaded_project.datalad_dataset_path,
-                            loaded_project.ssh_remote,
-                            loaded_project.base_directory,
-                            loaded_project.ssh_user,
-                            loaded_project.ssh_remote,
-                            loaded_project.datalad_dataset_path,
-                            loaded_project.base_directory)
-                    else:
-                        cmd = 'datalad install -D "Dataset {} (remote:{}) installed on {}" -s ssh://{}@{}:{} {}'.format(
-                            loaded_project.datalad_dataset_path,
-                            loaded_project.ssh_remote,
-                            loaded_project.base_directory,
-                            loaded_project.ssh_user,
-                            loaded_project.ssh_remote,
-                            loaded_project.datalad_dataset_path,
-                            loaded_project.base_directory)
-                    try:
-                        print_blue('... cmd: {}'.format(cmd))
-                        core.run(cmd, env={}, cwd=os.path.abspath(
-                            loaded_project.base_directory))
-                        del os.environ['REMOTEUSERPWD']
-                    except Exception:
-                        print("    ERROR: Failed to install datalad dataset via ssh")
-                        del os.environ['REMOTEUSERPWD']
-                else:
-                    cmd = 'datalad install -D "Dataset {} installed on {}" -s {} {}'.format(
-                        loaded_project.datalad_dataset_path,
-                        loaded_project.base_directory,
-                        loaded_project.datalad_dataset_path,
-                        loaded_project.base_directory)
-                    try:
-                        print_blue('... cmd: {}'.format(cmd))
-                        core.run(cmd, env={}, cwd=os.path.abspath(
-                            loaded_project.base_directory))
-                    except Exception:
-                        print("    ERROR: Failed to install datalad dataset via ssh")
-            else:
-                print('    ERROR: Datalad is not installed!')
-
-            # Install dataset via datalad
-            # datalad install -s ssh://user@IP_ADDRESS:/remote/path/to/ds-example /local/path/to/ds-example
-            #
-
-        t1_available = False
-        t2_available = False
-        diffusion_available = False
-        fmri_available = False
-
-        # print("Local BIDS dataset: %s" % loaded_project.base_directory)
-        if np_res:
-            try:
-                bids_layout = BIDSLayout(loaded_project.base_directory)
-                print(bids_layout)
-
-                loaded_project.bids_layout = bids_layout
-
-                loaded_project.subjects = []
-                for subj in bids_layout.get_subjects():
-                    if debug:
-                        print("sub: %s" % subj)
-                    if 'sub-' + str(subj) not in loaded_project.subjects:
-                        loaded_project.subjects.append('sub-' + str(subj))
-                # loaded_project.subjects = ['sub-'+str(subj) for subj in bids_layout.get_subjects()]
-                loaded_project.subjects.sort()
-
-                if debug:
-                    print("Available subjects : ")
-                    print(loaded_project.subjects)
-                loaded_project.number_of_subjects = len(loaded_project.subjects)
-
-                loaded_project.subject = loaded_project.subjects[0]
-                if debug:
-                    print(loaded_project.subject)
-
-                subject = loaded_project.subject.split('-')[1]
-
-                sessions = bids_layout.get(
-                    target='session', return_type='id', subject=subject)
-
-                if debug:
-                    print("Sessions: ")
-                    print(sessions)
-
-                if len(sessions) > 0:
-                    loaded_project.subject_sessions = [
-                        'ses-{}'.format(sessions[0])]
-                    loaded_project.subject_session = 'ses-{}'.format(sessions[0])
-                else:
-                    loaded_project.subject_sessions = ['']
-                    loaded_project.subject_session = ''
-
-                if len(sessions) > 0:
-                    print(
-                        f'    ... Check for available input modalities for subject {subject} of session {sessions[0]}...')
-
-                    query_files = [f.filename for f in bids_layout.get(subject=subject, session=sessions[0], suffix='bold',
-                                                                       extensions=['nii', 'nii.gz'])]
-                    if len(query_files) > 0:
-                        print("        * Available BOLD(s): {}".format(query_files))
-                        fmri_available = True
-
-                    query_files = [f.filename for f in bids_layout.get(subject=subject, session=sessions[0], suffix='T1w',
-                                                                       extensions=['nii', 'nii.gz'])]
-                    if len(query_files) > 0:
-                        print("        * Available T1w(s): {}".format(query_files))
-                        t1_available = True
-
-                    query_files = [f.filename for f in bids_layout.get(subject=subject, session=sessions[0], suffix='T2w',
-                                                                       extensions=['nii', 'nii.gz'])]
-                    if len(query_files) > 0:
-                        print("        * Available T2w(s): {}".format(query_files))
-                        t2_available = True
-
-                    query_files = [f.filename for f in bids_layout.get(subject=subject, session=sessions[0], suffix='dwi',
-                                                                       extensions=['nii', 'nii.gz'])]
-                    if len(query_files) > 0:
-                        print("        * Available DWI(s): {}".format(query_files))
-                        diffusion_available = True
-
-                else:
-                    print(
-                        f'    ... Check for available input modalities for subject {subject}...')
-                    query_files = [f.filename for f in
-                                   bids_layout.get(subject=subject, suffix='T1w', extensions=['nii', 'nii.gz'])]
-                    if len(query_files) > 0:
-                        print("        * Available T1w(s): {}".format(query_files))
-                        t1_available = True
-
-                    query_files = [f.filename for f in
-                                   bids_layout.get(subject=subject, suffix='T2w', extensions=['nii', 'nii.gz'])]
-                    if len(query_files) > 0:
-                        print("        * Available T2w(s): {}".format(query_files))
-                        t2_available = True
-
-                    query_files = [f.filename for f in
-                                   bids_layout.get(subject=subject, suffix='dwi', extensions=['nii', 'nii.gz'])]
-                    if len(query_files) > 0:
-                        print("        * Available DWI(s): {}".format(query_files))
-                        diffusion_available = True
-
-                    query_files = [f.filename for f in
-                                   bids_layout.get(subject=subject, suffix='bold', extensions=['nii', 'nii.gz'])]
-                    if len(query_files) > 0:
-                        print("        * Available BOLD(s): {}".format(query_files))
-                        fmri_available = True
-
-            except Exception:
-                msg = "Invalid BIDS dataset. Please see documentation for more details."
-                print_error(msg)
-                error(message=msg, title="BIDS error")
-                return
-
-            ui_info.ui.context["object"].project_info = loaded_project
-
-            anat_inputs_checked = False
-            if t1_available:
-                anat_inputs_checked = True
-
-            dmri_inputs_checked = False
-            if t1_available and diffusion_available:
-                dmri_inputs_checked = True
-
-            if t2_available and debug:
-                print('T2 available')
-
-            fmri_inputs_checked = False
-            if t1_available and fmri_available:
-                fmri_inputs_checked = True
-                if debug:
-                    print('fmri input check : {}'.format(fmri_inputs_checked))
-
-            self.anat_inputs_checked = anat_inputs_checked
-            self.dmri_inputs_checked = dmri_inputs_checked
-            self.fmri_inputs_checked = fmri_inputs_checked
-
-            if anat_inputs_checked:
-
-                self.anat_pipeline = anatomical_pipeline.AnatomicalPipelineUI(
-                    loaded_project)
-                self.anat_pipeline.number_of_cores = loaded_project.number_of_cores
-
-                code_directory = os.path.join(
-                    loaded_project.base_directory, 'code')
-
-                anat_config_file = os.path.join(
-                    code_directory, 'ref_anatomical_config.json')
-
-                # Check for old configuration file with INI format
-                # when there is no existing json configuration file
-                # and convert it to JSON format if so
-                if not os.path.isfile(anat_config_file):
-                    anat_config_ini_file = os.path.join(
-                        code_directory, 'ref_anatomical_config.ini')
-                    if os.path.isfile(anat_config_ini_file):
-                        anat_config_file = convert_config_ini_2_json(anat_config_ini_file)
-
-                loaded_project.anat_config_file = anat_config_file
-
-                if self.anat_pipeline is not None and not os.path.isfile(anat_config_file):
-                    if not os.path.exists(code_directory):
-                        try:
-                            os.makedirs(code_directory)
-                        except os.error:
-                            print_warning("%s was already existing" % code_directory)
-                        finally:
-                            print("Created directory %s" % code_directory)
-
-                    print(">> Create new reference anatomical config file...")
-                    anat_save_config(self.anat_pipeline,
-                                     loaded_project.anat_config_file)
-                else:
-                    print(">> Load reference anatomical config file...")
-                    # if datalad_is_available:
-                    #     print('... Datalad get anatomical config file : {}'.format(loaded_project.anat_config_file))
-                    #     cmd = 'datalad run -m "Get reference anatomical config file" bash -c "datalad get code/ref_anatomical_config.json"'
-                    #     try:
-                    #         print('... cmd: {}'.format(cmd))
-                    #         core.run( cmd, env={}, cwd=os.path.abspath(loaded_project.base_directory))
-                    #     except Exception:
-                    #         print("    ERROR: Failed to get file")
-
-                    anat_load_config_json(self.anat_pipeline, loaded_project.anat_config_file)
-
-                self.anat_pipeline.config_file = loaded_project.anat_config_file
-
-                ui_info.ui.context["object"].anat_pipeline = self.anat_pipeline
-                loaded_project.t1_available = self.anat_inputs_checked
-
-                loaded_project.parcellation_scheme = \
-                    self.anat_pipeline.stages['Parcellation'].config.parcellation_scheme
-                loaded_project.freesurfer_subjects_dir = \
-                    self.anat_pipeline.stages['Segmentation'].config.freesurfer_subjects_dir
-                loaded_project.freesurfer_subject_id = \
-                    self.anat_pipeline.stages['Segmentation'].config.freesurfer_subject_id
-
-                ui_info.ui.context["object"].project_info = loaded_project
-
-                self.project_loaded = True
-
-                if dmri_inputs_checked:
-                    self.dmri_pipeline = \
-                        diffusion_pipeline.DiffusionPipelineUI(loaded_project)
-                    self.dmri_pipeline.number_of_cores = loaded_project.number_of_cores
-                    self.dmri_pipeline.parcellation_scheme = \
-                        ui_info.ui.context["object"].project_info.parcellation_scheme
-
-                    code_directory = os.path.join(loaded_project.base_directory, 'code')
-                    dmri_config_file = os.path.join(code_directory, 'ref_diffusion_config.json')
-
-                    # Check for old configuration file with INI format
-                    # when there is no existing json configuration file
-                    # and convert it to JSON format if so
-                    if not os.path.isfile(dmri_config_file):
-                        dmri_config_ini_file = os.path.join(code_directory, 'ref_diffusion_config.ini')
-                        if os.path.isfile(dmri_config_ini_file):
-                            dmri_config_file = convert_config_ini_2_json(dmri_config_ini_file)
-
-                    loaded_project.dmri_config_file = dmri_config_file
-                    self.dmri_pipeline.config_file = dmri_config_file
-
-                    if not os.path.isfile(dmri_config_file) and self.dmri_pipeline is not None:
-
-                        # Look for diffusion acquisition model information from filename (acq-*)
-                        if loaded_project.subject_session != '':
-                            session = loaded_project.subject_session.split('-')[1]
-                            diffusion_imaging_models = [i for i in
-                                                        bids_layout.get(subject=subject, session=session, suffix='dwi',
-                                                                        target='acquisition', return_type='id',
-                                                                        extensions=['nii', 'nii.gz'])]
-                            if debug:
-                                print('DIFFUSION IMAGING MODELS : {}'.format(
-                                    diffusion_imaging_models))
-
-                            if len(diffusion_imaging_models) > 0:
-                                if len(diffusion_imaging_models) > 1:
-                                    loaded_project.dmri_bids_acqs = diffusion_imaging_models
-                                    loaded_project.configure_traits(view='dmri_bids_acq_view')
-                                else:
-                                    loaded_project.dmri_bids_acqs = ['{}'.format(diffusion_imaging_models[0])]
-                                    loaded_project.dmri_bids_acq = diffusion_imaging_models[0]
-
-                                if ('dsi' in loaded_project.dmri_bids_acq) or ('DSI' in loaded_project.dmri_bids_acq):
-                                    loaded_project.diffusion_imaging_model = 'DSI'
-                                elif ('dti' in loaded_project.dmri_bids_acq) or ('DTI' in loaded_project.dmri_bids_acq):
-                                    loaded_project.diffusion_imaging_model = 'DTI'
-                                elif ('hardi' in loaded_project.dmri_bids_acq) or ('HARDI' in loaded_project.dmri_bids_acq):
-                                    loaded_project.diffusion_imaging_model = 'HARDI'
-                                elif ('multishell' in loaded_project.dmri_bids_acq) or ('MULTISHELL' in loaded_project.dmri_bids_acq):
-                                    loaded_project.diffusion_imaging_model = 'multishell'
-                                else:
-                                    loaded_project.diffusion_imaging_model = 'DTI'
-                            else:
-                                loaded_project.dmri_bids_acqs = ['']
-                                loaded_project.dmri_bids_acq = ''
-                                loaded_project.configure_traits(
-                                    view='diffusion_imaging_model_select_view')
-
-                            files = [f.filename for f in bids_layout.get(subject=subject, session=session, suffix='dwi',
-                                                                         extensions=['nii', 'nii.gz'])]
-
-                            if debug:
-                                print('****************************************')
-                                print(files)
-                                print('****************************************')
-
-                            if loaded_project.dmri_bids_acq != '':
-                                for file in files:
-                                    if loaded_project.dmri_bids_acq in file:
-                                        dwi_file = file
-                                        if debug:
-                                            print('Loaded DWI file: {}'.format(dwi_file))
-                                        break
-                            else:
-                                dwi_file = files[0]
-                        else:
-                            diffusion_imaging_models = [i for i in
-                                                        bids_layout.get(subject=subject, suffix='dwi', target='acquisition',
-                                                                        return_type='id', extensions=['nii', 'nii.gz'])]
-
-                            if len(diffusion_imaging_models) > 0:
-                                if len(diffusion_imaging_models) > 1:
-                                    loaded_project.dmri_bids_acqs = diffusion_imaging_models
-                                    loaded_project.configure_traits(view='dmri_bids_acq_view')
-                                else:
-                                    loaded_project.dmri_bids_acq = diffusion_imaging_models[0]
-
-                                if ('dsi' in loaded_project.dmri_bids_acq) or ('DSI' in loaded_project.dmri_bids_acq):
-                                    loaded_project.diffusion_imaging_model = 'DSI'
-                                elif ('dti' in loaded_project.dmri_bids_acq) or ('DTI' in loaded_project.dmri_bids_acq):
-                                    loaded_project.diffusion_imaging_model = 'DTI'
-                                elif ('hardi' in loaded_project.dmri_bids_acq) or ('HARDI' in loaded_project.dmri_bids_acq):
-                                    loaded_project.diffusion_imaging_model = 'HARDI'
-                                elif ('multishell' in loaded_project.dmri_bids_acq) or ('MULTISHELL' in loaded_project.dmri_bids_acq):
-                                    loaded_project.diffusion_imaging_model = 'multishell'
-                                else:
-                                    loaded_project.diffusion_imaging_model = 'DTI'
-                            else:
-                                loaded_project.dmri_bids_acqs = ['']
-                                loaded_project.dmri_bids_acq = ''
-                                loaded_project.configure_traits(view='diffusion_imaging_model_select_view')
-
-                        self.dmri_pipeline.diffusion_imaging_model = loaded_project.diffusion_imaging_model
-                        self.dmri_pipeline.global_conf.diffusion_imaging_model = loaded_project.diffusion_imaging_model
-                        self.dmri_pipeline.global_conf.dmri_bids_acq = loaded_project.dmri_bids_acq
-                        self.dmri_pipeline.stages[
-                            "Diffusion"].diffusion_imaging_model = loaded_project.diffusion_imaging_model
-                        print(">> Create new reference diffusion config file...")
-                        dmri_save_config(self.dmri_pipeline, dmri_config_file)
-                    else:
-                        print(">> Load reference diffusion config file...")
-
-                        # if datalad_is_available:
-                        #     print('... Datalad get reference diffusion config file : {}'.format(loaded_project.anat_config_file))
-                        #     cmd = 'datalad run -m "Get reference anatomical config file" bash -c "datalad get code/ref_diffusion_config.json"'
-                        #     try:
-                        #         print('... cmd: {}'.format(cmd))
-                        #         core.run( cmd, env={}, cwd=os.path.abspath(loaded_project.base_directory))
-                        #     except Exception:
-                        #         print("    ERROR: Failed to get file")
-
-                        dmri_load_config_json(self.dmri_pipeline, loaded_project.dmri_config_file)
-                        # TODO: check if diffusion imaging model (DSI/DTI/HARDI/multishell) is correct/valid.
-
-                    ui_info.ui.context["object"].dmri_pipeline = self.dmri_pipeline
-                    loaded_project.dmri_available = self.dmri_inputs_checked
-
-                    ui_info.ui.context["object"].project_info = loaded_project
-
-                    self.project_loaded = True
-
-                if fmri_inputs_checked:
-                    self.fmri_pipeline = fMRI_pipeline.fMRIPipelineUI(loaded_project)
-                    self.fmri_pipeline.number_of_cores = loaded_project.number_of_cores
-                    self.fmri_pipeline.parcellation_scheme = ui_info.ui.context[
-                        "object"].project_info.parcellation_scheme
-
-                    self.fmri_pipeline.stages["Registration"].pipeline_mode = 'fMRI'
-                    self.fmri_pipeline.stages["Registration"].registration_mode = 'FSL (Linear)'
-                    self.fmri_pipeline.stages["Registration"].registration_mode_trait = [
-                        'FSL (Linear)', 'BBregister (FS)']
-
-                    code_directory = os.path.join(loaded_project.base_directory, 'code')
-                    fmri_config_file = os.path.join(code_directory, 'ref_fMRI_config.json')
-
-                    # Check for old configuration file with INI format
-                    # when there is no existing json configuration file
-                    # and convert it to JSON format if so
-                    if not os.path.isfile(fmri_config_file):
-                        fmri_config_ini_file = os.path.join(code_directory, 'ref_fMRI_config.ini')
-                        if os.path.isfile(fmri_config_ini_file):
-                            fmri_config_file = convert_config_ini_2_json(fmri_config_ini_file)
-
-                    loaded_project.fmri_config_file = fmri_config_file
-                    self.fmri_pipeline.config_file = fmri_config_file
-
-                    if not os.path.isfile(fmri_config_file) and self.fmri_pipeline is not None:
-                        print(">> Create new reference fMRI config file...")
-                        fmri_save_config(self.fmri_pipeline, fmri_config_file)
-                    else:
-                        print(">> Load reference fMRI config file...")
-
-                        # if datalad_is_available:
-                        #     print('... Datalad get reference fMRI config file : {}'.format(loaded_project.anat_config_file))
-                        #     cmd = 'datalad run -m "Get reference fMRI config file" bash -c "datalad get code/ref_fMRI_config.json"'
-                        #     try:
-                        #         print('... cmd: {}'.format(cmd))
-                        #         core.run( cmd, env={}, cwd=os.path.abspath(loaded_project.base_directory))
-                        #     except Exception:
-                        #         print("    ERROR: Failed to get file")
-
-                        fmri_load_config_json(self.fmri_pipeline, loaded_project.fmri_config_file)
-
-                    ui_info.ui.context["object"].fmri_pipeline = self.fmri_pipeline
-                    loaded_project.fmri_available = self.fmri_inputs_checked
-
-                    ui_info.ui.context["object"].project_info = loaded_project
-
-                    self.project_loaded = True
-
-
-class CMP_BIDSAppWindowHandler(Handler):
-    """Event handler of the BIDS App Interface window.
-
-    Attributes
-    ----------
-    docker_process : subprocess.Popen
-        Instance of ``subprocess.Popen`` where BIDS App docker image is run
-    """
-
-    docker_process = Instance(Popen)
-
-    def check_settings(self, ui_info):
-        """Function that checks if all parameters are properly set before execution of the BIDS App.
-
-        Parameters
-        ----------
-        ui_info : QtView
-            TraitsUI QtView associated with ``self``
-        """
-        ui_info.ui.context["object"].settings_checked = True
-        ui_info.ui.context["object"].handler = self
-
-        if os.path.isdir(ui_info.ui.context["object"].bids_root):
-            print("BIDS root directory : {}".format(
-                ui_info.ui.context["object"].bids_root))
-        else:
-            print_error("Error: BIDS root invalid!")
-            ui_info.ui.context["object"].settings_checked = False
-
-        if os.path.isfile(ui_info.ui.context["object"].anat_config):
-            print("Anatomical configuration file : {}".format(
-                ui_info.ui.context["object"].anat_config))
-        else:
-            print_error("Error: Configuration file for anatomical pipeline not existing!")
-            ui_info.ui.context["object"].settings_checked = False
-
-        if os.path.isfile(ui_info.ui.context["object"].dmri_config):
-            print("Diffusion configuration file : {}".format(
-                ui_info.ui.context["object"].dmri_config))
-        else:
-            print_warning("Warning: Configuration file for diffusion pipeline not existing!")
-
-        if os.path.isfile(ui_info.ui.context["object"].fmri_config):
-            print("fMRI configuration file : {}".format(
-                ui_info.ui.context["object"].fmri_config))
-        else:
-            print_warning("Warning: Configuration file for fMRI pipeline not existing!")
-
-        if os.path.isfile(ui_info.ui.context["object"].fs_license):
-            print("Freesurfer license : {}".format(
-                ui_info.ui.context["object"].fs_license))
-        else:
-            print_error("Error: Invalid Freesurfer license ({})!".format(
-                ui_info.ui.context["object"].fs_license))
-            ui_info.ui.context["object"].settings_checked = False
-
-        msg = f'Valid inputs for BIDS App : {ui_info.ui.context["object"].settings_checked}'
-        if ui_info.ui.context["object"].settings_checked:
-            print(msg)
-        else:
-            print_error(msg)
-
-        print("Docker running ? {}".format(
-            ui_info.ui.context["object"].docker_running))
-        return True
-
-    @classmethod
-    def start_bidsapp_process(ui_info, participant_label):
-        """Function that runs the BIDS App on a single subject.
-
-        Parameters
-        ----------
-        ui_info : QtView
-            TraitsUI QtView associated with this handler
-        participant_label : string
-            Label of the participant / subject (e.g. ``"01"``, no "sub-" prefix)
-        """
-        cmd = ['docker', 'run', '-it', '--rm',
-               '-v', '{}:/bids_dataset'.format(
-                   ui_info.ui.context["object"].bids_root),
-               '-v', '{}/derivatives:/outputs'.format(
-                   ui_info.ui.context["object"].bids_root),
-               # '-v', '{}:/bids_dataset/derivatives/freesurfer/fsaverage'.format(ui_info.ui.context["object"].fs_average),
-               '-v', '{}:/opt/freesurfer/license.txt'.format(
-                   ui_info.ui.context["object"].fs_license),
-               '-v', '{}:/code/ref_anatomical_config.json'.format(ui_info.ui.context["object"].anat_config)]
-
-        if ui_info.ui.context["object"].run_dmri_pipeline:
-            cmd.append('-v')
-            cmd.append(
-                '{}:/code/ref_diffusion_config.json'.format(ui_info.ui.context["object"].dmri_config))
-
-        if ui_info.ui.context["object"].run_fmri_pipeline:
-            cmd.append('-v')
-            cmd.append(
-                '{}:/code/ref_fMRI_config.json'.format(ui_info.ui.context["object"].fmri_config))
-
-        cmd.append('-u')
-        cmd.append('{}:{}'.format(os.geteuid(), os.getegid()))
-
-        cmd.append('sebastientourbier/connectomemapper-bidsapp:latest')
-        cmd.append('/bids_dataset')
-        cmd.append('/outputs')
-        cmd.append('participant')
-
-        cmd.append('--participant_label')
-        cmd.append('{}'.format(participant_label))
-
-        cmd.append('--anat_pipeline_config')
-        cmd.append('/code/ref_anatomical_config.json')
-
-        if ui_info.ui.context["object"].run_dmri_pipeline:
-            cmd.append('--dwi_pipeline_config')
-            cmd.append('/code/ref_diffusion_config.json')
-
-        if ui_info.ui.context["object"].run_fmri_pipeline:
-            cmd.append('--func_pipeline_config')
-            cmd.append('/code/ref_fMRI_config.json')
-
-        print_blue(' '.join(cmd))
-
-        log_filename = os.path.join(ui_info.ui.context["object"].bids_root, 'derivatives/cmp',
-                                    'sub-{}_log-cmpbidsapp.txt'.format(participant_label))
-
-        with open(log_filename, 'w+') as log:
-            proc = Popen(cmd, stdout=log, stderr=log)
-
-        return proc
-
-    @classmethod
-    def manage_bidsapp_procs(self, proclist):
-        """Function that managed the parallelized BIDS App Popen process.
-
-        Parameters
-        ----------
-        proclist
-            List of ``Popen`` processes running the BIDS App on a single subject
-        """
-        for proc in proclist:
-            if proc.poll() is not None:
-                proclist.remove(proc)
-
-    def start_bids_app(self, ui_info):
-        """Main function that runs the BIDS App on a set or sub-set of participants.
-
-        Parameters
-        ----------
-        ui_info : QtView
-            TraitsUI QtView associated with this handler
-        """
-        print("[Start BIDS App]")
-
-        maxprocs = multiprocessing.cpu_count()
-        processes = []
-
-        ui_info.ui.context["object"].docker_running = True
-
-        for label in ui_info.ui.context["object"].list_of_subjects_to_be_processed:
-            while len(processes) == maxprocs:
-                self.manage_bidsapp_procs(processes)
-
-            proc = self.start_bidsapp_process(ui_info, label=label)
-            processes.append(proc)
-
-        while len(processes) > 0:
-            self.manage_bidsapp_procs(processes)
-
-        print('Processing with BIDS App Finished')
-
-        ui_info.ui.context["object"].docker_running = False
-
-        return True
-
-    @classmethod
-    def stop_bids_app(ui_info):
-        """Function that stops the BIDS execution.
-
-        Parameters
-        ----------
-        ui_info : QtView
-            TraitsUI QtView associated with this handler
-        """
-        print("Stop BIDS App")
-        # self.docker_process.kill()
-        ui_info.ui.context["object"].docker_running = False
-        return True
+    creation_mode = Enum("Load BIDS dataset", "Install Datalad BIDS dataset")
+    install_datalad_dataset_via_ssh = Bool(True)
+    ssh_user = String("remote_username")
+    ssh_pwd = Password("")
+    ssh_remote = String("IP address/ Machine name")
+    datalad_dataset_path = Directory("/shared/path/to/existing/datalad/dataset")
+
+    anat_runs = List()
+    anat_run = Enum(values="anat_runs")
+
+    dmri_runs = List()
+    dmri_run = Enum(values="dmri_runs")
+
+    fmri_runs = List()
+    fmri_run = Enum(values="fmri_runs")
+
+    summary_view_button = Button("Pipeline processing summary")
+
+    pipeline_processing_summary_view = VGroup(Item("pipeline_processing_summary"))
+
+    dataset_view = VGroup(
+        VGroup(
+            HGroup(
+                Item(
+                    "base_directory",
+                    width=-0.3,
+                    style="readonly",
+                    label="",
+                    resizable=True,
+                ),
+                Item(
+                    "number_of_subjects",
+                    width=-0.3,
+                    style="readonly",
+                    label="Number of participants",
+                    resizable=True,
+                ),
+                "summary_view_button",
+            ),
+            label="BIDS Dataset",
+        ),
+        spring,
+        HGroup(
+            Group(Item("subject", style="simple", show_label=True, resizable=True)),
+            Group(
+                Item(
+                    "subject_session", style="simple", label="Session", resizable=True
+                ),
+                visible_when='subject_session!=""',
+            ),
+            springy=True,
+        ),
+        spring,
+        Group(
+            Item("t1_available", style="readonly", label="T1", resizable=True),
+            HGroup(
+                Item(
+                    "dmri_available",
+                    style="readonly",
+                    label="Diffusion",
+                    resizable=True,
+                ),
+                Item(
+                    "diffusion_imaging_model",
+                    label="Model",
+                    resizable=True,
+                    enabled_when="dmri_available",
+                ),
+            ),
+            Item("fmri_available", style="readonly", label="BOLD", resizable=True),
+            label="Modalities",
+        ),
+        spring,
+        Group(
+            Item(
+                "anat_last_date_processed",
+                label="Anatomical pipeline",
+                style="readonly",
+                resizable=True,
+                enabled_when="t1_available",
+            ),
+            Item(
+                "dmri_last_date_processed",
+                label="Diffusion pipeline",
+                style="readonly",
+                resizable=True,
+                enabled_when="dmri_available",
+            ),
+            Item(
+                "fmri_last_date_processed",
+                label="fMRI pipeline",
+                style="readonly",
+                resizable=True,
+                enabled_when="fmri_available",
+            ),
+            label="Last date processed",
+        ),
+        spring,
+        Group(
+            Item("number_of_cores", resizable=True), label="Processing configuration"
+        ),
+        "550",
+        spring,
+        springy=True,
+    )
+
+    traits_view = QtView(Include("dataset_view"))
+
+    create_view = View(
+        Item("creation_mode", style="custom"),
+        Group(
+            Group(
+                Item("base_directory", label="BIDS Dataset"),
+                visible_when='creation_mode=="Load BIDS dataset"',
+            ),
+            Group(
+                Item("install_datalad_dataset_via_ssh"),
+                visible_when='creation_mode=="Install Datalad/BIDS dataset"',
+            ),
+            Group(
+                Item(
+                    "ssh_remote",
+                    label="Remote ssh server",
+                    visible_when="install_datalad_dataset_via_ssh",
+                ),
+                Item(
+                    "ssh_user",
+                    label="Remote username",
+                    visible_when="install_datalad_dataset_via_ssh",
+                ),
+                Item(
+                    "ssh_pwd",
+                    label="Remote password",
+                    visible_when="install_datalad_dataset_via_ssh",
+                ),
+                Item(
+                    "datalad_dataset_path",
+                    label="Datalad/BIDS Dataset Path/URL to be installed",
+                ),
+                Item("base_directory", label="Installation directory"),
+                visible_when='creation_mode=="Install Datalad/BIDS dataset"',
+            ),
+        ),
+        kind="livemodal",
+        title="Data creation: BIDS dataset selection",
+        # style_sheet=style_sheet,
+        width=modal_width,
+        buttons=["OK", "Cancel"],
+    )
+
+    subject_view = View(
+        Group(Item("subject", label="Selected Subject")),
+        kind="modal",
+        title="Subject and session selection",
+        # style_sheet=style_sheet,
+        width=modal_width,
+        buttons=["OK", "Cancel"],
+    )
+
+    subject_session_view = View(
+        Group(
+            Item("subject", style="readonly", label="Selected Subject"),
+            Item("subject_session", label="Selected Session"),
+        ),
+        kind="modal",
+        title="Session selection",
+        # style_sheet=style_sheet,
+        width=modal_width,
+        buttons=["OK", "Cancel"],
+    )
+
+    dmri_bids_acq_view = View(
+        Group(
+            Item("dmri_bids_acq", label="Selected model"),
+        ),
+        kind="modal",
+        title="Selection of diffusion acquisition model",
+        # style_sheet=style_sheet,
+        width=modal_width,
+        buttons=["OK", "Cancel"],
+    )
+
+    anat_warning_view = View(
+        Group(
+            Item("anat_warning_msg", style="readonly", show_label=False),
+        ),
+        title="Warning : Anatomical T1w data",
+        kind="modal",
+        width=modal_width,
+        # style_sheet=style_sheet,
+        buttons=["OK", "Cancel"],
+    )
+
+    anat_config_error_view = View(
+        Group(
+            Item("anat_config_error_msg", style="readonly", show_label=False),
+        ),
+        title="Error",
+        kind="modal",
+        width=modal_width,
+        # style_sheet=style_sheet,
+        buttons=["OK", "Cancel"],
+    )
+
+    dmri_warning_view = View(
+        Group(
+            Item("dmri_warning_msg", style="readonly", show_label=False),
+        ),
+        title="Warning : Diffusion MRI data",
+        kind="modal",
+        width=modal_width,
+        # style_sheet=style_sheet,
+        buttons=["OK", "Cancel"],
+    )
+
+    dmri_config_error_view = View(
+        Group(
+            Item("dmri_config_error_msg", style="readonly", show_label=False),
+        ),
+        title="Error",
+        kind="modal",
+        width=modal_width,
+        # style_sheet=style_sheet,
+        buttons=["OK", "Cancel"],
+    )
+
+    fmri_warning_view = View(
+        Group(
+            Item("fmri_warning_msg", style="readonly", show_label=False),
+        ),
+        title="Warning : fMRI data",
+        kind="modal",
+        width=modal_width,
+        # style_sheet=style_sheet,
+        buttons=["OK", "Cancel"],
+    )
+
+    fmri_config_error_view = View(
+        Group(
+            Item("fmri_config_error_msg", style="readonly", show_label=False),
+        ),
+        title="Error",
+        kind="modal",
+        width=modal_width,
+        # style_sheet=style_sheet,
+        buttons=["OK", "Cancel"],
+    )
+
+    open_view = View(
+        Item("creation_mode", label="Mode"),
+        Group(
+            Item("install_datalad_dataset_via_ssh"),
+            Item(
+                "ssh_remote",
+                label="Remote ssh server",
+                visible_when="install_datalad_dataset_via_ssh",
+            ),
+            Item(
+                "ssh_user",
+                label="Remote username",
+                visible_when="install_datalad_dataset_via_ssh",
+            ),
+            Item(
+                "ssh_pwd",
+                label="Remote password",
+                visible_when="install_datalad_dataset_via_ssh",
+            ),
+            Item(
+                "datalad_dataset_path",
+                label="Datalad/BIDS Dataset Path/URL to be installed",
+            ),
+            Item("base_directory", label="Installation directory"),
+            visible_when='creation_mode=="Install Datalad BIDS dataset"',
+        ),
+        Group(
+            Item("base_directory", label="BIDS Dataset"),
+            visible_when='creation_mode=="Load BIDS dataset"',
+        ),
+        kind="livemodal",
+        title="BIDS Dataset Creation/Loading",
+        # style_sheet=style_sheet,
+        width=600,
+        height=250,
+        buttons=["OK", "Cancel"],
+    )
+
+    anat_select_config_to_load = View(
+        Group(
+            Item("anat_config_to_load_msg", style="readonly", show_label=False),
+            Item(
+                "anat_config_to_load",
+                style="custom",
+                editor=EnumEditor(name="anat_available_config"),
+                show_label=False,
+            ),
+        ),
+        title="Select configuration for anatomical pipeline",
+        kind="modal",
+        width=modal_width,
+        # style_sheet=style_sheet,
+        buttons=["OK", "Cancel"],
+    )
+
+    anat_custom_map_view = View(
+        Group(
+            Item(
+                "anat_custom_last_stage",
+                editor=EnumEditor(name="anat_stage_names"),
+                style="custom",
+                show_label=False,
+            ),
+        ),
+        title="Select until which stage to process the anatomical pipeline.",
+        kind="modal",
+        width=modal_width,
+        # style_sheet=style_sheet,
+        buttons=["OK", "Cancel"],
+    )
+
+    diffusion_imaging_model_select_view = View(
+        Group(
+            Item("diffusion_imaging_model", label="Diffusion MRI modality"),
+        ),
+        title="Please select diffusion MRI modality",
+        kind="modal",
+        width=modal_width,
+        buttons=["OK", "Cancel"],
+    )
+
+    dmri_select_config_to_load = View(
+        Group(
+            Item("dmri_config_to_load_msg", style="readonly", show_label=False),
+        ),
+        Item(
+            "dmri_config_to_load",
+            style="custom",
+            editor=EnumEditor(name="dmri_available_config"),
+            show_label=False,
+        ),
+        title="Select configuration for diffusion pipeline",
+        kind="modal",
+        width=modal_width,
+        # style_sheet=style_sheet,
+        buttons=["OK", "Cancel"],
+    )
+
+    dmri_custom_map_view = View(
+        Group(
+            Item(
+                "dmri_custom_last_stage",
+                editor=EnumEditor(name="dmri_stage_names"),
+                style="custom",
+                show_label=False,
+            ),
+        ),
+        title="Select until which stage to process the diffusion pipeline.",
+        kind="modal",
+        width=modal_width,
+        # style_sheet=style_sheet,
+        buttons=["OK", "Cancel"],
+    )
+
+    fmri_select_config_to_load = View(
+        Group(
+            Item("fmri_config_to_load_msg", style="readonly", show_label=False),
+        ),
+        Item(
+            "fmri_config_to_load",
+            style="custom",
+            editor=EnumEditor(name="fmri_available_config"),
+            show_label=False,
+        ),
+        title="Select configuration for fMRI pipeline",
+        kind="modal",
+        width=modal_width,
+        # style_sheet=style_sheet,
+        buttons=["OK", "Cancel"],
+    )
+
+    fmri_custom_map_view = View(
+        Group(
+            Item(
+                "fmri_custom_last_stage",
+                editor=EnumEditor(name="fmri_stage_names"),
+                style="custom",
+                show_label=False,
+            ),
+        ),
+        title="Select until which stage to process the fMRI pipeline.",
+        kind="modal",
+        width=modal_width,
+        # style_sheet=style_sheet,
+        buttons=["OK", "Cancel"],
+    )
+
+    def _summary_view_button_fired(self):
+        self.configure_traits(view="pipeline_processing_summary_view")

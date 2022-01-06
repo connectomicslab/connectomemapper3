@@ -15,10 +15,13 @@ This neuroimaging processing pipeline software is developed by the Connectomics 
 .. image:: https://zenodo.org/badge/183162514.svg
   :target: https://zenodo.org/badge/latestdoi/183162514
   :alt: Digital Object Identifier
-.. image:: https://img.shields.io/docker/v/sebastientourbier/connectomemapper-bidsapp?label=docker
-  :target: https://hub.docker.com/r/sebastientourbier/connectomemapper-bidsapp
+.. image:: https://img.shields.io/pypi/v/connectomemapper?color=orange
+  :target: https://pypi.org/project/connectomemapper/
+  :alt: PyPI
+.. image:: https://img.shields.io/docker/v/sebastientourbier/connectomemapper-bidsapp?color=blue&label=docker%20version
+  :target: https://hub.docker.com/r/sebastientourbier/connectomemapper-bidsapp?color=blue&label=docker%20version
   :alt: Docker Image Version (latest by date)
-.. image:: https://img.shields.io/docker/pulls/sebastientourbier/connectomemapper-bidsapp
+.. image:: https://img.shields.io/docker/pulls/sebastientourbier/connectomemapper-bidsapp?color=orange
   :target: https://hub.docker.com/r/sebastientourbier/connectomemapper-bidsapp
   :alt: Docker Pulls
 .. image:: https://circleci.com/gh/connectomicslab/connectomemapper3/tree/master.svg?style=shield
@@ -33,6 +36,9 @@ This neuroimaging processing pipeline software is developed by the Connectomics 
 .. image:: https://app.codacy.com/project/badge/Grade/658266303c3046e8896769670e6988eb
   :target: https://www.codacy.com/gh/connectomicslab/connectomemapper3?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=connectomicslab/connectomemapper3&amp;utm_campaign=Badge_Grade
   :alt: Code Quality Review Status
+.. image:: https://img.shields.io/badge/all_contributors-12-orange.svg?style=flat-square
+  :target: contributors
+  :alt: All-contributors
 
 
 .. warning:: THIS SOFTWARE IS FOR RESEARCH PURPOSES ONLY AND SHALL NOT BE USED FOR ANY CLINICAL USE. THIS SOFTWARE HAS NOT BEEN REVIEWED OR APPROVED BY THE FOOD AND DRUG ADMINISTRATION OR EQUIVALENT AUTHORITY, AND IS FOR NON-CLINICAL, IRB-APPROVED RESEARCH USE ONLY. IN NO EVENT SHALL DATA OR IMAGES GENERATED THROUGH THE USE OF THE SOFTWARE BE USED IN THE PROVISION OF PATIENT CARE.
@@ -46,32 +52,35 @@ About
 	:width: 1000
 	:align: center
 
-``Connectome Mapper 3`` implements full anatomical, diffusion and
-resting-state MRI processing pipelines, from raw Diffusion / T1 /
-T2 / BOLD data to multi-resolution connection matrices.
+Connectome Mapper 3 is an open-source Python3 image processing pipeline software,
+with a Graphical User Interface (GUI), that implements full anatomical, diffusion and
+resting-state MRI processing pipelines, from raw Diffusion / T1 / T2 / BOLD data
+to multi-resolution connection matrices based on a new version of the Lausanne
+parcellation atlas, aka `Lausanne2018`.
 
 ``Connectome Mapper 3`` pipelines use a combination of tools from
 well-known software packages, including FSL_, FreeSurfer_, ANTs_,
 MRtrix3_, Dipy_ and AFNI_, empowered by the Nipype_ dataflow library.
-These pipelines were designed to provide the best software implementation
-for each state of processing, and will be updated as newer and better
-neuroimaging software become available.
+These pipelines are designed to provide the best software implementation
+for each state of processing at the time of conception, and can be
+easily updated as newer and better neuroimaging software become available.
 
-This tool allows you to easily do the following:
+To enhance reproducibility and replicatibility, the processing pipelines
+with all dependencies are encapsulated in a Docker image container, which handles datasets
+organized following the BIDS standard and is distributed as a `BIDS App`_ @
+`Docker Hub <https://hub.docker.com/r/sebastientourbier/connectomemapper-bidsapp>`_. For execution on high-performance computing cluster, a
+Singularity image is also made freely available @
+`Sylabs Cloud <https://cloud.sylabs.io/library/_container/5fe4e971bccfe9cf45792495>`_.
 
-  * Handle T1 / Diffusion / resting-state MRI data, organized following the
-    Brain Imaging Data Structure (BIDS) standard, from raw to multi-resolution
-    connection matrices.
-  * Implement tools from different software packages.
-  * Achieve optimal data processing quality by using the best tools available
-  * Automate and parallelize processing steps, which provides a significant
-    speed-up from typical linear, manual processing.
-
-Portability, reproducibility and replicatibility are achieved through the
-distribution of a BIDSApp, a software container image which (1) takes datasets
-organized following the Brain Imaging Data Structure (BIDS) standard, and which
-(2) provides a frozen computing environment where versions of all external
-softwares and libraries are fixed.
+To enhanced accessibility and reduce the risk of misconfiguration,
+Connectome Mapper 3 comes with an interactive GUI, aka `cmpbidsappmanager`,
+which supports the user in all the steps involved in the configuration of
+the pipelines, the configuration and execution of the BIDS App, and
+the control of the output quality. In addition, to facilitate the use
+by users not familiar with Docker and Singularity containers,
+Connectome Mapper 3 provides two Python commandline wrappers
+(`connectomemapper3_docker` and `connectomemapper3_singularity`) that will
+generate and run the appropriate command.
 
 .. _FSL: https://fsl.fmrib.ox.ac.uk/fsl/fslwiki
 
@@ -87,6 +96,7 @@ softwares and libraries are fixed.
 
 .. _Nipype: https://nipype.readthedocs.io/en/latest/
 
+.. _BIDS App: https://bids-apps.neuroimaging.io/
 
 *******************
 License information
@@ -170,6 +180,7 @@ Contents
    LICENSE
    changes
    citing
+   contributors
    contributing
    support
 

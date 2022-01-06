@@ -1,9 +1,397 @@
 version: 2.1
 
 orbs:
-  coverage-reporter: codacy/coverage-reporter@11.9.0
-  singularity: singularity/singularity@1.0.10
-  codecov: codecov/codecov@1.0.2
+  singularity: singularity/singularity@1.0.11
+  codecov: codecov/codecov@1.1.5
+
+commands:
+
+  load-docker-image-archive:
+    parameters:
+      archive_file:
+        type: string
+        default: "/tmp/cache/docker/docker.tar.zst"
+      run_name:
+        type: string
+        default: "Load Docker image layer cache"
+    steps:
+      - run:
+          name: "<<parameters.run_name>> from <<parameters.archive_file>>"
+          no_output_timeout: 30m
+          command: |
+            docker info
+            set +o pipefail
+            if [ -f "<<parameters.archive_file>>" ]; then
+              wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+              sudo apt-get update && sudo apt-get -y install zstd
+              zstd -d --stdout "<<parameters.archive_file>>" | docker load
+              docker images
+            fi
+
+  clean-configuration-files:
+    parameters:
+      circleci_job:
+        type: string
+        default: ${CIRCLE_JOB}
+      run_name:
+        type: string
+        default: "Remove any config file present in ds-sample/code and create ds-sample/test"
+    steps:
+      - run:
+          name: <<parameters.run_name>>
+          no_output_timeout: 8h
+          command: |
+            # Get version, update files.
+            #THISVERSION=v$( python /home/circleci/src/connectomemapper3/get_version.py )
+            #echo "THISVERSION : ${THISVERSION}"
+            ls -la  /tmp/data/ds-sample/code
+            # Remove existing config files in ds-sample (Make sure we are using the ones stored in the repo)
+            rm -f /tmp/data/ds-sample/code/*.ini
+            # Create the test folder to store list of test output files
+            mkdir -p /tmp/data/ds-sample/test
+            # Create the dataset dedicated to this job and copy data into it
+            echo "Create test-dedicated dataset at: /tmp/data/<<parameters.circleci_job>>/ds-sample"
+            mkdir -p "/tmp/data/<<parameters.circleci_job>>/ds-sample"
+            cp -R /tmp/data/ds-sample/* "/tmp/data/<<parameters.circleci_job>>/ds-sample"
+
+  install-conda-and-cmp3:
+    parameters:
+      run_name:
+        type: string
+        default: "Setup miniconda environment and install connectomemapper3 with Python wrappers"
+      cmp3_dir:
+        type: string
+        default: /home/circleci/src/connectomemapper3
+    steps:
+      - run:
+          name: <<parameters.run_name>>
+          no_output_timeout: 5h
+          command: |
+            wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
+            bash miniconda.sh -bfp $HOME/miniconda
+            export PATH="$HOME/miniconda/bin:$PATH"
+            conda update -y conda
+            conda create -n connectomemapper3 python=3.7 pip=20.1.1 numpy=1.19.2
+            source activate connectomemapper3
+            echo $(which pip)
+            pip install "<<parameters.cmp3_dir>>"
+            rm miniconda.sh
+
+  test-singularity-anat-pipeline:
+    parameters:
+      circleci_job:
+        type: string
+        default: ${CIRCLE_JOB}
+      run_name:
+        type: string
+        default: "Run anatomical pipeline"
+      test_name:
+        type: string
+        default: "test-01"
+      config_dir:
+        type: string
+        default: /home/circleci/src/connectomemapper3/.circleci/tests/configuration_files
+      singularity_image:
+        type: string
+        default: "/tmp/cache/singularity/connectomemapper3.simg"
+      anat_pipeline_config:
+        type: string
+        default: "ref_anatomical_config_1.ini"
+    steps:
+      - run:
+          name: <<parameters.run_name>>
+          no_output_timeout: 5h
+          command: |
+            # Execute BIDS App
+            singularity run --containall \
+                --bind /tmp/data/<<parameters.circleci_job>>/ds-sample:/bids_dir \
+                --bind /tmp/data/<<parameters.circleci_job>>/ds-sample/derivatives:/output_dir \
+                --bind <<parameters.config_dir>>:/config \
+                <<parameters.singularity_image>> \
+                /bids_dir /output_dir participant --participant_label 01 --session_label 01 \
+                --anat_pipeline_config /config/<<parameters.anat_pipeline_config>> \
+                --fs_license /bids_dir/code/license.txt \
+                --ants_number_of_threads 4 \
+                --coverage \
+                --notrack
+            # Rename partial coverage
+            mv /tmp/data/<<parameters.circleci_job>>/ds-sample/code/coverage.xml /tmp/data/ds-sample/test/<<parameters.test_name>>_coverage.xml
+            # Rename execution log
+            mv /tmp/data/<<parameters.circleci_job>>/ds-sample/code/log.txt /tmp/data/ds-sample/test/<<parameters.test_name>>_log.txt
+      - run:
+          name: Checking outputs of Connectome Mapper run (<<parameters.test_name>>)
+          command: |
+            # Get all files in derivatives except the _*.json interface hash generated by nipype (find) /
+            # Remove the full path of the derivatives (sed) / sort the files and write it to a text file
+            sudo find /tmp/data/<<parameters.circleci_job>>/ds-sample/derivatives -path */figures -prune -o -not -name "_*.json" -type f -print | sed s+/tmp/data/<<parameters.circleci_job>>/ds-sample/derivatives/++ | sort > /tmp/data/ds-sample/test/<<parameters.test_name>>-simg_outputs.out
+            diff /home/circleci/src/connectomemapper3/.circleci/tests/expected_outputs/ds-sample_<<parameters.test_name>>-simg_outputs.txt /tmp/data/ds-sample/test/<<parameters.test_name>>-simg_outputs.out
+            exit $?
+
+  test-singularity-anat-pipeline-wrapper:
+    parameters:
+      circleci_job:
+        type: string
+        default: ${CIRCLE_JOB}
+      run_name:
+        type: string
+        default: "Run anatomical pipeline"
+      test_name:
+        type: string
+        default: "test-09"
+      config_dir:
+        type: string
+        default: "/home/circleci/src/connectomemapper3/.circleci/tests/configuration_files"
+      singularity_image:
+        type: string
+        default: "/tmp/cache/singularity/connectomemapper3.simg"
+      anat_pipeline_config:
+        type: string
+        default: "ref_anatomical_config_1.ini"
+    steps:
+      - run:
+          name: <<parameters.run_name>>
+          no_output_timeout: 5h
+          command: |
+            export PATH="$HOME/miniconda/bin:$PATH"
+            # Activate the conda environment
+            source activate connectomemapper3
+            # Execute BIDS App via the singularity python wrapper
+            bids_dir="/tmp/data/<<parameters.circleci_job>>/ds-sample"
+            output_dir="${bids_dir}/derivatives"
+            connectomemapper3_singularity \
+                "${bids_dir}" "${output_dir}" participant --participant_label 01 --session_label 01 \
+                --singularity_image <<parameters.singularity_image>> \
+                --config_dir <<parameters.config_dir>> \
+                --anat_pipeline_config <<parameters.anat_pipeline_config>> \
+                --fs_license "${bids_dir}/code/license.txt" \
+                --ants_number_of_threads 4 \
+                --coverage \
+                --notrack
+            # Rename partial coverage
+            mv /tmp/data/<<parameters.circleci_job>>/ds-sample/code/coverage.xml /tmp/data/ds-sample/test/<<parameters.test_name>>_coverage.xml
+            # Rename execution log
+            mv /tmp/data/<<parameters.circleci_job>>/ds-sample/code/log.txt /tmp/data/ds-sample/test/<<parameters.test_name>>_log.txt
+      - run:
+          name: Checking outputs of Connectome Mapper run (<<parameters.test_name>>)
+          command: |
+            # Get all files in derivatives except the _*.json interface hash generated by nipype (find) /
+            # Remove the full path of the derivatives (sed) / sort the files and write it to a text file
+            sudo find /tmp/data/<<parameters.circleci_job>>/ds-sample/derivatives -path */figures -prune -o -not -name "_*.json" -type f -print | sed s+/tmp/data/<<parameters.circleci_job>>/ds-sample/derivatives/++ | sort > /tmp/data/ds-sample/test/<<parameters.test_name>>-simg_outputs.out
+            diff /home/circleci/src/connectomemapper3/.circleci/tests/expected_outputs/ds-sample_<<parameters.test_name>>-simg_outputs.txt /tmp/data/ds-sample/test/<<parameters.test_name>>-simg_outputs.out
+            exit $?
+
+  test-docker-anat-pipeline-wrapper:
+    parameters:
+      circleci_job:
+        type: string
+        default: ${CIRCLE_JOB}
+      run_name:
+        type: string
+        default: "Run anatomical pipeline"
+      test_name:
+        type: string
+        default: "test-09"
+      config_dir:
+        type: string
+        default: "/home/circleci/src/connectomemapper3/.circleci/tests/configuration_files"
+      anat_pipeline_config:
+        type: string
+        default: "ref_anatomical_config_1.ini"
+      check_output:
+        type: boolean
+        default: true
+
+    steps:
+      - run:
+          name: <<parameters.run_name>>
+          no_output_timeout: 5h
+          command: |
+            export PATH="$HOME/miniconda/bin:$PATH"
+            # Activate the conda environment
+            source activate connectomemapper3
+            # Execute BIDS App via the singularity python wrapper
+            bids_dir="/tmp/data/<<parameters.circleci_job>>/ds-sample"
+            output_dir="${bids_dir}/derivatives"
+            connectomemapper3_docker \
+                "${bids_dir}" "${output_dir}" participant --participant_label 01 --session_label 01 \
+                --docker_image "sebastientourbier/connectomemapper3" \
+                --config_dir <<parameters.config_dir>> \
+                --anat_pipeline_config <<parameters.anat_pipeline_config>> \
+                --fs_license "${bids_dir}/code/license.txt" \
+                --ants_number_of_threads 4 \
+                --coverage \
+                --notrack
+            # Rename partial coverage
+            mv /tmp/data/<<parameters.circleci_job>>/ds-sample/code/coverage.xml /tmp/data/ds-sample/test/<<parameters.test_name>>_coverage.xml
+            # Rename execution log
+            mv /tmp/data/<<parameters.circleci_job>>/ds-sample/code/log.txt /tmp/data/ds-sample/test/<<parameters.test_name>>_log.txt
+      - run:
+          name: Checking outputs of Connectome Mapper run (<<parameters.test_name>>)
+          command: |
+            # Get all files in derivatives except the _*.json interface hash generated by nipype (find) /
+            # Remove the full path of the derivatives (sed) / sort the files and write it to a text file
+            sudo find /tmp/data/<<parameters.circleci_job>>/ds-sample/derivatives -path */figures -prune -o -not -name "_*.json" -type f -print | sed s+/tmp/data/<<parameters.circleci_job>>/ds-sample/derivatives/++ | sort > /tmp/data/ds-sample/test/<<parameters.test_name>>_outputs.out
+      - when:
+          condition:
+            equal: [ "true", << parameters.check_output >> ]
+          steps:
+            - run:
+                name: Checking outputs of Connectome Mapper run (<<parameters.test_name>>)
+                command: |
+                  diff /home/circleci/src/connectomemapper3/.circleci/tests/expected_outputs/ds-sample_<<parameters.test_name>>_outputs.txt /tmp/data/ds-sample/test/<<parameters.test_name>>_outputs.out
+                  exit $?
+
+  test-docker-anat-pipeline:
+    parameters:
+      circleci_job:
+        type: string
+        default: ${CIRCLE_JOB}
+      run_name:
+        type: string
+        default: "Run anatomical pipeline"
+      test_name:
+        type: string
+        default: "test-01"
+      config_dir:
+        type: string
+        default: /home/circleci/src/connectomemapper3/.circleci/tests/configuration_files
+      anat_pipeline_config:
+        type: string
+        default: "ref_anatomical_config_1.ini"
+    steps:
+      - run:
+          name: <<parameters.run_name>>
+          no_output_timeout: 5h
+          command: |
+            # Execute BIDS App
+            docker run -it --rm \
+                --entrypoint /app/run_coverage_cmp3.sh \
+                -v /tmp/data/<<parameters.circleci_job>>/ds-sample:/bids_dir \
+                -v /tmp/data/<<parameters.circleci_job>>/ds-sample/derivatives:/output_dir \
+                -v <<parameters.config_dir>>:/config \
+                sebastientourbier/connectomemapper3 \
+                /bids_dir /output_dir participant --participant_label 01 --session_label 01 \
+                --anat_pipeline_config /config/<<parameters.anat_pipeline_config>> \
+                --fs_license /bids_dir/code/license.txt \
+                --ants_number_of_threads 4 \
+                --coverage \
+                --notrack
+            # Rename partial coverage
+            mv /tmp/data/<<parameters.circleci_job>>/ds-sample/code/coverage.xml /tmp/data/ds-sample/test/<<parameters.test_name>>_coverage.xml
+            # Rename execution log
+            mv /tmp/data/<<parameters.circleci_job>>/ds-sample/code/log.txt /tmp/data/ds-sample/test/<<parameters.test_name>>_log.txt
+      - run:
+          name: Checking outputs of Connectome Mapper run (<<parameters.test_name>>)
+          command: |
+            # Get all files in derivatives except the _*.json interface hash generated by nipype (find) /
+            # Remove the full path of the derivatives (sed) / sort the files and write it to a text file
+            sudo find /tmp/data/<<parameters.circleci_job>>/ds-sample/derivatives -path */figures -prune -o -not -name "_*.json" -type f -print | sed s+/tmp/data/<<parameters.circleci_job>>/ds-sample/derivatives/++ | sort > /tmp/data/ds-sample/test/<<parameters.test_name>>_outputs.out
+            diff /home/circleci/src/connectomemapper3/.circleci/tests/expected_outputs/ds-sample_<<parameters.test_name>>_outputs.txt /tmp/data/ds-sample/test/<<parameters.test_name>>_outputs.out
+            exit $?
+
+  test-docker-anat-dwi-pipelines:
+    parameters:
+      circleci_job:
+        type: string
+        default: ${CIRCLE_JOB}
+      run_name:
+        type: string
+        default: "Run anatomical and diffusion pipelines"
+      test_name:
+        type: string
+        default: "test-01"
+      config_dir:
+        type: string
+        default: /home/circleci/src/connectomemapper3/.circleci/tests/configuration_files
+      anat_pipeline_config:
+        type: string
+        default: "ref_anatomical_config_1.ini"
+      dwi_pipeline_config:
+        type: string
+        default: "ref_diffusion_config_1.ini"
+    steps:
+      - run:
+          name: <<parameters.run_name>>
+          no_output_timeout: 5h
+          command: |
+            # Execute BIDS App
+            docker run -it --rm \
+                --entrypoint /app/run_coverage_cmp3.sh \
+                -v /tmp/data/<<parameters.circleci_job>>/ds-sample:/bids_dir \
+                -v /tmp/data/<<parameters.circleci_job>>/ds-sample/derivatives:/output_dir \
+                -v <<parameters.config_dir>>:/config \
+                sebastientourbier/connectomemapper3 \
+                /bids_dir /output_dir participant --participant_label 01 --session_label 01 \
+                --anat_pipeline_config /config/<<parameters.anat_pipeline_config>> \
+                --dwi_pipeline_config /config/<<parameters.dwi_pipeline_config>> \
+                --fs_license /bids_dir/code/license.txt \
+                --ants_number_of_threads 4 \
+                --coverage \
+                --notrack
+            # Rename partial coverage
+            mv /tmp/data/<<parameters.circleci_job>>/ds-sample/code/coverage.xml /tmp/data/ds-sample/test/<<parameters.test_name>>_coverage.xml
+            # Rename execution log
+            mv /tmp/data/<<parameters.circleci_job>>/ds-sample/code/log.txt /tmp/data/ds-sample/test/<<parameters.test_name>>_log.txt
+      - run:
+          name: Checking outputs of Connectome Mapper run (<<parameters.test_name>>)
+          command: |
+            # Get all files in derivatives except the _*.json interface hash generated by nipype (find) /
+            # Remove the full path of the derivatives (sed) / sort the files and write it to a text file
+            sudo find /tmp/data/<<parameters.circleci_job>>/ds-sample/derivatives -path */figures -prune -o -not -name "_*.json" -type f -print | sed s+/tmp/data/<<parameters.circleci_job>>/ds-sample/derivatives/++ | sort > /tmp/data/ds-sample/test/<<parameters.test_name>>_outputs.out
+            diff /home/circleci/src/connectomemapper3/.circleci/tests/expected_outputs/ds-sample_<<parameters.test_name>>_outputs.txt /tmp/data/ds-sample/test/<<parameters.test_name>>_outputs.out
+            exit $?
+
+  test-docker-anat-func-pipelines:
+    parameters:
+      circleci_job:
+        type: string
+        default: ${CIRCLE_JOB}
+      run_name:
+        type: string
+        default: "Run anatomical and fMRI pipelines"
+      test_name:
+        type: string
+        default: "test-01"
+      config_dir:
+        type: string
+        default: /home/circleci/src/connectomemapper3/.circleci/tests/configuration_files
+      anat_pipeline_config:
+        type: string
+        default: "ref_anatomical_config_1.ini"
+      func_pipeline_config:
+        type: string
+        default: "ref_fMRI_config_1.ini"
+    steps:
+      - run:
+          name: <<parameters.run_name>>
+          no_output_timeout: 5h
+          command: |
+            # Execute BIDS App
+            docker run -it --rm \
+                --entrypoint /app/run_coverage_cmp3.sh \
+                -v /tmp/data/<<parameters.circleci_job>>/ds-sample:/bids_dir \
+                -v /tmp/data/<<parameters.circleci_job>>/ds-sample/derivatives:/output_dir \
+                -v <<parameters.config_dir>>:/config \
+                sebastientourbier/connectomemapper3 \
+                /bids_dir /output_dir participant --participant_label 01 --session_label 01 \
+                --anat_pipeline_config /config/<<parameters.anat_pipeline_config>> \
+                --func_pipeline_config /config/<<parameters.func_pipeline_config>> \
+                --fs_license /bids_dir/code/license.txt \
+                --ants_number_of_threads 4 \
+                --coverage \
+                --notrack
+            # Rename partial coverage
+            mv /tmp/data/<<parameters.circleci_job>>/ds-sample/code/coverage.xml /tmp/data/ds-sample/test/<<parameters.test_name>>_coverage.xml
+            # Rename execution log
+            mv /tmp/data/<<parameters.circleci_job>>/ds-sample/code/log.txt /tmp/data/ds-sample/test/<<parameters.test_name>>_log.txt
+      - run:
+          name: Checking outputs of Connectome Mapper run (<<parameters.test_name>>)
+          command: |
+            # Get all files in derivatives except the _*.json interface hash generated by nipype (find) /
+            # Remove the full path of the derivatives (sed) / sort the files and write it to a text file
+            sudo find /tmp/data/<<parameters.circleci_job>>/ds-sample/derivatives -path */figures -prune -o -not -name "_*.json" -type f -print | sed s+/tmp/data/<<parameters.circleci_job>>/ds-sample/derivatives/++ | sort > /tmp/data/ds-sample/test/<<parameters.test_name>>_outputs.out
+            diff /home/circleci/src/connectomemapper3/.circleci/tests/expected_outputs/ds-sample_<<parameters.test_name>>_outputs.txt /tmp/data/ds-sample/test/<<parameters.test_name>>_outputs.out
+            exit $?
 
 jobs:
 
@@ -40,37 +428,75 @@ jobs:
             python --version
             pip3 install cmp
 
+  deploy-pypi-release:
+    docker:
+      - image: circleci/python:3.7
+    steps:
+      - checkout
+      - run:
+          name: "Install dependencies"
+          command: |
+            python --version
+            pip3 install twine
+      - run:
+          name: "Verify git tag vs. version"
+          command: |
+            python3 setup_pypi.py verify
+      - run:
+          name: "init .pypirc"
+          command: |
+            echo -e "[pypi]" >> ~/.pypirc
+            echo -e "username = $PYPI_USER" >> ~/.pypirc
+            echo -e "password = $PYPI_TOKEN" >> ~/.pypirc
+      - run:
+          name: "Create distribution wheel"
+          command: |
+            python3 setup_pypi.py sdist bdist_wheel
+      - run:
+          name: "Upload to pypi"
+          command: |
+            twine upload dist/*
+
   build_docker:
     environment:
       TZ: "/usr/share/zoneinfo/Europe/Zurich"
       SCRATCH: "/scratch"
-    docker:
-      - image: docker:19.03.1-git
-    working_directory: tmp/src/connectomemapper3
+    machine:
+      image: ubuntu-1604:201903-01
+      docker_layer_caching: true
+    resource_class: medium
+    working_directory: /home/circleci/src/connectomemapper3
     steps:
       - run:
-          name: Install parallel gzip and python2
+          name: Install parallel zstd
           command: |
-            apk add --no-cache pigz python2
-      - restore_cache:
-          keys:
-            - docker-{{ .Branch }}-{{ epoch }}
-            - docker-{{ .Branch }}-
-            - docker-master-
-            - docker-
-          paths:
-            - /tmp/cache/docker.tar.gz
-      - checkout
-      - setup_remote_docker:
-          docker_layer_caching: false
+            sudo apt-get update
+            sudo apt-get install zstd
+      - run:
+          name: Enable "--squash" feature of docker build
+          command: |
+            sudo touch /etc/docker/daemon.json
+            echo "{\"experimental\": true}" | sudo tee -a /etc/docker/daemon.json
+            sudo service docker restart
+      #- restore_cache:
+      #    keys:
+      #      - docker-v1-{{ .Branch }}-{{ .Revision }}
+      #      - docker-v1--{{ .Revision }}
+      #      - docker-v1-{{ .Branch }}-
+      #      - docker-v1-master-
+      #      - docker-v1-
+      #    paths:
+      #      - /tmp/cache
+      - checkout:
+          path: /home/circleci/src/connectomemapper3
       - run:
           name: Load Docker image layer cache
           no_output_timeout: 30m
           command: |
             docker info
             set +o pipefail
-            if [ -f /tmp/cache/docker.tar.gz ]; then
-              pigz -d --stdout /tmp/cache/docker.tar.gz | docker load
+            if [ -f /tmp/cache/docker/docker.tar.zst ]; then
+              zstd -d --stdout /tmp/cache/docker/docker.tar.zst | docker load
               docker images
             fi
       - run:
@@ -79,7 +505,7 @@ jobs:
           command: |
             # Get version, update files.
             python --version
-            THISVERSION=$( python get_version.py )
+            THISVERSION=$( python /home/circleci/src/connectomemapper3/get_version.py )
             echo "THISVERSION : ${THISVERSION}"
             echo "CIRCLE_TAG : ${CIRCLE_TAG}"
             if [[ ${THISVERSION:0:1} == "0" ]] ; then
@@ -89,17 +515,15 @@ jobs:
               echo "them to your fork with ``git push origin --tags``"
             fi
             # Build CMP BIDS App docker image
+            cd /home/circleci/src/connectomemapper3
             ls -la .
-            e=1 && for i in {1..5}; do
-              docker build --cache-from sebastientourbier/connectomemapper3 --rm=true --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` --build-arg VCS_REF=`git rev-parse --short HEAD` --build-arg VERSION="${CIRCLE_TAG:-$THISVERSION}" -t sebastientourbier/connectomemapper3 . \
-              && e=0 && break || sleep 15
-            done && [ "$e" -eq "0" ]
-      - run:
-          name: Prune Docker cache (temporary)
-          command: docker system prune -f
-      - run:
-          name: Prune Docker volume (temporary)
-          command: docker volume prune --force
+            DOCKER_BUILDKIT=1 docker build --progress=plain --squash --rm=true --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` --build-arg VCS_REF=`git rev-parse --short HEAD` --build-arg VERSION="${CIRCLE_TAG:-$THISVERSION}" -t sebastientourbier/connectomemapper3 /home/circleci/src/connectomemapper3 \
+      #- run:
+      #    name: Prune Docker cache (temporary)
+      #    command: docker system prune -f
+      #- run:
+      #    name: Prune Docker volume (temporary)
+      #    command: docker volume prune --force
       - run:
           name: Display storage information
           command: df -h
@@ -112,21 +536,25 @@ jobs:
           no_output_timeout: 40m
           command: |
             # Get version, update files.
-            THISVERSION=$( python get_version.py )
-            mkdir -p /tmp/cache
+            THISVERSION=$( python /home/circleci/src/connectomemapper3/get_version.py )
+            mkdir -p /tmp/cache/docker
             docker save sebastientourbier/connectomemapper3 \
-            | pigz -8 -p 3 > /tmp/cache/docker.tar.gz
+            | zstd -10 --threads=4 > /tmp/cache/docker/docker.tar.zst
       - persist_to_workspace:
           root: /tmp
           paths:
-            - cache/docker.tar.gz
-            - src/connectomemapper3
+            - cache/docker/docker.tar.zst
+      #- save_cache:
+      #    key: docker-v1-{{ .Branch }}-{{ .Revision }}
+      #    paths:
+      #      - /tmp/cache
 
   build_singularity:
     machine:
       # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
       image: ubuntu-1604:201903-01
-    working_directory: /tmp/src/connectomemapper3
+    resource_class: large
+    working_directory: /home/circleci/src/connectomemapper3
     steps:
       - checkout:
           path: /home/circleci/src/connectomemapper3
@@ -143,23 +571,12 @@ jobs:
       - run:
           name: "Starting local registry"
           command: docker run -d -p 5000:5000 --restart=always --name registry registry:2
-      - run:
-          name: "Load Docker image layer cache"
-          no_output_timeout: 30m
-          command: |
-            docker info
-            set +o pipefail
-            if [ -f /tmp/cache/docker.tar.gz ]; then
-              wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-              sudo apt-get update && sudo apt-get -y install pigz
-              pigz -d --stdout /tmp/cache/docker.tar.gz | docker load
-              docker images
-              sudo rm /tmp/cache/docker.tar.gz
-            fi
+      - load-docker-image-archive:
+          archive_file: "/tmp/cache/docker/docker.tar.zst"
       - singularity/install-go:
           go-version: '1.13'
       - singularity/debian-install-3:
-          singularity-version: 3.5.1
+          singularity-version: 3.8.4
       - run:
           name: "Set SINGULARITY TMP and CACHEDIR to prevent overflowing the /tmp folder"
           command: |
@@ -171,27 +588,13 @@ jobs:
             export SINGULARITY_DISABLE_CACHE=true
             export
       - run:
-          name: "Display storage information"
-          command: |
-            du -xm ~/ | sort -rn > ~/usage.txt
-            echo "/home directory:"
-            du -sh ~/
-            echo "/tmp directory:"
-            du -sh /tmp
-      - run:
           name: "Display storage information ALL"
           command: |
             df -h
       - run:
-          name: "Display storage information (df -h)"
-          command: |
-            echo "/home directory:"
-            df -h ~/
-            echo "/tmp directory:"
-            df -h /tmp
-      - run:
           name: "Building Singularity image from Docker image"
           command: |
+            mkdir -p /tmp/cache/singularity
             docker tag sebastientourbier/connectomemapper3 localhost:5000/sebastientourbier/connectomemapper3:latest
             docker push localhost:5000/sebastientourbier/connectomemapper3:latest
             docker images -a | grep "sebastientourbier/connectomemapper3"
@@ -199,19 +602,15 @@ jobs:
             SINGULARITY_LOCALCACHEDIR=~/.singularity/tmp \
             SINGULARITY_CACHEDIR=~/.singularity/tmp SINGULARITY_TMPDIR=~/.singularity/tmp \
             TMPDIR=~/.singularity/tmp SINGULARITY_DISABLE_CACHE=true \
-            singularity --debug -v build /tmp/cache/connectomemapper3.simg docker://localhost:5000/sebastientourbier/connectomemapper3:latest
+            singularity build /tmp/cache/singularity/connectomemapper3.simg docker://localhost:5000/sebastientourbier/connectomemapper3:latest
           no_output_timeout: 5h
       - run:
-          name: Display storage information
+          name: "Display storage information ALL"
           command: df -h
       - persist_to_workspace:
           root: /tmp
           paths:
-            - cache/connectomemapper3.simg
-      - store_artifacts:
-          path: /tmp/cache/connectomemapper3.simg
-      - store_artifacts:
-          path: ~/usage.txt
+            - cache/singularity/connectomemapper3.simg
 
   get_data:
     machine:
@@ -219,43 +618,176 @@ jobs:
       image: ubuntu-1604:201903-01
     working_directory: /home/circleci/data
     steps:
+      - restore_cache:
+          keys:
+            - data-v2-1-{{ .Branch }}-{{ .Revision }}
+            - data-v2-1--{{ .Revision }}
+            - data-v2-1-{{ .Branch }}-
+            - data-v2-1-master-
+            - data-v2-1-
+          paths:
+            - /tmp/data
       - run:
           name: Get test data from ds-sample
           command: |
-            mkdir -p /tmp/data
-            wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -v \
-              -O ds-sample.tar.gz "https://zenodo.org/record/3712762/files/ds-sample.tar.gz?download=1"
-            tar xvzf ds-sample.tar.gz -C /tmp/data/
-            echo "Dataset ds-sample has been successfully downloaded"
+            if [[ ! -d /tmp/data/ds-sample ]]; then
+              mkdir -p /tmp/data
+              wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -v \
+                -O ds-sample.tar.gz "https://zenodo.org/record/5790821/files/ds-sample.tar.gz?download=1"
+              tar xvzf ds-sample.tar.gz -C /tmp/data/
+              echo "Dataset ds-sample has been successfully downloaded"
+            else
+              echo "Dataset ds-sample was cached"
+            fi
       - run:
           name: Get FreeSurfer derivatives for ds-sample
           command: |
-            mkdir -p /tmp/data/ds-sample/derivatives
-            wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -v \
-              -O freesurfer.tar.gz "https://zenodo.org/record/3712762/files/freesurfer.tar.gz?download=1"
-            tar xvzf freesurfer.tar.gz -C /tmp/data/ds-sample/derivatives
-            echo "FreeSurfer derivatives of ds-sample  have been successfully downloaded"
+            if [[ ! -d /tmp/data/ds-sample/derivatives/freesurfer-6.0.1 ]]; then
+              mkdir -p /tmp/data/ds-sample/derivatives
+              wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -v \
+                -O freesurfer.tar.gz "https://zenodo.org/record/5790821/files/freesurfer.tar.gz?download=1"
+              tar xvzf freesurfer.tar.gz -C /tmp/data/ds-sample/derivatives
+              mv /tmp/data/ds-sample/derivatives/freesurfer /tmp/data/ds-sample/derivatives/freesurfer-6.0.1
+              echo "FreeSurfer derivatives of ds-sample have been successfully downloaded"
+            else
+              echo "FreeSurfer derivatives of ds-sample was cached"
+            fi
       - run:
           name: Store FreeSurfer license file
           command: |
-            mkdir -p /tmp/data/ds-sample/code
-            cd /tmp/data/ds-sample/code
-            echo `echo c2ViYXN0aWVuLnRvdXJiaWVyMUBnbWFpbC5jb20KMzAwNzYKICpDYUpVZ0VMQlJEYkEKIEZTMkkyWDNwNkpicWcK== | base64 -di` > /tmp/data/ds-sample/code/license.txt
-            cat /tmp/data/ds-sample/code/license.txt
+            if [[ ! -e /tmp/data/ds-sample/code/license.txt ]]; then
+              mkdir -p /tmp/data/ds-sample/code
+              cd /tmp/data/ds-sample/code
+              echo `echo c2ViYXN0aWVuLnRvdXJiaWVyMUBnbWFpbC5jb20KMzAwNzYKICpDYUpVZ0VMQlJEYkEKIEZTMkkyWDNwNkpicWcK== | base64 -di` > /tmp/data/ds-sample/code/license.txt
+              cat /tmp/data/ds-sample/code/license.txt
+              echo "FreeSurfer license.txt been successfully created"
+            else
+              echo "FreeSurfer license.txt was cached"
+            fi
       - persist_to_workspace:
           root: /tmp
           paths:
             - data
       - save_cache:
-         key: data-{{ epoch }}
+         key: data-v2-1-{{ .Branch }}-{{ .Revision }}
          paths:
             - /tmp/data
 
-  test_docker_dsi_mrtrix:
+  test1_docker_parcellation:
     machine:
       # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
       image: ubuntu-1604:201903-01
+    resource_class: large
+    working_directory: /tmp/data
+    environment:
+      - FS_LICENSE: /tmp/data/${CIRCLE_JOB}/ds-sample/code/license.txt
+    steps:
+      - checkout:
+          path: /home/circleci/src/connectomemapper3
+      - run:
+          name: Check whether test_docker_parcellation should be skipped
+          command: |
+            cd /home/circleci/src/connectomemapper3
+            if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[skip[ _]?test_docker_parcellation\]' )" != "" ]]; then
+              echo "Skipping test_docker_parcellation job"
+              circleci step halt
+            fi
+      - attach_workspace:
+          at: /tmp
+      - load-docker-image-archive:
+          archive_file: "/tmp/cache/docker/docker.tar.zst"
+      - install-conda-and-cmp3:
+          run_name: "Setup miniconda environment and install connectomemapper3 with Python wrappers"
+          cmp3_dir: /home/circleci/src/connectomemapper3
+      - clean-configuration-files:
+          circleci_job: ${CIRCLE_JOB}
+      - test-docker-anat-pipeline-wrapper:
+          circleci_job: ${CIRCLE_JOB}
+          run_name: Run anatomical pipeline on ds-sample (test 1 - Lausanne 2018 - Python wrapper)
+          test_name: "test-01"
+          config_dir: /home/circleci/src/connectomemapper3/.circleci/tests/configuration_files
+          anat_pipeline_config: "ref_anatomical_config_1.ini"
+          check_output : true
+      - run:
+          name: Clean working directory
+          when: always
+          command: |
+            sudo chown $(id -un):$(id -gn) -R /tmp/data/${CIRCLE_JOB}/ds-sample
+            find /tmp/data/ds-sample/derivatives -not -name "*.svg" -not -name "*.html" -not -name "*.rst" \
+                -not -name "*.mat" -not -name "*.gpickle" -not -name "*.lta" -not -name "*.json" -not -name "*.txt" \
+                -not -name "*.log" -not -name "*.pklz" -type f -delete
+      - persist_to_workspace:
+          root: /tmp
+          paths:
+            - data/ds-sample/test/test-01_*
+            - data/test1_docker_parcellation/ds-sample/derivatives/nipype-*
+            - data/test1_docker_parcellation/ds-sample/derivatives/cmp-*
+      - store_artifacts:
+          path: /tmp/data/ds-sample/test
+      - store_artifacts:
+          path: /tmp/data/test1_docker_parcellation/ds-sample/code
+      - store_artifacts:
+          path: /tmp/data/test1_docker_parcellation/ds-sample/derivatives/cmp-*
+      - store_artifacts:
+          path: /tmp/data/test1_docker_parcellation/ds-sample/derivatives/nipype-*
 
+  test2_docker_parcellation:
+    machine:
+      # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
+      image: ubuntu-1604:201903-01
+    resource_class: medium
+    working_directory: /tmp/data
+    environment:
+      - FS_LICENSE: /tmp/data/${CIRCLE_JOB}/ds-sample/code/license.txt
+    steps:
+      - checkout:
+          path: /home/circleci/src/connectomemapper3
+      - run:
+          name: Check whether test_docker_parcellation should be skipped
+          command: |
+            cd /home/circleci/src/connectomemapper3
+            if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[skip[ _]?test_docker_parcellation\]' )" != "" ]]; then
+              echo "Skipping test_docker_parcellation job"
+              circleci step halt
+            fi
+      - attach_workspace:
+          at: /tmp
+      - load-docker-image-archive:
+          archive_file: "/tmp/cache/docker/docker.tar.zst"
+      - clean-configuration-files:
+          circleci_job: ${CIRCLE_JOB}
+      - test-docker-anat-pipeline:
+          circleci_job: ${CIRCLE_JOB}
+          run_name: Run anatomical pipeline on ds-sample (test 2 - NativeFreesurfer)
+          test_name: "test-02"
+          config_dir: /home/circleci/src/connectomemapper3/.circleci/tests/configuration_files
+          anat_pipeline_config: "ref_anatomical_config_2.ini"
+      - run:
+          name: Clean working directory
+          when: always
+          command: |
+            sudo chown $(id -un):$(id -gn) -R /tmp/data/${CIRCLE_JOB}/ds-sample
+            find /tmp/data/ds-sample/derivatives -not -name "*.svg" -not -name "*.html" -not -name "*.rst" \
+                -not -name "*.mat" -not -name "*.gpickle" -not -name "*.lta" -not -name "*.json" -not -name "*.txt" \
+                -not -name "*.log" -not -name "*.pklz" -type f -delete
+      - persist_to_workspace:
+          root: /tmp
+          paths:
+            - data/ds-sample/test/test-02_*
+      - store_artifacts:
+          path: /tmp/data/ds-sample/test
+      - store_artifacts:
+          path: /tmp/data/test2_docker_parcellation/ds-sample/code
+      - store_artifacts:
+          path: /tmp/data/test2_docker_parcellation/ds-sample/derivatives/cmp-*
+      - store_artifacts:
+          path: /tmp/data/test2_docker_parcellation/ds-sample/derivatives/nipype-*
+
+  test3_docker_dsi_mrtrix:
+    machine:
+      # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
+      image: ubuntu-1604:201903-01
+    resource_class: large
     working_directory: /tmp/data
     environment:
       - FS_LICENSE: /tmp/data/${CIRCLE_JOB}/ds-sample/code/license.txt
@@ -273,114 +805,91 @@ jobs:
       - attach_workspace:
           at: /tmp
       - run:
-          name: Load Docker image layer cache
-          no_output_timeout: 30m
+          name: "Copy anatomical pipeline output from test 1"
           command: |
-            docker info
-            set +o pipefail
-            if [ -f /tmp/cache/docker.tar.gz ]; then
-              wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-              sudo apt-get update && sudo apt-get -y install pigz
-              pigz -d --stdout /tmp/cache/docker.tar.gz | docker load
-              docker images
-            fi
-      - run:
-          name: Remove any config file present in ds-sample/code and create ds-sample/test
-          no_output_timeout: 8h
-          command: |
-            # Get version, update files.
-            #THISVERSION=v$( python /home/circleci/src/connectomemapper3/get_version.py )
-            #echo "THISVERSION : ${THISVERSION}"
-            ls -la  /tmp/data/ds-sample/code
-
-            # Remove existing config files in ds-sample (Make sure we are using the ones stored in the repo)
-            rm -f /tmp/data/ds-sample/code/*.ini
-
-            # Create the test folder to store list of test output files
-            mkdir -p /tmp/data/ds-sample/test
-
-            # Create the dataset dedicated to this job and copy data into it
-            echo "Create test-dedicated dataset at: /tmp/data/${CIRCLE_JOB}/ds-sample"
-            mkdir -p /tmp/data/${CIRCLE_JOB}/ds-sample
-            cp -R /tmp/data/ds-sample/* /tmp/data/${CIRCLE_JOB}/ds-sample
-      - run:
-          name: Run anatomical and diffusion pipelines on ds-sample (test 1 - Lausanne2018 + FSL FLIRT + Dipy SHORE + MRtrix SD_STREAM tracking + MRtrix SIFT tractogram filtering)
-          no_output_timeout: 8h
-          command: |
-            # Execute BIDS App
-            docker run -it --rm \
-                --entrypoint /app/run_coverage_cmp3.sh \
-                -v /tmp/data/${CIRCLE_JOB}/ds-sample:/bids_dir \
-                -v /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives:/output_dir \
-                -v /home/circleci/src/connectomemapper3/.circleci/tests/configuration_files:/config \
-                sebastientourbier/connectomemapper3 \
-                /bids_dir /output_dir participant --participant_label 01 --session_label 01 \
-                --anat_pipeline_config /config/ref_anatomical_config_1.ini \
-                --dwi_pipeline_config /config/ref_diffusion_config_1.ini \
-                --fs_license /bids_dir/code/license.txt \
-                --coverage
-
-            # Rename partial coverage
-            mv /tmp/data/${CIRCLE_JOB}/ds-sample/code/coverage.xml /tmp/data/ds-sample/test/test-01_coverage.xml
-
-            # Rename execution log
-            mv /tmp/data/${CIRCLE_JOB}/ds-sample/code/log.txt /tmp/data/ds-sample/test/test-01_log.txt
-      - run:
-          name: Checking outputs of Connectome Mapper run (test 1)
-          command: |
-            # Get all files in derivatives except the _*.json interface hash generated by nipype (find) /
-            # Remove the full path of the derivatives (sed) / sort the files and write it to a text file
-            sudo find /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives -path */figures -prune -o -not -name "_*.json" -type f -print | sed s+/tmp/data/${CIRCLE_JOB}/ds-sample/derivatives/++ | sort > /tmp/data/ds-sample/test/test-01_outputs.out
-            diff /home/circleci/src/connectomemapper3/.circleci/tests/expected_outputs/ds-sample_test-01_outputs.txt /tmp/data/ds-sample/test/test-01_outputs.out
-            exit $?
-      - run:
-          name: Run anatomical and diffusion pipelines on ds-sample (test 2 - Lausanne2018 + ANTs SyN + Dipy SHORE + MRtrix ACT iFOV2 tracking)
-          no_output_timeout: 8h
-          command: |
-            # Execute BIDS App
-            docker run -it --rm \
-                --entrypoint /app/run_coverage_cmp3.sh \
-                -v /tmp/data/${CIRCLE_JOB}/ds-sample:/bids_dir \
-                -v /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives:/output_dir \
-                -v /home/circleci/src/connectomemapper3/.circleci/tests/configuration_files:/config \
-                sebastientourbier/connectomemapper3 \
-                /bids_dir /output_dir participant --participant_label 01 --session_label 01 \
-                --anat_pipeline_config /config/ref_anatomical_config_1.ini \
-                --dwi_pipeline_config /config/ref_diffusion_config_2.ini \
-                --fs_license /bids_dir/code/license.txt \
-                --coverage
-
-            # Rename partial coverage
-            mv /tmp/data/${CIRCLE_JOB}/ds-sample/code/coverage.xml /tmp/data/ds-sample/test/test-02_coverage.xml
-
-            # Rename execution log
-            mv /tmp/data/${CIRCLE_JOB}/ds-sample/code/log.txt /tmp/data/ds-sample/test/test-02_log.txt
-      - run:
-          name: Checking outputs of Connectome Mapper run (test 2)
-          command: |
-            # Get all files in derivatives except the _*.json interface hash generated by nipype (find) /
-            # Remove the full path of the derivatives (sed) / sort the files and write it to a text file
-            sudo find /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives -path */figures -prune -o -not -name "_*.json" -type f -print | sed s+/tmp/data/${CIRCLE_JOB}/ds-sample/derivatives/++ | sort > /tmp/data/ds-sample/test/test-02_outputs.out
-            diff /home/circleci/src/connectomemapper3/.circleci/tests/expected_outputs/ds-sample_test-02_outputs.txt /tmp/data/ds-sample/test/test-02_outputs.out
-            exit $?
+            mkdir -p /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives/cmp-custom
+            cp -r /tmp/data/test1_docker_parcellation/ds-sample/derivatives/cmp-*/* \
+            /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives/cmp-custom/
+      - load-docker-image-archive:
+          archive_file: "/tmp/cache/docker/docker.tar.zst"
+      - clean-configuration-files:
+          circleci_job: ${CIRCLE_JOB}
+      - test-docker-anat-dwi-pipelines:
+          circleci_job: ${CIRCLE_JOB}
+          run_name: Run anatomical and diffusion pipelines on ds-sample (test 3 - Lausanne2018 + FSL FLIRT + Dipy SHORE + MRtrix SD_STREAM tracking + MRtrix SIFT tractogram filtering)
+          test_name: "test-03"
+          config_dir: /home/circleci/src/connectomemapper3/.circleci/tests/configuration_files
+          anat_pipeline_config: "ref_anatomical_config_3.json"
+          dwi_pipeline_config: "ref_diffusion_config_1.ini"
       - persist_to_workspace:
           root: /tmp
           paths:
-            - data/ds-sample/test
+            - data/ds-sample/test/test-03_*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
-          path: /tmp/data/test_docker_dsi_mrtrix/ds-sample/code
+          path: /tmp/data/test3_docker_dsi_mrtrix/ds-sample/code
       - store_artifacts:
-          path: /tmp/data/test_docker_dsi_mrtrix/ds-sample/derivatives/cmp
+          path: /tmp/data/test3_docker_dsi_mrtrix/ds-sample/derivatives/cmp-*
       - store_artifacts:
-          path: /tmp/data/test_docker_dsi_mrtrix/ds-sample/derivatives/nipype
+          path: /tmp/data/test3_docker_dsi_mrtrix/ds-sample/derivatives/nipype-*
 
-  test_docker_dsi_dipy:
+  test4_docker_dsi_mrtrix:
     machine:
       # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
       image: ubuntu-1604:201903-01
+    resource_class: large
+    working_directory: /tmp/data
+    environment:
+      - FS_LICENSE: /tmp/data/${CIRCLE_JOB}/ds-sample/code/license.txt
+    steps:
+      - checkout:
+          path: /home/circleci/src/connectomemapper3
+      - run:
+          name: Check whether test_docker_dsi_mrtrix should be skipped
+          command: |
+            cd /home/circleci/src/connectomemapper3
+            if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[skip[ _]?test_docker_dsi_mrtrix\]' )" != "" ]]; then
+              echo "Skipping test_docker_dsi_mrtrix job"
+              circleci step halt
+            fi
+      - attach_workspace:
+          at: /tmp
+      - run:
+          name: "Copy anatomical pipeline output from test 1"
+          command: |
+            mkdir -p /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives
+            cp -r /tmp/data/test1_docker_parcellation/ds-sample/derivatives/nipype-* \
+            /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives
+      - load-docker-image-archive:
+          archive_file: "/tmp/cache/docker/docker.tar.zst"
+      - clean-configuration-files:
+          circleci_job: ${CIRCLE_JOB}
+      - test-docker-anat-dwi-pipelines:
+          circleci_job: ${CIRCLE_JOB}
+          run_name: Run anatomical and diffusion pipelines on ds-sample (test 4 - Lausanne2018 + ANTs SyN + Dipy SHORE + MRtrix ACT iFOV2 tracking)
+          test_name: "test-04"
+          config_dir: /home/circleci/src/connectomemapper3/.circleci/tests/configuration_files
+          anat_pipeline_config: "ref_anatomical_config_1.ini"
+          dwi_pipeline_config: "ref_diffusion_config_2.ini"
+      - persist_to_workspace:
+          root: /tmp
+          paths:
+            - data/ds-sample/test/test-04_*
+      - store_artifacts:
+          path: /tmp/data/ds-sample/test
+      - store_artifacts:
+          path: /tmp/data/test4_docker_dsi_mrtrix/ds-sample/code
+      - store_artifacts:
+          path: /tmp/data/test4_docker_dsi_mrtrix/ds-sample/derivatives/cmp-*
+      - store_artifacts:
+          path: /tmp/data/test4_docker_dsi_mrtrix/ds-sample/derivatives/nipype-*
 
+  test5_docker_dsi_dipy:
+    machine:
+      # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
+      image: ubuntu-1604:201903-01
+    resource_class: large
     working_directory: /tmp/data
     environment:
       - FS_LICENSE: /tmp/data/${CIRCLE_JOB}/ds-sample/code/license.txt
@@ -398,114 +907,40 @@ jobs:
       - attach_workspace:
           at: /tmp
       - run:
-          name: Load Docker image layer cache
-          no_output_timeout: 30m
+          name: "Copy anatomical pipeline output from test 1"
           command: |
-            docker info
-            set +o pipefail
-            if [ -f /tmp/cache/docker.tar.gz ]; then
-              wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-              sudo apt-get update && sudo apt-get -y install pigz
-              pigz -d --stdout /tmp/cache/docker.tar.gz | docker load
-              docker images
-            fi
-      - run:
-          name: Remove any config file present in ds-sample/code and create ds-sample/test
-          no_output_timeout: 8h
-          command: |
-            # Get version, update files.
-            #THISVERSION=v$( python /home/circleci/src/connectomemapper3/get_version.py )
-            #echo "THISVERSION : ${THISVERSION}"
-            ls -la  /tmp/data/ds-sample/code
-
-            # Remove existing config files in ds-sample (Make sure we are using the ones stored in the repo)
-            rm -f /tmp/data/ds-sample/code/*.ini
-
-            # Create the test folder to store list of test output files
-            mkdir -p /tmp/data/ds-sample/test
-
-            # Create the dataset dedicated to this job and copy data into it
-            echo "Create test-dedicated dataset at: /tmp/data/${CIRCLE_JOB}/ds-sample"
-            mkdir -p /tmp/data/${CIRCLE_JOB}/ds-sample
-            cp -R /tmp/data/ds-sample/* /tmp/data/${CIRCLE_JOB}/ds-sample
-      - run:
-          name: Run anatomical and diffusion pipelines on ds-sample (test 3 - Dipy SHORE + Deterministic tracking)
-          no_output_timeout: 8h
-          command: |
-            # Execute BIDS App
-            docker run -it --rm \
-                --entrypoint /app/run_coverage_cmp3.sh \
-                -v /tmp/data/${CIRCLE_JOB}/ds-sample:/bids_dir \
-                -v /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives:/output_dir \
-                -v /home/circleci/src/connectomemapper3/.circleci/tests/configuration_files:/config \
-                sebastientourbier/connectomemapper3 \
-                /bids_dir /output_dir participant --participant_label 01 --session_label 01 \
-                --anat_pipeline_config /config/ref_anatomical_config_1.ini \
-                --dwi_pipeline_config /config/ref_diffusion_config_3.ini \
-                --fs_license /bids_dir/code/license.txt \
-                --coverage
-
-            # Rename partial coverage
-            mv /tmp/data/${CIRCLE_JOB}/ds-sample/code/coverage.xml /tmp/data/ds-sample/test/test-03_coverage.xml
-
-            # Rename execution log
-            mv /tmp/data/${CIRCLE_JOB}/ds-sample/code/log.txt /tmp/data/ds-sample/test/test-03_log.txt
-      - run:
-          name: Checking outputs of Connectome Mapper run (test 3)
-          command: |
-            # Get all files in derivatives except the _*.json interface hash generated by nipype (find) /
-            # Remove the full path of the derivatives (sed) / sort the files and write it to a text file
-            sudo find /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives -path */figures -prune -o -not -name "_*.json" -type f -print | sed s+/tmp/data/${CIRCLE_JOB}/ds-sample/derivatives/++ | sort > /tmp/data/ds-sample/test/test-03_outputs.out
-            diff /home/circleci/src/connectomemapper3/.circleci/tests/expected_outputs/ds-sample_test-03_outputs.txt /tmp/data/ds-sample/test/test-03_outputs.out
-            exit $?
-      - run:
-          name: Run anatomical and diffusion pipelines on ds-sample (test 4 - Dipy SHORE + PFT tracking)
-          no_output_timeout: 8h
-          command: |
-            # Execute BIDS App
-            docker run -it --rm \
-                --entrypoint /app/run_coverage_cmp3.sh \
-                -v /tmp/data/${CIRCLE_JOB}/ds-sample:/bids_dir \
-                -v /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives:/output_dir \
-                -v /home/circleci/src/connectomemapper3/.circleci/tests/configuration_files:/config \
-                sebastientourbier/connectomemapper3 \
-                /bids_dir /output_dir participant --participant_label 01 --session_label 01 \
-                --anat_pipeline_config /config/ref_anatomical_config_1.ini \
-                --dwi_pipeline_config /config/ref_diffusion_config_4.ini \
-                --fs_license /bids_dir/code/license.txt \
-                --coverage
-
-            # Rename partial coverage
-            mv /tmp/data/${CIRCLE_JOB}/ds-sample/code/coverage.xml /tmp/data/ds-sample/test/test-04_coverage.xml
-
-            # Rename execution log
-            mv /tmp/data/${CIRCLE_JOB}/ds-sample/code/log.txt /tmp/data/ds-sample/test/test-04_log.txt
-      - run:
-          name: Checking outputs of Connectome Mapper run (test 4)
-          command: |
-            # Get all files in derivatives except the _*.json interface hash generated by nipype (find) /
-            # Remove the full path of the derivatives (sed) / sort the files and write it to a text file
-            sudo find /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives -path */figures -prune -o -not -name "_*.json" -type f -print | sed s+/tmp/data/${CIRCLE_JOB}/ds-sample/derivatives/++ | sort > /tmp/data/ds-sample/test/test-04_outputs.out
-            diff /home/circleci/src/connectomemapper3/.circleci/tests/expected_outputs/ds-sample_test-04_outputs.txt /tmp/data/ds-sample/test/test-04_outputs.out
-            exit $?
+            mkdir -p /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives
+            cp -r /tmp/data/test1_docker_parcellation/ds-sample/derivatives/nipype-* \
+            /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives
+      - load-docker-image-archive:
+          archive_file: "/tmp/cache/docker/docker.tar.zst"
+      - clean-configuration-files:
+          circleci_job: ${CIRCLE_JOB}
+      - test-docker-anat-dwi-pipelines:
+          circleci_job: ${CIRCLE_JOB}
+          run_name: Run anatomical and diffusion pipelines on ds-sample (test 5 - Dipy SHORE + Deterministic tracking)
+          test_name: "test-05"
+          config_dir: /home/circleci/src/connectomemapper3/.circleci/tests/configuration_files
+          anat_pipeline_config: "ref_anatomical_config_1.ini"
+          dwi_pipeline_config: "ref_diffusion_config_3.ini"
       - persist_to_workspace:
           root: /tmp
           paths:
-            - data/ds-sample/test
+            - data/ds-sample/test/test-05_*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
-          path: /tmp/data/test_docker_dsi_dipy/ds-sample/code
+          path: /tmp/data/test5_docker_dsi_dipy/ds-sample/code
       - store_artifacts:
-          path: /tmp/data/test_docker_dsi_dipy/ds-sample/derivatives/cmp
+          path: /tmp/data/test5_docker_dsi_dipy/ds-sample/derivatives/cmp-*
       - store_artifacts:
-          path: /tmp/data/test_docker_dsi_dipy/ds-sample/derivatives/nipype
+          path: /tmp/data/test5_docker_dsi_dipy/ds-sample/derivatives/nipype-*
 
-  test_docker_parcellation:
+  test6_docker_dsi_dipy:
     machine:
       # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
       image: ubuntu-1604:201903-01
-
+    resource_class: large
     working_directory: /tmp/data
     environment:
       - FS_LICENSE: /tmp/data/${CIRCLE_JOB}/ds-sample/code/license.txt
@@ -513,130 +948,50 @@ jobs:
       - checkout:
           path: /home/circleci/src/connectomemapper3
       - run:
-          name: Check whether test_docker_parcellation should be skipped
+          name: Check whether test_docker_dsi_dipy should be skipped
           command: |
             cd /home/circleci/src/connectomemapper3
-            if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[skip[ _]?test_docker_parcellation\]' )" != "" ]]; then
-              echo "Skipping test_docker_parcellation job"
+            if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[skip[ _]?test_docker_dsi_dipy\]' )" != "" ]]; then
+              echo "Skipping test_docker_dsi_dipy job"
               circleci step halt
             fi
       - attach_workspace:
           at: /tmp
       - run:
-          name: Load Docker image layer cache
-          no_output_timeout: 30m
+          name: "Copy anatomical pipeline output from test 1"
           command: |
-            docker info
-            set +o pipefail
-            if [ -f /tmp/cache/docker.tar.gz ]; then
-              wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-              sudo apt-get update && sudo apt-get -y install pigz
-              pigz -d --stdout /tmp/cache/docker.tar.gz | docker load
-              docker images
-            fi
-      - run:
-          name: Remove any config file present in ds-sample/code and create ds-sample/test
-          no_output_timeout: 1h
-          command: |
-            # Get version, update files.
-            #THISVERSION=v$( python /home/circleci/src/connectomemapper3/get_version.py )
-            #echo "THISVERSION : ${THISVERSION}"
-            ls -la  /tmp/data/ds-sample/code
-
-            # Remove existing config files in ds-sample (Make sure we are using the ones stored in the repo)
-            rm -f /tmp/data/ds-sample/code/*.ini
-
-            # Create the test folder to store list of test output files
-            mkdir -p /tmp/data/ds-sample/test
-
-            # Create the dataset dedicated to this job and copy data into it
-            echo "Create test-dedicated dataset at: /tmp/data/${CIRCLE_JOB}/ds-sample"
-            mkdir -p /tmp/data/${CIRCLE_JOB}/ds-sample
-            cp -R /tmp/data/ds-sample/* /tmp/data/${CIRCLE_JOB}/ds-sample
-      - run:
-          name: Run anatomical pipeline on ds-sample (test 5 - NativeFreesurfer)
-          no_output_timeout: 5h
-          command: |
-            # Execute BIDS App
-            docker run -it --rm \
-                --entrypoint /app/run_coverage_cmp3.sh \
-                -v /tmp/data/${CIRCLE_JOB}/ds-sample:/bids_dir \
-                -v /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives:/output_dir \
-                -v /home/circleci/src/connectomemapper3/.circleci/tests/configuration_files:/config \
-                sebastientourbier/connectomemapper3 \
-                /bids_dir /output_dir participant --participant_label 01 --session_label 01 \
-                --anat_pipeline_config /config/ref_anatomical_config_2.ini \
-                --fs_license /bids_dir/code/license.txt \
-                --coverage
-
-            # Rename partial coverage
-            mv /tmp/data/${CIRCLE_JOB}/ds-sample/code/coverage.xml /tmp/data/ds-sample/test/test-05_coverage.xml
-
-            # Rename execution log
-            mv /tmp/data/${CIRCLE_JOB}/ds-sample/code/log.txt /tmp/data/ds-sample/test/test-05_log.txt
-      - run:
-          name: Checking outputs of Connectome Mapper run (test 5)
-          command: |
-            # Get all files in derivatives except the _*.json interface hash generated by nipype (find) /
-            # Remove the full path of the derivatives (sed) / sort the files and write it to a text file
-            sudo find /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives -path */figures -prune -o -not -name "_*.json" -type f -print | sed s+/tmp/data/${CIRCLE_JOB}/ds-sample/derivatives/++ | sort > /tmp/data/ds-sample/test/test-05_outputs.out
-            diff /home/circleci/src/connectomemapper3/.circleci/tests/expected_outputs/ds-sample_test-05_outputs.txt /tmp/data/ds-sample/test/test-05_outputs.out
-            exit $?
-      - run:
-          name: Run anatomical pipeline on ds-sample (test 6 - Lausanne 2008)
-          no_output_timeout: 5h
-          command: |
-            # Execute BIDS App
-            docker run -it --rm \
-                --entrypoint /app/run_coverage_cmp3.sh \
-                -v /tmp/data/${CIRCLE_JOB}/ds-sample:/bids_dir \
-                -v /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives:/output_dir \
-                -v /home/circleci/src/connectomemapper3/.circleci/tests/configuration_files:/config \
-                sebastientourbier/connectomemapper3 \
-                /bids_dir /output_dir participant --participant_label 01 --session_label 01 \
-                --anat_pipeline_config /config/ref_anatomical_config_3.ini \
-                --fs_license /bids_dir/code/license.txt \
-                --coverage
-
-            # Rename partial coverage
-            mv /tmp/data/${CIRCLE_JOB}/ds-sample/code/coverage.xml /tmp/data/ds-sample/test/test-06_coverage.xml
-
-            # Rename execution log
-            mv /tmp/data/${CIRCLE_JOB}/ds-sample/code/log.txt /tmp/data/ds-sample/test/test-06_log.txt
-      - run:
-          name: Checking outputs of Connectome Mapper run (test 6)
-          command: |
-            # Get all files in derivatives except the _*.json interface hash generated by nipype (find) /
-            # Remove the full path of the derivatives (sed) / sort the files and write it to a text file
-            sudo find /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives -path */figures -prune -o -not -name "_*.json" -type f -print | sed s+/tmp/data/${CIRCLE_JOB}/ds-sample/derivatives/++ | sort > /tmp/data/ds-sample/test/test-06_outputs.out
-            diff /home/circleci/src/connectomemapper3/.circleci/tests/expected_outputs/ds-sample_test-06_outputs.txt /tmp/data/ds-sample/test/test-06_outputs.out
-            exit $?
-      - run:
-          name: Clean working directory
-          when: always
-          command: |
-            sudo chown $(id -un):$(id -gn) -R /tmp/data/${CIRCLE_JOB}/ds-sample
-            find /tmp/data/ds-sample/derivatives -not -name "*.svg" -not -name "*.html" -not -name "*.rst" \
-                -not -name "*.mat" -not -name "*.gpickle" -not -name "*.lta" -not -name "*.json" -not -name "*.txt" \
-                -not -name "*.log" -not -name "*.pklz" -type f -delete
+            mkdir -p /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives
+            cp -r /tmp/data/test1_docker_parcellation/ds-sample/derivatives/nipype-* \
+            /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives
+      - load-docker-image-archive:
+          archive_file: "/tmp/cache/docker/docker.tar.zst"
+      - clean-configuration-files:
+          circleci_job: ${CIRCLE_JOB}
+      - test-docker-anat-dwi-pipelines:
+          circleci_job: ${CIRCLE_JOB}
+          run_name: Run anatomical and diffusion pipelines on ds-sample (test 6 - Dipy SHORE + PFT tracking)
+          test_name: "test-06"
+          config_dir: /home/circleci/src/connectomemapper3/.circleci/tests/configuration_files
+          anat_pipeline_config: "ref_anatomical_config_1.ini"
+          dwi_pipeline_config: "ref_diffusion_config_4.ini"
       - persist_to_workspace:
           root: /tmp
           paths:
-            - data/ds-sample/test
+            - data/ds-sample/test/test-06_*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
-          path: /tmp/data/test_docker_parcellation/ds-sample/code
+          path: /tmp/data/test6_docker_dsi_dipy/ds-sample/code
       - store_artifacts:
-          path: /tmp/data/test_docker_parcellation/ds-sample/derivatives/cmp
+          path: /tmp/data/test6_docker_dsi_dipy/ds-sample/derivatives/cmp-*
       - store_artifacts:
-          path: /tmp/data/test_docker_parcellation/ds-sample/derivatives/nipype
+          path: /tmp/data/test6_docker_dsi_dipy/ds-sample/derivatives/nipype-*
 
-  test_docker_fmri:
+  test7_docker_fmri:
     machine:
       # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
       image: ubuntu-1604:201903-01
-
+    resource_class: large
     working_directory: /tmp/data
     environment:
       - FS_LICENSE: /tmp/data/${CIRCLE_JOB}/ds-sample/code/license.txt
@@ -654,168 +1009,91 @@ jobs:
       - attach_workspace:
           at: /tmp
       - run:
-          name: Load Docker image layer cache
-          no_output_timeout: 30m
+          name: "Copy anatomical pipeline output from test 1"
           command: |
-            docker info
-            set +o pipefail
-            if [ -f /tmp/cache/docker.tar.gz ]; then
-              wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-              sudo apt-get update && sudo apt-get -y install pigz
-              pigz -d --stdout /tmp/cache/docker.tar.gz | docker load
-              docker images
-            fi
-      - run:
-          name: Remove any config file present in ds-sample/code and create ds-sample/test
-          no_output_timeout: 8h
-          command: |
-            # Get version, update files.
-            #THISVERSION=v$( python /home/circleci/src/connectomemapper3/get_version.py )
-            #echo "THISVERSION : ${THISVERSION}"
-            ls -la  /tmp/data/ds-sample/code
-
-            # Remove existing config files in ds-sample (Make sure we are using the ones stored in the repo)
-            rm -f /tmp/data/ds-sample/code/*.ini
-
-            # Create the test folder to store list of test output files
-            mkdir -p /tmp/data/ds-sample/test
-
-            # Create the dataset dedicated to this job and copy data into it
-            echo "Create test-dedicated dataset at: /tmp/data/${CIRCLE_JOB}/ds-sample"
-            mkdir -p /tmp/data/${CIRCLE_JOB}/ds-sample
-            cp -R /tmp/data/ds-sample/* /tmp/data/${CIRCLE_JOB}/ds-sample
-      - run:
-          name: Run anatomical and fmri pipelines on ds-sample (test 7 - Lausanne2018 + BBRegister + fmri)
-          no_output_timeout: 8h
-          command: |
-            # Execute BIDS App
-            docker run -it --rm \
-                --entrypoint /app/run_coverage_cmp3.sh \
-                -v /tmp/data/${CIRCLE_JOB}/ds-sample:/bids_dir \
-                -v /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives:/output_dir \
-                -v /home/circleci/src/connectomemapper3/.circleci/tests/configuration_files:/config \
-                sebastientourbier/connectomemapper3 \
-                /bids_dir /output_dir participant --participant_label 01 --session_label 01 \
-                --anat_pipeline_config /config/ref_anatomical_config_1.ini \
-                --func_pipeline_config /config/ref_fMRI_config_1.ini \
-                --fs_license /bids_dir/code/license.txt \
-                --coverage
-
-            # Rename partial coverage
-            mv /tmp/data/${CIRCLE_JOB}/ds-sample/code/coverage.xml /tmp/data/ds-sample/test/test-07_coverage.xml
-
-            # Rename execution log
-            mv /tmp/data/${CIRCLE_JOB}/ds-sample/code/log.txt /tmp/data/ds-sample/test/test-07_log.txt
-      - run:
-          name: Checking outputs of Connectome Mapper run (test 7)
-          command: |
-            # Get all files in derivatives except the _*.json interface hash generated by nipype (find) /
-            # Remove the full path of the derivatives (sed) / sort the files and write it to a text file
-            sudo find /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives -path */figures -prune -o -not -name "_*.json" -type f -print | sed s+/tmp/data/${CIRCLE_JOB}/ds-sample/derivatives/++ | sort > /tmp/data/ds-sample/test/test-07_outputs.out
-            diff /home/circleci/src/connectomemapper3/.circleci/tests/expected_outputs/ds-sample_test-07_outputs.txt /tmp/data/ds-sample/test/test-07_outputs.out
-            exit $?
-      - run:
-          name: Run anatomical and fmri pipelines on ds-sample (test 8 - Lausanne2018 + FSL FLIRT + All nuisance regression + linear detrending + scrubbing)
-          no_output_timeout: 8h
-          command: |
-            # Execute BIDS App
-            docker run -it --rm \
-            --entrypoint /app/run_coverage_cmp3.sh \
-            -v /tmp/data/${CIRCLE_JOB}/ds-sample:/bids_dir \
-            -v /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives:/output_dir \
-            -v /home/circleci/src/connectomemapper3/.circleci/tests/configuration_files:/config \
-            sebastientourbier/connectomemapper3 \
-            /bids_dir /output_dir participant --participant_label 01 --session_label 01 \
-            --anat_pipeline_config /config/ref_anatomical_config_1.ini \
-            --func_pipeline_config /config/ref_fMRI_config_2.ini \
-            --fs_license /bids_dir/code/license.txt \
-            --coverage
-
-            # Rename partial coverage
-            mv /tmp/data/${CIRCLE_JOB}/ds-sample/code/coverage.xml /tmp/data/ds-sample/test/test-08_coverage.xml
-
-            # Rename execution log
-            mv /tmp/data/${CIRCLE_JOB}/ds-sample/code/log.txt /tmp/data/ds-sample/test/test-08_log.txt
-      - run:
-          name: Checking outputs of Connectome Mapper run (test 8)
-          command: |
-            # Get all files in derivatives except the _*.json interface hash generated by nipype (find) /
-            # Remove the full path of the derivatives (sed) / sort the files and write it to a text file
-            sudo find /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives -path */figures -prune -o -not -name "_*.json" -type f -print | sed s+/tmp/data/${CIRCLE_JOB}/ds-sample/derivatives/++ | sort > /tmp/data/ds-sample/test/test-08_outputs.out
-            diff /home/circleci/src/connectomemapper3/.circleci/tests/expected_outputs/ds-sample_test-08_outputs.txt /tmp/data/ds-sample/test/test-08_outputs.out
-            exit $?
+            mkdir -p /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives
+            cp -r /tmp/data/test1_docker_parcellation/ds-sample/derivatives/nipype-* \
+            /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives
+      - load-docker-image-archive:
+          archive_file: "/tmp/cache/docker/docker.tar.zst"
+      - clean-configuration-files:
+          circleci_job: ${CIRCLE_JOB}
+      - test-docker-anat-func-pipelines:
+          circleci_job: ${CIRCLE_JOB}
+          run_name: Run anatomical and fmri pipelines on ds-sample (test 7 - Lausanne2018 + BBRegister + fmri)
+          test_name: "test-07"
+          config_dir: /home/circleci/src/connectomemapper3/.circleci/tests/configuration_files
+          anat_pipeline_config: "ref_anatomical_config_1.ini"
+          func_pipeline_config: "ref_fMRI_config_1.ini"
       - persist_to_workspace:
           root: /tmp
           paths:
-            - data/ds-sample/test
+            - data/ds-sample/test/test-07_*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
-          path: /tmp/data/test_docker_fmri/ds-sample/code
+          path: /tmp/data/test7_docker_fmri/ds-sample/code
       - store_artifacts:
-          path: /tmp/data/test_docker_fmri/ds-sample/derivatives/cmp
+          path: /tmp/data/test7_docker_fmri/ds-sample/derivatives/cmp-*
       - store_artifacts:
-          path: /tmp/data/test_docker_fmri/ds-sample/derivatives/nipype
+          path: /tmp/data/test7_docker_fmri/ds-sample/derivatives/nipype-*
 
-  codacy_coverage_report:
-    docker:
-      - image: 'circleci/openjdk:8-jdk'
-    working_directory: /tmp/data/ds-sample/code
-    steps:
-      - attach_workspace:
-          at: /tmp
-      - run:
-          name: Run Codacy Coverage Reporter to convert and upload the reports to Codacy
-          command: |
-            export CODACY_REPORTER_VERSION=latest
-            export CODACY_PROJECT_TOKEN=${CODACY_PROJECT_TOKEN}
-            # Handles partial reports and send the final report to Codacy
-            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
-                -l Python -r /tmp/data/ds-sample/test/test-01_coverage.xml --partial &&\
-            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
-                -l Python -r /tmp/data/ds-sample/test/test-02_coverage.xml --partial &&\
-            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
-                -l Python -r /tmp/data/ds-sample/test/test-03_coverage.xml --partial &&\
-            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
-                -l Python -r /tmp/data/ds-sample/test/test-04_coverage.xml --partial &&\
-            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
-                -l Python -r /tmp/data/ds-sample/test/test-05_coverage.xml --partial &&\
-            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
-                -l Python -r /tmp/data/ds-sample/test/test-06_coverage.xml --partial &&\
-            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
-                -l Python -r /tmp/data/ds-sample/test/test-07_coverage.xml --partial &&\
-            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
-                -l Python -r /tmp/data/ds-sample/test/test-08_coverage.xml --partial &&\
-            bash <(curl -Ls https://coverage.codacy.com/get.sh) final
-
-  send_codecov_report:
-    docker:
-      - image: 'circleci/openjdk:8-jdk'
-    working_directory: /tmp/data/ds-sample/code
-    steps:
-      - attach_workspace:
-          at: /tmp
-      - codecov/upload:
-          file: /tmp/data/ds-sample/test/test-01_coverage.xml
-      - codecov/upload:
-          file: /tmp/data/ds-sample/test/test-02_coverage.xml
-      - codecov/upload:
-          file: /tmp/data/ds-sample/test/test-03_coverage.xml
-      - codecov/upload:
-          file: /tmp/data/ds-sample/test/test-04_coverage.xml
-      - codecov/upload:
-          file: /tmp/data/ds-sample/test/test-05_coverage.xml
-      - codecov/upload:
-          file: /tmp/data/ds-sample/test/test-06_coverage.xml
-      - codecov/upload:
-          file: /tmp/data/ds-sample/test/test-07_coverage.xml
-      - codecov/upload:
-          file: /tmp/data/ds-sample/test/test-08_coverage.xml
-
-  test_singularity_parcellation:
+  test8_docker_fmri:
     machine:
       # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
       image: ubuntu-1604:201903-01
+    resource_class: large
+    working_directory: /tmp/data
+    environment:
+      - FS_LICENSE: /tmp/data/${CIRCLE_JOB}/ds-sample/code/license.txt
+    steps:
+      - checkout:
+          path: /home/circleci/src/connectomemapper3
+      - run:
+          name: Check whether test_docker_fmri should be skipped
+          command: |
+            cd /home/circleci/src/connectomemapper3
+            if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[skip[ _]?test_docker_fmri\]' )" != "" ]]; then
+              echo "Skipping test_docker_fmri job"
+              circleci step halt
+            fi
+      - attach_workspace:
+          at: /tmp
+      - run:
+          name: "Copy anatomical pipeline output from test 1"
+          command: |
+            mkdir -p /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives
+            cp -r /tmp/data/test1_docker_parcellation/ds-sample/derivatives/nipype-* \
+            /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives
+      - load-docker-image-archive:
+          archive_file: "/tmp/cache/docker/docker.tar.zst"
+      - clean-configuration-files:
+          circleci_job: ${CIRCLE_JOB}
+      - test-docker-anat-func-pipelines:
+          circleci_job: ${CIRCLE_JOB}
+          run_name: Run anatomical and fmri pipelines on ds-sample (test 8 - Lausanne2018 + FSL FLIRT + All nuisance regression + linear detrending + scrubbing)
+          test_name: "test-08"
+          config_dir: /home/circleci/src/connectomemapper3/.circleci/tests/configuration_files
+          anat_pipeline_config: "ref_anatomical_config_1.ini"
+          func_pipeline_config: "ref_fMRI_config_2.ini"
+      - persist_to_workspace:
+          root: /tmp
+          paths:
+            - data/ds-sample/test/test-08_*
+      - store_artifacts:
+          path: /tmp/data/ds-sample/test
+      - store_artifacts:
+          path: /tmp/data/test8_docker_fmri/ds-sample/code
+      - store_artifacts:
+          path: /tmp/data/test8_docker_fmri/ds-sample/derivatives/cmp-*
+      - store_artifacts:
+          path: /tmp/data/test8_docker_fmri/ds-sample/derivatives/nipype-*
+
+  test9_singularity_parcellation:
+    machine:
+      # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
+      image: ubuntu-1604:201903-01
+    resource_class: large
     working_directory: /tmp/data
     environment:
       - FS_LICENSE: /tmp/data/${CIRCLE_JOB}/ds-sample/code/license.txt
@@ -835,69 +1113,19 @@ jobs:
       - singularity/install-go:
           go-version: '1.13'
       - singularity/debian-install-3:
-          singularity-version: 3.5.1
-      - run:
-          name: Remove any config file present in ds-sample/code and create ds-sample/test
-          no_output_timeout: 1h
-          command: |
-            # Get version, update files.
-            #THISVERSION=v$( python /home/circleci/src/connectomemapper3/get_version.py )
-            #echo "THISVERSION : ${THISVERSION}"
-            ls -la  /tmp/data/ds-sample/code
-
-            # Remove existing config files in ds-sample (Make sure we are using the ones stored in the repo)
-            rm -f /tmp/data/ds-sample/code/*.ini
-
-            # Create the test folder to store list of test output files
-            mkdir -p /tmp/data/ds-sample/test
-
-            # Create the dataset dedicated to this job and copy data into it
-            echo "Create test-dedicated dataset at: /tmp/data/${CIRCLE_JOB}/ds-sample"
-            mkdir -p /tmp/data/${CIRCLE_JOB}/ds-sample
-            cp -R /tmp/data/ds-sample/* /tmp/data/${CIRCLE_JOB}/ds-sample
-      - run:
-          name: Run anatomical pipeline on ds-sample (test 5 bis - NativeFreesurfer)
-          no_output_timeout: 5h
-          command: |
-            # Execute BIDS App
-            singularity run --containall \
-                --bind /tmp/data/${CIRCLE_JOB}/ds-sample:/bids_dir \
-                --bind /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives:/output_dir \
-                --bind /home/circleci/src/connectomemapper3/.circleci/tests/configuration_files:/config \
-                /tmp/cache/connectomemapper3.simg \
-                /bids_dir /output_dir participant --participant_label 01 --session_label 01 \
-                --anat_pipeline_config /config/ref_anatomical_config_2.ini \
-                --fs_license /bids_dir/code/license.txt
-      - run:
-          name: Checking outputs of Connectome Mapper run (test 5)
-          command: |
-            # Get all files in derivatives except the _*.json interface hash generated by nipype (find) /
-            # Remove the full path of the derivatives (sed) / sort the files and write it to a text file
-            sudo find /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives -path */figures -prune -o -not -name "_*.json" -type f -print | sed s+/tmp/data/${CIRCLE_JOB}/ds-sample/derivatives/++ | sort > /tmp/data/ds-sample/test/test-05-simg_outputs.out
-            diff /home/circleci/src/connectomemapper3/.circleci/tests/expected_outputs/ds-sample_test-05-simg_outputs.txt /tmp/data/ds-sample/test/test-05-simg_outputs.out
-            exit $?
-      - run:
-          name: Run anatomical pipeline on ds-sample (test 6 bis - Lausanne 2008)
-          no_output_timeout: 5h
-          command: |
-            # Execute BIDS App
-            singularity run --containall \
-                --bind /tmp/data/${CIRCLE_JOB}/ds-sample:/bids_dir \
-                --bind /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives:/output_dir \
-                --bind /home/circleci/src/connectomemapper3/.circleci/tests/configuration_files:/config \
-                /tmp/cache/connectomemapper3.simg \
-                /bids_dir /output_dir participant --participant_label 01 --session_label 01 \
-                --anat_pipeline_config /config/ref_anatomical_config_3.ini \
-                --fs_license /bids_dir/code/license.txt \
-                --coverage
-      - run:
-          name: Checking outputs of Connectome Mapper run (test 6)
-          command: |
-            # Get all files in derivatives except the _*.json interface hash generated by nipype (find) /
-            # Remove the full path of the derivatives (sed) / sort the files and write it to a text file
-            sudo find /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives -path */figures -prune -o -not -name "_*.json" -type f -print | sed s+/tmp/data/${CIRCLE_JOB}/ds-sample/derivatives/++ | sort > /tmp/data/ds-sample/test/test-06-simg_outputs.out
-            diff /home/circleci/src/connectomemapper3/.circleci/tests/expected_outputs/ds-sample_test-06-simg_outputs.txt /tmp/data/ds-sample/test/test-06-simg_outputs.out
-            exit $?
+          singularity-version: 3.8.4
+      - install-conda-and-cmp3:
+          run_name: "Setup miniconda environment and install connectomemapper3 with Python wrappers"
+          cmp3_dir: /home/circleci/src/connectomemapper3
+      - clean-configuration-files:
+          circleci_job: ${CIRCLE_JOB}
+      - test-singularity-anat-pipeline-wrapper:
+          circleci_job: ${CIRCLE_JOB}
+          run_name: Run anatomical pipeline on ds-sample (test 9 - Lausanne 2018)
+          test_name: "test-09"
+          config_dir: /home/circleci/src/connectomemapper3/.circleci/tests/configuration_files
+          singularity_image: "/tmp/cache/singularity/connectomemapper3.simg"
+          anat_pipeline_config: "ref_anatomical_config_1.ini"
       - run:
           name: Clean working directory
           when: always
@@ -909,15 +1137,90 @@ jobs:
       - persist_to_workspace:
           root: /tmp
           paths:
-            - data/ds-sample/test
+            - data/ds-sample/test/test-09_*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
-          path: /tmp/data/test_singularity_parcellation/ds-sample/code
+          path: /tmp/data/test9_singularity_parcellation/ds-sample/code
       - store_artifacts:
-          path: /tmp/data/test_singularity_parcellation/ds-sample/derivatives/cmp
+          path: /tmp/data/test9_singularity_parcellation/ds-sample/derivatives/cmp-*
       - store_artifacts:
-          path: /tmp/data/test_singularity_parcellation/ds-sample/derivatives/nipype
+          path: /tmp/data/test9_singularity_parcellation/ds-sample/derivatives/nipype-*
+
+  codacy_coverage_report:
+    docker:
+      - image: 'cimg/openjdk:8.0.312'
+    working_directory: /tmp/data/ds-sample/test
+    steps:
+      - attach_workspace:
+          at: /tmp
+      - run:
+          name: Run Codacy Coverage Reporter to convert and upload the reports to Codacy
+          command: |
+            export CODACY_REPORTER_VERSION=latest
+            export CODACY_PROJECT_TOKEN="${CODACY_PROJECT_TOKEN}"
+            export COMMIT_UUID="${CIRCLE_SHA1}"
+            echo "CODACY_REPORTER_VERSION = ${CODACY_REPORTER_VERSION}"
+            echo "CODACY_PROJECT_TOKEN = ${CODACY_PROJECT_TOKEN}"
+            echo "COMMIT_UUID = ${COMMIT_UUID}"
+            # Handles partial reports and send the final report to Codacy
+            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
+                --project-token ${CODACY_PROJECT_TOKEN} --commit-uuid ${COMMIT_UUID} \
+                -l Python -r /tmp/data/ds-sample/test/test-01_coverage.xml --partial &&\
+            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
+                --project-token ${CODACY_PROJECT_TOKEN} --commit-uuid ${COMMIT_UUID} \
+                -l Python -r /tmp/data/ds-sample/test/test-02_coverage.xml --partial &&\
+            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
+                --project-token ${CODACY_PROJECT_TOKEN} --commit-uuid ${COMMIT_UUID} \
+                -l Python -r /tmp/data/ds-sample/test/test-03_coverage.xml --partial &&\
+            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
+                --project-token ${CODACY_PROJECT_TOKEN} --commit-uuid ${COMMIT_UUID} \
+                -l Python -r /tmp/data/ds-sample/test/test-04_coverage.xml --partial &&\
+            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
+                --project-token ${CODACY_PROJECT_TOKEN} --commit-uuid ${COMMIT_UUID} \
+                -l Python -r /tmp/data/ds-sample/test/test-05_coverage.xml --partial &&\
+            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
+                --project-token ${CODACY_PROJECT_TOKEN} --commit-uuid ${COMMIT_UUID} \
+                -l Python -r /tmp/data/ds-sample/test/test-06_coverage.xml --partial &&\
+            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
+                --project-token ${CODACY_PROJECT_TOKEN} --commit-uuid ${COMMIT_UUID} \
+                -l Python -r /tmp/data/ds-sample/test/test-07_coverage.xml --partial &&\
+            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
+                --project-token ${CODACY_PROJECT_TOKEN} --commit-uuid ${COMMIT_UUID} \
+                -l Python -r /tmp/data/ds-sample/test/test-08_coverage.xml --partial &&\
+            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
+                --project-token ${CODACY_PROJECT_TOKEN} --commit-uuid ${COMMIT_UUID} \
+                -l Python -r /tmp/data/ds-sample/test/test-09_coverage.xml --partial &&\
+            bash <(curl -Ls https://coverage.codacy.com/get.sh) final \
+                --project-token ${CODACY_PROJECT_TOKEN} --commit-uuid ${COMMIT_UUID}
+
+  send_codecov_report:
+    docker:
+      - image: 'cimg/openjdk:8.0.312'
+    working_directory: /home/circleci/src/connectomemapper3
+    steps:
+      - attach_workspace:
+          at: /tmp
+      - checkout:
+          path: /home/circleci/src/connectomemapper3
+      - codecov/upload:
+          file: /tmp/data/ds-sample/test/test-01_coverage.xml
+      - codecov/upload:
+          file: /tmp/data/ds-sample/test/test-02_coverage.xml
+      - codecov/upload:
+          file: /tmp/data/ds-sample/test/test-03_coverage.xml
+      - codecov/upload:
+          file: /tmp/data/ds-sample/test/test-04_coverage.xml
+      - codecov/upload:
+          file: /tmp/data/ds-sample/test/test-05_coverage.xml
+      - codecov/upload:
+          file: /tmp/data/ds-sample/test/test-06_coverage.xml
+      - codecov/upload:
+          file: /tmp/data/ds-sample/test/test-07_coverage.xml
+      - codecov/upload:
+          file: /tmp/data/ds-sample/test/test-08_coverage.xml
+      - codecov/upload:
+          file: /tmp/data/ds-sample/test/test-09_coverage.xml
 
   build_docs:
     machine:
@@ -938,18 +1241,8 @@ jobs:
 
       - attach_workspace:
           at: /tmp
-      - run:
-          name: Load Docker image layer cache
-          no_output_timeout: 30m
-          command: |
-            docker info
-            set +o pipefail
-            if [ -f /tmp/cache/docker.tar.gz ]; then
-              wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-              sudo apt-get update && sudo apt-get -y install pigz
-              pigz -d --stdout /tmp/cache/docker.tar.gz | docker load
-              docker images
-            fi
+      - load-docker-image-archive:
+          archive_file: "/tmp/cache/docker/docker.tar.zst"
       - run:
           name: Build Connectome Mapper 3 documentation
           no_output_timeout: 2h
@@ -964,67 +1257,19 @@ jobs:
       - store_artifacts:
           path: /home/circleci/out/docs
 
-  deploy_docker_release:
-    machine:
-      # Ubuntu 14.04 with Docker 17.10.0-ce
-      image: ubuntu-1604:201903-01
-    working_directory: /tmp/src/connectomemapper3
-    steps:
-      - checkout:
-          path: /home/circleci/src/connectomemapper3
-      - attach_workspace:
-          at: /tmp
-      - run:
-          name: Load Docker image layer cache
-          no_output_timeout: 30m
-          command: |
-            docker info
-            set +o pipefail
-            if [ -f /tmp/cache/docker.tar.gz ]; then
-              wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-              sudo apt-get update && sudo apt-get -y install pigz
-              pigz -d --stdout /tmp/cache/docker.tar.gz | docker load
-              docker images
-            fi
-      - run:
-          name: Deploy release with version tag to Docker Hub
-          no_output_timeout: 40m
-          command: |
-            # Get version, update files.
-            THISVERSION=$( python /home/circleci/src/connectomemapper3/get_version.py )
-            echo "THISVERSION : ${THISVERSION}"
-            echo "CIRCLE_TAG : ${CIRCLE_TAG}"
-
-            if [[ -n "$DOCKER_PASS" ]]; then
-              docker login -u $DOCKER_USER -p $DOCKER_PASS
-              if [[ -n "$CIRCLE_TAG" ]]; then
-                docker tag sebastientourbier/connectomemapper3 sebastientourbier/connectomemapper-bidsapp:$CIRCLE_TAG
-                docker push sebastientourbier/connectomemapper-bidsapp:$CIRCLE_TAG
-              fi
-            fi
-
   deploy_docker_latest:
     machine:
       # Ubuntu 14.04 with Docker 17.10.0-ce
       image: ubuntu-1604:201903-01
-    working_directory: /tmp/src/connectomemapper3
+    resource_class: medium
+    working_directory: /home/circleci/src/connectomemapper3
     steps:
       - checkout:
           path: /home/circleci/src/connectomemapper3
       - attach_workspace:
           at: /tmp
-      - run:
-          name: Load Docker image layer cache
-          no_output_timeout: 30m
-          command: |
-            docker info
-            set +o pipefail
-            if [ -f /tmp/cache/docker.tar.gz ]; then
-              wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-              sudo apt-get update && sudo apt-get -y install pigz
-              pigz -d --stdout /tmp/cache/docker.tar.gz | docker load
-              docker images
-            fi
+      - load-docker-image-archive:
+          archive_file: "/tmp/cache/docker/docker.tar.zst"
       - run:
           name: Deploy latest master to Docker Hub
           no_output_timeout: 40m
@@ -1044,7 +1289,8 @@ jobs:
     machine:
       # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
       image: ubuntu-1604:201903-01
-    working_directory: /tmp/src/connectomemapper3
+    resource_class: medium
+    working_directory: /home/circleci/src/connectomemapper3
     steps:
       - checkout:
           path: /home/circleci/src/connectomemapper3
@@ -1061,7 +1307,7 @@ jobs:
       - singularity/install-go:
           go-version: '1.13'
       - singularity/debian-install-3:
-          singularity-version: 3.5.1
+          singularity-version: 3.8.4
       - run:
           name: 'Write Sylabs.io TOKEN'
           command: |
@@ -1069,17 +1315,51 @@ jobs:
             touch ~/.singularity/sylabs-token
             echo "${SINGULARITY_TOKEN}" > ~/.singularity/sylabs-token
             cat ~/.singularity/sylabs-token
+            # https://sylabs.io/guides/3.1/user-guide/cli/singularity_remote_login.html
+            singularity remote login --tokenfile ~/.singularity/sylabs-token SylabsCloud
       - run:
           name: 'Deploy simg with latest tag to Sylabs.io'
+          no_output_timeout: 40m
           command: |
-            singularity delete --arch=amd64 library://connectomicslab/default/connectomemapper-bidsapp:latest
-            singularity push -U /tmp/cache/connectomemapper3.simg library://connectomicslab/default/connectomemapper-bidsapp:latest
+            # singularity delete --arch=amd64 library://connectomicslab/default/connectomemapper-bidsapp:latest
+            singularity push -U /tmp/cache/singularity/connectomemapper3.simg library://connectomicslab/default/connectomemapper-bidsapp:latest
+
+  deploy_docker_release:
+    machine:
+      # Ubuntu 14.04 with Docker 17.10.0-ce
+      image: ubuntu-1604:201903-01
+    resource_class: medium
+    working_directory: /home/circleci/src/connectomemapper3
+    steps:
+      - checkout:
+          path: /home/circleci/src/connectomemapper3
+      - attach_workspace:
+          at: /tmp
+      - load-docker-image-archive:
+          archive_file: "/tmp/cache/docker/docker.tar.zst"
+      - run:
+          name: Deploy release with version tag to Docker Hub
+          no_output_timeout: 40m
+          command: |
+            # Get version, update files.
+            THISVERSION=$( python /home/circleci/src/connectomemapper3/get_version.py )
+            echo "THISVERSION : ${THISVERSION}"
+            echo "CIRCLE_TAG : ${CIRCLE_TAG}"
+
+            if [[ -n "$DOCKER_PASS" ]]; then
+              docker login -u $DOCKER_USER -p $DOCKER_PASS
+              if [[ -n "$CIRCLE_TAG" ]]; then
+                docker tag sebastientourbier/connectomemapper3 sebastientourbier/connectomemapper-bidsapp:$CIRCLE_TAG
+                docker push sebastientourbier/connectomemapper-bidsapp:$CIRCLE_TAG
+              fi
+            fi
 
   deploy_singularity_release:
     machine:
       # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
       image: ubuntu-1604:201903-01
-    working_directory: /tmp/src/connectomemapper3
+    resource_class: medium
+    working_directory: /home/circleci/src/connectomemapper3
     steps:
       - checkout:
           path: /home/circleci/src/connectomemapper3
@@ -1096,7 +1376,7 @@ jobs:
       - singularity/install-go:
           go-version: '1.13'
       - singularity/debian-install-3:
-          singularity-version: 3.5.1
+          singularity-version: 3.8.4
       - run:
           name: 'Write Sylabs.io TOKEN'
           command: |
@@ -1104,15 +1384,18 @@ jobs:
             touch ~/.singularity/sylabs-token
             echo "${SINGULARITY_TOKEN}" > ~/.singularity/sylabs-token
             cat ~/.singularity/sylabs-token
+            # https://sylabs.io/guides/3.1/user-guide/cli/singularity_remote_login.html
+            singularity remote login --tokenfile ~/.singularity/sylabs-token SylabsCloud
       - run:
           name: 'Deploy simg with version tag to Sylabs.io'
+          no_output_timeout: 40m
           command: |
             # Get version, update files.
             # FIXME: cannot use python (might need to install extra package with apt-get)
             # THISVERSION="$( python /home/circleci/src/connectomemapper3/get_version.py )"
             # echo "THISVERSION : ${THISVERSION}"
             echo "CIRCLE_TAG : ${CIRCLE_TAG}"
-            singularity push -U /tmp/cache/connectomemapper3.simg library://connectomicslab/default/connectomemapper-bidsapp:latest
+            singularity push -U /tmp/cache/singularity/connectomemapper3.simg library://connectomicslab/default/connectomemapper-bidsapp:${CIRCLE_TAG}
 
 workflows:
   version: 2.1
@@ -1165,38 +1448,12 @@ workflows:
       #           - /docs?\/.*/
       #       tags:
       #         only: /.*/
-
-      - test_docker_dsi_mrtrix:
-          requires:
-            - get_data
-            # - update_cache
-            - build_docker
-          filters:
-            branches:
-              ignore:
-                - /docs?\/.*/
-            tags:
-              only: /.*/
-
-      - test_docker_dsi_dipy:
-          requires:
-            - get_data
-            # - update_cache
-            - build_docker
-          filters:
-            branches:
-              ignore:
-                - /docs?\/.*/
-            tags:
-              only: /.*/
-
       # JOB taking more than 5hours (CircleCI hard limit)
-      - test_docker_parcellation:
+      - test1_docker_parcellation:
           requires:
             - get_data
             # - update_cache
             - build_docker
-            - build_singularity  # delay this job as we are limited to 4 concurrent jobs
           filters:
             branches:
               ignore:
@@ -1204,7 +1461,79 @@ workflows:
             tags:
               only: /.*/
 
-      - test_singularity_parcellation:
+      - test2_docker_parcellation:
+          requires:
+            - get_data
+            # - update_cache
+            - build_docker
+          filters:
+            branches:
+              ignore:
+                - /docs?\/.*/
+            tags:
+              only: /.*/
+
+      - test3_docker_dsi_mrtrix:
+          requires:
+            - test1_docker_parcellation
+          filters:
+            branches:
+              ignore:
+                - /docs?\/.*/
+            tags:
+              only: /.*/
+
+      - test4_docker_dsi_mrtrix:
+          requires:
+            - test1_docker_parcellation
+          filters:
+            branches:
+              ignore:
+                - /docs?\/.*/
+            tags:
+              only: /.*/
+
+      - test5_docker_dsi_dipy:
+          requires:
+            - test1_docker_parcellation
+          filters:
+            branches:
+              ignore:
+                - /docs?\/.*/
+            tags:
+              only: /.*/
+
+      - test6_docker_dsi_dipy:
+          requires:
+            - test1_docker_parcellation
+          filters:
+            branches:
+              ignore:
+                - /docs?\/.*/
+            tags:
+              only: /.*/
+
+      - test7_docker_fmri:
+          requires:
+            - test1_docker_parcellation
+          filters:
+            branches:
+              ignore:
+                - /docs?\/.*/
+            tags:
+              only: /.*/
+
+      - test8_docker_fmri:
+          requires:
+            - test1_docker_parcellation
+          filters:
+            branches:
+              ignore:
+                - /docs?\/.*/
+            tags:
+              only: /.*/
+
+      - test9_singularity_parcellation:
           requires:
             - get_data
             - build_singularity
@@ -1215,25 +1544,17 @@ workflows:
             tags:
               only: /.*/
 
-      - test_docker_fmri:
-          requires:
-            - get_data
-            # - update_cache
-            - build_docker
-          filters:
-            branches:
-              ignore:
-                - /docs?\/.*/
-            tags:
-              only: /.*/
-
       - codacy_coverage_report:
           requires:
-            - test_singularity_parcellation
-            - test_docker_dsi_mrtrix
-            - test_docker_dsi_dipy
-            - test_docker_parcellation
-            - test_docker_fmri
+            - test1_docker_parcellation
+            - test2_docker_parcellation
+            - test3_docker_dsi_mrtrix
+            - test4_docker_dsi_mrtrix
+            - test5_docker_dsi_dipy
+            - test6_docker_dsi_dipy
+            - test7_docker_fmri
+            - test8_docker_fmri
+            - test9_singularity_parcellation
           filters:
               branches:
                 ignore:
@@ -1243,11 +1564,15 @@ workflows:
 
       - send_codecov_report:
           requires:
-            - test_singularity_parcellation
-            - test_docker_dsi_mrtrix
-            - test_docker_dsi_dipy
-            - test_docker_parcellation
-            - test_docker_fmri
+            - test1_docker_parcellation
+            - test2_docker_parcellation
+            - test3_docker_dsi_mrtrix
+            - test4_docker_dsi_mrtrix
+            - test5_docker_dsi_dipy
+            - test6_docker_dsi_dipy
+            - test7_docker_fmri
+            - test8_docker_fmri
+            - test9_singularity_parcellation
           filters:
             branches:
               ignore:
@@ -1255,14 +1580,25 @@ workflows:
             tags:
               only: /.*/
 
+      - deploy-pypi-release:
+          requires:
+            # - build_docs
+            - codacy_coverage_report
+            - send_codecov_report
+          filters:
+            # ignore any commit on any branch by default
+            branches:
+              ignore: /.*/
+              # only: master
+            # only act on version tags
+            tags:
+              only: /^v.*/
+
       - deploy_docker_release:
           requires:
             # - build_docs
-            - test_docker_dsi_mrtrix
-            - test_docker_dsi_dipy
-            - test_docker_parcellation
-            - test_docker_fmri
             - codacy_coverage_report
+            - send_codecov_report
           filters:
             # ignore any commit on any branch by default
             branches:
@@ -1275,11 +1611,8 @@ workflows:
       - deploy_docker_latest:
           requires:
             # - build_docs
-            - test_docker_dsi_mrtrix
-            - test_docker_dsi_dipy
-            - test_docker_parcellation
-            - test_docker_fmri
             - codacy_coverage_report
+            - send_codecov_report
           filters:
             # ignore any commit on any branch by default
             branches:
@@ -1288,12 +1621,8 @@ workflows:
       - deploy_singularity_release:
           requires:
             # - build_docs
-            - test_singularity_parcellation
-            - test_docker_dsi_mrtrix
-            - test_docker_dsi_dipy
-            - test_docker_parcellation
-            - test_docker_fmri
             - codacy_coverage_report
+            - send_codecov_report
           filters:
             # ignore any commit on any branch by default
             branches:

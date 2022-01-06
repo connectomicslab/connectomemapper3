@@ -1,4 +1,4 @@
-# Copyright (C) 2009-2021, Ecole Polytechnique Federale de Lausanne (EPFL) and
+# Copyright (C) 2009-2022, Ecole Polytechnique Federale de Lausanne (EPFL) and
 # Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland, and CMP3 contributors
 # All rights reserved.
 #
@@ -32,14 +32,22 @@ class ConnectomeConfigUI(ConnectomeConfig):
     cmp.stages.connectome.fmri_connectome.ConnectomeConfig
     """
 
-    output_types = List(['gPickle'], editor=CheckListEditor(
-        values=['gPickle', 'mat', 'cff', 'graphml'], cols=4))
+    output_types = List(
+        ["gPickle"],
+        editor=CheckListEditor(values=["gPickle", "mat", "cff", "graphml"], cols=4),
+    )
 
-    traits_view = View(VGroup('apply_scrubbing',
-                              VGroup(Item('FD_thr', label='FD threshold'),
-                                     Item('DVARS_thr', label='DVARS threshold'),
-                                     visible_when="apply_scrubbing==True")),
-                       Item('output_types', style='custom'))
+    traits_view = View(
+        VGroup(
+            "apply_scrubbing",
+            VGroup(
+                Item("FD_thr", label="FD threshold"),
+                Item("DVARS_thr", label="DVARS threshold"),
+                visible_when="apply_scrubbing==True",
+            ),
+        ),
+        Item("output_types", style="custom"),
+    )
 
 
 class ConnectomeStageUI(ConnectomeStage):
@@ -48,7 +56,7 @@ class ConnectomeStageUI(ConnectomeStage):
     Attributes
     ----------
     log_visualization : traits.Bool
-        If True, display with a log transformation 
+        If True, display with a log transformation
 
     circular_layout : traits.Bool
         If True, display the connectivity matrix using a circular layout
@@ -71,38 +79,52 @@ class ConnectomeStageUI(ConnectomeStage):
     log_visualization = Bool(True)
     circular_layout = Bool(False)
 
-    inspect_output_button = Button('View')
+    inspect_output_button = Button("View")
 
-    inspect_outputs_view = View(Group(Item('name', editor=TitleEditor(), show_label=False),
-                                      Group(
-                                            Item('log_visualization', label='Log scale'),
-                                            Item('circular_layout', label='Circular layout'),
-                                            label='Visualization', show_border=True),
-                                      Group(
-                                            Item('inspect_outputs_enum', show_label=False),
-                                            Item('inspect_output_button',
-                                                 enabled_when='inspect_outputs_enum!="Outputs not available"',
-                                                 show_label=False),
-                                      label='View outputs', show_border=True)),
-                                scrollable=True,
-                                resizable=True,
-                                kind='livemodal',
-                                title='Inspect stage outputs',
-                                buttons=['OK', 'Cancel'])
+    inspect_outputs_view = View(
+        Group(
+            Item("name", editor=TitleEditor(), show_label=False),
+            Group(
+                Item("log_visualization", label="Log scale"),
+                Item("circular_layout", label="Circular layout"),
+                label="Visualization",
+                show_border=True,
+            ),
+            Group(
+                Item("inspect_outputs_enum", show_label=False),
+                Item(
+                    "inspect_output_button",
+                    enabled_when='inspect_outputs_enum!="Outputs not available"',
+                    show_label=False,
+                ),
+                label="View outputs",
+                show_border=True,
+            ),
+        ),
+        scrollable=True,
+        resizable=True,
+        kind="livemodal",
+        title="Inspect stage outputs",
+        buttons=["OK", "Cancel"],
+    )
 
-    config_view = View(Group(
-                             Item('name', editor=TitleEditor(), show_label=False),
-                             Group(
-                                   Item('config', style='custom', show_label=False),
-                                   label='Configuration',
-                                   show_border=True)),
-                       scrollable=True,
-                       resizable=True,
-                       height=200,
-                       width=408,
-                       kind='livemodal',
-                       title='Edit stage configuration',
-                       buttons=['OK', 'Cancel'])
+    config_view = View(
+        Group(
+            Item("name", editor=TitleEditor(), show_label=False),
+            Group(
+                Item("config", style="custom", show_label=False),
+                label="Configuration",
+                show_border=True,
+            ),
+        ),
+        scrollable=True,
+        resizable=True,
+        height=200,
+        width=408,
+        kind="livemodal",
+        title="Edit stage configuration",
+        buttons=["OK", "Cancel"],
+    )
 
     def __init__(self, bids_dir, output_dir):
         """Constructor of the Functional ConnectomeStageUI class.

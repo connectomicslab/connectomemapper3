@@ -1,4 +1,4 @@
-# Copyright (C) 2009-2021, Ecole Polytechnique Federale de Lausanne (EPFL) and
+# Copyright (C) 2009-2022, Ecole Polytechnique Federale de Lausanne (EPFL) and
 # Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland, and CMP3 contributors
 # All rights reserved.
 #
@@ -7,7 +7,6 @@
 """Definition of common parent classes for pipelines."""
 
 import os
-# import fnmatch
 import threading
 import time
 
@@ -15,8 +14,9 @@ from traits.api import *
 
 import nipype.pipeline.engine as pe
 import nipype.interfaces.utility as util
-
 from nipype.interfaces.base import File, Directory
+
+from cmtklib.bids.io import __nipype_directory__
 
 
 class ProgressWindow(HasTraits):
@@ -24,8 +24,9 @@ class ProgressWindow(HasTraits):
 
     (Not used anymore by CMP3)
     """
+
     main_status = Str("Processing launched...")
-    stages_status = List([''])
+    stages_status = List([""])
 
 
 class ProgressThread(threading.Thread):
@@ -34,6 +35,7 @@ class ProgressThread(threading.Thread):
     Information is display in the ProgressWindow
     (Not used anymore by CMP3)
     """
+
     stages = {}
     stage_names = []
     pw = Instance(ProgressWindow)
@@ -60,7 +62,7 @@ class ProgressThread(threading.Thread):
                     statuses.append(stage + " stage not selected for running!")
             self.pw.stages_status = statuses
         self.pw.main_status = "Processing finished!"
-        self.pw.stages_status = ['All stages finished!']
+        self.pw.stages_status = ["All stages finished!"]
 
 
 class ProcessThread(threading.Thread):
@@ -71,64 +73,12 @@ class ProcessThread(threading.Thread):
     pipeline <Instance>
          Any Pipeline instance
     """
+
     pipeline = Instance(Any)
 
     def run(self):
         """Execute the pipeline."""
         self.pipeline.process()
-
-
-# -- FileAdapter Class ----------------------------------------------------
-
-
-# class FileAdapter(ITreeNodeAdapter):
-#
-#     adapts(File, ITreeNode)
-#
-#     #-- ITreeNodeAdapter Method Overrides ------------------------------------
-#
-#     def allows_children(self):
-#         """ Returns whether this object can have children.
-#         """
-#         return self.adaptee.is_folder
-#
-#     def has_children(self):
-#         """ Returns whether the object has children.
-#         """
-#         children = self.adaptee.children
-#         return ((children is not None) and (len(children) > 0))
-#
-#     def get_children(self):
-#         """ Gets the object's children.
-#         """
-#         return self.adaptee.children
-#
-#     def get_label(self):
-#         """ Gets the label to display for a specified object.
-#         """
-#         return self.adaptee.name + self.adaptee.ext
-#
-#     def get_tooltip(self):
-#         """ Gets the tooltip to display for a specified object.
-#         """
-#         return self.adaptee.absolute_path
-#
-#     def get_icon(self, is_expanded):
-#         """ Returns the icon for a specified object.
-#         """
-#         if self.adaptee.is_file:
-#             return '<item>'
-#
-#         if is_expanded:
-#             return '<open>'
-#
-#         return '<open>'
-#
-#     def can_auto_close(self):
-#         """ Returns whether the object's children should be automatically
-#             closed.
-#         """
-#         return True
 
 
 class Pipeline(HasTraits):
@@ -148,7 +98,7 @@ class Pipeline(HasTraits):
     output_directory = Directory
 
     root = Property
-    subject = 'sub-01'
+    subject = "sub-01"
     last_date_processed = Str
     last_stage_processed = Str
 
@@ -157,14 +107,8 @@ class Pipeline(HasTraits):
 
     anat_flow = None
 
-    # -- Traits Default Value Methods -----------------------------------------
-
-    # def _base_directory_default(self):
-    #     return getcwd()
-
     # -- Property Implementations ---------------------------------------------
-
-    @property_depends_on('base_directory')
+    @property_depends_on("base_directory")
     def _get_root(self):
         return File(path=self.base_directory)
 
@@ -173,13 +117,25 @@ class Pipeline(HasTraits):
         self.number_of_cores = project_info.number_of_cores
 
         for stage in list(self.stages.keys()):
-            if project_info.subject_session != '':
-                self.stages[stage].stage_dir = os.path.join(self.base_directory, "derivatives", 'nipype', self.subject,
-                                                            project_info.subject_session, self.pipeline_name,
-                                                            self.stages[stage].name)
+            if project_info.subject_session != "":
+                self.stages[stage].stage_dir = os.path.join(
+                    self.base_directory,
+                    "derivatives",
+                    __nipype_directory__,
+                    self.subject,
+                    project_info.subject_session,
+                    self.pipeline_name,
+                    self.stages[stage].name,
+                )
             else:
-                self.stages[stage].stage_dir = os.path.join(self.base_directory, "derivatives", 'nipype', self.subject,
-                                                            self.pipeline_name, self.stages[stage].name)
+                self.stages[stage].stage_dir = os.path.join(
+                    self.base_directory,
+                    "derivatives",
+                    __nipype_directory__,
+                    self.subject,
+                    self.pipeline_name,
+                    self.stages[stage].name,
+                )
             # if self.stages[stage].name == 'segmentation_stage' or self.stages[stage].name == 'parcellation_stage':
             #     #self.stages[stage].stage_dir = os.path.join(self.base_directory,"derivatives",
             #                                                  'freesurfer',self.subject,self.stages[stage].name)
@@ -212,11 +168,12 @@ class Pipeline(HasTraits):
         # if self.stages['MRTrixConnectome'].config.output_types == []:
         #     return('\n\tNo output type selected for the connectivity matrices.\t\n\t'
         #            'Please select at least one output type in the connectome configuration window.\t\n')
-        if not self.stages['Connectome'].config.output_types:
+        if not self.stages["Connectome"].config.output_types:
             return (
-                '\n\tNo output type selected for the connectivity matrices.\t\n\t'
-                'Please select at least one output type in the connectome configuration window.\t\n')
-        return ''
+                "\n\tNo output type selected for the connectivity matrices.\t\n\t"
+                "Please select at least one output type in the connectome configuration window.\t\n"
+            )
+        return ""
 
     def create_stage_flow(self, stage_name):
         """Create the sub-workflow of a processing stage.
@@ -231,10 +188,12 @@ class Pipeline(HasTraits):
         """
         stage = self.stages[stage_name]
         flow = pe.Workflow(name=stage.name)
-        inputnode = pe.Node(interface=util.IdentityInterface(
-            fields=stage.inputs), name="inputnode")
-        outputnode = pe.Node(interface=util.IdentityInterface(
-            fields=stage.outputs), name="outputnode")
+        inputnode = pe.Node(
+            interface=util.IdentityInterface(fields=stage.inputs), name="inputnode"
+        )
+        outputnode = pe.Node(
+            interface=util.IdentityInterface(fields=stage.outputs), name="outputnode"
+        )
         flow.add_nodes([inputnode, outputnode])
         stage.create_workflow(flow, inputnode, outputnode)
         return flow
@@ -249,16 +208,16 @@ class Pipeline(HasTraits):
         """Check stage execution."""
         for stage in list(self.stages.values()):
             if stage.has_run():
-                print(f'{stage} stage finished!')
+                print(f"{stage} stage finished!")
             if stage.is_running():
-                print(f'{stage} stage running...')
+                print(f"{stage} stage running...")
 
     def clear_stages_outputs(self):
         """Clear processing stage outputs."""
         for stage in list(self.stages.values()):
             if stage.enabled:
                 stage.inspect_outputs_dict = {}
-                stage.inspect_outputs = ['Outputs not available']
+                stage.inspect_outputs = ["Outputs not available"]
                 # Remove result_*.pklz files to clear them from visualisation drop down list
                 # stage_results = [os.path.join(dirpath, f)
                 #                 for dirpath, dirnames, files in os.walk(stage.stage_dir)

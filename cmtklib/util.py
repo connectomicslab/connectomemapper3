@@ -1,4 +1,4 @@
-# Copyright (C) 2009-2021, Ecole Polytechnique Federale de Lausanne (EPFL) and
+# Copyright (C) 2009-2022, Ecole Polytechnique Federale de Lausanne (EPFL) and
 # Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland, and CMP3 contributors
 # All rights reserved.
 #
@@ -7,31 +7,78 @@
 """Module that defines CMTK Utility functions."""
 
 import os
-from os import path as op
-
 import warnings
-from glob import glob
+from pathlib import Path
 
-# import pickle
-import gzip
 import json
-
-import networkx as nx
 import numpy as np
 
 warnings.simplefilter("ignore")
 
 
+def unicode2str(text):
+    """Convert a unicode to a string using system's encoding.
+
+    Parameters
+    ----------
+    text : bytes
+        Unicode bytes representation of a string
+
+    Returns
+    -------
+    out_str : str
+        Output string
+    """
+    out_str = str(text)
+    return out_str
+
+
+def isavailable(file):
+    """Check if file is available and return the file if it is.
+
+    Used for debugging.
+
+    Parameters
+    ----------
+    file : File
+        Input file
+
+    Returns
+    -------
+    file : File
+        Output file
+    """
+    return file
+
+
+def get_basename(path):
+    """Return ``os.path.basename()`` of a ``path``.
+
+    Parameters
+    ----------
+    path : os.path
+        Path to extract the containing directory
+
+    Returns
+    -------
+    path : os.path
+        Path to the containing directory
+    """
+    from os import path as op  # Important to be used as Nipype connect function
+    return op.basename(path)
+
+
 class BColors:
     """Utility class for color unicode."""
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
+
+    HEADER = "\033[95m"
+    OKBLUE = "\033[94m"
+    OKGREEN = "\033[92m"
+    WARNING = "\033[93m"
+    FAIL = "\033[91m"
+    ENDC = "\033[0m"
+    BOLD = "\033[1m"
+    UNDERLINE = "\033[4m"
 
 
 def print_warning(message):
@@ -133,86 +180,6 @@ def return_button_style_sheet(image, image_disabled=None, verbose=False):
     return button_style_sheet
 
 
-def load_graphs(output_dir, subjects, parcellation_scheme, weight):
-    """Return a dictionary of connectivity matrices (graph adjacency matrices).
-
-    Still in development
-
-    Parameters
-    ----------
-    output_dir : string
-        Output/derivatives directory
-
-    subjects : list
-        List of subject
-
-    parcellation_scheme : ['NativeFreesurfer','Lausanne2008','Lausanne2018']
-        Parcellation scheme
-
-    weight : ['number_of_fibers','fiber_density',...]
-        Edge metric to extract from the graph
-
-    Returns
-    -------
-
-    connmats: dict
-        Dictionary of connectivity matrices
-
-    """
-    if parcellation_scheme == 'Lausanne2008':
-        bids_atlas_label = 'L2008'
-    elif parcellation_scheme == 'Lausanne2018':
-        bids_atlas_label = 'L2018'
-    elif parcellation_scheme == 'NativeFreesurfer':
-        bids_atlas_label = 'Desikan'
-
-    if parcellation_scheme == 'NativeFreesurfer':
-        for subj in subjects:
-            subj_dir = os.path.join(output_dir, subj)
-            subj_session_dirs = glob(op.join(subj_dir, "ses-*"))
-            subj_sessions = ['ses-{}'.format(subj_session_dir.split("-")[-1])
-                             for subj_session_dir in subj_session_dirs]
-
-            if len(subj_sessions) > 0:  # Session structure
-                for subj_session in subj_sessions:
-                    conn_derivatives_dir = op.join(
-                        output_dir, 'cmp', subj, subj_session, 'connectivity')
-
-                    # Extract the connectivity matrix
-                    # self.subject+'_label-'+bids_atlas_label+'_desc-scale5_conndata-snetwork_connectivity'
-                    connmat_fname = op.join(conn_derivatives_dir,
-                                            '{}_{}_label-{}_conndata-snetwork_connectivity.gpickle'.format(subj,
-                                                                                                           subj_session,
-                                                                                                           bids_atlas_label))
-                    connmat_gp = nx.read_gpickle(connmat_fname)
-                    connmat = nx.to_numpy_matrix(
-                        connmat_gp, weight=weight, dtype=np.float32)
-    else:
-        # For each parcellation scale
-        for scale in np.arange(1, 6):
-            for subj in subjects:
-                subj_dir = os.path.join(output_dir, subj)
-                subj_session_dirs = glob(op.join(subj_dir, "ses-*"))
-                subj_sessions = ['ses-{}'.format(subj_session_dir.split("-")[-1]) for subj_session_dir in
-                                 subj_session_dirs]
-
-                if len(subj_sessions) > 0:  # Session structure
-                    for subj_session in subj_sessions:
-                        conn_derivatives_dir = op.join(
-                            output_dir, 'cmp', subj, subj_session, 'connectivity')
-
-                        # Extract the connectivity matrix
-                        # self.subject+'_label-'+bids_atlas_label+'_desc-scale5_conndata-snetwork_connectivity'
-                        connmat_fname = op.join(conn_derivatives_dir,
-                                                '{}_{}_label-{}_desc-scale{}_conndata-snetwork_connectivity.gpickle'.format(
-                                                    subj, subj_session, bids_atlas_label, scale))
-                        connmat_gp = nx.read_gpickle(connmat_fname)
-                        connmat = nx.to_numpy_matrix(
-                            connmat_gp, weight=weight, dtype=np.float32)
-                # TODO: finalize condition and append all conmat to a list
-    return connmat
-
-
 def length(xyz, along=False):
     """Euclidean length of track line.
 
@@ -301,18 +268,18 @@ def mean_curvature(xyz):
     >>> y=0*x
     >>> z=0*x
     >>> xyz=np.vstack((x,y,z)).T
-    >>> m=tm.mean_curvature(xyz) #mean curvature straight line
+    >>> m=tm.mean_curvature(xyz)  # mean curvature straight line
     >>> theta=np.pi*np.linspace(0,1,100)
     >>> x=np.cos(theta)
     >>> y=np.sin(theta)
     >>> z=0*x
     >>> xyz=np.vstack((x,y,z)).T
-    >>> m=tm.mean_curvature(xyz) #mean curvature for semi-circle
+    >>> m=tm.mean_curvature(xyz)  # mean curvature for semi-circle
     """
     xyz = np.asarray(xyz)
     n_pts = xyz.shape[0]
     if n_pts == 0:
-        raise ValueError('xyz array cannot be empty')
+        raise ValueError("xyz array cannot be empty")
 
     dxyz = np.gradient(xyz)[0]
     ddxyz = np.gradient(dxyz)[0]
@@ -353,7 +320,7 @@ def extract_freesurfer_subject_dir(reconall_report, local_output_dir=None, debug
             # Extract line containing listing of node outputs
             if "* subject_id : " in line:
                 fs_subject_dir = line.strip()
-                prefix = '* subject_id : '
+                prefix = "* subject_id : "
                 fs_subject_dir = str.replace(fs_subject_dir, prefix, "")
                 if debug:
                     print(fs_subject_dir)
@@ -361,7 +328,9 @@ def extract_freesurfer_subject_dir(reconall_report, local_output_dir=None, debug
                 # Update from BIDS App /output_dir to local output directory
                 # specified by local_output_dir
                 if local_output_dir is not None:
-                    fs_subject_dir = str.replace(fs_subject_dir, "/output_dir", local_output_dir)
+                    fs_subject_dir = str.replace(
+                        fs_subject_dir, "/output_dir", local_output_dir
+                    )
                 break
 
             line = fp.readline()
@@ -370,7 +339,44 @@ def extract_freesurfer_subject_dir(reconall_report, local_output_dir=None, debug
     return fs_subject_dir
 
 
-def get_pipeline_dictionary_outputs(datasink_report, local_output_dir=None, debug=False):
+def get_freesurfer_subject_id(file):
+    """Extract Freesurfer subject ID from file generated by recon-all.
+
+    Parameters
+    ----------
+    file : str
+        File generated by recon-all
+
+    Returns
+    -------
+    out : str
+        Freesurfer subject ID
+    """
+    out = file[:-18]
+    return out
+
+
+def extract_reconall_base_dir(file):
+    """Extract Recon-all base directory from a file.
+
+    Parameters
+    ----------
+    file : File
+        File generated by Recon-all
+
+    Returns
+    -------
+    out_path : string
+        Recon-all base directory
+    """
+    # print("Extract reconall base dir : %s" % file[:-17])
+    out_path = str(file[:-17])
+    return out_path
+
+
+def get_pipeline_dictionary_outputs(
+    datasink_report, local_output_dir=None, debug=False
+):
     """Read the Nipype datasink report and return a dictionary of pipeline outputs.
 
     Parameters
@@ -399,15 +405,17 @@ def get_pipeline_dictionary_outputs(datasink_report, local_output_dir=None, debu
             # Extract line containing listing of node outputs and stop
             if "_outputs :" in line:
                 str_outputs = line.strip()
-                prefix = '* _outputs : '
+                prefix = "* _outputs : "
                 str_outputs = str.replace(str_outputs, prefix, "")
-                str_outputs = str.replace(str_outputs, "\'", "\"")
-                str_outputs = str.replace(str_outputs, "<undefined>", "\"\"")
+                str_outputs = str.replace(str_outputs, "'", '"')
+                str_outputs = str.replace(str_outputs, "<undefined>", '""')
 
                 # Update from BIDS App /output_dir to local output directory
                 # specified by local_output_dir
                 if local_output_dir is not None:
-                    str_outputs = str.replace(str_outputs, "/output_dir", local_output_dir)
+                    str_outputs = str.replace(
+                        str_outputs, "/output_dir", local_output_dir
+                    )
                 break
 
     # Convert the extracted JSON-structured string to a dictionary
@@ -446,14 +454,16 @@ def get_node_dictionary_outputs(node_report, local_output_dir=None, debug=False)
             # Extract line containing listing of node outputs and stop
             if "_outputs :" in line:
                 str_outputs = line.strip()
-                prefix = '* _outputs : '
+                prefix = "* _outputs : "
                 str_outputs = str.replace(str_outputs, prefix, "")
-                str_outputs = str.replace(str_outputs, "\'", "\"")
+                str_outputs = str.replace(str_outputs, "'", '"')
 
                 # Update from BIDS App /output_dir to local output directory
                 # specified by local_output_dir
                 if local_output_dir is not None:
-                    str_outputs = str.replace(str_outputs, "/output_dir", local_output_dir)
+                    str_outputs = str.replace(
+                        str_outputs, "/output_dir", local_output_dir
+                    )
                 break
 
     # Convert the extracted JSON-structured string to a dictionary
@@ -461,3 +471,33 @@ def get_node_dictionary_outputs(node_report, local_output_dir=None, debug=False)
     if debug:
         print("Dictionary of node outputs: {}".format(dict_outputs))
     return dict_outputs
+
+
+def convert_list_to_tuple(lists):
+    """Convert list of files to tuple of files.
+
+    (Duplicated with preprocessing, could be moved to utils in the future)
+
+    Parameters
+    ----------
+    lists : [bvecs, bvals]
+        List of files containing bvecs and bvals
+    Returns
+    -------
+    out_tuple : (bvecs, bvals)
+        Tuple of files containing bvecs and bvals
+    """
+    return tuple(lists)
+
+
+def check_directory_exists(mandatory_dir):
+    """Makes sure the mandatory directory exists.
+
+    Raises
+    ------
+    FileNotFoundError
+        Raised when the directory is not found.
+    """
+    f_path = Path(mandatory_dir)
+    if not f_path.is_dir():
+        raise FileNotFoundError(f"No directory is found at: {str(f_path)}")
