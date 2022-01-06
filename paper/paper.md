@@ -86,29 +86,32 @@ To ease and automate the practice of sharing raw and processed neuroimaging data
 Following these advances, a number of processing pipelines, supporting the mapping of connectomes
   derived from MRI data organized following the BIDS standard, such as C-PAC [@cpac:2013],
   NIAK [@BellecNeuroimagingNIAK:2016], fMRIPrep [@Ghosh:2018],
-  dMRIPrep [@dmriprep:2019], QSIPREP [@CieslakQSIPrep:2020], NDMG [@KiarAVariability:2018] and PyNets
-  [@PisnerPyNets:2020] have been developed .
+  dMRIPrep [@dmriprep:2019], QSIPREP [@CieslakQSIPrep:2020], MRtrix3_connectome [@Smith2019:BIDSApp],
+  NDMG [@KiarAVariability:2018] and PyNets [@PisnerPyNets:2020] have been developed .
 They have demonstrated their capability in addressing all the challenges of data sharing,
   portability, computing scalability, reliability, reproducibility and transparency.
 However, none of the existing solutions provide a direct alternative to Connectome Mapper (CMP)
-  whose has created to distribute its own and unique multi-scale brain parcellation scheme [@].
-  and to simplify the organisation and the analysis of sMRI and dMRI from raw data to multi-scale
-  structural weighted connectomes [@Daducci:2012]. However it has been historically
-  designed before the emergence of the BIDS standards and the containerization technologies.
-While CMP3 derives from the now deprecated CMP1 and CMP2 packages, it has migrated to Python 3 and
-  the processing pipelines have been encapsulated in software container images and continuously tested
-  in concordance to the BIDS Apps standard since its premises. It has massively evolved over the years
-  in terms of the underlying codebase, the tools used, and the scope of the functionality provided.
+  whose has been created before the emergence of the BIDS standards and the containerization technologies
+  to simplify the organisation and the analysis of sMRI and dMRI from raw data to multi-scale
+  structural weighted connectomes [@Daducci:2012] using the in-house multi-scale Lausanne brain parcellation
+  scheme [@Cammoun2012:MappingMRI], extended in a second version release with a preliminary pipeline
+  for resting-state fMRI for integrative multimodal analyses.
+While CMP3 derives from the preceding two versions, it has made CMP massively evolve over the years
+  in terms of the underlying codebase, the tools used, and the scope of the functionality provided, including
+  the migration to Python 3, a brand-new Lausanne parcellation scheme, the adoption of the BIDS standard for
+  data organization, the encapsulation of the processing pipelines have been encapsulated in software container images, continuously tested in concordance to the
+  BIDS Apps standard, the refinement of the fMRI pipeline, and the current extension to
+  Electroencephalography (EEG). 
 
 # Summary
 
 Connectome Mapper 3 provides a unique open-source software pipeline solution with a Graphical User Interface
   (GUI) for researchers to easily, reliably and transparently create a hierarchical multi-scale
   connectome representation of the structural and functional brain systems, on any sMRI / dMRI /
-  rfMRI dataset structured according to the BIDS standard, by interfacing with a number of widely adopted
-  neuroimaging tools (inclusing FSL [@Jenkinson2012FSL], FreeSurfer [@Fischl2012FreeSurfer],
-  ANTs [@AVANTS2008SymmetricBrain], dipy [@Garyfallidis2014DipyData],
-  mrtrix3 [@Tournier2019MRtrix3:Visualisation], and AFNI [@Cox2012]).
+  rfMRI / EEG dataset structured according to the BIDS standard, by interfacing with a number
+  of widely adopted neuroimaging tools (inclusing FSL [@Jenkinson2012FSL], FreeSurfer [@Fischl2012FreeSurfer],
+  ANTs [@AVANTS2008SymmetricBrain], dipy [@Garyfallidis2014DipyData], mrtrix3 [@Tournier2019MRtrix3:Visualisation],
+  AFNI [@Cox2012]), pycartool [@pycartool], and MNE [@GramfortEtAl2013a].
 It has been developed around different principles and characteristics that are presented right after.
 
 Design considerations with the implementation of modular, configurable, and containerized
@@ -231,7 +234,7 @@ The full documentation of the outputs can be found on the
   license's disclaimers of warranty are maintained.
 The source code for CMP3 is hosted at
   [https://github.com/sebastientourbier/connectomemapper3](https://github.com/sebastientourbier/connectomemapper3),
-  and archived to Zenodo [@ZenodoCMP:2021].
+  and each release is archived to Zenodo [@ZenodoCMP:2021].
 To be robust to adverse code changes, versions are released through continuous integration building
   and testing.
 Specifically, this involves testing the installation of the python package, the build of
@@ -252,7 +255,7 @@ Furthermore, bugs as well as both internal and external developer contributions 
   discussed and managed through issues directly on GitHub for transparent software
   development.
 
-\textbf{A unique multi-scale multi-modality solution in the new generation of connectome mapping tools.}
+\textbf{A unique new generation connectome mapping tool highly flexible and extendable.}
   While CMP3 simplifies the creation of connectomes and makes it a straightforward process
   even for users not familiar with nipype and software container technology, it fulfils
   at the same time the needs of advanced users in charge of analyzing huge amount of data,
@@ -269,7 +272,7 @@ In addition, the very flexible framework of CMP3 enables the addition of new ste
 It is worth noting the software is ready to accommodate other imaging modalities.
 At the time of writing, an EEG source imaging pipeline is being integrated, initiated during OHBM BrainHack 2020
   ([https://github.com/ohbm/hackathon2020/issues/214](https://github.com/ohbm/hackathon2020/issues/214)),
-  which will make CMP3 even more unique in the BIDS ecosystem of connectome mapping tools.
+  which will make CMP3 even more unique in the new generation of connectome mapping tools.
 
 
 # Mention
