@@ -111,8 +111,6 @@ Connectome Mapper 3 provides a unique open-source software pipeline solution wit
   mrtrix3 [@Tournier2019MRtrix3:Visualisation], and AFNI [@Cox2012]).
 It has been developed around different principles and characteristics that are presented right after.
 
-
-
 Design considerations with the implementation of modular, configurable, and containerized
   processing pipelines, empowered by nipype, handling datasets concordant to the BIDS standard,
   distributed as a BIDS App, makes it not only easy to install and use (as it provides the user with a computing
@@ -129,31 +127,13 @@ Outputs are organized following a BIDS derivatives-like structure where connecto
   analyzes, but also to facilitate the sharing of the derivatives in the BIDS App
   ecosystem.
 
-While CMP3 simplifies the creation of connectomes and makes it a straightforward process
-  even for users not familiar with nipype and software container technology, it fulfils
-  at the same time the needs of advanced users in charge of analyzing huge amount of data, offering them the
-  possibility to tune and save all the parameters in configuration files and create a batch
-  job to automatically process all data with the BIDS App.
-CMP3 can be highly versatile as it offers a number of options at each processing steps to
-  be completely data agnostic.
-At the same time, it provides the user with a very efficient framework to compute
-  connectomes in the way it guides them through all the steps and options involved in their
-  creation, and it guarantees seamless processing, irrespective of the choices made.
-In addition, the very flexible framework of CMP3 enables the addition of new steps, stages
-  or pipelines with relatively little effort to account for additional imaging modalities
-  and algorithms.
-It is worth noting the software is ready to accommodate other imaging modalities.
-At the time of writing, an EEG source imaging pipeline is being integrated, initiated during OHBM BrainHack 2020
-  ([https://github.com/ohbm/hackathon2020/issues/214](https://github.com/ohbm/hackathon2020/issues/214)),
-  which will make CMP3 even more unique in the BIDS ecosystem of connectome mapping tools.
-
 # Highlights
 
 \textbf{A unique parcellation scheme in the BIDS ecosystem.}
 
 \textbf{A flexible workflow for multi-modal human connectome mapping in the BIDS ecosystem.} CMP3 is
-  written in Python 3 and implements pipelines that maps from sMRI / dMRI / fMRI the structural and
-  / or functional connectomes, for five macroscopic brain parcellation scales with hierarchical
+  written in Python 3 and implements pipelines that maps the structural and
+  / or functional connectomes from sMRI / dMRI and / or fMRI, for five macroscopic brain parcellation scales with hierarchical
   region grouping.
 \autoref{fig:cmp3-diagram} illustrates the participant-level analysis workflow.
 
@@ -187,7 +167,7 @@ Each pipeline class provides methods to create and execute a nipype workflow tha
   can be set by loading pipeline configuration files in `.json` format.
 Empowered by the nipype workflow engine, the re-execution of the workflow will resume the
   processing at any stages a change of parameter occurred.
-To maximize accessibility and re-usability of the tool, the implemented pipelines are encapsulated
+To ensure reproducibility and maximize re-usability of the tool, the implemented pipelines are encapsulated
   in a Docker [@merkeldocker:2014] and a Singularity [@Kurtzer2017Singularity:Compute] software image
   containers, in concordance to the BIDS App standard [@GorgolewskiBIDSMethods:2017].
 This means that the BIDS App of CMP3 can be run on diversity of datasets Linux, MacOSX, Windows computers,
@@ -199,12 +179,11 @@ This means that the BIDS App of CMP3 can be run on diversity of datasets Linux, 
   represented as Traits objects with TraitsUI graphical representations, which makes it easier to understand
   and extend.
 This has enabled the design of a GUI aka `cmpbidsappmanager` (Figure \autoref{fig:gui}) that reflects
-  the structure of the processing workflow and that facilitates the configuration of all pipeline stages
-  and guarantees the formatting of the `.json` pipeline configuration files (Figure \autoref{fig:gui} b),
-  supports their execution within the BIDS App (Figure \autoref{fig:gui} c), and the inspection of stage
-  outputs with native visualization tools bundled with each software package
-  involved in the processing stage as the end user might be already very familiar with these tools
-  (Figure \autoref{fig:gui} d).
+  the modular structure of the processing workflow. It has been designed to facilitate the configuration of all pipeline stages,
+  to guarantee the formatting of the `.json` pipeline configuration files (Figure \autoref{fig:gui} b),
+  to support their execution within the BIDS App (Figure \autoref{fig:gui} c), and to allow seamless
+  inspection of stage outputs with native visualization tools bundled with each software package
+  involved in the processing stage (Figure \autoref{fig:gui} d).
 In particular, all sMRI are inspected with the fsleyes viewer shipped with fsl, brain tissue
   segmentation and parcellation are inspected with freeview, mrview is used to visualize the fiber
   orientation distribution functions estimated by the diffusion signal model, and TrackVis is used
@@ -272,6 +251,26 @@ In case of problems, CMP3 has a dedicated forum at
 Furthermore, bugs as well as both internal and external developer contributions are
   discussed and managed through issues directly on GitHub for transparent software
   development.
+
+\textbf{A unique multi-scale multi-modality solution in the new generation of connectome mapping tools.}
+  While CMP3 simplifies the creation of connectomes and makes it a straightforward process
+  even for users not familiar with nipype and software container technology, it fulfils
+  at the same time the needs of advanced users in charge of analyzing huge amount of data,
+  offering them the possibility to tune and save all the parameters in configuration files and create a batch
+  job to automatically process all data with the BIDS App.
+CMP3 can be highly versatile as it offers a number of options at each processing steps to
+  be completely data agnostic.
+At the same time, it provides the user with a very efficient framework to compute
+  connectomes in the way it guides them through all the steps and options involved in their
+  creation, and it guarantees seamless processing, irrespective of the choices made.
+In addition, the very flexible framework of CMP3 enables the addition of new steps, stages
+  or pipelines with relatively little effort to account for additional imaging modalities
+  and algorithms.
+It is worth noting the software is ready to accommodate other imaging modalities.
+At the time of writing, an EEG source imaging pipeline is being integrated, initiated during OHBM BrainHack 2020
+  ([https://github.com/ohbm/hackathon2020/issues/214](https://github.com/ohbm/hackathon2020/issues/214)),
+  which will make CMP3 even more unique in the BIDS ecosystem of connectome mapping tools.
+
 
 # Mention
 
