@@ -35,8 +35,8 @@ class EEGInverseSolutionStage(Stage):
         self.config = EEGInverseSolutionConfig()
         self.inputs = ["bids_dir","subject","eeg_ts_file", "epochs_fif_fname", "rois_file", "src_file", "invsol_file",
                        "lamda", "svd_params", "roi_ts_file", "invsol_params", "bem_file", "noise_cov_fname",
-                       "trans_fname", "fwd_fname","parcellation"]
-        self.outputs = ["roi_ts_file"]
+                       "trans_fname", "fwd_fname","inv_fname","parcellation"]
+        self.outputs = ["roi_ts_file", "fwd_fname"]
 
     def create_workflow(self, flow, inputnode, outputnode):
 
@@ -81,9 +81,9 @@ class EEGInverseSolutionStage(Stage):
                    [('subject', 'subject'),
                     ('bids_dir', 'bids_dir'),
                     ('fwd_fname','fwd_fname'),
+                    ('inv_fname','inv_fname'),
                     ('src_file','src_file'),
                     ('bem_file','bem_file'),
-                    ('noise_cov_fname','noise_cov_fname'),
                     ('epochs_fif_fname','epochs_fif_fname'),
                     ('parcellation','parcellation'),
                     ('roi_ts_file', 'roi_ts_file')
@@ -93,7 +93,8 @@ class EEGInverseSolutionStage(Stage):
             # use dummy variables "has_run" to enforce order of nodes although they don't produce outputs 
             # (outputs are files with fixed names that are defined in eeg.py)
             flow.connect([(covmat_node,invsol_node,
-                           [('has_run','cov_has_run')
+                           [('has_run','cov_has_run'),
+                            ('noise_cov_fname','noise_cov_fname')
                             ]
                            )])
             
@@ -103,7 +104,8 @@ class EEGInverseSolutionStage(Stage):
                            )])
 
             flow.connect([(invsol_node, outputnode,
-                  [('roi_ts_file','roi_ts_file'),
+                  [('fwd_fname','fwd_fname'),
+                   ('roi_ts_file','roi_ts_file'),
                   ]
                     )])
 

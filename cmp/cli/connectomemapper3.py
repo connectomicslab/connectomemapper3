@@ -384,7 +384,7 @@ def main():
                 eeg_pipeline.atlas_info = anat_pipeline.atlas_info
 
                 if eeg_valid_inputs:
-                    print(">> Process anatomical pipeline")
+                    print(">> Process EEG pipeline")
                     eeg_pipeline.process()
                 else:
                     print("  .. ERROR: Invalid inputs")

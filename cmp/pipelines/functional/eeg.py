@@ -173,20 +173,6 @@ class EEGPipeline(Pipeline):
         preparer_flow = self.create_stage_flow("EEGPreparer")
         loader_flow = self.create_stage_flow("EEGLoader")
         invsol_flow = self.create_stage_flow("EEGInverseSolution")
-                
-        # 2do: implement dataset-generic workflow! 
-        # workflow for reading EEG data 
-            # read file name from config file 
-            # figure out format from file name and return error if not implemented 
-            # find the file in the correct derivatives folder depending on the format 
-        # more specifically: 
-            # rn, variable name in config file is "eeg_format", and from that, "epochs" is created 
-            # --> instead, read "epochs" and create "eeg_format" from that 
-        # parcellation file: (how does it work in anatomical pipeline?)
-            # search for file name using the provided string 
-            # if it can't be found, look for any file name that has the string as a part of it, display information 
-            # if both fail, display an error 
-        # other EEG params (see config file)
         
         # read name of eeg file and determine format and derivatives folder name 
         epochs_fname = self.stages['EEGPreparer'].config.epochs        
@@ -202,7 +188,7 @@ class EEGPipeline(Pipeline):
         self.stages['EEGPreparer'].config.eeg_format = eeg_format
         
         datasource.inputs.epochs = [os.path.join(self.base_directory,'derivatives',derivatives_folder, self.subject,
-                                                 'eeg', self.subject + epochs_fname)]
+                                                 'eeg', epochs_fname)]
         
         datasource.inputs.EEG_params = self.stages['EEGPreparer'].config.EEG_params
         
@@ -219,7 +205,7 @@ class EEGPipeline(Pipeline):
                     self.base_directory,
                     'derivatives',
                     'eeglab',
-                    self.subject, 'eeg', self.subject + '_task-' + expe_name + '_events.txt'
+                    self.subject, 'eeg', self.subject + '_task-' + expe_name + '_desc-preproc_events.tsv'
                 )
             ]
             
@@ -281,15 +267,13 @@ class EEGPipeline(Pipeline):
             )
         elif self.stages['EEGPreparer'].config.invsol_format.split('-')[0] == 'mne':
             
-            # MNE finds Freesurfer annot files based on parcellation label 
-            if parcellation_desc=='':
-                parcellation = parcellation_label
+            # Freesurfer annot files are required 
+            if parcellation_suffix=='':
+                parcellation = parcellation_label # aparc
             else:
-                parcellation = parcellation_label + '.' + parcellation_desc
+                parcellation = parcellation_label + '.' + parcellation_suffix # lausanne2008.scalex where x=1...5
 
-            datasource.inputs.parcellation = parcellation#os.path.join(self.base_directory,
-            #                                                  'derivatives', 'cmp', self.subject,
-            #                                                  'anat', parcellation)
+            datasource.inputs.parcellation = parcellation
             
             # define names for MNE outputs 
             datasource.inputs.noise_cov_fname = os.path.join(self.base_directory,
@@ -312,29 +296,22 @@ class EEGPipeline(Pipeline):
                                                          'eeg', 
                                                          self.subject + '-fwd.fif')
             
+            datasource.inputs.inv_fname = os.path.join(self.base_directory,
+                                                        'derivatives',
+                                                        'cmp',
+                                                         self.subject, 
+                                                         'eeg', 
+                                                         self.subject + '-inv.fif')
+             
             ######
-            # this is non-standard, needs to be fixed!! 
-            # datasource.inputs.electrode_positions_file = os.path.join(self.base_directory,
-            #                                                           'derivatives',
-            #                                                           cartool_dir,
-            #                                                           self.subject, 
-            #                                                           'eeg', 
-            #                                                           self.subject + '.xyz')                                                                      
-            
+            # These two files come from cartool, which is non-standard, needs to be fixed!!
             datasource.inputs.electrode_positions_file = os.path.join(self.base_directory,
                                                                       'derivatives',
                                                                       'eeglab',
                                                                       self.subject, 
                                                                       'eeg', 
                                                                       self.subject + '.xyz')
-            
-            # datasource.inputs.MRI_align_transform_file = os.path.join(self.base_directory,
-            #                                                           'derivatives',
-            #                                                           cartool_dir,
-            #                                                           self.subject, 
-            #                                                           'eeg', 
-            #                                                           self.subject + '.Transform.Electrodes Coregistration.Electrodes to Realigned MRI.txt')
-            
+
             datasource.inputs.MRI_align_transform_file = os.path.join(self.base_directory,
                                                                       'derivatives',
                                                                       'eeglab',
@@ -342,7 +319,7 @@ class EEGPipeline(Pipeline):
                                                                       'eeg', 
                                                                       self.subject + '.Transform.Electrodes Coregistration.Electrodes to Realigned MRI.txt')
             #######
-            
+
             eeg_flow.connect(
                 [
                     (datasource, preparer_flow, [('epochs', 'inputnode.epochs'),
@@ -364,13 +341,15 @@ class EEGPipeline(Pipeline):
                     
                     (datasource, invsol_flow, [('subject', 'inputnode.subject'),
                                                ('base_directory','inputnode.bids_dir'),
-                                               ('epochs_fif_fname', 'inputnode.epochs_fif_fname'),
                                                ('noise_cov_fname','inputnode.noise_cov_fname'),
                                                ('trans_fname','inputnode.trans_fname'),
                                                ('fwd_fname','inputnode.fwd_fname'),
+                                               ('inv_fname','inputnode.inv_fname'),
                                                ('parcellation', 'inputnode.parcellation'),
                                                ('roi_ts_file', 'inputnode.roi_ts_file')]),
                     
+                    (preparer_flow, invsol_flow, [('outputnode.epochs_fif_fname','inputnode.epochs_fif_fname')]),
+
                     (loader_flow, invsol_flow, [('outputnode.src', 'inputnode.src_file'),
                                                 ('outputnode.bem', 'inputnode.bem_file')]),
                     

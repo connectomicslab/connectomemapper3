@@ -27,7 +27,7 @@ class CreateFwdInputSpec(BaseInterfaceInputSpec):
         exists=True, desc='trans.fif file containing co-registration information (electrodes x MRI)')
     
     epochs_fif_fname = traits.File(
-        exists=True, desc='eeg * epochs in .set format, containing information about electrode montage', mandatory=True)
+        desc='eeg * epochs in .fif format, containing information about electrode montage', mandatory=True)
 
 class CreateFwdOutputSpec(TraitedSpec):
     """Output specification for creating MNE source space."""
@@ -57,7 +57,9 @@ class CreateFwd(BaseInterface):
 
     @staticmethod
     def _create_Fwd(src,bem,trans,info,fwd_fname):
-        fwd = mne.make_forward_solution(info, trans=trans, src=src,bem=bem, meg=False, eeg=True, mindist=5.0, n_jobs=4)
+        mindist = 0. # 5.0
+        fwd = mne.make_forward_solution(
+            info, trans=trans, src=src,bem=bem, meg=False, eeg=True, mindist=mindist, n_jobs=4)
         mne.write_forward_solution(fwd_fname, fwd, overwrite=True, verbose=None)
         has_run = True
         return has_run

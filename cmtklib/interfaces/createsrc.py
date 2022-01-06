@@ -68,7 +68,7 @@ class CreateSrc(BaseInterface):
         # from notebook 
         overwrite_src = True 
         
-        subjects_dir = os.path.join(bids_dir,'derivatives','freesurfer','subjects')
+        subjects_dir = os.path.join(bids_dir,'derivatives','freesurfer')
         src = mne.setup_source_space(subject=subject, spacing='oct6', subjects_dir=subjects_dir)
         mne.write_source_spaces(src_fname,src,overwrite=overwrite_src)
 

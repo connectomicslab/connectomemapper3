@@ -61,6 +61,7 @@ class EEGPreparerStage(Stage):
         self.outputs = [
             "output_query",
             "invsol_params",
+            "epochs_fif_fname",
             "derivative_list"
         ]
 
@@ -169,6 +170,10 @@ class EEGPreparerStage(Stage):
                             ('derivative_list', 'derivative_list')]
                            )])
             
+            flow.connect([(eeglab2fif_node, outputnode,
+                           [('epochs_fif_fname','epochs_fif_fname')]
+                           )])
+
     def define_inspect_outputs(self):
         raise NotImplementedError
 

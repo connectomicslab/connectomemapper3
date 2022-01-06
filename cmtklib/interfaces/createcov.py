@@ -15,7 +15,7 @@ class CreateCovInputSpec(BaseInterfaceInputSpec):
     """Input specification for creating noise covariance matrix."""
     
     epochs_fif_fname = traits.File(
-        desc='eeg * epochs in .set format', mandatory=True)
+        exists=True, desc='eeg * epochs in .set format', mandatory=True)
     
     noise_cov_fname = traits.File(
         desc='Location and name to store noise covariance matrix in fif format', mandatory=True)
@@ -26,7 +26,7 @@ class CreateCovOutputSpec(TraitedSpec):
     has_run = traits.Bool(False, desc='if true, covariance matrix has been produced')
     
     noise_cov_fname = traits.File(
-        desc='Location and name to store noise covariance matrix in fif format')
+        exists=True, desc='Location and name to store noise covariance matrix in fif format')
 
 
 class CreateCov(BaseInterface):
@@ -36,7 +36,6 @@ class CreateCov(BaseInterface):
     def _run_interface(self, runtime):
         epochs_fname = self.inputs.epochs_fif_fname
         self.noise_cov_fname = self.inputs.noise_cov_fname
-        
         if os.path.exists(self.noise_cov_fname):
             self.has_run = True
         else:

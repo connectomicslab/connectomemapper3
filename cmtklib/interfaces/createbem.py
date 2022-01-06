@@ -66,7 +66,7 @@ class CreateBEM(BaseInterface):
     @staticmethod
     def _create_BEM(subject,bids_dir):
         # create the boundaries between the tissues, using segmentation file 
-        subjects_dir = os.path.join(bids_dir,'derivatives','freesurfer','subjects')
+        subjects_dir = os.path.join(bids_dir,'derivatives','freesurfer')
         bemfilename = os.path.join(bids_dir,'derivatives','cmp',subject,'eeg',subject+'_bem.fif')
         if not "bem" in os.listdir(os.path.join(subjects_dir,subject)):
             mne.bem.make_watershed_bem(subject,subjects_dir,overwrite=True) # still need to check if this actually works
