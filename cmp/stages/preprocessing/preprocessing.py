@@ -1,4 +1,4 @@
-# Copyright (C) 2009-2021, Ecole Polytechnique Federale de Lausanne (EPFL) and
+# Copyright (C) 2009-2022, Ecole Polytechnique Federale de Lausanne (EPFL) and
 # Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland, and CMP3 contributors
 # All rights reserved.
 #
@@ -33,7 +33,7 @@ from cmtklib.interfaces.mrtrix3 import (
 )
 from cmtklib.diffusion import ExtractPVEsFrom5TT, UpdateGMWMInterfaceSeeding
 from cmtklib.interfaces.fsl import CreateAcqpFile, CreateIndexFile
-from cmtklib.util import convertList2Tuple
+from cmtklib.util import convert_list_to_tuple
 
 
 class PreprocessingConfig(HasTraits):
@@ -289,7 +289,7 @@ class PreprocessingStage(Stage):
             [
                 (processing_input, concatnode, [("bvecs", "in1")]),
                 (processing_input, concatnode, [("bvals", "in2")]),
-                (concatnode, mr_convert, [(("out", convertList2Tuple), "grad_fsl")]),
+                (concatnode, mr_convert, [(("out", convert_list_to_tuple), "grad_fsl")]),
             ]
         )
         # fmt: on

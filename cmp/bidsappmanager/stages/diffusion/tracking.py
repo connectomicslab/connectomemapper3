@@ -1,4 +1,4 @@
-# Copyright (C) 2009-2021, Ecole Polytechnique Federale de Lausanne (EPFL) and
+# Copyright (C) 2009-2022, Ecole Polytechnique Federale de Lausanne (EPFL) and
 # Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland, and CMP3 contributors
 # All rights reserved.
 #
@@ -9,11 +9,11 @@
 from traits.api import *
 from traitsui.api import *
 
-from cmp.stages.diffusion.tracking import Dipy_tracking_config, MRtrix_tracking_config
+from cmp.stages.diffusion.tracking import DipyTrackingConfig, MRtrixTrackingConfig
 
 
-class Dipy_tracking_configUI(Dipy_tracking_config):
-    """Class that extends the :class:`Dipy_tracking_config` with graphical components.
+class Dipy_tracking_configUI(DipyTrackingConfig):
+    """Class that extends the :class:`DipyTrackingConfig` with graphical components.
 
     Attributes
     ----------
@@ -23,7 +23,7 @@ class Dipy_tracking_configUI(Dipy_tracking_config):
 
     See also
     ---------
-    cmp.stages.diffusion.tracking.Dipy_tracking_config
+    cmp.stages.diffusion.tracking.DipyTrackingConfig
     """
 
     traits_view = View(
@@ -52,8 +52,8 @@ class Dipy_tracking_configUI(Dipy_tracking_config):
     )
 
 
-class MRtrix_tracking_configUI(MRtrix_tracking_config):
-    """Class that extends the :class:`MRtrix_tracking_config` with graphical components.
+class MRtrix_tracking_configUI(MRtrixTrackingConfig):
+    """Class that extends the :class:`MRtrixTrackingConfig` with graphical components.
 
     Attributes
     ----------
@@ -63,7 +63,7 @@ class MRtrix_tracking_configUI(MRtrix_tracking_config):
 
     See also
     ---------
-    cmp.stages.diffusion.reconstruction.MRtrix_tracking_config
+    cmp.stages.diffusion.reconstruction.MRtrixTrackingConfig
     """
 
     traits_view = View(

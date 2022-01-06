@@ -1,4 +1,4 @@
-# Copyright (C) 2009-2021, Ecole Polytechnique Federale de Lausanne (EPFL) and
+# Copyright (C) 2009-2022, Ecole Polytechnique Federale de Lausanne (EPFL) and
 # Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland, and CMP3 contributors
 # All rights reserved.
 #
@@ -20,7 +20,7 @@ import nipype.interfaces.utility as util
 # Own imports
 from cmtklib.interfaces.afni import Despike
 from cmp.stages.common import Stage
-from cmtklib.functionalMRI import Discard_tp
+from cmtklib.functionalMRI import DiscardTP
 
 
 class PreprocessingConfig(HasTraits):
@@ -116,7 +116,7 @@ class PreprocessingStage(Stage):
         )
         if self.config.discard_n_volumes > 0:
             discard = pe.Node(
-                interface=Discard_tp(n_discard=self.config.discard_n_volumes),
+                interface=DiscardTP(n_discard=self.config.discard_n_volumes),
                 name="discard_volumes",
             )
             # fmt:off

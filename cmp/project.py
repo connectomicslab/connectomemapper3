@@ -1,4 +1,4 @@
-# Copyright (C) 2009-2021, Ecole Polytechnique Federale de Lausanne (EPFL) and
+# Copyright (C) 2009-2022, Ecole Polytechnique Federale de Lausanne (EPFL) and
 # Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland, and CMP3 contributors
 # All rights reserved.
 #
@@ -19,16 +19,11 @@ from traits.api import *
 from bids import BIDSLayout
 
 # Own imports
-from cmtklib.bids.io import (
-    __cmp_directory__,
-    __nipype_directory__,
-    __freesurfer_directory__
-)
-from cmtklib.bids.utils import write_derivative_description
 from cmp.pipelines.anatomical import anatomical as Anatomical_pipeline
 from cmp.pipelines.diffusion import diffusion as Diffusion_pipeline
 from cmp.pipelines.functional import fMRI as FMRI_pipeline
 from cmp.pipelines.functional import eeg as EEG_pipeline
+
 from cmtklib.config import (
     anat_load_config_json,
     anat_save_config,
@@ -39,6 +34,12 @@ from cmtklib.config import (
     eeg_load_config_json,
     eeg_save_config
 )
+from cmtklib.bids.io import (
+    __cmp_directory__,
+    __nipype_directory__,
+    __freesurfer_directory__
+)
+from cmtklib.bids.utils import write_derivative_description
 
 # Ignore some warnings
 warnings.filterwarnings(
@@ -49,7 +50,7 @@ warnings.filterwarnings(
 )
 
 
-class CMP_Project_Info(HasTraits):
+class ProjectInfo(HasTraits):
     """Class used to store all properties of a processing project.
 
     Attributes
@@ -358,7 +359,7 @@ def init_dmri_project(project_info, bids_layout, is_new_project, gui=True, debug
 
     Parameters
     ----------
-    project_info : cmp.project.CMP_Project_Info
+    project_info : cmp.project.ProjectInfo
         Instance of ``cmp.project.CMP_Project_Info`` object
 
     bids_layout : bids.BIDSLayout
@@ -469,7 +470,7 @@ def init_fmri_project(project_info, bids_layout, is_new_project, gui=True, debug
 
     Parameters
     ----------
-    project_info : cmp.project.CMP_Project_Info
+    project_info : cmp.project.ProjectInfo
         Instance of ``cmp.project.CMP_Project_Info`` object
 
     bids_layout : bids.BIDSLayout
@@ -577,7 +578,7 @@ def init_anat_project(project_info, is_new_project, debug=False):
 
     Parameters
     ----------
-    project_info : cmp.project.CMP_Project_Info
+    project_info : cmp.project.ProjectInfo
         Instance of ``cmp.project.CMP_Project_Info`` object
 
     is_new_project : bool
@@ -761,7 +762,7 @@ def update_anat_last_processed(project_info, pipeline):
 
     Parameters
     ----------
-    project_info : cmp.project.CMP_Project_Info
+    project_info : cmp.project.ProjectInfo
         Instance of `CMP_Project_Info` object
 
     pipeline : cmp.pipelines.anatomical.anatomical.AnatomicalPipeline
@@ -821,7 +822,7 @@ def update_dmri_last_processed(project_info, pipeline):
 
     Parameters
     ----------
-    project_info : cmp.project.CMP_Project_Info
+    project_info : cmp.project.ProjectInfo
         Instance of `CMP_Project_Info` object
 
     pipeline : cmp.pipelines.diffusion.diffusion.DiffusionPipeline
@@ -877,7 +878,7 @@ def update_fmri_last_processed(project_info, pipeline):
 
     Parameters
     ----------
-    project_info : cmp.project.CMP_Project_Info
+    project_info : cmp.project.ProjectInfo
         Instance of `CMP_Project_Info` object
 
     pipeline : cmp.pipelines.functional.fMRI.fMRIPipeline
@@ -1014,7 +1015,7 @@ def run_individual(
     number_of_threads : int
         Number of threads used by programs relying on the OpenMP library
     """
-    project = CMP_Project_Info()
+    project = ProjectInfo()
     project.base_directory = os.path.abspath(bids_dir)
     project.output_directory = os.path.abspath(output_dir)
     project.subjects = ["{}".format(participant_label)]

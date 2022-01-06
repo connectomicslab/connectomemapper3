@@ -49,6 +49,7 @@ packages = [
     "cmp.pipelines.diffusion",
     "cmp.pipelines.functional",
     "cmp.bidsappmanager",
+    "cmp.bidsappmanager.gui",
     "cmp.bidsappmanager.stages",
     "cmp.bidsappmanager.stages.preprocessing",
     "cmp.bidsappmanager.stages.segmentation",
@@ -130,10 +131,11 @@ def main():
     """Main function of CMP3 ``setup.py``"""
     # Setup configuration
     setuptools.setup(
-        name="cmp",
+        name="connectomemapper",
         version=__version__,
-        description="Connectome Mapper 3: A software pipeline for multi-scale connectome mapping of multimodal data",
+        description="Connectome Mapper 3: A Flexible and Open-Source Pipeline Software for Multiscale Multimodal Human Connectome Mapping",
         long_description=long_description,
+        long_description_content_type="text/markdown",
         author="Sebastien Tourbier",
         author_email="sebastien.tourbier@alumni.epfl.ch",
         url="https://github.com/connectomicslab/connectomemapper3",
@@ -148,7 +150,7 @@ def main():
         },
         license="BSD-3-Clause",
         classifiers=[
-            "Development Status :: 4 - Beta",
+            "Development Status :: 5 - Production/Stable",
             "Intended Audience :: Science/Research",
             "Intended Audience :: Developers",
             "License :: OSI Approved",

@@ -1,4 +1,4 @@
-# Copyright (C) 2009-2021, Ecole Polytechnique Federale de Lausanne (EPFL) and
+# Copyright (C) 2009-2022, Ecole Polytechnique Federale de Lausanne (EPFL) and
 # Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland, and CMP3 contributors
 # All rights reserved.
 #
@@ -663,7 +663,7 @@ class UpdateGMWMInterfaceSeeding(BaseInterface):
         return outputs
 
 
-class Make_SeedsInputSpec(BaseInterfaceInputSpec):
+class MakeSeedsInputSpec(BaseInterfaceInputSpec):
     ROI_files = InputMultiPath(
         File(exists=True), desc="ROI files registered to diffusion space"
     )
@@ -672,19 +672,19 @@ class Make_SeedsInputSpec(BaseInterfaceInputSpec):
     # DWI = File(mandatory=True,desc='Diffusion data file for probabilistic tractography')
 
 
-class Make_SeedsOutputSpec(TraitedSpec):
+class MakeSeedsOutputSpec(TraitedSpec):
     seed_files = OutputMultiPath(
         File(exists=True), desc="Seed files for probabilistic tractography"
     )
 
 
-class Make_Seeds(BaseInterface):
+class MakeSeeds(BaseInterface):
     """Creates seeding ROIs by intersecting dilated ROIs with WM mask for `Dipy`.
 
     Examples
     --------
-    >>> from cmtklib.diffusion import Make_Seeds
-    >>> make_dipy_seeds = Make_Seeds()
+    >>> from cmtklib.diffusion import MakeSeeds
+    >>> make_dipy_seeds = MakeSeeds()
     >>> make_dipy_seeds.inputs.ROI_files  = ['sub-01_space-DWI_atlas-L2018_desc-scale1_dseg.nii.gz',
     >>>                                 'sub-01_space-DWI_atlas-L2018_desc-scale2_dseg.nii.gz',
     >>>                                 'sub-01_space-DWI_atlas-L2018_desc-scale3_dseg.nii.gz',
@@ -695,8 +695,8 @@ class Make_Seeds(BaseInterface):
 
     """
 
-    input_spec = Make_SeedsInputSpec
-    output_spec = Make_SeedsOutputSpec
+    input_spec = MakeSeedsInputSpec
+    output_spec = MakeSeedsOutputSpec
     ROI_idx = []
     base_name = ""
 
@@ -778,8 +778,8 @@ class Make_Mrtrix_Seeds(BaseInterface):
 
     """
 
-    input_spec = Make_SeedsInputSpec
-    output_spec = Make_SeedsOutputSpec
+    input_spec = MakeSeedsInputSpec
+    output_spec = MakeSeedsOutputSpec
     ROI_idx = []
     base_name = ""
 
@@ -823,7 +823,7 @@ class Make_Mrtrix_Seeds(BaseInterface):
         return outputs
 
 
-class SplitDiffusion_InputSpec(BaseInterfaceInputSpec):
+class SplitDiffusionInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, desc="Input diffusion MRI file")
 
     start = Int(0, desc="Volume index to start the split")
@@ -831,7 +831,7 @@ class SplitDiffusion_InputSpec(BaseInterfaceInputSpec):
     end = Int(desc="Volume index to end the split")
 
 
-class SplitDiffusion_OutputSpec(TraitedSpec):
+class SplitDiffusionOutputSpec(TraitedSpec):
     data = File(exists=True, desc="Extracted volumes")
 
     padding1 = File(exists=False, desc="Extracted volumes with padding 1")
@@ -853,8 +853,8 @@ class SplitDiffusion(BaseInterface):
 
     """
 
-    input_spec = SplitDiffusion_InputSpec
-    output_spec = SplitDiffusion_OutputSpec
+    input_spec = SplitDiffusionInputSpec
+    output_spec = SplitDiffusionOutputSpec
 
     def _run_interface(self, runtime):
         diffusion_file = nib.load(self.inputs.in_file)

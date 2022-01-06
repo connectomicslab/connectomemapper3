@@ -1,4 +1,4 @@
-# Copyright (C) 2009-2021, Ecole Polytechnique Federale de Lausanne (EPFL) and
+# Copyright (C) 2009-2022, Ecole Polytechnique Federale de Lausanne (EPFL) and
 # Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland, and CMP3 contributors
 # All rights reserved.
 #
@@ -8,13 +8,10 @@
 
 import os
 import warnings
-from glob import glob
+from pathlib import Path
 
 import json
-import networkx as nx
 import numpy as np
-
-from cmtklib.bids.io import __cmp_directory__
 
 warnings.simplefilter("ignore")
 
@@ -183,96 +180,6 @@ def return_button_style_sheet(image, image_disabled=None, verbose=False):
     return button_style_sheet
 
 
-def load_graphs(output_dir, subjects, parcellation_scheme, weight):
-    """Return a dictionary of connectivity matrices (graph adjacency matrices).
-
-    Still in development
-
-    Parameters
-    ----------
-    output_dir : string
-        Output/derivatives directory
-
-    subjects : list
-        List of subject
-
-    parcellation_scheme : ['NativeFreesurfer', 'Lausanne2018', 'Custom']
-        Parcellation scheme
-
-    weight : ['number_of_fibers','fiber_density',...]
-        Edge metric to extract from the graph
-
-    Returns
-    -------
-    connmats: dict
-        Dictionary of connectivity matrices
-
-    """
-    if parcellation_scheme == "Lausanne2018":
-        bids_atlas_label = "L2018"
-    elif parcellation_scheme == "NativeFreesurfer":
-        bids_atlas_label = "Desikan"
-
-    if parcellation_scheme == "NativeFreesurfer":
-        for subj in subjects:
-            subj_dir = os.path.join(output_dir, subj)
-            subj_session_dirs = glob(os.path.join(subj_dir, "ses-*"))
-            subj_sessions = [
-                "ses-{}".format(subj_session_dir.split("-")[-1])
-                for subj_session_dir in subj_session_dirs
-            ]
-
-            if len(subj_sessions) > 0:  # Session structure
-                for subj_session in subj_sessions:
-                    conn_derivatives_dir = os.path.join(
-                        output_dir, __cmp_directory__, subj, subj_session, "connectivity"
-                    )
-
-                    # Extract the connectivity matrix
-                    # self.subject+'_label-'+bids_atlas_label+'_desc-scale5_conndata-snetwork_connectivity'
-                    connmat_fname = os.path.join(
-                        conn_derivatives_dir,
-                        "{}_{}_atlas-{}_conndata-snetwork_connectivity.gpickle".format(
-                            subj, subj_session, bids_atlas_label
-                        ),
-                    )
-                    connmat_gp = nx.read_gpickle(connmat_fname)
-                    connmat = nx.to_numpy_matrix(
-                        connmat_gp, weight=weight, dtype=np.float32
-                    )
-    else:
-        # For each parcellation scale
-        for scale in np.arange(1, 6):
-            for subj in subjects:
-                subj_dir = os.path.join(output_dir, subj)
-                subj_session_dirs = glob(os.path.join(subj_dir, "ses-*"))
-                subj_sessions = [
-                    "ses-{}".format(subj_session_dir.split("-")[-1])
-                    for subj_session_dir in subj_session_dirs
-                ]
-
-                if len(subj_sessions) > 0:  # Session structure
-                    for subj_session in subj_sessions:
-                        conn_derivatives_dir = os.path.join(
-                            output_dir, __cmp_directory__, subj, subj_session, "connectivity"
-                        )
-
-                        # Extract the connectivity matrix
-                        # self.subject+'_label-'+bids_atlas_label+'_desc-scale5_conndata-snetwork_connectivity'
-                        connmat_fname = os.path.join(
-                            conn_derivatives_dir,
-                            "{}_{}_atlas-{}_res-scale{}_conndata-snetwork_connectivity.gpickle".format(
-                                subj, subj_session, bids_atlas_label, scale
-                            ),
-                        )
-                        connmat_gp = nx.read_gpickle(connmat_fname)
-                        connmat = nx.to_numpy_matrix(
-                            connmat_gp, weight=weight, dtype=np.float32
-                        )
-                # TODO: finalize condition and append all conmat to a list
-    return connmat
-
-
 def length(xyz, along=False):
     """Euclidean length of track line.
 
@@ -361,13 +268,13 @@ def mean_curvature(xyz):
     >>> y=0*x
     >>> z=0*x
     >>> xyz=np.vstack((x,y,z)).T
-    >>> m=tm.mean_curvature(xyz) #mean curvature straight line
+    >>> m=tm.mean_curvature(xyz)  # mean curvature straight line
     >>> theta=np.pi*np.linspace(0,1,100)
     >>> x=np.cos(theta)
     >>> y=np.sin(theta)
     >>> z=0*x
     >>> xyz=np.vstack((x,y,z)).T
-    >>> m=tm.mean_curvature(xyz) #mean curvature for semi-circle
+    >>> m=tm.mean_curvature(xyz)  # mean curvature for semi-circle
     """
     xyz = np.asarray(xyz)
     n_pts = xyz.shape[0]
@@ -566,7 +473,7 @@ def get_node_dictionary_outputs(node_report, local_output_dir=None, debug=False)
     return dict_outputs
 
 
-def convertList2Tuple(lists):
+def convert_list_to_tuple(lists):
     """Convert list of files to tuple of files.
 
     (Duplicated with preprocessing, could be moved to utils in the future)
@@ -581,3 +488,16 @@ def convertList2Tuple(lists):
         Tuple of files containing bvecs and bvals
     """
     return tuple(lists)
+
+
+def check_directory_exists(mandatory_dir):
+    """Makes sure the mandatory directory exists.
+
+    Raises
+    ------
+    FileNotFoundError
+        Raised when the directory is not found.
+    """
+    f_path = Path(mandatory_dir)
+    if not f_path.is_dir():
+        raise FileNotFoundError(f"No directory is found at: {str(f_path)}")

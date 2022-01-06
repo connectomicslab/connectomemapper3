@@ -1,16 +1,17 @@
-# Copyright (C) 2009-2021, Ecole Polytechnique Federale de Lausanne (EPFL) and
+# Copyright (C) 2009-2022, Ecole Polytechnique Federale de Lausanne (EPFL) and
 # Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland, and CMP3 contributors
 # All rights reserved.
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-"""This module defines the `connectomemapper_docker.py` script that wraps calls to the Docker BIDS APP image."""
+"""This module defines the `connectomemapper3_docker.py` script that wraps calls to the Docker BIDS APP image."""
 
 # General imports
 import sys
 
 # Own imports
 from cmp.parser import get_docker_wrapper_parser
+from cmtklib.util import check_directory_exists
 from cmtklib.process import run
 
 
@@ -111,6 +112,7 @@ def main():
     parser = get_docker_wrapper_parser()
     args = parser.parse_args()
 
+    check_directory_exists(args.bids_dir)
     # Create the docker run command
     cmd = create_docker_cmd(args)
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2009-2021, Ecole Polytechnique Federale de Lausanne (EPFL) and
+# Copyright (C) 2009-2022, Ecole Polytechnique Federale de Lausanne (EPFL) and
 # Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland, and CMP3 contributors
 # All rights reserved.
 #
@@ -11,7 +11,7 @@ import subprocess
 
 
 def run(command, env=None, cwd=None):
-    """Function calls by `CMP_MainWindowHandler` to run datalad commands.
+    """Function calls by `MainWindowHandler` to run datalad commands.
 
     It runs the command specified as input via ``subprocess.run()``.
 

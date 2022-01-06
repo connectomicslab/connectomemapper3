@@ -3,6 +3,8 @@
 Contributors
 **************
 
+Thanks goes to these wonderful people (`emoji key <https://allcontributors.org/docs/en/emoji-key>`_):
+
 .. raw:: html
 
   <!-- ALL-CONTRIBUTORS-LIST:START - Copy the content in README if the bot has been called and the list updated -->
@@ -26,3 +28,31 @@ Contributors
   </table>
 
   <!-- ALL-CONTRIBUTORS-LIST:END -->
+  <br>
+
+Thanks also goes to all these wonderful people that contributed to the two first versions of Connectome Mapper:
+
+*   Collaborators from Signal Processing Laboratory (LTS5), EPFL, Lausanne:
+
+    *   Jean-Philippe Thiran
+    *   Leila Cammoun
+    *   Adrien Birbaumer (abirba)
+    *   Alessandro Daducci (daducci)
+    *   Stephan Gerhard (unidesigner)
+    *   Christophe Chênes (Cwis)
+    *   Oscar Esteban (oesteban)
+    *   David Romascano (davidrs06)
+    *   Alia Lemkaddem (allem)
+    *   Xavier Gigandet
+
+
+*   Collaborators from Children's Hospital, Boston:
+
+    *   Ellen Grant
+    *   Daniel Ginsburg (danginsburg)
+    *   Rudolph Pienaar (rudolphpienaar)
+    *   Nicolas Rannou (NicolasRannou)
+
+This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
+
+See :ref:`contributing page <contributing>` for more details about how to join us!

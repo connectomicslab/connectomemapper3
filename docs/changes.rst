@@ -3,14 +3,56 @@ Changes
 ========
 
 ****************************
+Version 3.0.1
+****************************
+
+Date: Jan 05, 2021
+
+This version is mostly a bug fix release that allows the python packages of Connectome Mapper 3 to be available on PyPI.
+It incorporates `Pull Request #132 <https://github.com/connectomicslab/connectomemapper3/pull/132>`_ which includes the following changes.
+
+*Bug fix*
+
+*   Rename the project name in `setup.py` and `setup_pypi.py` from `"cmp"` to `"connectomemapper"`.
+    Such a `"cmp"` project name was already existing on PyPI, that caused continuous integration on CircleCI to fail during the last `v3.0.0` release, while uploading the python packages of CMP3 to PyPI.
+
+*Code refactoring*
+
+*   Make `cmp.bidsappmanager.gui.py` more lightweight by splitting the classes defined there in different files.
+    (See `Issue #129 <https://github.com/connectomicslab/connectomemapper3/issues/129>`_ for more discussion details)
+
+*   Split the `create_workflow()` method of the `RegistrationStage` into the `create_ants_workflow()`, `create_flirt_workflow()`, and `create_bbregister_workflow()`.
+    (See `Issue #95 <https://github.com/connectomicslab/connectomemapper3/issues/95>`_ for more discussion details)
+
+*Code style*
+
+*   Correct a number of code style issues with class names
+
+*Contributors*
+
+*   `Sebastien Tourbier <https://github.com/connectomicslab/connectomemapper3/issues?q=is%3Apr+author%3Asebastientourbier>`_
+
+Please check the `main pull request 132 page <https://github.com/connectomicslab/connectomemapper3/pull/132>`_ for more details.
+
+
+****************************
 Version 3.0.0
 ****************************
 
-Date: Dec XX, 2021
+Date: Dec 24, 2021
 
 This version corresponds to the first official release of Connectome Mapper 3 (CMP3).
 It incorporates `Pull Request #88 <https://github.com/connectomicslab/connectomemapper3/pull/88>`_ (>450 commits)
 which includes the following changes.
+
+*Updates*
+
+*   traits has been updated from `6.0.0` to `6.2.0`.
+*   traitsui has been updated from `6.1.3` to `7.0.0`.
+*   pybids has been updated from `0.10.2` to `0.14.0`.
+*   nipype has been updated to `1.5.1` to `1.7.0`.
+*   dipy has been updated from `1.1.0` to `1.3.0`.
+*   obspy has been updated from `1.2.1` to `1.2.2`.
 
 *New features*
 

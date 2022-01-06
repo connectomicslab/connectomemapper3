@@ -1,4 +1,4 @@
-# Copyright (C) 2009-2021, Ecole Polytechnique Federale de Lausanne (EPFL) and
+# Copyright (C) 2009-2022, Ecole Polytechnique Federale de Lausanne (EPFL) and
 # Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland, and CMP3 contributors
 # All rights reserved.
 #
@@ -146,35 +146,6 @@ class ParcellationStageUI(ParcellationStage):
         """
         ParcellationStage.__init__(self, pipeline_mode, subject, session, bids_dir, output_dir)
         self.config = ParcellationConfigUI()
-        self.config.template_thalamus = os.path.join(
-            "app",
-            "connectomemapper3",
-            "cmtklib",
-            "data",
-            "segmentation",
-            "thalamus2018",
-            "mni_icbm152_t1_tal_nlin_sym_09b_hires_1.nii.gz",
-        )
-        self.config.thalamic_nuclei_maps = os.path.join(
-            "app",
-            "connectomemapper3",
-            "cmtklib",
-            "data",
-            "segmentation",
-            "thalamus2018",
-            "Thalamus_Nuclei-HCP-4DSPAMs.nii.gz",
-        )
-        # FIXME Bids App / local
-        # self.config.template_thalamus = pkg_resources.resource_filename('cmtklib',
-        #                                                                 os.path.join('data',
-        #                                                                              'segmentation',
-        #                                                                              'thalamus2018',
-        #                                                                              'mni_icbm152_t1_tal_nlin_sym_09b_hires_1.nii.gz'))
-        # self.config.thalamic_nuclei_maps = pkg_resources.resource_filename('cmtklib',
-        #                                                                    os.path.join('data',
-        #                                                                                 'segmentation',
-        #                                                                                 'thalamus2018',
-        #                                                                                 'Thalamus_Nuclei-HCP-4DSPAMs.nii.gz'))
 
     def _inspect_output_button_fired(self, info):
         """Display the selected output when ``inspect_output_button`` is clicked.

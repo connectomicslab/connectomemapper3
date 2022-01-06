@@ -1,4 +1,4 @@
-# Copyright (C) 2009-2021, Ecole Polytechnique Federale de Lausanne (EPFL) and
+# Copyright (C) 2009-2022, Ecole Polytechnique Federale de Lausanne (EPFL) and
 # Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland, and CMP3 contributors
 # All rights reserved.
 #
@@ -82,10 +82,10 @@ class DiffusionConfig(HasTraits):
 
     See Also
     --------
-    cmp.stages.diffusion.reconstruction.Dipy_recon_config
-    cmp.stages.diffusion.reconstruction.MRtrix_recon_config
-    cmp.stages.diffusion.tracking.Dipy_tracking_config
-    cmp.stages.diffusion.tracking.MRtrix_tracking_config
+    cmp.stages.diffusion.reconstruction.DipyReconConfig
+    cmp.stages.diffusion.reconstruction.MRtrixReconConfig
+    cmp.stages.diffusion.tracking.DipyTrackingConfig
+    cmp.stages.diffusion.tracking.MRtrixTrackingConfig
     cmp.stages.diffusion.diffusion.DiffusionStage
     """
 
@@ -111,20 +111,20 @@ class DiffusionConfig(HasTraits):
 
     def __init__(self):
         """Constructor of an :class:`cmp.stages.diffusion.diffusion.DiffusionConfig` object."""
-        self.dipy_recon_config = Dipy_recon_config(
+        self.dipy_recon_config = DipyReconConfig(
             imaging_model=self.diffusion_imaging_model,
             recon_mode=self.diffusion_model,
             tracking_processing_tool=self.tracking_processing_tool,
         )
-        self.mrtrix_recon_config = MRtrix_recon_config(
+        self.mrtrix_recon_config = MRtrixReconConfig(
             imaging_model=self.diffusion_imaging_model, recon_mode=self.diffusion_model
         )
-        self.dipy_tracking_config = Dipy_tracking_config(
+        self.dipy_tracking_config = DipyTrackingConfig(
             imaging_model=self.diffusion_imaging_model,
             tracking_mode=self.diffusion_model,
             SD=self.mrtrix_recon_config.local_model,
         )
-        self.mrtrix_tracking_config = MRtrix_tracking_config(
+        self.mrtrix_tracking_config = MRtrixTrackingConfig(
             tracking_mode=self.diffusion_model, SD=self.mrtrix_recon_config.local_model
         )
 
@@ -314,10 +314,10 @@ class DiffusionStage(Stage):
     --------
     cmp.pipelines.diffusion.diffusion.DiffusionPipeline
     cmp.stages.diffusion.diffusion.DiffusionConfig
-    cmp.stages.diffusion.reconstruction.Dipy_recon_config
-    cmp.stages.diffusion.reconstruction.MRtrix_recon_config
-    cmp.stages.diffusion.tracking.Dipy_tracking_config
-    cmp.stages.diffusion.tracking.MRtrix_tracking_config
+    cmp.stages.diffusion.reconstruction.DipyReconConfig
+    cmp.stages.diffusion.reconstruction.MRtrixReconConfig
+    cmp.stages.diffusion.tracking.DipyTrackingConfig
+    cmp.stages.diffusion.tracking.MRtrixTrackingConfig
     cmp.stages.diffusion.reconstruction.create_dipy_recon_flow
     cmp.stages.diffusion.reconstruction.create_mrtrix_recon_flow
     cmp.stages.diffusion.tracking.create_dipy_tracking_flow
