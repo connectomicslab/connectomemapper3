@@ -111,21 +111,13 @@ Connectome Mapper 3 provides a unique open-source software pipeline solution, wr
   a hierarchical multi-scale connectome representation of the structural and functional brain systems, on any sMRI / dMRI /
   rfMRI / EEG dataset structured according to the BIDS standard, by interfacing with a number
   of widely adopted neuroimaging tools.
-It has been developed around different principles and characteristics that are highlighted right after.
+It has been designed around different characteristics that are highlighted in the next sections.
 
-\textbf{A flexible workflow in the BIDS ecosystem for integrative multi-modal human connectome analyses.} CMP3 is
-   and implements pipelines that maps the structural and
-  / or functional connectomes from sMRI / dMRI and / or fMRI, for five macroscopic brain parcellation scales with hierarchical
-  region grouping (\autoref{fig:cmp3-diagram}).
-
-![\textbf{Overview of participant-level analysis workflow of the Connectome Mapper 3 BIDS App.}
-\label{fig:cmp3-diagram}](cmp3-diagram.png)
-
-The workflow is implemented with Nipype [@GorgolewskiNipype:2011] adopting an object-oriented programming style
-  with a modular architecture, composed of three different pipeline classes (anatomical, diffusion, and fMRI) dedicated to the processing of
-  each modality (sMRI, dMRI, rfMRI), that enables the addition of new steps, stages
-  or pipelines with relatively little effort to account for additional imaging modalities
-  and algorithms.
+\textbf{A flexible workflow in the BIDS ecosystem for integrative multi-modal human connectome analyses.}
+CMP3 is empowered by Nipype [@GorgolewskiNipype:2011] and adopts an object-oriented programming style with a
+  modular architecture.
+The workflow is composed of three different pipeline classes (anatomical, diffusion, and fMRI) dedicated
+  to the processing of each modality (sMRI, dMRI, rfMRI).
 Each pipeline class provides methods to create and execute a Nipype workflow that runs a number of
   Nipype sub-workflows, described by stage classes and implementing one or multiple tasks,
   where each task can interface with either a specific tool including in
@@ -133,8 +125,13 @@ Each pipeline class provides methods to create and execute a Nipype workflow tha
   ANTs [@AVANTS2008SymmetricBrain], dipy [@Garyfallidis2014DipyData],
   mrtrix3 [@Tournier2019MRtrix3:Visualisation], AFNI [@Cox2012], or with an in-house tool
   (\autoref{fig:cmp3-diagram}), taking datasets organized following the
-  Brain Imaging Data Structure standard as inputs; Pipeline and stage object attributes (parameters)
-  can be set by loading pipeline configuration files in `.json` format.
+  Brain Imaging Data Structure standard as inputs;
+Pipeline and stage object attributes (parameters) can be set by loading pipeline
+  configuration files in `.json` format.
+
+![\textbf{Overview of participant-level analysis workflow of the Connectome Mapper 3 BIDS App.}
+\label{fig:cmp3-diagram}](cmp3-diagram.png)
+
 BIDS allows CMP3 to automatically identify the structure of the input data, to check the
   availability of sMRI, dMRI, rfMRI, and derived data, and to collect all the available acquisition
   metadata.
@@ -144,6 +141,8 @@ This enables CMP3 to self-adapt to the type of dMRI acquisition scheme (DTI, DSI
   to appropriately set up the set of available pipeline configuration parameters for its processing.
 Empowered by the Nipype workflow engine, the re-execution of the workflow will resume the
   processing at any stages a change of parameter occurred.
+This also enables the addition of new steps, stages or pipelines with relatively little effort to account for additional
+  imaging modalities and algorithms.
 To ensure reproducibility and maximize re-usability of the tool, the implemented pipelines are encapsulated
   in a Docker [@merkeldocker:2014] and a Singularity [@Kurtzer2017Singularity:Compute] software image
   containers, in concordance to the BIDS App standard [@GorgolewskiBIDSMethods:2017].
@@ -154,8 +153,8 @@ Design considerations makes CMP3 not only easy to install and use (as it provide
   are already installed) on a diversity of multi-modal BIDS datasets, but also efficient in managing and scaling the pipeline execution
   while recording provenance, and easy to customize it for specific needs.
 
-\textbf{A revisited multi-scale cortical parcellation scheme.}CMP3 revisits
-  the multiscale cortical parcellation proposed by [@Cammoun2012:MappingMRI]
+\textbf{A revisited multi-scale cortical parcellation scheme.}
+CMP3 revisits the multiscale cortical parcellation proposed by [@Cammoun2012:MappingMRI]
   and its implementation, and extends with new structures including a subdivision for each
   brain hemisphere of the thalamus into 7 nuclei, the hippocampus into 12 subfields and the brainstem into 4 sub-structures.
 The parcellation derived from the Desikan-Killiany atlas [@Desikan2006AnInterest] has been
@@ -170,15 +169,16 @@ All segmented structures are combined at the end of process to create the final 
   at each scale along with the corresponding label index color mapping file in accordance to the BIDS Derivatives
   specifications.
 
-\textbf{A Graphical User Interface that reflects the workflow structure.} CMP3 takes advantage of Traits/TraitsUI
-  framework (\href{http://docs.enthought.com/traits/}{http://docs.enthought.com/traits/}) for building an
+\textbf{A Graphical User Interface that reflects the workflow structure.}
+CMP3 takes advantage of Traits/TraitsUI framework
+  (\href{http://docs.enthought.com/traits/}{http://docs.enthought.com/traits/}) for building an
   interactive Graphical User Interface (GUI), where pipeline and stage class attributes (parameters) are
   represented as Traits objects with TraitsUI graphical representations, which makes it easier to understand
   and extend.
 This has enabled the design of a GUI aka `cmpbidsappmanager` (Figure \autoref{fig:gui}) that reflects
-  the modular structure of the processing workflow. It has been designed to facilitate the configuration of all pipeline stages,
-  to guarantee the formatting of the `.json` pipeline configuration files (Figure \autoref{fig:gui} b),
-  to support their execution within the BIDS App (Figure \autoref{fig:gui} c), and to allow seamless
+  the modular structure of the processing workflow. It has been designed to facilitate the configuration
+  of all pipeline stages, to guarantee the formatting of the `.json` pipeline configuration files
+  (Figure \autoref{fig:gui} b), to support their execution within the BIDS App (Figure \autoref{fig:gui} c), and to allow seamless
   inspection of stage outputs with native visualization tools bundled with each software package
   involved in the processing stage (Figure \autoref{fig:gui} d).
 In particular, all sMRI are inspected with the fsleyes viewer shipped with fsl, brain tissue
@@ -191,12 +191,12 @@ Each pipeline can be individually configured and executed with the aid of the us
   parameters and re-execute when results at a given stage are found not to be satisfactory.
 CMP3 simplifies the creation of connectomes and makes it a straightforward process
   even for users not familiar with Nipype and software container technology. Nevertheless,
-  it can fulfil at the same time the needs of advanced users in charge of analyzing huge amount of data,
+  it still fulfils the needs of advanced users in charge of analyzing huge amount of data,
   offering them the possibility to tune and save all the parameters in configuration files and create a batch
   job to automatically process all data with the BIDS App.
 
 ![\textbf{Graphical User Interface of the Connectome Mapper 3.}
-It is designed to guide and support th user in all the steps required to
+It is designed to guide and support the user in all the steps required to
   perform an analysis.
 A typical procedure would consists of
   (a) the selection of the root directory of the BIDS dataset to be analyzed,
