@@ -59,7 +59,7 @@ The field of Magnetic Resonance (MR) Connectomics has rapidly expanded since its
 It has revolutionized the way to investigate `in-vivo`, `non-invasively` and 
   `safely` at different macroscopic scales the structural and functional systems of the 
   brain by modeling connections between brain areas as a graph or network, the so-called
-  `connectome`.
+  `connectome`, and has become a widely used method in Neuroscience [@Bassett2017]. 
 
 While brain areas are usually derived from high resolution T1 weighted  MR imaging, so-called
   structural MRI (sMRI), structural brain connectomes are mapped from diffusion MR imaging (dMRI)
@@ -90,13 +90,13 @@ Following these advances, a number of processing pipelines, supporting the mappi
   NDMG [@KiarAVariability:2018] and PyNets [@PisnerPyNets:2020] have been developed .
 They have demonstrated their capability in addressing all the challenges of data sharing,
   portability, computing scalability, reliability, reproducibility and transparency.
-However, none of the existing solutions provide a direct alternative to Connectome Mapper (CMP)
-  whose has been created before the emergence of the BIDS standards and the containerization technologies
+However, none of the existing solutions provide a direct alternative to Connectome Mapper (CMP),
+  whose has been created before the emergence of the BIDS standard, and the containerization technologies,
   to simplify the organisation and the analysis of sMRI and dMRI from raw data to multi-scale
   structural weighted connectomes [@Daducci:2012] using the in-house multi-scale Lausanne brain parcellation
   scheme [@Cammoun2012:MappingMRI], extended in a second version release with a preliminary pipeline
   for resting-state fMRI for integrative multimodal analyses.
-While CMP3 derives from the preceding two versions, it has made CMP massively evolve over the years
+While CMP3 derives from the two preceding versions, it has made CMP massively evolve over the years
   in terms of the underlying codebase, the tools used, and the scope of the functionality provided, including
   the migration to Python 3, a brand-new Lausanne parcellation scheme, the adoption of the BIDS standard for
   data organization, the encapsulation of the processing pipelines have been encapsulated in software container images, continuously tested in concordance to the
@@ -112,8 +112,6 @@ Connectome Mapper 3 provides a unique open-source software pipeline solution, wr
   rfMRI / EEG dataset structured according to the BIDS standard, by interfacing with a number
   of widely adopted neuroimaging tools.
 It has been developed around different principles and characteristics that are highlighted right after.
-
-\textbf{A new Lausanne parcellation scheme for multi-scale connectome mapping.}
 
 \textbf{A flexible workflow in the BIDS ecosystem for integrative multi-modal human connectome analyses.} CMP3 is
    and implements pipelines that maps the structural and
@@ -156,6 +154,22 @@ Design considerations makes CMP3 not only easy to install and use (as it provide
   are already installed) on a diversity of multi-modal BIDS datasets, but also efficient in managing and scaling the pipeline execution
   while recording provenance, and easy to customize it for specific needs.
 
+\textbf{A revisited multi-scale cortical parcellation scheme.}CMP3 revisits
+  the multiscale cortical parcellation proposed by [@Cammoun2012:MappingMRI]
+  and its implementation, and extends with new structures including a subdivision for each
+  brain hemisphere of the thalamus into 7 nuclei, the hippocampus into 12 subfields and the brainstem into 4 sub-structures.
+The parcellation derived from the Desikan-Killiany atlas [@Desikan2006AnInterest] has been
+  made symmetric by projecting the right hemisphere labels to the left hemisphere, matching the
+  boundaries of the projected regions of the left hemisphere to the boundaries of the original regions
+  of the left hemisphere, applying this transformation to the rest of the scales, and saving
+  each parcellation scale in a Freesurfer annotation file.
+After generating the volumetric parcellations from the annotation files, one can now decide or not
+  to perform brainstem parcellation [@Iglesias2015BayesianMRI], hippocampal subfields segmentation [@Iglesias2015AMRI],
+  and / or probabilistic atlas-based segmentation of the thalamic nuclei [@Najdenovska2018In-vivoImaging].
+All segmented structures are combined at the end of process to create the final parcellation nifti image
+  at each scale along with the corresponding label index color mapping file in accordance to the BIDS Derivatives
+  specifications.
+
 \textbf{A Graphical User Interface that reflects the workflow structure.} CMP3 takes advantage of Traits/TraitsUI
   framework (\href{http://docs.enthought.com/traits/}{http://docs.enthought.com/traits/}) for building an
   interactive Graphical User Interface (GUI), where pipeline and stage class attributes (parameters) are
@@ -170,7 +184,7 @@ This has enabled the design of a GUI aka `cmpbidsappmanager` (Figure \autoref{fi
 In particular, all sMRI are inspected with the fsleyes viewer shipped with fsl, brain tissue
   segmentation and parcellation are inspected with freeview, mrview is used to visualize the fiber
   orientation distribution functions estimated by the diffusion signal model, and TrackVis is used
-  to visualize the fiber bundles estimated with tractography.
+  to render the fiber bundles estimated with tractography.
 Each pipeline can be individually configured and executed with the aid of the user-friendly
   GUI and the output of each stage can be visually reviewed, enabling the user to keep
   an eye on the data being processed and easily understand the cause of the problems, change the
