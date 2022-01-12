@@ -156,7 +156,7 @@ Design considerations makes CMP3 not only easy to install and use (as it provide
 CMP3 revisits the multiscale cortical parcellation proposed by [@Cammoun2012:MappingMRI]
   and its implementation, and extends with new structures including a subdivision for each
   brain hemisphere of the thalamus into 7 nuclei, the hippocampus into 12 subfields and the brainstem into
-  4 sub-structures (Figure \autoref{fig:parc}).
+  4 sub-structures (\autoref{fig:parc}).
 The parcellation derived from the Desikan-Killiany atlas [@Desikan2006AnInterest] has been
   made symmetric by projecting the right hemisphere labels to the left hemisphere, matching the
   boundaries of the projected regions of the left hemisphere to the boundaries of the original regions
@@ -178,12 +178,12 @@ CMP3 takes advantage of Traits/TraitsUI framework
   interactive Graphical User Interface (GUI), where pipeline and stage class attributes (parameters) are
   represented as Traits objects with TraitsUI graphical representations, which makes it easier to understand
   and extend.
-This has enabled the design of a GUI aka `cmpbidsappmanager` (Figure \autoref{fig:gui}) that reflects
+This has enabled the design of a GUI aka `cmpbidsappmanager` (\autoref{fig:gui}) that reflects
   the modular structure of the processing workflow. It has been designed to facilitate the configuration
   of all pipeline stages, to guarantee the formatting of the `.json` pipeline configuration files
-  (Figure \autoref{fig:gui} b), to support their execution within the BIDS App (Figure \autoref{fig:gui} c), and to allow seamless
+  (\autoref{fig:gui} b), to support their execution within the BIDS App (\autoref{fig:gui} c), and to allow seamless
   inspection of stage outputs with native visualization tools bundled with each software package
-  involved in the processing stage (Figure \autoref{fig:gui} d).
+  involved in the processing stage (\autoref{fig:gui} d).
 In particular, all sMRI are inspected with the fsleyes viewer shipped with fsl, brain tissue
   segmentation and parcellation are inspected with freeview, mrview is used to visualize the fiber
   orientation distribution functions estimated by the diffusion signal model, and TrackVis is used
