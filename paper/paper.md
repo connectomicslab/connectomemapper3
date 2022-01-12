@@ -265,9 +265,10 @@ Furthermore, bugs as well as both internal and external developer contributions 
 # Mention
 
 Connectome Mapper 3 has already been employed with success in a number of methodological
-  and clinical research articles [@Carboni2019TheOutcome] [@Zheng2020GeometricConnectomeb]
-  [@Vorderwulbecke2020High-densityPoint] [@CarboniNeuro:2020] [@GlombNeuro:2020] [@GlombNet:2020]
-  [@AkselrodHBM:2021] [@RueQueraltNeuro:2021] [@PascucciNet:2021] [@ds003505:1.0.1].
+  [@Zheng2020GeometricConnectomeb] [@GlombNeuro:2020] [@GlombNet:2020] [@AkselrodHBM:2021]
+  [@RueQueraltNeuro:2021] [@PascucciNet:2021], clinical [@Carboni2019TheOutcome] 
+  [@Vorderwulbecke2020High-densityPoint] [@CarboniNeuro:2020], and data [@ds003505:1.0.1]
+  research articles. 
 
 # Acknowledgements
 
