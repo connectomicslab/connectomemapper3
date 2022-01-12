@@ -72,16 +72,15 @@ The size and organization of these datasets as well as the increasing complexity
   pipelines to analyze them present important challenges for scalable computing, data sharing,
   reproducibility and transparency of the analysis.
 
-The last ten years have indeed witnessed a trend towards the adoption by the community of open research
-  practices, which promotes `open data` and `open method`, to not only address these challenges, but also
-  due to the evolution of research incentives.
+The last ten years have indeed witnessed an evolution of research incentives and a trend towards the adoption by the community of open research
+  practices, which promotes `open data` and `open method`, to address these challenges.
 This has led for instance to the elaboration of the principles of open and reproducible research for
   neuroimaging using Magnetic Resonance Imaging (MRI) [@Nichols:2017] and to the recommendation of
   standard practices for sharing code and programs [@EglenTowardNeuroscience:2017]. 
 To ease and automate the practice of sharing raw and processed neuroimaging data and code with
   appropriate metadata and provenance records, multiple initiatives have developed new standards,
   tools, and educational resources [@GorgolewskiNipype:2011] [@GorgolewskiTheExperiments:2016]
-  [@GorgolewskiBIDSMethods:2017].
+  [@GorgolewskiBIDSMethods:2017] [@Kennedy2019].
 
 Following these advances, a number of processing pipelines, supporting the mapping of connectomes
   derived from MRI data organized following the BIDS standard, such as C-PAC [@cpac:2013],
