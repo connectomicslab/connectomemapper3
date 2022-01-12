@@ -152,10 +152,11 @@ Design considerations makes CMP3 not only easy to install and use (as it provide
   are already installed) on a diversity of multi-modal BIDS datasets, but also efficient in managing and scaling the pipeline execution
   while recording provenance, and easy to customize it for specific needs.
 
-\textbf{A revisited multi-scale cortical parcellation scheme.}
+\textbf{A revisited and extended multi-scale cortical parcellation scheme.}
 CMP3 revisits the multiscale cortical parcellation proposed by [@Cammoun2012:MappingMRI]
   and its implementation, and extends with new structures including a subdivision for each
-  brain hemisphere of the thalamus into 7 nuclei, the hippocampus into 12 subfields and the brainstem into 4 sub-structures.
+  brain hemisphere of the thalamus into 7 nuclei, the hippocampus into 12 subfields and the brainstem into
+  4 sub-structures (Figure \autoref{fig:parc}).
 The parcellation derived from the Desikan-Killiany atlas [@Desikan2006AnInterest] has been
   made symmetric by projecting the right hemisphere labels to the left hemisphere, matching the
   boundaries of the projected regions of the left hemisphere to the boundaries of the original regions
@@ -167,6 +168,9 @@ After generating the volumetric parcellations from the annotation files, one can
 All segmented structures are combined at the end of process to create the final parcellation nifti image
   at each scale along with the corresponding label index color mapping file in accordance to the BIDS Derivatives
   specifications.
+
+![\textbf{Creation of the new Lausanne2018 Connectome Parcellation.}
+\label{fig:parc}](Lausanne2018_parcellation_diagram.png)
 
 \textbf{A Graphical User Interface that reflects the workflow structure.}
 CMP3 takes advantage of Traits/TraitsUI framework
