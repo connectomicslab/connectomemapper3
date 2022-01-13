@@ -43,7 +43,7 @@ warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
 
 # Set forkserver mode to enable a hard-limited memory-scope
-multiprocessing.set_start_method('forkserver')
+multiprocessing.set_start_method('forkserver', force=True)
 
 
 def report_usage(event_category, event_action, event_label, verbose=False):
