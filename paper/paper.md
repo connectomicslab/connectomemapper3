@@ -101,7 +101,7 @@ While CMP3 derives from the two preceding versions, it has made CMP massively ev
   the migration to Python 3, a brand-new Lausanne parcellation scheme, the adoption of the BIDS standard for
   data organization, the encapsulation of the processing pipelines in software container images,
   continuously tested in concordance to the BIDS Apps standard, major upgrades of the diffusion and
-  fMRI pipelines, and the current extension to Electroencephalography (EEG), initiated during OHBM BrainHack 2020
+  fMRI pipelines, and the current extension to ElectroEncephaloGraphy (EEG), initiated during OHBM BrainHack 2020
   ([https://github.com/ohbm/hackathon2020/issues/214](https://github.com/ohbm/hackathon2020/issues/214)). 
 
 # Summary
@@ -110,18 +110,17 @@ Connectome Mapper 3 (CMP3) provides a unique open-source software pipeline solut
   with a Graphical User Interface (GUI) for researchers to easily, reliably and transparently
   interface with a number of widely adopted neuroimaging tools to create a hierarchical multi-scale
   connectome representation of the structural and functional brain systems, from any sMRI / dMRI /
-  rfMRI / EEG dataset structured according to the BIDS standard. In this work, we present CMP3
-  around the principal characteristics and principles it has been designed. 
+  rfMRI / EEG dataset structured according to the BIDS standard (\autoref{fig:cmp3-diagram}).
+In this work, we present CMP3 around the principal characteristics and principles it has been designed. 
+
+![\textbf{Overview of participant-level analysis workflow of the Connectome Mapper 3 BIDS App.}
+\label{fig:cmp3-diagram}](cmp3-diagram.png)
 
 \textbf{A flexible and interoperable workflow for multi-modal human connectome mapping.}
 CMP3 relies on Nipype [@GorgolewskiNipype:2011] and adopts an object-oriented programming style with a
   modular architecture.
 The workflow is composed of three different pipeline classes (anatomical, diffusion, and fMRI) dedicated
-  to the processing of each modality (sMRI, dMRI, rfMRI), as illustrated by \autoref{fig:cmp3-diagram}.
-
-![\textbf{Overview of participant-level analysis workflow of the Connectome Mapper 3 BIDS App.}
-\label{fig:cmp3-diagram}](cmp3-diagram.png)
-
+  to the processing of each modality (sMRI, dMRI, rfMRI).
 Each pipeline class provides methods to create and execute a Nipype workflow that runs a number of
   sub-workflows, described by stage classes and implementing one or multiple tasks,
   where each task can interface with either a specific tool including in
@@ -129,14 +128,16 @@ Each pipeline class provides methods to create and execute a Nipype workflow tha
   ANTs [@AVANTS2008SymmetricBrain], dipy [@Garyfallidis2014DipyData],
   mrtrix3 [@Tournier2019MRtrix3:Visualisation], AFNI [@Cox2012], or with an in-house tool
   (\autoref{fig:cmp3-diagram}), taking datasets organized following the
-  Brain Imaging Data Structure standard as inputs;
-Pipeline and stage object attributes (parameters) can be set by loading pipeline
-  configuration files in `.json` format.
+  Brain Imaging Data Structure standard as inputs.
 BIDS allows CMP3 to automatically identify the structure of the input data, to check the
   availability of sMRI, dMRI, rfMRI, and derived data, and to collect all the available acquisition
   metadata.
-The processing pipelines and stages are dynamically built and configured depending on the input
-  data (sMRI, dMRI, rfMRI) and parameters set in the configuration files.
+To guarantee consistent processing in large neuroimaging cohorts,
+  pipeline and stage object attributes (parameters) can be set by loading pipeline
+  configuration files in `.json` format.
+The processing pipelines and stages are dynamically built and configured depending on (1) the input
+  data (sMRI, dMRI, rfMRI), and on (2) pipeline stage parameters set in configuration files in `.json`
+  format.
 This enables CMP3 to self-adapt to the type of dMRI acquisition scheme (DTI, DSI, multi-shell) and
   to appropriately set up the set of available pipeline configuration parameters for its processing.
 Empowered by the Nipype workflow engine, the re-execution of the workflow will resume the
