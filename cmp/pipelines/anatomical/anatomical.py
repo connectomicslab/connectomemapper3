@@ -13,7 +13,7 @@ import os
 import glob
 import shutil
 import sys
-from multiprocessing import set_start_method, Process, Manager
+from multiprocessing import Process, Manager
 
 import nipype.pipeline.engine as pe
 import nipype.interfaces.utility as util
@@ -1008,9 +1008,6 @@ class AnatomicalPipeline(cmp_common.Pipeline):
 
     def process(self):
         """Executes the anatomical pipeline workflow and returns True if successful."""
-        # Set forkserver mode to enable a hard-limited memory-scope
-        set_start_method('forkserver')
-
         # Enable the use of the W3C PROV data model to capture and represent provenance in Nipype
         # config.enable_provenance()
 

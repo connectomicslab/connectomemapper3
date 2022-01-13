@@ -42,6 +42,9 @@ from cmp.project import ProjectInfo, run_individual
 warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
 
+# Set forkserver mode to enable a hard-limited memory-scope
+multiprocessing.set_start_method('forkserver')
+
 
 def report_usage(event_category, event_action, event_label, verbose=False):
     """Send HTTP POST event to Google Analytics
