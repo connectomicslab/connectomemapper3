@@ -8,9 +8,12 @@
 """Anatomical pipeline Class definition."""
 
 import datetime
+import gc
 import os
 import glob
 import shutil
+import sys
+from multiprocessing import set_start_method, Process, Manager
 
 import nipype.pipeline.engine as pe
 import nipype.interfaces.utility as util
@@ -821,7 +824,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         return sinker
 
     def create_pipeline_flow(
-        self, cmp_deriv_subject_directory, nipype_deriv_subject_directory
+        self, cmp_deriv_subject_directory, nipype_deriv_subject_directory, retval
     ):
         """Create the pipeline workflow.
 
@@ -835,10 +838,10 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             Intermediate Nipype output directory of a subject
             e.g. ``/output_dir/nipype/sub-XX/(ses-YY)``
 
-        Returns
-        -------
-        anat_flow : nipype.pipeline.engine.Workflow
-            An instance of :class:`nipype.pipeline.engine.Workflow`
+        retval : Dict
+            Output dictionary containing the built workflow (`retval["workflow"]`)
+            to allow isolation using a ``multiprocessing.Process`` that allows CMP3 to enforce
+            a hard-limited memory-scope.
         """
         # Data grabber for inputs
         datasource = self.create_datagrabber_node(
@@ -853,7 +856,8 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         # Clear previous outputs
         self.clear_stages_outputs()
 
-        # Create common_flow
+        # Create common_flow and initialize to None to output workflow
+        retval['workflow'] = None
         anat_flow = pe.Workflow(
             name="anatomical_pipeline",
             base_dir=os.path.abspath(nipype_deriv_subject_directory),
@@ -998,11 +1002,15 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         )
         # fmt: on
 
-        self.flow = anat_flow
-        return anat_flow
+        retval["workflow"] = anat_flow
+        retval['return_code'] = 0
+        return retval
 
     def process(self):
         """Executes the anatomical pipeline workflow and returns True if successful."""
+        # Set forkserver mode to enable a hard-limited memory-scope
+        set_start_method('forkserver')
+
         # Enable the use of the W3C PROV data model to capture and represent provenance in Nipype
         # config.enable_provenance()
 
@@ -1049,8 +1057,8 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         config.update_config(
             {
                 "logging": {
-                    "workflow_level": "DEBUG",
-                    "interface_level": "DEBUG",
+                    "workflow_level": "INFO",
+                    "interface_level": "INFO",
                     "log_directory": os.path.join(
                         nipype_deriv_subject_directory, "anatomical_pipeline"
                     ),
@@ -1071,18 +1079,29 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         iflogger = logging.getLogger("nipype.interface")
         iflogger.info("**** Processing ****")
 
-        anat_flow = self.create_pipeline_flow(
-            cmp_deriv_subject_directory=cmp_deriv_subject_directory,
-            nipype_deriv_subject_directory=nipype_deriv_subject_directory,
-        )
+        # Call self.create_pipeline_flow(cmp_deriv_subject_directory, nipype_deriv_subject_directory)
+        with Manager() as mgr:
+            retval = mgr.dict()
+            p = Process(target=self.create_pipeline_flow,
+                        args=(cmp_deriv_subject_directory, nipype_deriv_subject_directory, retval))
+            p.start()
+            p.join()
+
+            if p.exitcode != 0:
+                sys.exit(p.exitcode)
+
+            anat_flow = retval['workflow']
+
+        if anat_flow is None:
+            sys.exit(1)
+
         anat_flow.write_graph(graph2use="colored", format="svg", simple_form=True)
 
-        if self.number_of_cores != 1:
-            anat_flow.run(
+        # Clean up master process before running workflow, which may create forks
+        gc.collect()
+        anat_flow.run(
                 plugin="MultiProc", plugin_args={"n_procs": self.number_of_cores}
             )
-        else:
-            anat_flow.run()
 
         self._update_parcellation_scheme()
 
