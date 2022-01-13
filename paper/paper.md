@@ -29,12 +29,13 @@ authors:
     orcid: 0000-0003-1923-1653
     affiliation: 2
   - name: Mikkel Schöttner
+    orcid: 0000-0002-4521-9837 
     affiliation: 1
   - name: Jonathan Wirsich
     orcid: 0000-0003-0588-9710
     affiliation: 3
   - name: Patric Hagmann
-    orcid: 0000-0002-4441-899X
+    orcid: 0000-0002-2854-6561
     affiliation: 1
 affiliations:
  - name: Radiology Department, Centre Hospitalier Universitaire Vaudois and University of Lausanne (CHUV-UNIL), Switzerland
