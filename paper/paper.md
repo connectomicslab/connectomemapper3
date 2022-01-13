@@ -114,12 +114,16 @@ Connectome Mapper 3 provides a unique open-source software pipeline solution, wr
 It has been designed around different characteristics that are highlighted in the next sections.
 
 \textbf{A flexible workflow for multi-modal human connectome mapping in the BIDS ecosystem.}
-CMP3 is empowered by Nipype [@GorgolewskiNipype:2011] and adopts an object-oriented programming style with a
+CMP3 relies on Nipype [@GorgolewskiNipype:2011] and adopts an object-oriented programming style with a
   modular architecture.
 The workflow is composed of three different pipeline classes (anatomical, diffusion, and fMRI) dedicated
-  to the processing of each modality (sMRI, dMRI, rfMRI).
+  to the processing of each modality (sMRI, dMRI, rfMRI), as illustrated by \autoref{fig:cmp3-diagram}.
+
+![\textbf{Overview of participant-level analysis workflow of the Connectome Mapper 3 BIDS App.}
+\label{fig:cmp3-diagram}](cmp3-diagram.png)
+
 Each pipeline class provides methods to create and execute a Nipype workflow that runs a number of
-  Nipype sub-workflows, described by stage classes and implementing one or multiple tasks,
+  sub-workflows, described by stage classes and implementing one or multiple tasks,
   where each task can interface with either a specific tool including in
   FSL [@Jenkinson2012FSL], FreeSurfer [@Fischl2012FreeSurfer],
   ANTs [@AVANTS2008SymmetricBrain], dipy [@Garyfallidis2014DipyData],
@@ -128,10 +132,6 @@ Each pipeline class provides methods to create and execute a Nipype workflow tha
   Brain Imaging Data Structure standard as inputs;
 Pipeline and stage object attributes (parameters) can be set by loading pipeline
   configuration files in `.json` format.
-
-![\textbf{Overview of participant-level analysis workflow of the Connectome Mapper 3 BIDS App.}
-\label{fig:cmp3-diagram}](cmp3-diagram.png)
-
 BIDS allows CMP3 to automatically identify the structure of the input data, to check the
   availability of sMRI, dMRI, rfMRI, and derived data, and to collect all the available acquisition
   metadata.
