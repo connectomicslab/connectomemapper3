@@ -85,9 +85,9 @@ To ease and automate the practice of sharing raw and processed neuroimaging data
 
 Following these advances, a number of processing pipelines, supporting the mapping of connectomes
   derived from MRI data organized following the BIDS standard, such as C-PAC [@cpac:2013],
-  NIAK [@BellecNeuroimagingNIAK:2016], fMRIPrep [@Ghosh:2018],
-  dMRIPrep [@dmriprep:2019], QSIPREP [@CieslakQSIPrep:2020], MRtrix3_connectome [@Smith2019:BIDSApp],
-  NDMG [@KiarAVariability:2018] and PyNets [@PisnerPyNets:2020] have been developed .
+  NIAK [@BellecNeuroimagingNIAK:2016], fMRIPrep [@Ghosh:2018], dMRIPrep [@dmriprep:2019],
+  QSIPREP [@CieslakQSIPrep:2020], MRtrix3_connectome [@Smith2019:BIDSApp], NDMG [@KiarAVariability:2018]
+  and PyNets [@PisnerPyNets:2020] have been developed.
 They have demonstrated their capability in addressing all the challenges of data sharing,
   portability, computing scalability, reliability, reproducibility and transparency.
 However, none of the existing solutions provide a direct alternative to Connectome Mapper (CMP),
@@ -99,21 +99,21 @@ However, none of the existing solutions provide a direct alternative to Connecto
 While CMP3 derives from the two preceding versions, it has made CMP massively evolve over the years
   in terms of the underlying codebase, the tools used, and the scope of the functionality provided, including
   the migration to Python 3, a brand-new Lausanne parcellation scheme, the adoption of the BIDS standard for
-  data organization, the encapsulation of the processing pipelines have been encapsulated in software container images, continuously tested in concordance to the
-  BIDS Apps standard, the refinement of the fMRI pipeline, and the current extension to
-  Electroencephalography (EEG), initiated during OHBM BrainHack 2020
+  data organization, the encapsulation of the processing pipelines in software container images,
+  continuously tested in concordance to the BIDS Apps standard, major upgrades of the diffusion and
+  fMRI pipelines, and the current extension to Electroencephalography (EEG), initiated during OHBM BrainHack 2020
   ([https://github.com/ohbm/hackathon2020/issues/214](https://github.com/ohbm/hackathon2020/issues/214)). 
 
 # Summary
 
-Connectome Mapper 3 provides a unique open-source software pipeline solution, written in Python 3,
+Connectome Mapper 3 (CMP3) provides a unique open-source software pipeline solution, written in Python 3,
   with a Graphical User Interface (GUI) for researchers to easily, reliably and transparently
   interface with a number of widely adopted neuroimaging tools to create a hierarchical multi-scale
   connectome representation of the structural and functional brain systems, from any sMRI / dMRI /
-  rfMRI / EEG dataset structured according to the BIDS standard.
-It has been designed around different characteristics that are highlighted in the next sections.
+  rfMRI / EEG dataset structured according to the BIDS standard. In this work, we present CMP3
+  around the principal characteristics and principles it has been designed. 
 
-\textbf{A flexible workflow for multi-modal human connectome mapping in the BIDS ecosystem.}
+\textbf{A flexible and interoperable workflow for multi-modal human connectome mapping.}
 CMP3 relies on Nipype [@GorgolewskiNipype:2011] and adopts an object-oriented programming style with a
   modular architecture.
 The workflow is composed of three different pipeline classes (anatomical, diffusion, and fMRI) dedicated
@@ -173,7 +173,7 @@ All segmented structures are combined at the end of process to create the final 
 ![\textbf{Creation of the new Lausanne2018 Connectome Parcellation.}
 \label{fig:parc}](Lausanne2018_parcellation_diagram.png)
 
-\textbf{A Graphical User Interface that reflects the workflow structure.}
+\textbf{A Graphical User Interface reflecting the workflow structure.}
 CMP3 takes advantage of Traits/TraitsUI framework
   (\href{http://docs.enthought.com/traits/}{http://docs.enthought.com/traits/}) for building an
   interactive Graphical User Interface (GUI), where pipeline and stage class attributes (parameters) are
