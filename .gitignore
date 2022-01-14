@@ -5,6 +5,7 @@
 *.mp4
 atom-config.txt
 atom*.txt
+**.xdebug*
 
 .DS_Store
 ._*
@@ -30,5 +31,10 @@ dev/notebooks
 dev/notebooks/*
 
 *.ipynb_checkpoints
+**/*.ipynb_checkpoints/
+**/*.ipynb_checkpoints/*
 
 .idea/
+**/*.idea/*
+.vscode
+*.egg-info

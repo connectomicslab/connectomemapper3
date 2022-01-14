@@ -6,7 +6,7 @@ echo "SHELL: $SHELL" && \
 echo "PATH: $PATH" && \
 . activate "${CONDA_ENV}" &&
 xvfb-run -s "-screen 0 900x900x24 -ac +extension GLX -noreset" \
--a coverage run --source=cmp,cmtklib --omit=*/bidsappmanager/*,*/viz/* \
+-a coverage run --source=cmp,cmtklib --omit=*/bidsappmanager/*,*/cli/*,*/viz/*,*/process*,*/bids/network* \
 /app/connectomemapper3/run.py "$@" \
 |& tee /bids_dir/code/log.txt &&
 coverage html -d /bids_dir/code/coverage_html &&

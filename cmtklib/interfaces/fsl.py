@@ -1,4 +1,4 @@
-# Copyright (C) 2009-2021, Ecole Polytechnique Federale de Lausanne (EPFL) and
+# Copyright (C) 2009-2022, Ecole Polytechnique Federale de Lausanne (EPFL) and
 # Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland, and CMP3 contributors
 # All rights reserved.
 #
@@ -16,7 +16,7 @@ from nipype.interfaces.base import (traits, BaseInterface, BaseInterfaceInputSpe
                                     InputMultiPath, OutputMultiPath, File,
                                     isdefined)
 import nipype.interfaces.fsl as fsl
-from traits.trait_types import Float
+from traits.trait_types import Float, Enum
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
@@ -49,7 +49,8 @@ class BinaryThreshold(FSLCommand):
     >>> thresh.inputs.in_file = '/path/to/probseg.nii.gz'
     >>> thresh.inputs.thresh = 0.5
     >>> thresh.inputs.out_file = '/path/to/output_binseg.nii.gz'
-    >>> thresh.run() # doctest: +SKIP
+    >>> thresh.run()  # doctest: +SKIP
+
     """
 
     _cmd = "fslmaths"
@@ -107,6 +108,7 @@ class MathsCommand(FSLCommand):
     >>> fsl_maths.inputs.nan2zeros = True
     >>> fsl_maths.inputs.out_file = '/path/to/image_with_no_nans.nii.gz'
     >>> fsl_maths.run()  # doctest: +SKIP
+
     """
 
     _cmd = "fslmaths"
@@ -167,6 +169,7 @@ class FSLCreateHD(CommandLine):
     >>> fsl_create.inputs.datatype = '16' # 16: float
     >>> fsl_create.inputs.out_filename = '/path/to/generated_image.nii.gz'
     >>> fsl_create.run()  # doctest: +SKIP
+
     """
 
     _cmd = 'fslcreatehd'
@@ -265,7 +268,8 @@ class Orient(FSLCommand):
     >>> fsl_orient.inputs.in_file = 'input_image.nii.gz'
     >>> fsl_orient.inputs.force_radiological = True
     >>> fsl_orient.inputs.out_file = 'output_image.nii.gz'
-    >>> fsl_orient.run() # doctest: +SKIP
+    >>> fsl_orient.run()  # doctest: +SKIP
+
     """
 
     _cmd = "fslorient"
@@ -342,7 +346,8 @@ class Eddy(FSLCommand):
     >>>                  bvecs='diffusion.bvecs',
     >>>                  bvals='diffusion.bvals',
     >>>                  out_file="diffusion_eddyc.nii")
-    >>> eddyc.run() # doctest: +SKIP
+    >>> eddyc.run()  # doctest: +SKIP
+
     """
 
     _cmd = 'eddy'
@@ -389,7 +394,8 @@ class EddyOpenMP(FSLCommand):
     >>>                        bvecs='diffusion.bvecs',
     >>>                        bvals='diffusion.bvals',
     >>>                        out_file="diffusion_eddyc.nii")
-    >>> eddyc.run() # doctest: +SKIP
+    >>> eddyc.run()  # doctest: +SKIP
+
     """
 
     _cmd = 'eddy_openmp'
@@ -435,6 +441,9 @@ class ApplymultipleXfmInputSpec(BaseInterfaceInputSpec):
     reference = File(desc="Reference image used for target space",
                      mandatory=True, exists=True)
 
+    interp = Enum('nearestneighbour', 'spline',
+                  desc='Interpolation used')
+
 
 class ApplymultipleXfmOutputSpec(TraitedSpec):
     out_files = OutputMultiPath(File(), desc="Transformed files")
@@ -454,7 +463,8 @@ class ApplymultipleXfm(BaseInterface):
     >>>                              '/path/to/sub-01_atlas-L2018_desc-scale5_dseg.nii.gz']
     >>> apply_xfm.inputs.xfm_file = '/path/to/flirt_transform.xfm'
     >>> apply_xfm.inputs.reference = '/path/to/sub-01_meanBOLD.nii.gz'
-    >>> apply_xfm.run() # doctest: +SKIP
+    >>> apply_xfm.run()  # doctest: +SKIP
+
     """
 
     input_spec = ApplymultipleXfmInputSpec
@@ -462,8 +472,12 @@ class ApplymultipleXfm(BaseInterface):
 
     def _run_interface(self, runtime):
         for in_file in self.inputs.in_files:
-            ax = fsl.ApplyXFM(in_file=in_file, in_matrix_file=self.inputs.xfm_file, apply_xfm=True,
-                              interp="nearestneighbour", reference=self.inputs.reference)
+            ax = fsl.ApplyXFM(
+                in_file=in_file,
+                in_matrix_file=self.inputs.xfm_file,
+                apply_xfm=True,
+                interp=self.inputs.interp,
+                reference=self.inputs.reference)
             ax.run()
         return runtime
 
@@ -504,7 +518,8 @@ class ApplymultipleWarp(BaseInterface):
     >>>                               '/path/to/sub-01_atlas-L2018_desc-scale5_dseg.nii.gz']
     >>> apply_warp.inputs.field_file = '/path/to/fnirt_deformation.nii.gz'
     >>> apply_warp.inputs.ref_file = '/path/to/sub-01_meanBOLD.nii.gz'
-    >>> apply_warp.run() # doctest: +SKIP
+    >>> apply_warp.run()  # doctest: +SKIP
+
     """
 
     input_spec = ApplymultipleWarpInputSpec
@@ -512,8 +527,12 @@ class ApplymultipleWarp(BaseInterface):
 
     def _run_interface(self, runtime):
         for in_file in self.inputs.in_files:
-            ax = fsl.ApplyWarp(in_file=in_file, interp=self.inputs.interp, field_file=self.inputs.field_file,
-                               ref_file=self.inputs.ref_file)
+            ax = fsl.ApplyWarp(
+                in_file=in_file,
+                interp=self.inputs.interp,
+                field_file=self.inputs.field_file,
+                ref_file=self.inputs.ref_file
+            )
             ax.run()
         return runtime
 
@@ -542,7 +561,8 @@ class CreateAcqpFile(BaseInterface):
     >>> from cmtklib.interfaces.fsl import CreateAcqpFile
     >>> create_acqp = CreateAcqpFile()
     >>> create_acqp.inputs.total_readout  = 0.28
-    >>> create_acqp.run() # doctest: +SKIP
+    >>> create_acqp.run()  # doctest: +SKIP
+
     """
 
     input_spec = CreateAcqpFileInputSpec
@@ -585,7 +605,8 @@ class CreateIndexFile(BaseInterface):
     >>> from cmtklib.interfaces.fsl import CreateIndexFile
     >>> create_index = CreateIndexFile()
     >>> create_index.inputs.in_grad_mrtrix  = 'grad.txt'
-    >>> create_index.run() # doctest: +SKIP
+    >>> create_index.run()  # doctest: +SKIP
+
     """
 
     input_spec = CreateIndexFileInputSpec

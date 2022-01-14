@@ -1,36 +1,35 @@
-# Copyright (C) 2009-2021, Ecole Polytechnique Federale de Lausanne (EPFL) and
+# Copyright (C) 2009-2022, Ecole Polytechnique Federale de Lausanne (EPFL) and
 # Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland, and CMP3 contributors
 # All rights reserved.
 #
 #  This software is distributed under the open-source license Modified BSD.
 """This module defines the `cmpbidsappmanager` script that launches the Graphical User Interface."""
 
-from traits.etsconfig.api import ETSConfig
-# Setup Qt5/Pyside2 backend for traitsui
-ETSConfig.toolkit = 'qt'
-
-import os
-os.environ['ETS_TOOLKIT'] = 'qt'
-# os.environ['QT_API'] = 'pyqt5'
-os.environ['QT_API'] = 'pyside2'
-
 import sys
 
+# Setup Qt5/Pyside2 backend for traitsui
+from traits.etsconfig.api import ETSConfig
+ETSConfig.toolkit = "qt"  # pylint: disable=E402 # noqa
+import os
+os.environ["ETS_TOOLKIT"] = "qt"  # pylint: disable=E402 # noqa
+# os.environ['QT_API'] = 'pyqt5'
+os.environ["QT_API"] = "pyside2"  # pylint: disable=E402 # noqa
+
 # CMP imports
-from cmp.bidsappmanager import gui
 from cmp.info import __version__, __copyright__
 from cmtklib.util import print_warning
+import cmp.bidsappmanager.gui.principal
 
 
 def info():
     """Print version and copyright information."""
     print("\nConnectome Mapper {} - BIDS App Manager ".format(__version__))
-    print_warning('------------------------------------------------------')
+    print_warning("------------------------------------------------------")
     print_warning("""{}""".format(__copyright__))
-    print_warning('------------------------------------------------------')
-    print('------------------------------------------------------')
+    print_warning("------------------------------------------------------")
+    print("------------------------------------------------------")
     print("  .. INFO: Use {} for graphical backend".format(ETSConfig.toolkit))
-    print('------------------------------------------------------\n')
+    print("------------------------------------------------------\n")
 
 
 def usage():
@@ -77,7 +76,7 @@ def main():
 
     argc = len(sys.argv)
     if argc == 1:  # no args, launch the GUI
-        mw = gui.CMP_MainWindow()
+        mw = cmp.bidsappmanager.gui.principal.MainWindow()
         _ = mw.configure_traits()
         exit_code = 0
     else:

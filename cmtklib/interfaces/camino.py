@@ -1,4 +1,4 @@
-# Copyright (C) 2009-2021, Ecole Polytechnique Federale de Lausanne (EPFL) and
+# Copyright (C) 2009-2022, Ecole Polytechnique Federale de Lausanne (EPFL) and
 # Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland, and CMP3 contributors
 # All rights reserved.
 #
@@ -7,7 +7,9 @@
 """The Camino module provides Nipype interfaces for Camino functions missing in nipype or modified.
 
 .. note:
+
     Module not used anymore by CMP3.
+
 """
 
 import os
@@ -86,7 +88,8 @@ class DTLUTGen(StdOutCommandLine):
     >>> dtl = cmon.DTLUTGen()
     >>> dtl.inputs.snr = 16
     >>> dtl.inputs.scheme_file = 'A.scheme'
-    >>> dtl.run()                  # doctest: +SKIP
+    >>> dtl.run()  # doctest: +SKIP
+
     """
 
     _cmd = 'dtlutgen'
@@ -162,7 +165,8 @@ class PicoPDFs(StdOutCommandLine):
     >>> pdf.inputs.inputmodel = 'dt'
     >>> pdf.inputs.luts = 'lut_file'
     >>> pdf.inputs.in_file = 'voxel-order_data.Bfloat'
-    >>> pdf.run()                  # doctest: +SKIP
+    >>> pdf.run()  # doctest: +SKIP
+
     """
 
     _cmd = 'picopdfs'
@@ -210,7 +214,8 @@ class Voxel2Image(StdOutCommandLine):
     >>> import cmtklib.interfaces.camino as cmon
     >>> vox2img = cmon.Voxel2Image()
     >>> vox2img.inputs.in_file = 'fa.img'
-    >>> vox2img.run()                  # doctest: +SKIP
+    >>> vox2img.run()  # doctest: +SKIP
+
     """
 
     _cmd = 'voxel2image'

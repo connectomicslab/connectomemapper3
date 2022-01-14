@@ -1,4 +1,4 @@
-# Copyright (C) 2009-2021, Ecole Polytechnique Federale de Lausanne (EPFL) and
+# Copyright (C) 2009-2022, Ecole Polytechnique Federale de Lausanne (EPFL) and
 # Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland, and CMP3 contributors
 # All rights reserved.
 #
@@ -7,7 +7,9 @@
 """Provides interfaces for functions provided by Camino-Tackvis missing in nipype or modified.
 
 .. note:
+
     Module not used anymore by CMP3.
+
 """
 
 import os
@@ -70,7 +72,8 @@ class Camino2Trackvis(CommandLine):
     >>> c2t.inputs.data_dims = [128, 104, 64]
     >>> c2t.inputs.voxel_dims = [2.0, 2.0, 2.0]
     >>> c2t.inputs.voxel_order = 'LAS'
-    >>> c2t.run()                  # doctest: +SKIP
+    >>> c2t.run()  # doctest: +SKIP
+
     """
 
     _cmd = 'camino_to_trackvis'

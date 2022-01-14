@@ -53,28 +53,31 @@ class BandpassInputSpec(AFNICommandInputSpec):
         exists=True)
     despike = traits.Bool(
         argstr='-despike',
-        desc="""Despike each time series before other processing.
-                  ++ Hopefully, you don't actually need to do this,
-                     which is why it is optional.""")
+        desc="Despike each time series before other processing. "
+             "Hopefully, you don't actually need to do this, "
+             "which is why it is optional."
+    )
     orthogonalize_file = InputMultiPath(
         File(exists=True),
         argstr="-ort %s",
-        desc="""Also orthogonalize input to columns in f.1D
-                   ++ Multiple '-ort' options are allowed.""")
+        desc="Also orthogonalize input to columns in f.1D "
+             "Multiple '-ort' options are allowed.")
     orthogonalize_dset = File(
         exists=True,
         argstr="-dsort %s",
-        desc="""Orthogonalize each voxel to the corresponding
-                   voxel time series in dataset 'fset', which must
-                   have the same spatial and temporal grid structure
-                   as the main input dataset.
-                   ++ At present, only one '-dsort' option is allowed.""")
+        desc="Orthogonalize each voxel to the corresponding "
+             "voxel time series in dataset 'fset', which must "
+             "have the same spatial and temporal grid structure "
+             "as the main input dataset. "
+             "At present, only one '-dsort' option is allowed."
+    )
     no_detrend = traits.Bool(
         argstr='-nodetrend',
-        desc="""Skip the quadratic detrending of the input that
-                    occurs before the FFT-based bandpassing.
-                   ++ You would only want to do this if the dataset
-                      had been detrended already in some other program.""")
+        desc="Skip the quadratic detrending of the input that "
+             "occurs before the FFT-based bandpassing. "
+             "++ You would only want to do this if the dataset "
+             "had been detrended already in some other program."
+    )
     tr = traits.Float(
         argstr="-dt %f",
         desc="set time step (TR) in sec [default=from dataset header]")
@@ -83,33 +86,36 @@ class BandpassInputSpec(AFNICommandInputSpec):
         desc="set the FFT length [must be a legal value]")
     normalize = traits.Bool(
         argstr='-norm',
-        desc="""Make all output time series have L2 norm = 1
-                   ++ i.e., sum of squares = 1""")
+        desc="Make all output time series have L2 norm = 1 "
+             "++ i.e., sum of squares = 1"
+    )
     automask = traits.Bool(
         argstr='-automask',
         desc="Create a mask from the input dataset")
     blur = traits.Float(
         argstr='-blur %f',
-        desc="""Blur (inside the mask only) with a filter
-                    width (FWHM) of 'fff' millimeters.""")
+        desc="Blur (inside the mask only) with a filter "
+             "width (FWHM) of 'fff' millimeters."
+    )
     localPV = traits.Float(
         argstr='-localPV %f',
-        desc="""Replace each vector by the local Principal Vector
-                    (AKA first singular vector) from a neighborhood
-                    of radius 'rrr' millimiters.
-                   ++ Note that the PV time series is L2 normalized.
-                   ++ This option is mostly for Bob Cox to have fun with.""")
+        desc="Replace each vector by the local Principal Vector "
+             "(AKA first singular vector) from a neighborhood "
+             "of radius 'rrr' millimiters. "
+             "Note that the PV time series is L2 normalized. "
+             "This option is mostly for Bob Cox to have fun with.")
     notrans = traits.Bool(
         argstr='-notrans',
-        desc="""Don't check for initial positive transients in the data:
-                   ++ The test is a little slow, so skipping it is OK,
-                   if you KNOW the data time series are transient-free.""")
+        desc="Don't check for initial positive transients in the data: "
+             "The test is a little slow, so skipping it is OK, "
+             "if you KNOW the data time series are transient-free."
+    )
 
 
 class Bandpass(AFNICommand):
     """Program to lowpass and/or highpass each voxel time series in a dataset.
 
-    Calls the `3dBandpass` tool from AFNI, offering more/different options than Fourier
+    Calls the `3dBandpass` tool from AFNI, offering more/different options than Fourier.
 
     For complete details, see the `3dBandpass Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dbandpass.html>`_
@@ -122,7 +128,8 @@ class Bandpass(AFNICommand):
     >>> bandpass.inputs.in_file = example_data('functional.nii')
     >>> bandpass.inputs.highpass = 0.005
     >>> bandpass.inputs.lowpass = 0.1
-    >>> res = bandpass.run() # doctest: +SKIP
+    >>> res = bandpass.run()  # doctest: +SKIP
+
     """
 
     _cmd = '3dBandpass'
@@ -177,9 +184,8 @@ class Despike(AFNICommand):
     >>> from nipype.interfaces import afni
     >>> despike = afni.Despike()
     >>> despike.inputs.in_file = 'functional.nii'
-    >>> despike.cmdline
-    '3dDespike -prefix functional_despike functional.nii'
     >>> res = despike.run()  # doctest: +SKIP
+
     """
 
     _cmd = "3dDespike"

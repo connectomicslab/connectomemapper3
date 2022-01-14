@@ -1,18 +1,27 @@
-# Copyright (C) 2009-2021, Ecole Polytechnique Federale de Lausanne (EPFL) and
+# Copyright (C) 2009-2022, Ecole Polytechnique Federale de Lausanne (EPFL) and
 # Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland, and CMP3 contributors
 # All rights reserved.
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-"""This modules provides CMTK Utility functions to handle BIDS datasets."""
+"""This module provides CMTK Utility functions to handle BIDS datasets."""
 
 import os
 import json
+from glob import glob
+
+from traits.api import Bool
 from nipype.interfaces.base import (
     BaseInterfaceInputSpec,
     BaseInterface,
     TraitedSpec,
     File,
+    InputMultiPath,
+    OutputMultiPath
+)
+
+from cmtklib.bids.io import (
+    __cmp_directory__, __nipype_directory__, __freesurfer_directory__
 )
 
 
@@ -28,69 +37,67 @@ def write_derivative_description(bids_dir, deriv_dir, pipeline_name):
         Output/derivatives directory
 
     pipeline_name : string
-        Type of derivatives (`['cmp', 'freesurfer', 'nipype']`)
+        Type of derivatives (`['cmp-<version>', 'freesurfer-<version>', 'nipype-<version>']`)
     """
     from cmp.info import __version__, __url__, DOCKER_HUB
 
     bids_dir = os.path.abspath(bids_dir)
     deriv_dir = os.path.abspath(deriv_dir)
 
-    if pipeline_name == "cmp":
+    desc = {}
+
+    if pipeline_name == __cmp_directory__:
         desc = {
             "Name": "CMP3 Outputs",
             "BIDSVersion": "1.4.0",
             "DatasetType": "derivatives",
-            "GeneratedBy": {
-                "Name": pipeline_name,
-                "Version": __version__,
-                "Container": {
-                    "Type": "docker",
-                    "Tag": "{}:{}".format(DOCKER_HUB, __version__),
-                },
-                "CodeURL": __url__,
-            },
-            "PipelineDescription": {"Name": "CMP3 Outputs ({})".format(__version__)},
-            "HowToAcknowledge": "Please cite ... ",
+            "GeneratedBy": [
+                {
+                    "Name": pipeline_name,
+                    "Version": __version__,
+                    "Container": {
+                        "Type": "docker",
+                        "Tag": "{}:{}".format(DOCKER_HUB, __version__)
+                    },
+                    "CodeURL": __url__
+                }
+            ]
         }
-    elif pipeline_name == "freesurfer":
+    elif pipeline_name == __freesurfer_directory__:
         desc = {
             "Name": "Freesurfer Outputs of CMP3 ({})".format(__version__),
             "BIDSVersion": "1.4.0",
             "DatasetType": "derivatives",
-            "GeneratedBy": {
-                "Name": "freesurfer",
-                "Version": "6.0.1",
-                "Container": {
-                    "Type": "docker",
-                    "Tag": "{}:{}".format(DOCKER_HUB, __version__),
-                },
-                "CodeURL": __url__,
-            },
-            "PipelineDescription": {
-                "Name": "Freesurfer Outputs of CMP3 ({})".format(__version__),
-            },
-            "HowToAcknowledge": "Please cite ... ",
+            "GeneratedBy": [
+                {
+                    "Name": "freesurfer",
+                    "Version": "6.0.1",
+                    "Container": {
+                        "Type": "docker",
+                        "Tag": "{}:{}".format(DOCKER_HUB, __version__)
+                    },
+                    "CodeURL": __url__
+                }
+            ]
         }
-    elif pipeline_name == "nipype":
+    elif pipeline_name == __nipype_directory__:
         from nipype import __version__ as nipype_version
 
         desc = {
             "Name": "Nipype Outputs of CMP3 ({})".format(__version__),
             "BIDSVersion": "1.4.0",
             "DatasetType": "derivatives",
-            "GeneratedBy": {
-                "Name": pipeline_name,
-                "Version": nipype_version,
-                "Container": {
-                    "Type": "docker",
-                    "Tag": "{}:{}".format(DOCKER_HUB, __version__),
-                },
-                "CodeURL": __url__,
-            },
-            "PipelineDescription": {
-                "Name": "Nipype Outputs of CMP3 ({})".format(__version__),
-            },
-            "HowToAcknowledge": "Please cite ... ",
+            "GeneratedBy": [
+                {
+                    "Name": pipeline_name,
+                    "Version": nipype_version,
+                    "Container": {
+                        "Type": "docker",
+                        "Tag": "{}:{}".format(DOCKER_HUB, __version__)
+                    },
+                    "CodeURL": __url__
+                }
+            ]
         }
 
     # Keys that can only be set by environment
@@ -116,7 +123,7 @@ def write_derivative_description(bids_dir, deriv_dir, pipeline_name):
         desc["SourceDatasets"]: [
             {
                 "DOI": orig_desc["DatasetDOI"],
-                "URL": "https://doi.org/{}".format(orig_desc["DatasetDOI"]),
+                "URL": 'https://doi.org/{}'.format(orig_desc["DatasetDOI"]),
                 "Version": "TODO: To be updated",
             }
         ]
@@ -170,22 +177,24 @@ class CreateBIDSStandardParcellationLabelIndexMappingFileInputSpec(
         desc="Path to FreesurferColorLUT.txt file that describes the RGB color of the "
         "graph nodes for a given parcellation",
     )
+    verbose = Bool(
+        False,
+        desc="Verbose mode"
+    )
 
 
 class CreateBIDSStandardParcellationLabelIndexMappingFileOutputSpec(
-    BaseInterfaceInputSpec
+    TraitedSpec
 ):
     """Specify the output of the :obj:`~cmtklib.bids.utils.CreateBIDSStandardParcellationLabelIndexMappingFile`."""
 
     roi_bids_tsv = File(
-        exists=True,
-        desc="Output BIDS standard generic label-index mapping file that "
-        "describes parcellation nodes",
+        desc="Output BIDS standard generic label-index mapping file that describes parcellation nodes",
     )
 
 
 class CreateBIDSStandardParcellationLabelIndexMappingFile(BaseInterface):
-    """Creates the BIDS standard generic label-index mapping file that describes parcellation nodes"""
+    """Creates the BIDS standard generic label-index mapping file that describes parcellation nodes."""
 
     input_spec = CreateBIDSStandardParcellationLabelIndexMappingFileInputSpec
     output_spec = CreateBIDSStandardParcellationLabelIndexMappingFileOutputSpec
@@ -214,6 +223,9 @@ class CreateBIDSStandardParcellationLabelIndexMappingFile(BaseInterface):
                     axis=0,
                 )
 
+        if self.inputs.verbose:
+            print(f'ROIS RGB Colors: {rois_rgb}')
+
         # Read the graphml node description file
         nodes_g = nx.readwrite.graphml.read_graphml(self.inputs.roi_graphml)
         nodes = nodes_g.nodes(data=True)
@@ -226,15 +238,40 @@ class CreateBIDSStandardParcellationLabelIndexMappingFile(BaseInterface):
             in_node_description = node[1]
             # Fill index and name
             out_node_description = {
-                "index": in_node_description["dn_multiscaleID"],
-                "name": in_node_description["dn_name"].lower(),
+                "index": 'n/a',
+                "name": 'n/a',
             }
+            in_node_description_keys = list(in_node_description.keys())
+            if ("dn_correspondence_id" in in_node_description_keys) and ("dn_fsname" in in_node_description_keys):
+                out_node_description = {
+                    "index": int(in_node_description["dn_correspondence_id"]),
+                    "name": in_node_description["dn_fsname"].lower(),
+                }
+            elif ("dn_multiscaleID" in in_node_description_keys) and ("dn_name" in in_node_description_keys):
+                out_node_description = {
+                    "index": int(in_node_description["dn_multiscaleID"]),
+                    "name": in_node_description["dn_name"].lower(),
+                }
+            else:
+                print('  .. Error: Parcellation keys not found in the graphml.')
             # Convert RGB color to hexadecimal
             r, g, b = (
-                rois_rgb[rois_rgb[:, 0] == out_node_description["index"]][:, 1],
-                rois_rgb[rois_rgb[:, 0] == out_node_description["index"]][:, 2],
-                rois_rgb[rois_rgb[:, 0] == out_node_description["index"]][:, 3],
+                rois_rgb[rois_rgb[:, 0].astype(int) == out_node_description["index"]][:, 1],
+                rois_rgb[rois_rgb[:, 0].astype(int) == out_node_description["index"]][:, 2],
+                rois_rgb[rois_rgb[:, 0].astype(int) == out_node_description["index"]][:, 3],
             )
+            if self.inputs.verbose:
+                print(f'DEBUG: node = {out_node_description["index"]} '
+                      f'(name = {out_node_description["name"]}), '
+                      f'roi rgb = {rois_rgb[rois_rgb[:, 0].astype(int) == out_node_description["index"]]}')
+            # Make sure we have scalar and not arrays of one element
+            r = r[0] if hasattr(r, '__len__') else r
+            g = g[0] if hasattr(g, '__len__') else g
+            b = b[0] if hasattr(b, '__len__') else b
+            if self.inputs.verbose:
+                print(f'DEBUG: node = {out_node_description["index"]} '
+                      f'(name = {out_node_description["name"]}), '
+                      f'r = {r}, g = {g}, b = {b}')
             # Fill hexadecimal color
             out_node_description["color"] = "#%02x%02x%02x" % (
                 r.squeeze(),
@@ -255,6 +292,7 @@ class CreateBIDSStandardParcellationLabelIndexMappingFile(BaseInterface):
         # Write list of standardized node description dictionaries to output TSV file
         keys = ["index", "name", "color", "mapping"]
         output_tsv_filename = self._gen_output_filename(self.inputs.roi_graphml)
+        print(f'\t\t > Save TSV file to {output_tsv_filename}...')
         with open(output_tsv_filename, "w") as output_tsv_file:
             dict_writer = csv.DictWriter(output_tsv_file, keys, delimiter="\t")
             dict_writer.writeheader()
@@ -264,15 +302,17 @@ class CreateBIDSStandardParcellationLabelIndexMappingFile(BaseInterface):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs["roi_bids_tsv"] = self._gen_output_filename(self.inputs.roi_graphml)
+        output_tsv_filename = self._gen_output_filename(self.inputs.roi_graphml)
+        output_tsv_filename = os.path.abspath(output_tsv_filename)
+        outputs["roi_bids_tsv"] = output_tsv_filename
+        return outputs
 
     @staticmethod
     def _gen_output_filename(input_file):
-        import os.path as op
         from pathlib import Path
 
         fpath = Path(input_file)
-        return op.abspath(str(fpath.stem) + ".tsv")
+        return str(fpath.stem) + ".tsv"
 
 
 class CreateCMPParcellationNodeDescriptionFilesFromBIDSFileInputSpec(
@@ -289,16 +329,14 @@ class CreateCMPParcellationNodeDescriptionFilesFromBIDSFileInputSpec(
 
 
 class CreateCMPParcellationNodeDescriptionFilesFromBIDSFileOutputSpec(
-    BaseInterfaceInputSpec
+    TraitedSpec
 ):
     """Specify the output of the :obj:`~cmtklib.bids.utils.CreateCMPParcellationNodeDescriptionFilesFromBIDSFile`."""
 
     roi_graphml = File(
-        exists=True,
         desc="Path to graphml file that describes graph nodes for a given parcellation",
     )
     roi_colorlut = File(
-        exists=True,
         desc="Path to FreesurferColorLUT.txt file that describes the RGB color of the "
         "graph nodes for a given parcellation",
     )
@@ -408,22 +446,91 @@ class CreateCMPParcellationNodeDescriptionFilesFromBIDSFile(BaseInterface):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs["roi_colorlut"] = self._gen_output_filename(
-            self.inputs.roi_bids_tsv, "colorlut"
+        outputs["roi_colorlut"] = os.path.abspath(
+            self._gen_output_filename( self.inputs.roi_bids_tsv, "colorlut")
         )
-        outputs["roi_graphml"] = self._gen_output_filename(
-            self.inputs.roi_bids_tsv, "graphml"
+        outputs["roi_graphml"] = os.path.abspath(
+            self._gen_output_filename(self.inputs.roi_bids_tsv, "graphml")
         )
+        return outputs
 
     @staticmethod
     def _gen_output_filename(input_tsv_filename, output_type):
-        import os.path as op
         from pathlib import Path
 
         tsv_filename_path = Path(input_tsv_filename)
         if output_type == "colorlut":
             outprefix_name = tsv_filename_path.stem
-            return op.abspath("{}_FreeSurferColorLUT.txt".format(outprefix_name))
+            return "{}_FreeSurferColorLUT.txt".format(outprefix_name.replace('_dseg', ''))
         if output_type == "graphml":
             outprefix_name = tsv_filename_path.stem
-            return op.abspath("{}.2.graphml".format(outprefix_name))
+            return "{}.graphml".format(outprefix_name)
+
+
+class CreateMultipleCMPParcellationNodeDescriptionFilesFromBIDSFileInputSpec(BaseInterfaceInputSpec):
+    """Specify the inputs of the :obj:`~cmtklib.bids.utils.CreateMultipleCMPParcellationNodeDescriptionFilesFromBIDSFile`."""
+
+    roi_bids_tsvs = InputMultiPath(
+        File(mandatory=True,
+             exists=True,
+             desc="List of paths of output BIDS standard generic label-index mapping file that "
+                  "describes parcellation nodes")
+    )
+
+
+class CreateMultipleCMPParcellationNodeDescriptionFilesFromBIDSFileOutputSpec(TraitedSpec):
+    """Specify the output of the :obj:`~cmtklib.bids.utils.CreateMultipleCMPParcellationNodeDescriptionFilesFromBIDSFile`."""
+
+    roi_graphmls = OutputMultiPath(
+        File(desc="Path to graphml file that describes graph nodes for a given parcellation")
+    )
+    roi_colorluts = OutputMultiPath(
+        File(desc="Paths to FreesurferColorLUT.txt files that describe the RGB color of the "
+                  "graph nodes for a given list of parcellations")
+    )
+
+
+class CreateMultipleCMPParcellationNodeDescriptionFilesFromBIDSFile(BaseInterface):
+    """Creates CMP graphml and FreeSurfer colorLUT files describing parcellation nodes from a list of BIDS TSV files"""
+
+    input_spec = CreateMultipleCMPParcellationNodeDescriptionFilesFromBIDSFileInputSpec
+    output_spec = CreateMultipleCMPParcellationNodeDescriptionFilesFromBIDSFileOutputSpec
+
+    def _run_interface(self, runtime):
+        for roi_bids_tsv in self.inputs.roi_bids_tsvs:
+            ax = CreateCMPParcellationNodeDescriptionFilesFromBIDSFile(roi_bids_tsv=roi_bids_tsv)
+            ax.run()
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['roi_graphmls'] = glob(os.path.abspath("*.graphml"))
+        outputs['roi_colorluts'] = glob(os.path.abspath("*_FreeSurferColorLUT.txt"))
+        return outputs
+
+
+def get_native_space_tsv_sidecar_files(filepathlist):
+    """Return path to tsv sidecar file of a list of niftis (`.nii.gz`) without `_space-<label>_` in their filename."""
+    out_filepathlist = []
+    for filepath in filepathlist:
+        if "space-" not in filepath:
+            out_filepathlist.append(filepath.replace(".nii.gz", ".tsv"))
+    return out_filepathlist
+
+
+def get_native_space_files(filepathlist):
+    """Return a list of files without `_space-<label>_` in the filename."""
+    out_filepathlist = []
+    for filepath in filepathlist:
+        if "space-" not in filepath:
+            out_filepathlist.append(filepath)
+    return out_filepathlist
+
+
+def get_native_space_no_desc_files(filepathlist):
+    """Return a list of files without `_space-<label>_` and `_desc-<label>_` in the filename."""
+    out_filepathlist = []
+    for filepath in filepathlist:
+        if "space-" not in filepath:
+            out_filepathlist.append(filepath)
+    return out_filepathlist
