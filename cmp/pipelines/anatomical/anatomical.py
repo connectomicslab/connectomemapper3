@@ -1080,11 +1080,15 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         logging.update_logging(config)
 
         iflogger = logging.getLogger("nipype.interface")
-        iflogger.info("**** Processing ****")
+        iflogger.info("**** Build workflow ****")
 
         # Call self.create_pipeline_flow(cmp_deriv_subject_directory, nipype_deriv_subject_directory)
-        p = Process(target=self.create_pipeline_flow,
-                    args=(cmp_deriv_subject_directory, nipype_deriv_subject_directory, self.retval))
+        p = Process(
+            target=self.create_pipeline_flow,
+            args=(cmp_deriv_subject_directory,
+                  nipype_deriv_subject_directory,
+                  self.retval)
+        )
         p.start()
         p.join()
 
@@ -1096,16 +1100,19 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         if anat_flow is None:
             sys.exit(1)
 
+        iflogger.info("**** Write graph ****")
         anat_flow.write_graph(graph2use="colored", format="svg", simple_form=True)
 
         # Clean up master process before running workflow, which may create forks
+        iflogger.info("**** Clean up master process ****")
         gc.collect()
+
+        iflogger.info("**** Processing ****")
         anat_flow.run(
-                plugin="MultiProc", plugin_args={"n_procs": self.number_of_cores}
-            )
-
+            plugin="MultiProc",
+            plugin_args={"n_procs": self.number_of_cores}
+        )
         self._update_parcellation_scheme()
-
         iflogger.info("**** Processing finished ****")
 
         return True
