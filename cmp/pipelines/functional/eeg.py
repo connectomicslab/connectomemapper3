@@ -99,7 +99,7 @@ class EEGPipeline(Pipeline):
 
         self.stages['EEGPreparer'].config.cmp3_dir = os.path.join(self.derivatives_directory, 'cmp')
         # removing the following three lines because these parameters are all set to default values at this point (the config file hasn't been read yet), so setting them with each other is pointless
-        # self.stages['EEGPreparer'].config.cartool_dir = os.path.join(self.derivatives_directory, 'cartool')
+        self.stages['EEGPreparer'].config.cartool_dir = os.path.join(self.derivatives_directory, 'cartool-v3.80')
         # self.stages['EEGLoader'].config.eeg_format = self.stages['EEGPreparer'].config.eeg_format
         # self.stages['EEGLoader'].config.invsol_format = self.stages['EEGPreparer'].config.invsol_format
 
@@ -236,11 +236,11 @@ class EEGPipeline(Pipeline):
 
         # Clear previous outputs
         self.clear_stages_outputs()
-        
+                
         # fmt: off
         if self.stages['EEGPreparer'].config.invsol_format.split('-')[0] == "Cartool": 
             # atlas image is required 
-            parcellation = self.subject + '_label-' +parcellation_label +'_desc-' +parcellation_desc + '_' + parcellation_suffix + '.nii.gz'
+            parcellation = self.subject + '_atlas-' +parcellation_label + '_res-' + parcellation_suffix + '_dseg.nii.gz'
             datasource.inputs.parcellation = os.path.join(self.base_directory, 'derivatives', 'cmp', self.subject,
                                                        'anat', parcellation)
                     
@@ -251,7 +251,9 @@ class EEGPipeline(Pipeline):
                                                  ('behav_file', 'inputnode.behav_file'),
                                                  ('parcellation', 'inputnode.parcellation'),
                                                  ('epochs_fif_fname', 'inputnode.epochs_fif_fname'),
-                                                 ('output_query', 'inputnode.output_query')]),
+                                                 ('EEG_params','inputnode.EEG_params'),
+                                                 ('output_query', 'inputnode.output_query'),
+                                                 ('base_directory','inputnode.bids_dir')]),
                     (datasource, loader_flow, [('base_directory', 'inputnode.base_directory'),
                                                ('subject', 'inputnode.subject')]),
                     (preparer_flow, loader_flow, [('outputnode.output_query', 'inputnode.output_query'),

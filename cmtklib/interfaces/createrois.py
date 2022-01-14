@@ -11,6 +11,9 @@ class CreateRoisInputSpec(BaseInterfaceInputSpec):
 
     subject = traits.Str(
         desc='subject', mandatory=True)
+    
+    bids_dir = traits.Str(
+        desc='base directory', mandatory=True)
 
     parcellation = traits.Str(
         desc='parcellation scheme', mandatory=True)
@@ -44,27 +47,27 @@ class CreateRois(BaseInterface):
 
     def _run_interface(self, runtime):
         subject = self.inputs.subject
-        parcellation_image_path = self.inputs.parcellation[0]
+        parcellation_image_path = self.inputs.parcellation
         parcellation_name = parcellation_image_path.split('/')[-1].split('.')[0]
-        cartool_dir = self.inputs.cartool_dir
-        cmp3_dir = self.inputs.cmp3_dir
+        cartool_dir = os.path.join(self.inputs.bids_dir,'derivatives',self.inputs.cartool_dir)
+        cmp3_dir = os.path.join(self.inputs.bids_dir,'derivatives',self.inputs.cmp3_dir)
         self.derivative_list = self.inputs.derivative_list
         self.output_query = self.inputs.output_query
 
         self._create_roi_files(subject, parcellation_image_path, parcellation_name, cartool_dir, cmp3_dir)
 
-        self.derivative_list.append('Cartool')
+        self.derivative_list.append('cartool-v3.80')
 
         self.output_query['rois'] = {
-            'scope': 'Cartool',
+            # 'scope': 'cartool-v3.80',
             'extensions': ['pickle.rois']
         }
         self.output_query['src'] = {
-            'scope': 'Cartool',
+            # 'scope': 'cartool-v3.80',
             'extensions': ['spi']
         }
         self.output_query['invsol'] = {
-            'scope': 'Cartool',
+            # 'scope': 'cartool-v3.80',
             'extensions': ['LAURA.is']
         }
 
@@ -78,7 +81,6 @@ class CreateRois(BaseInterface):
         impath = os.path.join(parcellation)
         im = nibabel.load(impath)
         imdata = im.get_fdata()
-
         x, y, z = np.where(imdata)
         center_brain = [np.mean(x), np.mean(y), np.mean(z)]
         source.coordinates[:, 0] = - source.coordinates[:, 0]
@@ -105,6 +107,8 @@ class CreateRois(BaseInterface):
                                                                    groups_of_indexes=groups_of_indexes,
                                                                    source_space=source)
 
+        if not os.path.isdir(os.path.join(cartool_dir, subject, 'Rois')):
+            os.mkdir(os.path.join(cartool_dir, subject, 'Rois'))
         filename_pkl = os.path.join(cartool_dir, subject, 'Rois', parcellation_name + '.pickle.rois')
         filehandler = open(filename_pkl, 'wb')
         pickle.dump(rois_file_new, filehandler)

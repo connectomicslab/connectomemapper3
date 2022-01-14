@@ -30,8 +30,8 @@ class EEGPreparerConfig(HasTraits):
                          desc='Cartool vs mne')
 
     parcellation = Dict({'label':'aparc', 'desc':'', 'suffix':''})
-    cartool_dir = Str()
-    cmp3_dir = Str()
+    cartool_dir = Str('cartool-v3.80')
+    cmp3_dir = Str('cmp')
     EEG_params = Dict()
 
 
@@ -68,27 +68,6 @@ class EEGPreparerStage(Stage):
     def create_workflow(self, flow, inputnode, outputnode):
         inputnode.inputs.derivative_list = []
         inputnode.inputs.output_query = {}
-                
-        if self.config.eeg_format == ".set":
-
-            eeglab2fif_node = pe.Node(EEGLAB2fif(), name="eeglab2fif")
-            flow.connect([(inputnode, eeglab2fif_node,
-                           [('epochs', 'eeg_ts_file'),
-                            ('behav_file', 'behav_file'),
-                            ('epochs_fif_fname', 'epochs_fif_fname'),
-                            ('electrode_positions_file','electrode_positions_file'),
-                            ('MRI_align_transform_file','MRI_align_transform_file'),
-                            ('EEG_params','EEG_params'),
-                            ('output_query', 'output_query'),
-                            ('derivative_list', 'derivative_list'),
-                            ]
-                           )])
-
-            if (not self.config.invsol_format.split('-')[0] == "Cartool") & (not self.config.invsol_format.split('-')[0] == "mne"):
-                flow.connect([(eeglab2fif_node, outputnode,
-                               [('output_query', 'output_query'),
-                                ('derivative_list', 'derivative_list')]
-                               )])
 
         if self.config.invsol_format.split('-')[0] == "Cartool":
 
@@ -98,6 +77,17 @@ class EEGPreparerStage(Stage):
             inputnode.inputs.cmp3_dir = self.config.cmp3_dir
 
             if self.config.eeg_format == ".set":
+                
+                eeglab2fif_node = pe.Node(EEGLAB2fif(), name="eeglab2fif")
+                flow.connect([(inputnode, eeglab2fif_node,
+                           [('epochs', 'eeg_ts_file'),
+                            ('behav_file', 'behav_file'),
+                            ('epochs_fif_fname', 'epochs_fif_fname'),
+                            ('EEG_params','EEG_params'),
+                            ('output_query', 'output_query'),
+                            ('derivative_list', 'derivative_list'),
+                            ]
+                           )])
 
                 flow.connect([(eeglab2fif_node, createrois_node,
                                [('output_query', 'output_query'),
@@ -112,11 +102,13 @@ class EEGPreparerStage(Stage):
 
             flow.connect([(inputnode, createrois_node,
                            [('subject', 'subject'),
+                            ('bids_dir', 'bids_dir'),
                             ('parcellation', 'parcellation'),
                             ('cartool_dir', 'cartool_dir'),
                             ('cmp3_dir', 'cmp3_dir'),
                             ]
                            )])
+            
             flow.connect([(createrois_node, outputnode,
                            [('output_query', 'output_query'),
                             ('derivative_list', 'derivative_list')]
@@ -141,17 +133,43 @@ class EEGPreparerStage(Stage):
             createbem_node = pe.Node(CreateBEM(), name="createbem")
             inputnode.inputs.base_dir = self.bids_dir
             
-            # create source space 
-            flow.connect([(eeglab2fif_node, createsrc_node,
+            if self.config.eeg_format == ".set":
+                
+                eeglab2fif_node = pe.Node(EEGLAB2fif(), name="eeglab2fif")
+                
+                flow.connect([(inputnode, eeglab2fif_node,
+                           [('epochs', 'eeg_ts_file'),
+                            ('behav_file', 'behav_file'),
+                            ('epochs_fif_fname', 'epochs_fif_fname'),
+                            ('electrode_positions_file','electrode_positions_file'),
+                            ('MRI_align_transform_file','MRI_align_transform_file'),
+                            ('EEG_params','EEG_params'),
+                            ('output_query', 'output_query'),
+                            ('derivative_list', 'derivative_list'),
+                            ]
+                           )])
+
+                flow.connect([(eeglab2fif_node, createsrc_node,
                            [('output_query', 'output_query'),
                             ('derivative_list', 'derivative_list')]                           
-                           )])            
-            flow.connect([(inputnode, createsrc_node,
+                           )])  
+                
+                # create source space
+                flow.connect([(inputnode, createsrc_node,
                            [('subject', 'subject'),
                             ('bids_dir', 'bids_dir'),
                             ]
                            )])
-            
+
+            else:
+                # create source space
+                flow.connect([(inputnode, createsrc_node,
+                               [('output_query', 'output_query'),
+                                ('derivative_list', 'derivative_list'),
+                                ('subject', 'subject'),
+                                ('bids_dir', 'bids_dir')]
+                               )])
+
             # create boundary element model (BEM) 
             flow.connect([(inputnode, createbem_node,
                            [('subject', 'subject'),

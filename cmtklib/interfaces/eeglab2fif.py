@@ -18,10 +18,10 @@ class EEGLAB2fifInputSpec(BaseInterfaceInputSpec):
         desc='eeg * epochs in .fif format', mandatory=True)
     
     electrode_positions_file = traits.File(
-        exists=True, desc='positions of EEG electrodes in a txt file', mandatory=True)
+        exists=True, desc='positions of EEG electrodes in a txt file')
     
     MRI_align_transform_file = traits.File(
-        exists=True, desc='file containing transformation matrix to align electrode positions in electrode_positions_file with the MRI', mandatory=True)
+        exists=True, desc='file containing transformation matrix to align electrode positions in electrode_positions_file with the MRI')
     
     EEG_params = traits.Dict(
         desc='dictionary defining EEG parameters')
@@ -71,7 +71,7 @@ class EEGLAB2fif(BaseInterface):
         self.output_query = self.inputs.output_query
         if not os.path.exists(self.epochs_fif_fname): 
             self._convert_eeglab2fif(epochs_file, behav_file, self.epochs_fif_fname, montage_fname, dev_head_t_fname, EEG_params)
-        self.derivative_list.apxpend('cmp')
+        self.derivative_list.append('cmp')
         self.output_query['EEG'] = {
             'suffix': 'epo',
             'extensions': ['fif']
@@ -93,22 +93,26 @@ class EEGLAB2fif(BaseInterface):
         epochs.apply_baseline((start_t,0))
         epochs.set_eeg_reference(ref_channels='average',projection = True)
         epochs.crop(tmin=start_t,tmax=end_t)
-
-        # create info object with information about electrode positions 
-        n = int(open(montage_fname).readline().lstrip().split(' ')[0])
-        all_coord = np.loadtxt(montage_fname, skiprows=1, usecols=(0, 1, 2), max_rows=n)
-        all_names = np.loadtxt(montage_fname, skiprows=1, usecols=3, max_rows=n,dtype=np.dtype(str)).tolist()
-        all_coord = list(map(lambda x: x/1000,all_coord))
-        ch_coord  = [all_coord[idx] for idx, chan in  enumerate(all_names) if chan not in ['lpa','rpa','nasion']]
-        # overwrite channel names?
-        ch_names  = [all_names[idx] for idx, chan in  enumerate(all_names) if chan not in ['lpa','rpa','nasion']]   
         
-        # create the montage object with the channel names and positions read from the file 
-        montage = mne.channels.make_dig_montage(ch_pos=dict(zip(ch_names, ch_coord)),coord_frame='head')
-        # align with MRI 
-        dev_head_t = np.loadtxt(dev_head_t_fname)
-        montage.dev_head_t = dev_head_t
-        epochs.info.set_montage(montage)
+        # in case electrode position file was supplied, create info object with information about electrode positions
+        try:
+            n = int(open(montage_fname).readline().lstrip().split(' ')[0])
+        except:
+            pass
+        else:
+            all_coord = np.loadtxt(montage_fname, skiprows=1, usecols=(0, 1, 2), max_rows=n)
+            all_names = np.loadtxt(montage_fname, skiprows=1, usecols=3, max_rows=n,dtype=np.dtype(str)).tolist()
+            all_coord = list(map(lambda x: x/1000,all_coord))
+            ch_coord  = [all_coord[idx] for idx, chan in  enumerate(all_names) if chan not in ['lpa','rpa','nasion']]
+            # overwrite channel names?
+            ch_names  = [all_names[idx] for idx, chan in  enumerate(all_names) if chan not in ['lpa','rpa','nasion']]   
+            
+            # create the montage object with the channel names and positions read from the file 
+            montage = mne.channels.make_dig_montage(ch_pos=dict(zip(ch_names, ch_coord)),coord_frame='head')
+            # align with MRI 
+            dev_head_t = np.loadtxt(dev_head_t_fname)
+            montage.dev_head_t = dev_head_t
+            epochs.info.set_montage(montage)
         
         epochs.save(epochs_fif_fname, overwrite=True)
 
