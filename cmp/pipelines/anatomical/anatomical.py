@@ -13,6 +13,7 @@ import multiprocessing
 import os
 import glob
 import shutil
+import sys
 
 import nipype.pipeline.engine as pe
 import nipype.interfaces.utility as util
@@ -1001,6 +1002,8 @@ class AnatomicalPipeline(cmp_common.Pipeline):
 
     def process(self):
         """Executes the anatomical pipeline workflow and returns True if successful."""
+        anat_flow = None  # noqa
+    
         # Enable the use of the W3C PROV data model to capture and represent provenance in Nipype
         # config.enable_provenance()
 
@@ -1068,18 +1071,19 @@ class AnatomicalPipeline(cmp_common.Pipeline):
 
         iflogger = logging.getLogger("nipype.interface")
         iflogger.info("**** Build workflow ****")
-
-        context = multiprocessing.get_context('forkserver')
-        pool = context.Pool(processes=1)
-
         # Call self.create_pipeline_flow(cmp_deriv_subject_directory, nipype_deriv_subject_directory)
-        anat_flow = pool.starmap(
-            func=self.create_pipeline_flow,
-            iterable=zip(
-                cmp_deriv_subject_directory,
-                nipype_deriv_subject_directory,
+        context = multiprocessing.get_context('forkserver')
+        with context.Pool(processes=1) as pool:
+            anat_flow = pool.starmap(
+                func=self.create_pipeline_flow,
+                iterable=zip(
+                    cmp_deriv_subject_directory,
+                    nipype_deriv_subject_directory,
+                )
             )
-        )
+
+        if anat_flow is None:
+            sys.exit(1)
 
         iflogger.info("**** Write graph ****")
         anat_flow.write_graph(graph2use="colored", format="svg", simple_form=True)
