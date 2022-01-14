@@ -143,6 +143,12 @@ class AnatomicalPipeline(cmp_common.Pipeline):
              self._update_parcellation_scheme, "parcellation_scheme"
         )
 
+        try:
+            manager = getattr(type(self), 'manager')
+        except AttributeError:
+            manager = type(self).manager = Manager()
+        self.retval = manager.dict()
+
     def _update_parcellation_scheme(self):
         """Updates ``parcellation_scheme`` and ``atlas_info`` when ``parcellation_scheme`` is updated."""
         self.parcellation_scheme = self.stages["Parcellation"].config.parcellation_scheme
@@ -1077,17 +1083,15 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         iflogger.info("**** Processing ****")
 
         # Call self.create_pipeline_flow(cmp_deriv_subject_directory, nipype_deriv_subject_directory)
-        with Manager() as mgr:
-            retval = mgr.dict()
-            p = Process(target=self.create_pipeline_flow,
-                        args=(cmp_deriv_subject_directory, nipype_deriv_subject_directory, retval))
-            p.start()
-            p.join()
+        p = Process(target=self.create_pipeline_flow,
+                    args=(cmp_deriv_subject_directory, nipype_deriv_subject_directory, self.retval))
+        p.start()
+        p.join()
 
-            if p.exitcode != 0:
-                sys.exit(p.exitcode)
+        if p.exitcode != 0:
+            sys.exit(p.exitcode)
 
-            anat_flow = retval['workflow']
+        anat_flow = self.retval['workflow']
 
         if anat_flow is None:
             sys.exit(1)
