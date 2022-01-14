@@ -9,18 +9,19 @@
 
 import datetime
 import gc
+import multiprocessing
 import os
 import glob
 import shutil
-import sys
-from multiprocessing import Process, Manager
 
 import nipype.pipeline.engine as pe
 import nipype.interfaces.utility as util
 import nipype.interfaces.io as nio
 from nipype import config, logging
 
-from traits.api import *
+from traits.api import (
+    Str, List, Dict, Directory, Enum, Instance, HasTraits
+)
 
 # Own import
 from cmtklib.bids.io import (
@@ -104,11 +105,11 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                 project_info.subject,
                 project_info.subject_session,
             )
-            subject_id = "_".join(( self.global_conf.subject, self.global_conf.subject_session))
+            subject_id = "_".join((self.global_conf.subject, self.global_conf.subject_session))
         else:
             self.global_conf.subject_session = ""
-            self.subject_directory = os.path.join( project_info.base_directory, self.global_conf.subject)
-            subject_id =  self.global_conf.subject
+            self.subject_directory = os.path.join(project_info.base_directory, self.global_conf.subject)
+            subject_id = self.global_conf.subject
 
         self.derivatives_directory = os.path.abspath(project_info.output_directory)
         self.output_directory = os.path.abspath(project_info.output_directory)
@@ -142,12 +143,6 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         self.stages["Parcellation"].config.on_trait_change(
              self._update_parcellation_scheme, "parcellation_scheme"
         )
-
-        try:
-            manager = getattr(type(self), 'manager')
-        except AttributeError:
-            manager = type(self).manager = Manager()
-        self.retval = manager.dict()
 
     def _update_parcellation_scheme(self):
         """Updates ``parcellation_scheme`` and ``atlas_info`` when ``parcellation_scheme`` is updated."""
@@ -830,7 +825,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         return sinker
 
     def create_pipeline_flow(
-        self, cmp_deriv_subject_directory, nipype_deriv_subject_directory, retval
+        self, cmp_deriv_subject_directory, nipype_deriv_subject_directory
     ):
         """Create the pipeline workflow.
 
@@ -843,11 +838,6 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         nipype_deriv_subject_directory : Directory
             Intermediate Nipype output directory of a subject
             e.g. ``/output_dir/nipype/sub-XX/(ses-YY)``
-
-        retval : Dict
-            Output dictionary containing the built workflow (`retval["workflow"]`)
-            to allow isolation using a ``multiprocessing.Process`` that allows CMP3 to enforce
-            a hard-limited memory-scope.
         """
         # Data grabber for inputs
         datasource = self.create_datagrabber_node(
@@ -863,7 +853,6 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         self.clear_stages_outputs()
 
         # Create common_flow and initialize to None to output workflow
-        retval['workflow'] = None
         anat_flow = pe.Workflow(
             name="anatomical_pipeline",
             base_dir=os.path.abspath(nipype_deriv_subject_directory),
@@ -1008,9 +997,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         )
         # fmt: on
 
-        retval["workflow"] = anat_flow
-        retval['return_code'] = 0
-        return retval
+        return anat_flow
 
     def process(self):
         """Executes the anatomical pipeline workflow and returns True if successful."""
@@ -1082,23 +1069,17 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         iflogger = logging.getLogger("nipype.interface")
         iflogger.info("**** Build workflow ****")
 
+        context = multiprocessing.get_context('forkserver')
+        pool = context.Pool(processes=1)
+
         # Call self.create_pipeline_flow(cmp_deriv_subject_directory, nipype_deriv_subject_directory)
-        p = Process(
-            target=self.create_pipeline_flow,
-            args=(cmp_deriv_subject_directory,
-                  nipype_deriv_subject_directory,
-                  self.retval)
+        anat_flow = pool.starmap(
+            func=self.create_pipeline_flow,
+            iterable=zip(
+                cmp_deriv_subject_directory,
+                nipype_deriv_subject_directory,
+            )
         )
-        p.start()
-        p.join()
-
-        if p.exitcode != 0:
-            sys.exit(p.exitcode)
-
-        anat_flow = self.retval['workflow']
-
-        if anat_flow is None:
-            sys.exit(1)
 
         iflogger.info("**** Write graph ****")
         anat_flow.write_graph(graph2use="colored", format="svg", simple_form=True)
