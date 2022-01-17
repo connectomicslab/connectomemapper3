@@ -24,6 +24,7 @@ from cmp.pipelines.common import *
 from cmp.stages.eeg.eeg_loader import EEGLoaderStage
 from cmp.stages.eeg.eeg_preparer import EEGPreparerStage
 from cmp.stages.eeg.eeg_inverse_solution import EEGInverseSolutionStage
+from cmp.info import __version__
 
 
 class Global_Configuration(HasTraits):
@@ -96,8 +97,9 @@ class EEGPipeline(Pipeline):
         }
 
         cmp_common.Pipeline.__init__(self, project_info)
-
-        self.stages['EEGPreparer'].config.cmp3_dir = os.path.join(self.derivatives_directory, 'cmp')
+        
+        cmp3_dir = os.path.join(self.derivatives_directory,f'cmp-{__version__}')
+        self.stages['EEGPreparer'].config.cmp3_dir = cmp3_dir
         # removing the following three lines because these parameters are all set to default values at this point (the config file hasn't been read yet), so setting them with each other is pointless
         self.stages['EEGPreparer'].config.cartool_dir = os.path.join(self.derivatives_directory, 'cartool-v3.80')
         # self.stages['EEGLoader'].config.eeg_format = self.stages['EEGPreparer'].config.eeg_format
@@ -213,7 +215,7 @@ class EEGPipeline(Pipeline):
             datasource.inputs.epochs_fif_fname = os.path.join(
                 self.base_directory,
                 'derivatives',
-                'cmp',
+                f'cmp-{__version__}',
                 self.subject, 'eeg', self.subject + '_epo.fif'
             )
             
@@ -222,7 +224,7 @@ class EEGPipeline(Pipeline):
         datasource.inputs.roi_ts_file = os.path.join(
             self.base_directory,
             'derivatives',
-            'cmp',
+            f'cmp-{__version__}',
             self.subject,
             'eeg',
             self.subject + '_rtc_epo.npy'
@@ -241,7 +243,7 @@ class EEGPipeline(Pipeline):
         if self.stages['EEGPreparer'].config.invsol_format.split('-')[0] == "Cartool": 
             # atlas image is required 
             parcellation = self.subject + '_atlas-' +parcellation_label + '_res-' + parcellation_suffix + '_dseg.nii.gz'
-            datasource.inputs.parcellation = os.path.join(self.base_directory, 'derivatives', 'cmp', self.subject,
+            datasource.inputs.parcellation = os.path.join(self.base_directory, 'derivatives', f'cmp-{__version__}', self.subject,
                                                        'anat', parcellation)
                     
             eeg_flow.connect(
@@ -279,28 +281,28 @@ class EEGPipeline(Pipeline):
             
             # define names for MNE outputs 
             datasource.inputs.noise_cov_fname = os.path.join(self.base_directory,
-                                                             'derivatives','cmp',
+                                                             'derivatives',f'cmp-{__version__}',
                                                              self.subject, 
                                                              'eeg', 
                                                              self.subject + '_noisecov.fif')
             
             datasource.inputs.trans_fname = os.path.join(self.base_directory,
                                                          'derivatives',
-                                                         'cmp',
+                                                         f'cmp-{__version__}',
                                                          self.subject, 
                                                          'eeg', 
                                                          self.subject + '-trans.fif')
             
             datasource.inputs.fwd_fname = os.path.join(self.base_directory,
                                                          'derivatives',
-                                                         'cmp',
+                                                         f'cmp-{__version__}',
                                                          self.subject, 
                                                          'eeg', 
                                                          self.subject + '-fwd.fif')
             
             datasource.inputs.inv_fname = os.path.join(self.base_directory,
                                                         'derivatives',
-                                                        'cmp',
+                                                        f'cmp-{__version__}',
                                                          self.subject, 
                                                          'eeg', 
                                                          self.subject + '-inv.fif')
@@ -376,14 +378,14 @@ class EEGPipeline(Pipeline):
 
         if self.global_conf.subject_session == '':
             cmp_deriv_subject_directory = os.path.join(
-                self.output_directory, "cmp", self.subject
+                self.output_directory, f'cmp-{__version__}', self.subject
             )
             nipype_deriv_subject_directory = os.path.join(
                 self.output_directory, "nipype", self.subject
             )
         else:
             cmp_deriv_subject_directory = os.path.join(
-                self.output_directory, "cmp", self.subject, self.global_conf.subject_session
+                self.output_directory, f'cmp-{__version__}', self.subject, self.global_conf.subject_session
             )
             nipype_deriv_subject_directory = os.path.join(
                 self.output_directory, "nipype", self.subject, self.global_conf.subject_session

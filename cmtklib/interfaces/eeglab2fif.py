@@ -4,6 +4,9 @@ import mne
 import numpy as np
 from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, traits, TraitedSpec
 
+# own imports 
+from cmp.info import __version__
+
 
 class EEGLAB2fifInputSpec(BaseInterfaceInputSpec):
     """Input specification for EEGLAB2fif. """
@@ -71,7 +74,7 @@ class EEGLAB2fif(BaseInterface):
         self.output_query = self.inputs.output_query
         if not os.path.exists(self.epochs_fif_fname): 
             self._convert_eeglab2fif(epochs_file, behav_file, self.epochs_fif_fname, montage_fname, dev_head_t_fname, EEG_params)
-        self.derivative_list.append('cmp')
+        self.derivative_list.append(f'cmp-{__version__}')
         self.output_query['EEG'] = {
             'suffix': 'epo',
             'extensions': ['fif']
