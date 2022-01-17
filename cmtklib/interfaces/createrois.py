@@ -60,15 +60,15 @@ class CreateRois(BaseInterface):
 
         self.output_query['rois'] = {
             # 'scope': 'cartool-v3.80',
-            'extensions': ['pickle.rois']
+            'extension': ['pickle.rois']
         }
         self.output_query['src'] = {
             # 'scope': 'cartool-v3.80',
-            'extensions': ['spi']
+            'extension': ['spi']
         }
         self.output_query['invsol'] = {
             # 'scope': 'cartool-v3.80',
-            'extensions': ['LAURA.is']
+            'extension': ['LAURA.is']
         }
 
         return runtime

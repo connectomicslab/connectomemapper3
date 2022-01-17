@@ -77,7 +77,7 @@ class EEGLAB2fif(BaseInterface):
         self.derivative_list.append(f'cmp-{__version__}')
         self.output_query['EEG'] = {
             'suffix': 'epo',
-            'extensions': ['fif']
+            'extension': ['fif']
         }
         return runtime
 
