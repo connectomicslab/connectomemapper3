@@ -761,7 +761,8 @@ class PreprocessingStage(Stage):
         fs_mriconvert_ROIs = pe.MapNode(
             interface=fs.MRIConvert(out_type="niigz", resample_type="nearest"),
             iterfield=["in_file"],
-            name="ROIs_resample",
+            synchronize=True,
+            name="ROIs_resample"
         )
         fs_mriconvert_ROIs.inputs.vox_size = self.config.resampling
         # fmt: off
@@ -1033,7 +1034,8 @@ class PreprocessingStage(Stage):
                 fs_mriconvert_PVEs = pe.MapNode(
                     interface=fs.MRIConvert(out_type="niigz"),
                     iterfield=["in_file"],
-                    name="PVEs_resample",
+                    synchronize=True,
+                    name="PVEs_resample"
                 )
                 fs_mriconvert_PVEs.inputs.vox_size = self.config.resampling
                 fs_mriconvert_PVEs.inputs.resample_type = self.config.interpolation

@@ -314,8 +314,9 @@ class ParcellationStage(Stage):
                 # fmt: on
                 createBIDSLabelIndexMappingFile = pe.MapNode(
                     interface=CreateBIDSStandardParcellationLabelIndexMappingFile(),
-                    name="createBIDSLabelIndexMappingFile",
-                    iterfield=['roi_graphml', 'roi_colorlut']
+                    iterfield=['roi_graphml', 'roi_colorlut'],
+                    synchronize=True,
+                    name="createBIDSLabelIndexMappingFile"
                 )
                 createBIDSLabelIndexMappingFile.inputs.verbose = True
                 # fmt: off
@@ -377,9 +378,10 @@ class ParcellationStage(Stage):
                 )
                 # fmt: on
                 createBIDSLabelIndexMappingFile = pe.MapNode(
-                        interface=CreateBIDSStandardParcellationLabelIndexMappingFile(),
-                        name="createBIDSLabelIndexMappingFile",
-                        iterfield=['roi_graphml', 'roi_colorlut']
+                    interface=CreateBIDSStandardParcellationLabelIndexMappingFile(),
+                    iterfield=['roi_graphml', 'roi_colorlut'],
+                    synchronize=True,
+                    name="createBIDSLabelIndexMappingFile"
                 )
                 createBIDSLabelIndexMappingFile.inputs.verbose = True
                 # fmt: off
