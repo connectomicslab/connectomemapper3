@@ -1001,14 +1001,14 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         self.flow = anat_flow
         return anat_flow
 
-    def process(self):
-        """Executes the anatomical pipeline workflow and returns True if successful."""
-        # Enable the use of the W3C PROV data model to capture and represent provenance in Nipype
-        # config.enable_provenance()
+    def init_subject_derivatives_dirs(self):
+        """Return the paths to Nipype and CMP derivatives folders of a given subject / session.
 
-        # Process time
-        self.now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
-
+        Notes
+        -----
+        `self.subject` is updated to "sub-<participant_label>_ses-<session_label>"
+        when subject has multiple sessions.
+        """
         if "_" in self.subject:
             self.subject = self.subject.split("_")[0]
 
@@ -1042,6 +1042,25 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             except os.error:
                 print("%s was already existing" % nipype_anatomical_pipeline_subject_dir)
 
+        return cmp_deriv_subject_directory, nipype_deriv_subject_directory, nipype_anatomical_pipeline_subject_dir
+
+    def process(self):
+        """Executes the anatomical pipeline workflow and returns True if successful."""
+        anat_flow = None  # noqa
+
+        # Enable the use of the W3C PROV data model to capture and represent provenance in Nipype
+        # config.enable_provenance()
+
+        # Process time
+        self.now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
+
+        # Create the paths <output_dir>/cmp-<version>/sub-<label>(/ses-<label>)
+        # and <output_dir>/nipype-<version>/sub-<label>(/ses-<label>)
+        # self.subject is updated to "sub-<label>_ses-<label>"
+        # when subject has multiple sessions.
+        cmp_deriv_subject_directory, nipype_deriv_subject_directory, nipype_anatomical_pipeline_subject_dir = \
+            self.init_subject_derivatives_dirs()
+
         # Initialization
         if os.path.isfile(os.path.join(nipype_anatomical_pipeline_subject_dir, "pypeline.log")):
             os.unlink(os.path.join(nipype_anatomical_pipeline_subject_dir, "pypeline.log"))
@@ -1049,8 +1068,8 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         config.update_config(
             {
                 "logging": {
-                    "workflow_level": "DEBUG",
-                    "interface_level": "DEBUG",
+                    "workflow_level": "INFO",
+                    "interface_level": "INFO",
                     "log_directory": os.path.join(
                         nipype_deriv_subject_directory, "anatomical_pipeline"
                     ),
@@ -1077,13 +1096,10 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         )
         anat_flow.write_graph(graph2use="colored", format="svg", simple_form=True)
 
-        if self.number_of_cores != 1:
-            anat_flow.run(
-                plugin="MultiProc", plugin_args={"n_procs": self.number_of_cores}
-            )
-        else:
-            anat_flow.run()
-
+        anat_flow.run(
+            plugin="MultiProc", plugin_args={"n_procs": self.number_of_cores}
+        )
+        
         self._update_parcellation_scheme()
 
         iflogger.info("**** Processing finished ****")
