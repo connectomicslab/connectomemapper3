@@ -7,12 +7,23 @@
 """This module defines the `connectomemapper3_singularity` script that wraps calls to the Singularity BIDS APP image."""
 
 # General imports
+import os
 import sys
+import logging
+from pathlib import Path
+
+# Carbon footprint
+from codecarbon import EmissionsTracker
 
 # Own imports
+from cmp.info import __version__
 from cmp.parser import get_singularity_wrapper_parser
 from cmtklib.util import check_directory_exists
 from cmtklib.process import run
+from cmtklib.carbonfootprint import (
+    get_emission_car_miles_equivalent,
+    get_emission_tv_time_equivalent
+)
 
 
 def create_singularity_cmd(args):
@@ -118,6 +129,21 @@ def main():
     # Create the singularity run command
     cmd = create_singularity_cmd(args)
 
+    # Create and start the carbon footprint tracker
+    if args.track_carbon_footprint:
+        # Create the code folder if it does not exist yet
+        if not os.path.exists(str(Path(args.bids_dir) / "code")):
+            os.makedirs(str(Path(args.bids_dir) / "code"), exist_ok=True)
+        # To not pollute CMP3 outputs with codecarbon outputs
+        # Comment this line for debug
+        logging.getLogger("codecarbon").disabled = True
+        tracker = EmissionsTracker(
+            project_name=f"connectomemapper_{__version__}_singularity",
+            output_dir=str(Path(args.bids_dir) / "code"),
+            measure_power_secs=15,
+        )
+        tracker.start()
+
     # Execute the singularity run command
     try:
         print(f'... cmd: {cmd}')
@@ -127,6 +153,29 @@ def main():
         print('Failed')
         print(e)
         exit_code = 1
+
+    if args.track_carbon_footprint:
+        emissions: float = tracker.stop()
+        print("############################################################")
+        print(f"CARBON FOOTPRINT OF {len(args.participant_label)} SUBJECT(S) PROCESSED")
+        print("############################################################")
+        print(f" * Estimated Co2 emissions: {emissions} kg")
+        car_kms = get_emission_car_miles_equivalent(emissions)
+        print(f" * Equivalent in distance travelled by avg car: {car_kms} kms")
+        tv_time = get_emission_tv_time_equivalent(emissions)
+        print(f" * Equivalent in amount of time watching a 32-inch LCD flat screen TV: {tv_time}")
+        print("############################################################")
+        print(f"PREDICTED CARBON FOOTPRINT OF 100 SUBJECTS PROCESSED")
+        print("############################################################")
+        pred_emissions = 100 * emissions / len(args.participant_label)
+        print(f" * Estimated Co2 emissions: {pred_emissions} kg")
+        car_kms = get_emission_car_miles_equivalent(pred_emissions)
+        print(f" * Equivalent in distance travelled by avg car: {car_kms} kms")
+        tv_time = get_emission_tv_time_equivalent(pred_emissions)
+        print(f" * Equivalent in amount of time watching a 32-inch LCD flat screen TV: {tv_time}")
+        print("############################################################")
+        print("Results can be visualized with the codecarbon visualization tool using following command:\n")
+        print(f'\t$ carbonboard --filepath="{args.bids_dir}/code/emissions.csv" --port=9999\n')
 
     return exit_code
 
