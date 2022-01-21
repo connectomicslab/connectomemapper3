@@ -525,7 +525,7 @@ class BIDSAppInterfaceWindow(HasTraits):
 
         # Check if sMRI data is available in the dataset
         smri_files = bids_layout.get(
-            datatype="anat", suffix="T1w", extensions="nii.gz", return_type="file"
+            datatype="anat", suffix="T1w", extension="nii.gz", return_type="file"
         )
 
         if not smri_files:
@@ -537,7 +537,7 @@ class BIDSAppInterfaceWindow(HasTraits):
 
         # Check if dMRI data is available in the dataset
         dmri_files = bids_layout.get(
-            datatype="dwi", suffix="dwi", extensions="nii.gz", return_type="file"
+            datatype="dwi", suffix="dwi", extension="nii.gz", return_type="file"
         )
 
         if not dmri_files:
@@ -554,7 +554,7 @@ class BIDSAppInterfaceWindow(HasTraits):
             task="rest",
             datatype="func",
             suffix="bold",
-            extensions="nii.gz",
+            extension="nii.gz",
             return_type="file",
         )
         if not fmri_files:

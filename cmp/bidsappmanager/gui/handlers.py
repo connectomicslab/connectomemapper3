@@ -1542,7 +1542,7 @@ class MainWindowHandler(Handler):
                             subject=subject,
                             session=sessions[0],
                             suffix="bold",
-                            extensions=["nii", "nii.gz"],
+                            extension=["nii", "nii.gz"],
                         )
                     ]
                     if len(query_files) > 0:
@@ -1555,7 +1555,7 @@ class MainWindowHandler(Handler):
                             subject=subject,
                             session=sessions[0],
                             suffix="T1w",
-                            extensions=["nii", "nii.gz"],
+                            extension=["nii", "nii.gz"],
                         )
                     ]
                     if len(query_files) > 0:
@@ -1568,7 +1568,7 @@ class MainWindowHandler(Handler):
                             subject=subject,
                             session=sessions[0],
                             suffix="T2w",
-                            extensions=["nii", "nii.gz"],
+                            extension=["nii", "nii.gz"],
                         )
                     ]
                     if len(query_files) > 0:
@@ -1581,7 +1581,7 @@ class MainWindowHandler(Handler):
                             subject=subject,
                             session=sessions[0],
                             suffix="dwi",
-                            extensions=["nii", "nii.gz"],
+                            extension=["nii", "nii.gz"],
                         )
                     ]
                     if len(query_files) > 0:
@@ -1595,7 +1595,7 @@ class MainWindowHandler(Handler):
                     query_files = [
                         f.filename
                         for f in bids_layout.get(
-                            subject=subject, suffix="T1w", extensions=["nii", "nii.gz"]
+                            subject=subject, suffix="T1w", extension=["nii", "nii.gz"]
                         )
                     ]
                     if len(query_files) > 0:
@@ -1605,7 +1605,7 @@ class MainWindowHandler(Handler):
                     query_files = [
                         f.filename
                         for f in bids_layout.get(
-                            subject=subject, suffix="T2w", extensions=["nii", "nii.gz"]
+                            subject=subject, suffix="T2w", extension=["nii", "nii.gz"]
                         )
                     ]
                     if len(query_files) > 0:
@@ -1615,7 +1615,7 @@ class MainWindowHandler(Handler):
                     query_files = [
                         f.filename
                         for f in bids_layout.get(
-                            subject=subject, suffix="dwi", extensions=["nii", "nii.gz"]
+                            subject=subject, suffix="dwi", extension=["nii", "nii.gz"]
                         )
                     ]
                     if len(query_files) > 0:
@@ -1625,7 +1625,7 @@ class MainWindowHandler(Handler):
                     query_files = [
                         f.filename
                         for f in bids_layout.get(
-                            subject=subject, suffix="bold", extensions=["nii", "nii.gz"]
+                            subject=subject, suffix="bold", extension=["nii", "nii.gz"]
                         )
                     ]
                     if len(query_files) > 0:
@@ -1783,7 +1783,7 @@ class MainWindowHandler(Handler):
                                     suffix="dwi",
                                     target="acquisition",
                                     return_type="id",
-                                    extensions=["nii", "nii.gz"],
+                                    extension=["nii", "nii.gz"],
                                 )
                             ]
                             if debug:
@@ -1842,7 +1842,7 @@ class MainWindowHandler(Handler):
                                     subject=subject,
                                     session=session,
                                     suffix="dwi",
-                                    extensions=["nii", "nii.gz"],
+                                    extension=["nii", "nii.gz"],
                                 )
                             ]
 
@@ -1870,7 +1870,7 @@ class MainWindowHandler(Handler):
                                     suffix="dwi",
                                     target="acquisition",
                                     return_type="id",
-                                    extensions=["nii", "nii.gz"],
+                                    extension=["nii", "nii.gz"],
                                 )
                             ]
 

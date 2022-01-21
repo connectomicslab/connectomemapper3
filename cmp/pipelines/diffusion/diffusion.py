@@ -406,12 +406,12 @@ class DiffusionPipeline(Pipeline):
 
             if self.global_conf.subject_session == "":
 
-                dwi_file = self.get_file(layout, subject=subjid, suffix="dwi", extensions=".nii.gz")
+                dwi_file = self.get_file(layout, subject=subjid, suffix="dwi", extension="nii.gz")
                 if dwi_file is None:
                     print("ERROR : Diffusion image not found for subject %s." % subjid)
                     return
 
-                json_file = self.get_file(layout, subject=subjid, suffix="dwi", extensions=".json")
+                json_file = self.get_file(layout, subject=subjid, suffix="dwi", extension="json")
                 if json_file is None:
                     json_file = "NotFound"
                     print(
@@ -419,7 +419,7 @@ class DiffusionPipeline(Pipeline):
                         % subjid
                     )
 
-                bval_file = self.get_file(layout, subject=subjid, suffix="dwi", extensions=".bval")
+                bval_file = self.get_file(layout, subject=subjid, suffix="dwi", extension="bval")
                 if bval_file is None:
                     print(
                         "ERROR : Diffusion bval image not found for subject %s."
@@ -427,7 +427,7 @@ class DiffusionPipeline(Pipeline):
                     )
                     return
 
-                bvec_file = self.get_file(layout, subject=subjid, suffix="dwi", extensions=".bvec")
+                bvec_file = self.get_file(layout, subject=subjid, suffix="dwi", extension="bvec")
                 if bvec_file is None:
                     print(
                         "ERROR : Diffusion bvec image not found for subject %s."
@@ -437,7 +437,7 @@ class DiffusionPipeline(Pipeline):
             else:
                 sessid = self.global_conf.subject_session.split("-")[1]
 
-                dwi_file = self.get_file(layout, subject=subjid, suffix="dwi", extensions=".nii.gz", session=sessid)
+                dwi_file = self.get_file(layout, subject=subjid, suffix="dwi", extension="nii.gz", session=sessid)
                 if dwi_file is None:
                     print(
                         "ERROR : Diffusion image not found for subject %s, session %s."
@@ -446,7 +446,7 @@ class DiffusionPipeline(Pipeline):
                     return
 
                 json_file = self.get_file(
-                    layout, subject=subjid, suffix="dwi", extensions=".json", session=sessid
+                    layout, subject=subjid, suffix="dwi", extension="json", session=sessid
                 )
                 if json_file is None:
                     json_file = "NotFound"
@@ -456,7 +456,7 @@ class DiffusionPipeline(Pipeline):
                     )
 
                 bval_file = self.get_file(
-                    layout, subject=subjid, suffix="dwi", extensions=".bval", session=sessid
+                    layout, subject=subjid, suffix="dwi", extension="bval", session=sessid
                 )
                 if bval_file is None:
                     print(
@@ -466,7 +466,7 @@ class DiffusionPipeline(Pipeline):
                     return
 
                 bvec_file = self.get_file(
-                    layout, subject=subjid, suffix="dwi", extensions=".bvec", session=sessid
+                    layout, subject=subjid, suffix="dwi", extension="bvec", session=sessid
                 )
                 if bvec_file is None:
                     print(
