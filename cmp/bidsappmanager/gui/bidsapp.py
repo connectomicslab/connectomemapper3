@@ -21,6 +21,8 @@ import glob
 from pathlib import Path
 
 from codecarbon import EmissionsTracker
+from codecarbon.core.units import EmissionsPerKwh
+from codecarbon.external.geography import GeoMetadata
 from pyface.api import ImageResource
 from traitsui.qt4.extra.qt_view import QtView
 from traitsui.api import *
@@ -466,12 +468,15 @@ class BIDSAppInterfaceWindow(HasTraits):
 
     carbon_footprint_view = View(
         Group(
-            Item("carbon_emission_msg", style="readonly", show_label=False),
+            Item("carbon_emission_msg", editor=HTMLEditor(), show_label=False),
         ),
         title="Carbon Footprint Report",
         kind="modal",
-        width=modal_width,
-        buttons=["OK", "Cancel"],
+        width=2*modal_width,
+        height=570,
+        resizable=True,
+        scrollable=False,
+        buttons=["OK"],
     )
 
     def __init__(
@@ -1253,32 +1258,121 @@ class BIDSAppInterfaceWindow(HasTraits):
 
         if self.track_carbon_footprint:
             emissions: float = tracker.stop()
-            carbon_msg = "############################################################\n"
-            carbon_msg += f"CARBON FOOTPRINT OF {len(self.list_of_subjects_to_be_processed)} SUBJECT(S) PROCESSED\n"
-            carbon_msg += "############################################################\n"
-            carbon_msg += f" * Estimated Co2 emissions: {emissions} kg\n"
+            geo: GeoMetadata = tracker._get_geo_metadata()
+            country_name = geo.country_name
             car_kms = get_emission_car_miles_equivalent(emissions)
-            carbon_msg += f" * Equivalent in distance travelled by avg car: {car_kms} kms\n"
             tv_time = get_emission_tv_time_equivalent(emissions)
-            carbon_msg += f" * Equivalent in amount of time watching a 32-inch LCD flat screen TV: {tv_time}\n"
-            carbon_msg += "############################################################\n"
-            carbon_msg += f"PREDICTED CARBON FOOTPRINT OF 100 SUBJECTS PROCESSED\n"
-            carbon_msg += "############################################################\n"
             pred_emissions = 100 * emissions / len(self.list_of_subjects_to_be_processed)
-            carbon_msg += f" * Estimated Co2 emissions: {pred_emissions} kg\n"
-            car_kms = get_emission_car_miles_equivalent(pred_emissions)
-            carbon_msg += f" * Equivalent in distance travelled by avg car: {car_kms} kms\n"
-            tv_time = get_emission_tv_time_equivalent(pred_emissions)
-            carbon_msg += f" * Equivalent in amount of time watching a 32-inch LCD flat screen TV: {tv_time}\n"
-            carbon_msg += "############################################################"
-            carbon_msg += "Results can be visualized with the codecarbon visualization tool using following command:\n\n"
-            carbon_msg += f'\t$ carbonboard --filepath="{self.bids_root}/code/emissions.csv" --port=9999\n'
-            print("############################################################\n")
-            print(carbon_msg)
+            pred_car_kms = get_emission_car_miles_equivalent(pred_emissions)
+            pred_tv_time = get_emission_tv_time_equivalent(pred_emissions)
+            carbon_msg = f"""
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Footer</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.no-icons.min.css" rel="stylesheet">
+  <script src="https://kit.fontawesome.com/d2ef6e0082.js" crossorigin="anonymous"></script>
+
+  <style>
+    div {{
+      border: 1px solid gray;
+      padding: 8px;
+    }}
+
+    h1 {{
+      text-align: center;
+      text-transform: uppercase;
+      color: #4CAF50;
+    }}
+
+    p {{
+      margin: 0px 10px 0px 10px;
+      padding: 10px 10px 10px 10px;
+      text-indent: 0px;
+      text-align: justify;
+      background-color: #EEEEEE;
+    }}
+
+    a {{
+      text-decoration: none;
+      color: #008CBA;
+    }}
+    
+    #footer {{
+      border: 0px solid gray;
+      padding: 8px;
+    }}
+
+    #GFG {{
+      border: 0px solid gray;
+      padding: 8px;
+      height: 60px;
+      text-align: center;
+      padding: 3px;
+      color: white;
+      background-image: url(https://ohbm-environment.org/wp-content/uploads/slider/cache/aceabfbee23a7b3e8e9fed910c639555/Borneo_rainforest-3.jpg);
+      background-position: center center;
+      background-repeat: no-repeat;
+      background-size: cover;
+    }}
+    .fa-brain{{
+      color: pink;
+      font-size: 1em;
+      margin: 0px 10px 0px 10px;
+      vertical-align: middle;
+      horizontal-align: left;
+    }}
+  </style>
+</head>
+<body>
+    <div id="GFG">
+    </div>
+    <div>
+      <h4>
+          Carbon footprint {len(self.list_of_subjects_to_be_processed)} of subject(s) processed
+      </h4>
+      <ul>
+          <li>Connectome Mapper 3 was run in {country_name}.</li>
+          <li>Total estimated Co2 emissions: {emissions} kg</li>
+          <li>Equivalent in distance travelled by avg car: {car_kms} kms</li>
+          <li>Equivalent in amount of time watching a 32-inch LCD flat screen TV: {tv_time}</li>
+      </ul>
+      <p>
+        <em>Estimations were conducted using the <a href="https://github.com/mlco2/codecarbon">CodeCarbon emissions tracker</a>.</em>
+      </p>
+      <h4>
+          Predicted carbon footprint for the processing of 100 subjects
+      </h4>
+      <ul>
+          <li>Co2 emissions: {pred_emissions} kg</li>
+          <li>Equivalent in distance travelled by avg car: {pred_car_kms} kms</li>
+          <li>Equivalent in amount of time watching a 32-inch LCD flat screen TV: {pred_tv_time}</li>
+      </ul>
+    </div>
+</body>
+<footer>
+  <div id="footer">
+    <p>
+        Actively part of the initiative created by the
+        <a href="https://neuropipelines.github.io/20pipelines">
+            Sustainability and Environment Action Special Interest Group</a>,
+        the CMP developers hope that by providing you with such metrics it can allow you to be aware about
+        the carbon footprint of your<i class="fas fa-brain" aria-hidden= "true"></i>research. &#127757; &#10024;
+    </p>
+  </div>
+</footer>
+<html>
+
+            """
+            # print(carbon_msg)
             self.carbon_emission_msg = carbon_msg
 
             # Display the carbon footprint report in a Dialog Window
-            self.configure_traits(view=self.carbon_footprint_view)
+            self.configure_traits(view='carbon_footprint_view')
 
         return True
 
