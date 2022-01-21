@@ -113,14 +113,11 @@ commands:
                 --fs_license /bids_dir/code/license.txt \
                 --ants_number_of_threads 4 \
                 --coverage \
-                --notrack \
-                --track_carbon_footprint
+                --notrack
             # Rename partial coverage
             mv /tmp/data/<<parameters.circleci_job>>/ds-sample/code/coverage.xml /tmp/data/ds-sample/test/<<parameters.test_name>>_coverage.xml
             # Rename execution log
             mv /tmp/data/<<parameters.circleci_job>>/ds-sample/code/log.txt /tmp/data/ds-sample/test/<<parameters.test_name>>_log.txt
-            # Rename emissions log
-            mv /tmp/data/<<parameters.circleci_job>>/ds-sample/code/emissions.csv /tmp/data/ds-sample/test/<<parameters.test_name>>_co2emissions.csv
       - run:
           name: Checking outputs of Connectome Mapper run (<<parameters.test_name>>)
           command: |
@@ -284,14 +281,11 @@ commands:
                 --fs_license /bids_dir/code/license.txt \
                 --ants_number_of_threads 4 \
                 --coverage \
-                --notrack \
-                --track_carbon_footprint
+                --notrack
             # Rename partial coverage
             mv /tmp/data/<<parameters.circleci_job>>/ds-sample/code/coverage.xml /tmp/data/ds-sample/test/<<parameters.test_name>>_coverage.xml
             # Rename execution log
             mv /tmp/data/<<parameters.circleci_job>>/ds-sample/code/log.txt /tmp/data/ds-sample/test/<<parameters.test_name>>_log.txt
-            # Rename emissions log
-            mv /tmp/data/<<parameters.circleci_job>>/ds-sample/code/emissions.csv /tmp/data/ds-sample/test/<<parameters.test_name>>_co2emissions.csv
       - run:
           name: Checking outputs of Connectome Mapper run (<<parameters.test_name>>)
           command: |
@@ -339,14 +333,11 @@ commands:
                 --fs_license /bids_dir/code/license.txt \
                 --ants_number_of_threads 4 \
                 --coverage \
-                --notrack \
-                --track_carbon_footprint
+                --notrack
             # Rename partial coverage
             mv /tmp/data/<<parameters.circleci_job>>/ds-sample/code/coverage.xml /tmp/data/ds-sample/test/<<parameters.test_name>>_coverage.xml
             # Rename execution log
             mv /tmp/data/<<parameters.circleci_job>>/ds-sample/code/log.txt /tmp/data/ds-sample/test/<<parameters.test_name>>_log.txt
-            # Rename emissions log
-            mv /tmp/data/<<parameters.circleci_job>>/ds-sample/code/emissions.csv /tmp/data/ds-sample/test/<<parameters.test_name>>_co2emissions.csv
       - run:
           name: Checking outputs of Connectome Mapper run (<<parameters.test_name>>)
           command: |
@@ -394,14 +385,11 @@ commands:
                 --fs_license /bids_dir/code/license.txt \
                 --ants_number_of_threads 4 \
                 --coverage \
-                --notrack \
-                --track_carbon_footprint
+                --notrack
             # Rename partial coverage
             mv /tmp/data/<<parameters.circleci_job>>/ds-sample/code/coverage.xml /tmp/data/ds-sample/test/<<parameters.test_name>>_coverage.xml
             # Rename execution log
             mv /tmp/data/<<parameters.circleci_job>>/ds-sample/code/log.txt /tmp/data/ds-sample/test/<<parameters.test_name>>_log.txt
-            # Rename emissions log
-            mv /tmp/data/<<parameters.circleci_job>>/ds-sample/code/emissions.csv /tmp/data/ds-sample/test/<<parameters.test_name>>_co2emissions.csv
       - run:
           name: Checking outputs of Connectome Mapper run (<<parameters.test_name>>)
           command: |
