@@ -320,7 +320,7 @@ class DiffusionPipeline(Pipeline):
     def _atlas_info_changed(self, new):
         pass
 
-    def get_file(self, layout, subject, suffix, extensions, session=None):
+    def get_file(self, layout, subject, suffix, extension, session=None):
         """Query files with PyBIDS and take the first file in the returned list or get a specific dmri file if BIDS acq- keyword is used in filename.
 
         Parameters
@@ -334,7 +334,7 @@ class DiffusionPipeline(Pipeline):
         suffix : str
             BIDS file suffix i.e. "T1w", "dwi", ...
 
-        extensions : str
+        extension : str
             File extension i.e. ".nii.gz", ".json", ".bval", ...
 
         session : str
@@ -346,9 +346,9 @@ class DiffusionPipeline(Pipeline):
             The output filepath or None if no file was found
         """
         if session is None:
-            files = layout.get(subject=subject, suffix=suffix, extension=extensions)
+            files = layout.get(subject=subject, suffix=suffix, extension=extension)
         else:
-            files = layout.get(subject=subject, suffix=suffix, extension=extensions, session=session)
+            files = layout.get(subject=subject, suffix=suffix, extension=extension, session=session)
 
         if len(files) > 0:
             out_file = os.path.join(files[0].dirname, files[0].filename)
