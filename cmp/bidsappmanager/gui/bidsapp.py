@@ -21,7 +21,7 @@ import glob
 from pathlib import Path
 
 from codecarbon import EmissionsTracker
-from codecarbon.core.units import EmissionsPerKwh
+from codecarbon.core.units import EmissionsPerKwh, Energy
 from codecarbon.external.geography import GeoMetadata
 from pyface.api import ImageResource
 from traitsui.qt4.extra.qt_view import QtView
@@ -473,7 +473,7 @@ class BIDSAppInterfaceWindow(HasTraits):
         title="Carbon Footprint Report",
         kind="modal",
         width=2*modal_width,
-        height=570,
+        height=590,
         resizable=True,
         scrollable=False,
         buttons=["OK"],
@@ -1259,6 +1259,7 @@ class BIDSAppInterfaceWindow(HasTraits):
         if self.track_carbon_footprint:
             emissions: float = tracker.stop()
             geo: GeoMetadata = tracker._get_geo_metadata()
+            country_emissions_per_kwh = tracker._emissions.get_country_emissions(Energy(1), geo)
             country_name = geo.country_name
             car_kms = get_emission_car_miles_equivalent(emissions)
             tv_time = get_emission_tv_time_equivalent(emissions)
@@ -1266,7 +1267,6 @@ class BIDSAppInterfaceWindow(HasTraits):
             pred_car_kms = get_emission_car_miles_equivalent(pred_emissions)
             pred_tv_time = get_emission_tv_time_equivalent(pred_emissions)
             carbon_msg = f"""
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -1333,24 +1333,30 @@ class BIDSAppInterfaceWindow(HasTraits):
     </div>
     <div>
       <h4>
-          Carbon footprint {len(self.list_of_subjects_to_be_processed)} of subject(s) processed
+          Carbon footprint results
       </h4>
       <ul>
-          <li>Connectome Mapper 3 was run in {country_name}.</li>
-          <li>Total estimated Co2 emissions: {emissions} kg</li>
-          <li>Equivalent in distance travelled by avg car: {car_kms} kms</li>
-          <li>Equivalent in amount of time watching a 32-inch LCD flat screen TV: {tv_time}</li>
+          Connectome Mapper ({__version__}) was run on {len(self.list_of_subjects_to_be_processed)} subject(s)
+          in {country_name} (Mean CO<sub>2</sub> kg / kWH: {country_emissions_per_kwh}), having the following
+          estimated carbon footprint:
+          <li>Total estimated CO<sub>2</sub> emissions: {emissions} kg </li>
+          <li>Equivalent in distance travelled by avg <i class="fas fa-car"></i>: {car_kms} kms</li>
+          <li>Equivalent in amount of time watching a 32-inch LCD flat screen <i class="fas fa-tv"></i>: {tv_time}</li>
       </ul>
       <p>
-        <em>Estimations were conducted using the <a href="https://github.com/mlco2/codecarbon">CodeCarbon emissions tracker</a>.</em>
+        <em>
+            Estimations were conducted using the
+            <a href="https://github.com/mlco2/codecarbon">CodeCarbon emissions tracker</a>.
+        </em>
       </p>
       <h4>
-          Predicted carbon footprint for the processing of 100 subjects
+          Carbon footprint prediction for 100 subjects
       </h4>
       <ul>
+          In the same conditions, this would have resulted in:
           <li>Co2 emissions: {pred_emissions} kg</li>
-          <li>Equivalent in distance travelled by avg car: {pred_car_kms} kms</li>
-          <li>Equivalent in amount of time watching a 32-inch LCD flat screen TV: {pred_tv_time}</li>
+          <li>Equivalent in distance travelled by avg <i class="fas fa-car"></i>: {pred_car_kms} kms</li>
+          <li>Equivalent in amount of time watching a 32-inch LCD flat screen <i class="fas fa-tv"></i>: {pred_tv_time}</li>
       </ul>
     </div>
 </body>
@@ -1360,7 +1366,7 @@ class BIDSAppInterfaceWindow(HasTraits):
         Actively part of the initiative created by the
         <a href="https://neuropipelines.github.io/20pipelines">
             Sustainability and Environment Action Special Interest Group</a>,
-        the CMP developers hope that by providing you with such metrics it can allow you to be aware about
+        the CMP developers hope that by providing you with such metrics it can allow you to be more aware about
         the carbon footprint of your<i class="fas fa-brain" aria-hidden= "true"></i>research. &#127757; &#10024;
     </p>
   </div>
