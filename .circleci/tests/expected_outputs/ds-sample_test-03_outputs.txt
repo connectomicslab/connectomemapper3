@@ -489,12 +489,6 @@ nipype-1.7.0/sub-01/ses-01/diffusion_pipeline/connectome_stage/merge_additional_
 nipype-1.7.0/sub-01/ses-01/diffusion_pipeline/connectome_stage/merge_additional_maps/result_merge_additional_maps.pklz
 nipype-1.7.0/sub-01/ses-01/diffusion_pipeline/d3.js
 nipype-1.7.0/sub-01/ses-01/diffusion_pipeline/diffusion_stage/dilate_rois/_inputs.pklz
-nipype-1.7.0/sub-01/ses-01/diffusion_pipeline/diffusion_stage/dilate_rois/mapflow/_dilate_rois0/command.txt
-nipype-1.7.0/sub-01/ses-01/diffusion_pipeline/diffusion_stage/dilate_rois/mapflow/_dilate_rois0/_inputs.pklz
-nipype-1.7.0/sub-01/ses-01/diffusion_pipeline/diffusion_stage/dilate_rois/mapflow/_dilate_rois0/_node.pklz
-nipype-1.7.0/sub-01/ses-01/diffusion_pipeline/diffusion_stage/dilate_rois/mapflow/_dilate_rois0/_report/report.rst
-nipype-1.7.0/sub-01/ses-01/diffusion_pipeline/diffusion_stage/dilate_rois/mapflow/_dilate_rois0/result__dilate_rois0.pklz
-nipype-1.7.0/sub-01/ses-01/diffusion_pipeline/diffusion_stage/dilate_rois/mapflow/_dilate_rois0/sub-01_ses-01_atlas-L2018_res-scale1_dseg_out_flirt_dil.nii.gz
 nipype-1.7.0/sub-01/ses-01/diffusion_pipeline/diffusion_stage/dilate_rois/_node.pklz
 nipype-1.7.0/sub-01/ses-01/diffusion_pipeline/diffusion_stage/dilate_rois/_report/report.rst
 nipype-1.7.0/sub-01/ses-01/diffusion_pipeline/diffusion_stage/dilate_rois/result_dilate_rois.pklz
@@ -877,12 +871,6 @@ nipype-1.7.0/sub-01/ses-01/diffusion_pipeline/preprocessing_stage/mrtrix_5tt/_no
 nipype-1.7.0/sub-01/ses-01/diffusion_pipeline/preprocessing_stage/mrtrix_5tt/_report/report.rst
 nipype-1.7.0/sub-01/ses-01/diffusion_pipeline/preprocessing_stage/mrtrix_5tt/result_mrtrix_5tt.pklz
 nipype-1.7.0/sub-01/ses-01/diffusion_pipeline/preprocessing_stage/ROIs_resample/_inputs.pklz
-nipype-1.7.0/sub-01/ses-01/diffusion_pipeline/preprocessing_stage/ROIs_resample/mapflow/_ROIs_resample0/command.txt
-nipype-1.7.0/sub-01/ses-01/diffusion_pipeline/preprocessing_stage/ROIs_resample/mapflow/_ROIs_resample0/_inputs.pklz
-nipype-1.7.0/sub-01/ses-01/diffusion_pipeline/preprocessing_stage/ROIs_resample/mapflow/_ROIs_resample0/_node.pklz
-nipype-1.7.0/sub-01/ses-01/diffusion_pipeline/preprocessing_stage/ROIs_resample/mapflow/_ROIs_resample0/_report/report.rst
-nipype-1.7.0/sub-01/ses-01/diffusion_pipeline/preprocessing_stage/ROIs_resample/mapflow/_ROIs_resample0/result__ROIs_resample0.pklz
-nipype-1.7.0/sub-01/ses-01/diffusion_pipeline/preprocessing_stage/ROIs_resample/mapflow/_ROIs_resample0/sub-01_ses-01_atlas-L2018_res-scale1_dseg_out.nii.gz
 nipype-1.7.0/sub-01/ses-01/diffusion_pipeline/preprocessing_stage/ROIs_resample/_node.pklz
 nipype-1.7.0/sub-01/ses-01/diffusion_pipeline/preprocessing_stage/ROIs_resample/_report/report.rst
 nipype-1.7.0/sub-01/ses-01/diffusion_pipeline/preprocessing_stage/ROIs_resample/result_ROIs_resample.pklz
