@@ -21,8 +21,6 @@ import glob
 from pathlib import Path
 
 from codecarbon import EmissionsTracker
-from codecarbon.core.units import EmissionsPerKwh, Energy
-from codecarbon.external.geography import GeoMetadata
 from pyface.api import ImageResource
 from traitsui.qt4.extra.qt_view import QtView
 from traitsui.api import *
@@ -45,8 +43,7 @@ from cmtklib.util import (
     print_error,
 )
 from cmtklib.carbonfootprint import (
-    get_emission_car_miles_equivalent,
-    get_emission_tv_time_equivalent
+    create_html_carbon_footprint_report
 )
 
 import cmp.bidsappmanager.gui.handlers
@@ -1202,7 +1199,8 @@ class BIDSAppInterfaceWindow(HasTraits):
             if not os.path.exists(str(Path(self.bids_root) / "code")):
                 os.makedirs(str(Path(self.bids_root) / "code"), exist_ok=True)
             # Comment this line for debug
-            logging.getLogger("codecarbon").disabled = True
+            # logging.getLogger("codecarbon").disabled = False
+            logging.getLogger('codecarbon').level = logging.DEBUG
             tracker = EmissionsTracker(
                 project_name=f"connectomemapper_{__version__}_gui",
                 output_dir=str(Path(self.bids_root) / "code"),
@@ -1257,127 +1255,13 @@ class BIDSAppInterfaceWindow(HasTraits):
         self.docker_running = False
 
         if self.track_carbon_footprint:
-            emissions: float = tracker.stop()
-            geo: GeoMetadata = tracker._get_geo_metadata()
-            country_emissions_per_kwh = tracker._emissions.get_country_emissions(Energy(1), geo)
-            country_name = geo.country_name
-            car_kms = get_emission_car_miles_equivalent(emissions)
-            tv_time = get_emission_tv_time_equivalent(emissions)
-            pred_emissions = 100 * emissions / len(self.list_of_subjects_to_be_processed)
-            pred_car_kms = get_emission_car_miles_equivalent(pred_emissions)
-            pred_tv_time = get_emission_tv_time_equivalent(pred_emissions)
-            carbon_msg = f"""
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Footer</title>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-  <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.no-icons.min.css" rel="stylesheet">
-  <script src="https://kit.fontawesome.com/d2ef6e0082.js" crossorigin="anonymous"></script>
-
-  <style>
-    div {{
-      border: 1px solid gray;
-      padding: 8px;
-    }}
-
-    h1 {{
-      text-align: center;
-      text-transform: uppercase;
-      color: #4CAF50;
-    }}
-
-    p {{
-      margin: 0px 10px 0px 10px;
-      padding: 10px 10px 10px 10px;
-      text-indent: 0px;
-      text-align: justify;
-      background-color: #EEEEEE;
-    }}
-
-    a {{
-      text-decoration: none;
-      color: #008CBA;
-    }}
-    
-    #footer {{
-      border: 0px solid gray;
-      padding: 8px;
-    }}
-
-    #GFG {{
-      border: 0px solid gray;
-      padding: 8px;
-      height: 60px;
-      text-align: center;
-      padding: 3px;
-      color: white;
-      background-image: url(https://ohbm-environment.org/wp-content/uploads/slider/cache/aceabfbee23a7b3e8e9fed910c639555/Borneo_rainforest-3.jpg);
-      background-position: center center;
-      background-repeat: no-repeat;
-      background-size: cover;
-    }}
-    .fa-brain{{
-      color: pink;
-      font-size: 1em;
-      margin: 0px 10px 0px 10px;
-      vertical-align: middle;
-      horizontal-align: left;
-    }}
-  </style>
-</head>
-<body>
-    <div id="GFG">
-    </div>
-    <div>
-      <h4>
-          Carbon footprint results
-      </h4>
-      <ul>
-          Connectome Mapper ({__version__}) was run on {len(self.list_of_subjects_to_be_processed)} subject(s)
-          in {country_name} (Mean CO<sub>2</sub> kg / kWH: {country_emissions_per_kwh}), having the following
-          estimated carbon footprint:
-          <li>Total estimated CO<sub>2</sub> emissions: {emissions} kg </li>
-          <li>Equivalent in distance travelled by avg <i class="fas fa-car"></i>: {car_kms} kms</li>
-          <li>Equivalent in amount of time watching a 32-inch LCD flat screen <i class="fas fa-tv"></i>: {tv_time}</li>
-      </ul>
-      <p>
-        <em>
-            Estimations were conducted using the
-            <a href="https://github.com/mlco2/codecarbon">CodeCarbon emissions tracker</a>.
-        </em>
-      </p>
-      <h4>
-          Carbon footprint prediction for 100 subjects
-      </h4>
-      <ul>
-          In the same conditions, this would have resulted in:
-          <li>Co2 emissions: {pred_emissions} kg</li>
-          <li>Equivalent in distance travelled by avg <i class="fas fa-car"></i>: {pred_car_kms} kms</li>
-          <li>Equivalent in amount of time watching a 32-inch LCD flat screen <i class="fas fa-tv"></i>: {pred_tv_time}</li>
-      </ul>
-    </div>
-</body>
-<footer>
-  <div id="footer">
-    <p>
-        Actively part of the initiative created by the
-        <a href="https://neuropipelines.github.io/20pipelines">
-            Sustainability and Environment Action Special Interest Group</a>,
-        the CMP developers hope that by providing you with such metrics it can allow you to be more aware about
-        the carbon footprint of your<i class="fas fa-brain" aria-hidden= "true"></i>research. &#127757; &#10024;
-    </p>
-  </div>
-</footer>
-<html>
-
-            """
-            # print(carbon_msg)
-            self.carbon_emission_msg = carbon_msg
-
+            # Stop the carbon tracker
+            tracker.stop()
             # Display the carbon footprint report in a Dialog Window
+            self.carbon_emission_msg = create_html_carbon_footprint_report(
+                emissions_csv_file=str(Path(self.bids_root) / "code" / "emissions.csv"),
+                nb_of_subjects_processed=len(self.list_of_subjects_to_be_processed)
+            )
             self.configure_traits(view='carbon_footprint_view')
 
         return True
