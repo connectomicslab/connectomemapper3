@@ -840,7 +840,7 @@ class CombineParcellations(BaseInterface):
                 for elem in outprefix_name.split("_"):
                     if "scale" in elem:
                         scale = elem
-                rh_annot_file = 'rh.lausanne2008.%s.annot' % scale
+                rh_annot_file = 'rh.lausanne2018.%s.annot' % scale
                 iflogger.info("  > Load {}".format(rh_annot_file))
                 rh_annot = ni.freesurfer.io.read_annot(
                     op.join(self.inputs.subjects_dir, self.inputs.subject_id, 'label', rh_annot_file))
@@ -1115,7 +1115,7 @@ class CombineParcellations(BaseInterface):
                 for elem in outprefix_name.split("_"):
                     if "scale" in elem:
                         scale = elem
-                lh_annot_file = 'lh.lausanne2008.%s.annot' % scale
+                lh_annot_file = 'lh.lausanne2018.%s.annot' % scale
                 iflogger.info("  > Load {}".format(lh_annot_file))
                 lh_annot = ni.freesurfer.io.read_annot(
                     op.join(self.inputs.subjects_dir, self.inputs.subject_id, 'label', lh_annot_file))
