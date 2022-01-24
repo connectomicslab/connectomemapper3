@@ -2440,12 +2440,12 @@ def create_roi(subject_id, subjects_dir, v=True):
     fs_string = 'export SUBJECTS_DIR=' + freesurfer_subj
 
     # Multiscale parcellation - define annotation and segmentation variables
-    rh_annot_files = ['rh.lausanne2008.scale1.annot', 'rh.lausanne2008.scale2.annot', 'rh.lausanne2008.scale3.annot',
-                      'rh.lausanne2008.scale4.annot', 'rh.lausanne2008.scale5.annot']
-    lh_annot_files = ['lh.lausanne2008.scale1.annot', 'lh.lausanne2008.scale2.annot', 'lh.lausanne2008.scale3.annot',
-                      'lh.lausanne2008.scale4.annot', 'lh.lausanne2008.scale5.annot']
-    annot = ['lausanne2008.scale1', 'lausanne2008.scale2', 'lausanne2008.scale3', 'lausanne2008.scale4',
-             'lausanne2008.scale5']
+    rh_annot_files = ['rh.lausanne2018.scale1.annot', 'rh.lausanne2018.scale2.annot', 'rh.lausanne2018.scale3.annot',
+                      'rh.lausanne2018.scale4.annot', 'rh.lausanne2018.scale5.annot']
+    lh_annot_files = ['lh.lausanne2018.scale1.annot', 'lh.lausanne2018.scale2.annot', 'lh.lausanne2018.scale3.annot',
+                      'lh.lausanne2018.scale4.annot', 'lh.lausanne2018.scale5.annot']
+    annot = ['lausanne2018.scale1', 'lausanne2018.scale2', 'lausanne2018.scale3', 'lausanne2018.scale4',
+             'lausanne2018.scale5']
     rois_output = ['ROI_scale1_Lausanne2018.nii.gz', 'ROI_scale2_Lausanne2018.nii.gz', 'ROI_scale3_Lausanne2018.nii.gz',
                    'ROI_scale4_Lausanne2018.nii.gz', 'ROI_scale5_Lausanne2018.nii.gz']
     roivs_output = ['ROIv_scale1_Lausanne2018.nii.gz', 'ROIv_scale2_Lausanne2018.nii.gz',
