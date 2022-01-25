@@ -620,11 +620,11 @@ jobs:
     steps:
       - restore_cache:
           keys:
-            - data-v2-1-{{ .Branch }}-{{ .Revision }}
-            - data-v2-1--{{ .Revision }}
-            - data-v2-1-{{ .Branch }}-
-            - data-v2-1-master-
-            - data-v2-1-
+            - data-v2-2-{{ .Branch }}-{{ .Revision }}
+            - data-v2-2--{{ .Revision }}
+            - data-v2-2-{{ .Branch }}-
+            - data-v2-2-master-
+            - data-v2-2-
           paths:
             - /tmp/data
       - run:
@@ -671,7 +671,7 @@ jobs:
           paths:
             - data
       - save_cache:
-         key: data-v2-1-{{ .Branch }}-{{ .Revision }}
+         key: data-v2-2-{{ .Branch }}-{{ .Revision }}
          paths:
             - /tmp/data
 
