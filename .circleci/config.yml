@@ -648,6 +648,8 @@ jobs:
                 -O freesurfer.tar.gz "https://zenodo.org/record/5790821/files/freesurfer.tar.gz?download=1"
               tar xvzf freesurfer.tar.gz -C /tmp/data/ds-sample/derivatives
               mv /tmp/data/ds-sample/derivatives/freesurfer /tmp/data/ds-sample/derivatives/freesurfer-6.0.1
+              # Remove outdated *.lausanne2008.*.annot files
+              rm /tmp/data/ds-sample/derivatives/freesurfer-6.0.1/sub-01_ses-01/label/*.lausanne2008.scale*.annot
               echo "FreeSurfer derivatives of ds-sample have been successfully downloaded"
             else
               echo "FreeSurfer derivatives of ds-sample was cached"
@@ -721,6 +723,7 @@ jobs:
           paths:
             - data/ds-sample/test/test-01_*
             - data/test1_docker_parcellation/ds-sample/derivatives/nipype-*
+            - data/test1_docker_parcellation/ds-sample/derivatives/freesurfer-*
             - data/test1_docker_parcellation/ds-sample/derivatives/cmp-*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
@@ -861,6 +864,9 @@ jobs:
             mkdir -p /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives
             cp -r /tmp/data/test1_docker_parcellation/ds-sample/derivatives/nipype-* \
             /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives
+            rm -r /tmp/data/ds-sample/derivatives/freesurfer-*
+            cp -r /tmp/data/test1_docker_parcellation/ds-sample/derivatives/freesurfer-* \
+            /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives
       - load-docker-image-archive:
           archive_file: "/tmp/cache/docker/docker.tar.zst"
       - clean-configuration-files:
@@ -911,6 +917,9 @@ jobs:
           command: |
             mkdir -p /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives
             cp -r /tmp/data/test1_docker_parcellation/ds-sample/derivatives/nipype-* \
+            /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives
+            rm -r /tmp/data/ds-sample/derivatives/freesurfer-*
+            cp -r /tmp/data/test1_docker_parcellation/ds-sample/derivatives/freesurfer-* \
             /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives
       - load-docker-image-archive:
           archive_file: "/tmp/cache/docker/docker.tar.zst"
@@ -963,6 +972,9 @@ jobs:
             mkdir -p /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives
             cp -r /tmp/data/test1_docker_parcellation/ds-sample/derivatives/nipype-* \
             /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives
+            rm -r /tmp/data/ds-sample/derivatives/freesurfer-*
+            cp -r /tmp/data/test1_docker_parcellation/ds-sample/derivatives/freesurfer-* \
+            /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives
       - load-docker-image-archive:
           archive_file: "/tmp/cache/docker/docker.tar.zst"
       - clean-configuration-files:
@@ -1014,6 +1026,9 @@ jobs:
             mkdir -p /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives
             cp -r /tmp/data/test1_docker_parcellation/ds-sample/derivatives/nipype-* \
             /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives
+            rm -r /tmp/data/ds-sample/derivatives/freesurfer-*
+            cp -r /tmp/data/test1_docker_parcellation/ds-sample/derivatives/freesurfer-* \
+            /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives
       - load-docker-image-archive:
           archive_file: "/tmp/cache/docker/docker.tar.zst"
       - clean-configuration-files:
@@ -1064,6 +1079,9 @@ jobs:
           command: |
             mkdir -p /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives
             cp -r /tmp/data/test1_docker_parcellation/ds-sample/derivatives/nipype-* \
+            /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives
+            rm -r /tmp/data/ds-sample/derivatives/freesurfer-*
+            cp -r /tmp/data/test1_docker_parcellation/ds-sample/derivatives/freesurfer-* \
             /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives
       - load-docker-image-archive:
           archive_file: "/tmp/cache/docker/docker.tar.zst"
