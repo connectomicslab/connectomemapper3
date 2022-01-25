@@ -382,11 +382,6 @@ nipype-1.7.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/compute_roi_vo
 nipype-1.7.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/compute_roi_volumetry/_report/report.rst
 nipype-1.7.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/compute_roi_volumetry/result_compute_roi_volumetry.pklz
 nipype-1.7.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/createBIDSLabelIndexMappingFile/_inputs.pklz
-nipype-1.7.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/createBIDSLabelIndexMappingFile/mapflow/_createBIDSLabelIndexMappingFile0/freesurferaparc.tsv
-nipype-1.7.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/createBIDSLabelIndexMappingFile/mapflow/_createBIDSLabelIndexMappingFile0/_inputs.pklz
-nipype-1.7.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/createBIDSLabelIndexMappingFile/mapflow/_createBIDSLabelIndexMappingFile0/_node.pklz
-nipype-1.7.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/createBIDSLabelIndexMappingFile/mapflow/_createBIDSLabelIndexMappingFile0/_report/report.rst
-nipype-1.7.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/createBIDSLabelIndexMappingFile/mapflow/_createBIDSLabelIndexMappingFile0/result__createBIDSLabelIndexMappingFile0.pklz
 nipype-1.7.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/createBIDSLabelIndexMappingFile/_node.pklz
 nipype-1.7.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/createBIDSLabelIndexMappingFile/_report/report.rst
 nipype-1.7.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/createBIDSLabelIndexMappingFile/result_createBIDSLabelIndexMappingFile.pklz
