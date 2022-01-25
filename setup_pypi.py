@@ -77,6 +77,10 @@ package_data = {
         "pipelines/functional/*.png",
     ],
     "resources": ["buttons/*.png", "icons/*png"],
+    "cmtklib": [
+        "data/report/carbonfootprint/css/*.*",
+        "data/report/carbonfootprint/js/*.*",
+    ],
 }
 
 # Extract package requirements from Conda environment.yml

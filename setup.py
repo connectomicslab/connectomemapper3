@@ -86,6 +86,8 @@ package_data = {
         "data/segmentation/ants_MICCAI2012_multi-atlas_challenge_data/*/*.*",
         "data/segmentation/ants_MICCAI2012_multi-atlas_challenge_data/*.*",
         "data/segmentation/thalamus2018/*.*",
+        "data/report/carbonfootprint/css/*.*",
+        "data/report/carbonfootprint/js/*.*",
     ],
 }
 

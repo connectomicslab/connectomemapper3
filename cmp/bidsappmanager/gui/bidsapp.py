@@ -43,7 +43,8 @@ from cmtklib.util import (
     print_error,
 )
 from cmtklib.carbonfootprint import (
-    create_html_carbon_footprint_report
+    create_emissions_tracker,
+    create_html_carbon_footprint_report, create_carbon_footprint_message
 )
 
 import cmp.bidsappmanager.gui.handlers
@@ -469,8 +470,8 @@ class BIDSAppInterfaceWindow(HasTraits):
         ),
         title="Carbon Footprint Report",
         kind="modal",
-        width=2*modal_width,
-        height=590,
+        width=2.2*modal_width,
+        height=770,
         resizable=True,
         scrollable=False,
         buttons=["OK"],
@@ -1195,17 +1196,7 @@ class BIDSAppInterfaceWindow(HasTraits):
 
         # Create and start the carbon footprint tracker
         if self.track_carbon_footprint:
-            # Create the code folder if it does not exist yet
-            if not os.path.exists(str(Path(self.bids_root) / "code")):
-                os.makedirs(str(Path(self.bids_root) / "code"), exist_ok=True)
-            # Comment this line for debug
-            # logging.getLogger("codecarbon").disabled = False
-            logging.getLogger('codecarbon').level = logging.DEBUG
-            tracker = EmissionsTracker(
-                project_name=f"connectomemapper_{__version__}_gui",
-                output_dir=str(Path(self.bids_root) / "code"),
-                measure_power_secs=15,
-            )
+            tracker = create_emissions_tracker(bids_root=self.bids_root)
             tracker.start()
 
         # maxprocs = multiprocessing.cpu_count()
@@ -1216,12 +1207,12 @@ class BIDSAppInterfaceWindow(HasTraits):
         if self.datalad_is_available and self.data_provenance_tracking:
 
             proc = self.start_bidsapp_participant_level_process_with_datalad(
-                    self.bidsapp_tag, self.list_of_subjects_to_be_processed
+                self.bidsapp_tag, self.list_of_subjects_to_be_processed
             )
 
         else:
             proc = self.start_bidsapp_participant_level_process(
-                    self.bidsapp_tag, self.list_of_subjects_to_be_processed
+                self.bidsapp_tag, self.list_of_subjects_to_be_processed
             )
 
         processes.append(proc)
@@ -1234,14 +1225,14 @@ class BIDSAppInterfaceWindow(HasTraits):
             # project.clean_cache(self.bids_root)
 
             cmd = 'datalad save -d . -m "Dataset processed by the connectomemapper-bidsapp:{}" --version-tag processed-{}'.format(
-                    self.bidsapp_tag, time.strftime("%Y%m%d-%H%M%S")
+                self.bidsapp_tag, time.strftime("%Y%m%d-%H%M%S")
             )
             try:
                 print_blue(f"... cmd: {cmd}")
                 self.run(cmd, env={}, cwd=os.path.abspath(self.bids_root))
             except Exception:
                 print_error(
-                        "    DATALAD ERROR: Failed to commit derivatives to datalad dataset"
+                    "    DATALAD ERROR: Failed to commit derivatives to datalad dataset"
                 )
 
             cmd = "datalad diff -t HEAD~1"
@@ -1257,6 +1248,13 @@ class BIDSAppInterfaceWindow(HasTraits):
         if self.track_carbon_footprint:
             # Stop the carbon tracker
             tracker.stop()
+            # Output the carbon footprint message to the terminal
+            carbonfootprint_msg = create_carbon_footprint_message(
+                bids_dir=self.bids_root,
+                emissions_csv_file=str(Path(self.bids_root) / 'code' / 'emissions.csv'),
+                nb_of_subjects_processed=len(self.list_of_subjects_to_be_processed)
+            )
+            print(carbonfootprint_msg)
             # Display the carbon footprint report in a Dialog Window
             self.carbon_emission_msg = create_html_carbon_footprint_report(
                 emissions_csv_file=str(Path(self.bids_root) / "code" / "emissions.csv"),
