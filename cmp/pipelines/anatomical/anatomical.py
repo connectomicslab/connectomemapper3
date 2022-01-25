@@ -897,7 +897,19 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         )
         # fmt:on
 
+        self.stages[
+            "Segmentation"
+        ].config.freesurfer_subjects_dir = os.path.join(
+            self.output_directory, __freesurfer_directory__
+        )
+        self.stages[
+            "Segmentation"
+        ].config.freesurfer_subject_id = os.path.join(
+            self.output_directory, __freesurfer_directory__, self.subject
+        )
+
         seg_flow = self.create_stage_flow("Segmentation")
+
         # fmt: off
         anat_flow.connect(
             [
@@ -909,17 +921,6 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         parc_flow = self.create_stage_flow("Parcellation")
 
         if self.stages["Segmentation"].config.seg_tool == "Freesurfer":
-
-            self.stages[
-                "Segmentation"
-            ].config.freesurfer_subjects_dir = os.path.join(
-                self.output_directory, __freesurfer_directory__
-            )
-            self.stages[
-                "Segmentation"
-            ].config.freesurfer_subject_id = os.path.join(
-                self.output_directory, __freesurfer_directory__, self.subject
-            )
 
             # fmt: off
             anat_flow.connect(
@@ -1099,7 +1100,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         anat_flow.run(
             plugin="MultiProc", plugin_args={"n_procs": self.number_of_cores}
         )
-        
+
         self._update_parcellation_scheme()
 
         iflogger.info("**** Processing finished ****")
