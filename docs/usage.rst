@@ -29,6 +29,19 @@ Participant Level Analysis
 
 You can run ``CMP3`` using the lightweight Docker or Singularity wrappers we created for convenience or you can interact directly with the Docker / Singularity Engine via the docker or singularity run command.
 
+.. role:: raw-html(raw)
+    :format: html
+
+.. admonition:: New in v3.0.2 ✨
+
+    You can now be aware about the adverse impact of your processing on the environment :raw-html:`&#x1F30D;`:raw-html:`&#x1f333;`!
+
+    With the new `--track_carbon_footprint` option of the `connectomemapper3_docker` and `connectomemapper3_singularity` BIDS App python wrappers, you can use `codecarbon <https://codecarbon.io>`_ to estimate the amount of carbon dioxide (CO2) produced to execute the code by the computing resources and save the results in ``<bids_dir>/code/emissions.csv``.
+
+    Then, to visualize, interpret and track the evolution of the CO2 emissions incurred, you can use the visualization tool of `codecarbon` aka `carbonboard` that takes as input the `.csv` created::
+
+        $ carbonboard --filepath="<bids_dir>/code/emissions.csv" --port=xxxx
+
 .. _wrapperusage:
 
 With the wrappers
@@ -43,6 +56,7 @@ When you run ``connectomemapper3_docker``, it will generate a Docker command lin
             participant --participant_label 01 --session_label 01 \
             --fs_license "/usr/local/freesurfer/license.txt" \
             --config_dir "/home/user/data/ds001/code" \
+            --track_carbon_footprint \
             --anat_pipeline_config "ref_anatomical_config.json" \
             (--dwi_pipeline_config "ref_diffusion_config.json" \)
             (--func_pipeline_config "ref_fMRI_config.json" \)
@@ -57,6 +71,7 @@ When you run ``connectomemapper3_singularity``, it will generate a Singularity c
             participant --participant_label 01 --session_label 01 \
             --fs_license "/usr/local/freesurfer/license.txt" \
             --config_dir "/home/user/data/ds001/code" \
+            --track_carbon_footprint \
             --anat_pipeline_config "ref_anatomical_config.json" \
             (--dwi_pipeline_config "ref_diffusion_config.json" \)
             (--func_pipeline_config "ref_fMRI_config.json" \)
@@ -77,14 +92,14 @@ For instance, the previous call to the ``connectomemapper3_docker`` wrapper corr
   .. parsed-literal::
 
     $ docker run -t --rm -u $(id -u):$(id -g) \\
-            -v /home/user/data/ds001:/bids_dir \
-            -v /home/user/data/ds001/derivatives:/output_dir \
-            (-v /usr/local/freesurfer/license.txt:/bids_dir/code/license.txt \)
-            sebastientourbier/connectomemapper-bidsapp:|release| \
-            /bids_dir /output_dir participant --participant_label 01 \(--session_label 01 \)
-            --anat_pipeline_config /bids_dir/code/ref_anatomical_config.json \)
-            (--dwi_pipeline_config /bids_dir/code/ref_diffusion_config.json \)
-            (--func_pipeline_config /bids_dir/code/ref_fMRI_config.json \)
+            -v /home/user/data/ds001:/bids_dir \\
+            -v /home/user/data/ds001/derivatives:/output_dir \\
+            (-v /usr/local/freesurfer/license.txt:/bids_dir/code/license.txt) \\
+            sebastientourbier/connectomemapper-bidsapp:|release| \\
+            /bids_dir /output_dir participant --participant_label 01 (--session_label 01) \\
+            --anat_pipeline_config /bids_dir/code/ref_anatomical_config.json \\
+            (--dwi_pipeline_config /bids_dir/code/ref_diffusion_config.json \\)
+            (--func_pipeline_config /bids_dir/code/ref_fMRI_config.json \\)
             (--number_of_participants_processed_in_parallel 1)
             
 Singularity
@@ -94,15 +109,15 @@ For instance, the previous call to the ``connectomemapper3_singularity`` wrapper
 
   .. parsed-literal::
 
-    $ singularity run  --containall \
-            --bind /home/user/data/ds001:/bids_dir \
-            --bind /home/user/data/ds001/derivatives:/output_dir \
-            --bind /usr/local/freesurfer/license.txt:/bids_dir/code/license.txt \
-            library://connectomicslab/default/connectomemapper-bidsapp:|release| \
-            /bids_dir /output_dir participant --participant_label 01 \(--session_label 01 \)
-            --anat_pipeline_config /bids_dir/code/ref_anatomical_config.json \)
-            (--dwi_pipeline_config /bids_dir/code/ref_diffusion_config.json \)
-            (--func_pipeline_config /bids_dir/code/ref_fMRI_config.json \)
+    $ singularity run  --containall \\
+            --bind /home/user/data/ds001:/bids_dir \\
+            --bind /home/user/data/ds001/derivatives:/output_dir \\
+            --bind /usr/local/freesurfer/license.txt:/bids_dir/code/license.txt \\
+            library://connectomicslab/default/connectomemapper-bidsapp:|release| \\
+            /bids_dir /output_dir participant --participant_label 01 (--session_label 01) \\
+            --anat_pipeline_config /bids_dir/code/ref_anatomical_config.json \\
+            (--dwi_pipeline_config /bids_dir/code/ref_diffusion_config.json \\)
+            (--func_pipeline_config /bids_dir/code/ref_fMRI_config.json \\)
             (--number_of_participants_processed_in_parallel 1)
 
 .. note:: The local directory of the input BIDS dataset (here: ``/home/user/data/ds001``) and the output directory (here: ``/home/user/data/ds001/derivatives``) used to process have to be mapped to the folders ``/bids_dir`` and ``/output_dir`` respectively using the docker ``-v`` / singularity ``--bind`` run option.
