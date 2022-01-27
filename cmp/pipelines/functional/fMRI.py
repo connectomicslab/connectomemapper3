@@ -272,26 +272,26 @@ class fMRIPipeline(Pipeline):
         print("> Looking for....")
         if self.global_conf.subject_session == "":
 
-            files = layout.get(subject=subjid, suffix="bold", extension=".nii.gz")
+            files = layout.get(subject=subjid, suffix="bold", extension="nii.gz")
             if len(files) > 0:
                 fmri_file = os.path.join(files[0].dirname, files[0].filename)
             else:
                 print("ERROR : BOLD image not found for subject %s." % subjid)
                 return
 
-            files = layout.get(subject=subjid, suffix="bold", extension=".json")
+            files = layout.get(subject=subjid, suffix="bold", extension="json")
             if len(files) > 0:
                 json_file = os.path.join(files[0].dirname, files[0].filename)
             else:
                 print("WARNING : BOLD json sidecar not found for subject %s." % subjid)
 
-            files = layout.get(subject=subjid, suffix="T1w", extension=".nii.gz")
+            files = layout.get(subject=subjid, suffix="T1w", extension="nii.gz")
             if len(files) > 0:
                 t1_file = os.path.join(files[0].dirname, files[0].filename)
             else:
                 print("WARNING : T1w image not found for subject %s." % subjid)
 
-            files = layout.get(subject=subjid, suffix="T2w", extension=".nii.gz")
+            files = layout.get(subject=subjid, suffix="T2w", extension="nii.gz")
             if len(files) > 0:
                 t2_file = os.path.join(files[0].dirname, files[0].filename)
             else:
@@ -301,7 +301,7 @@ class fMRIPipeline(Pipeline):
             sessid = self.global_conf.subject_session.split("-")[1]
 
             files = layout.get(
-                subject=subjid, suffix="bold", extension=".nii.gz", session=sessid
+                subject=subjid, suffix="bold", extension="nii.gz", session=sessid
             )
             if len(files) > 0:
                 fmri_file = os.path.join(files[0].dirname, files[0].filename)
@@ -313,7 +313,7 @@ class fMRIPipeline(Pipeline):
                 return
 
             files = layout.get(
-                subject=subjid, suffix="bold", extension=".json", session=sessid
+                subject=subjid, suffix="bold", extension="json", session=sessid
             )
             if len(files) > 0:
                 json_file = os.path.join(files[0].dirname, files[0].filename)
@@ -324,7 +324,7 @@ class fMRIPipeline(Pipeline):
                 )
 
             files = layout.get(
-                subject=subjid, suffix="T1w", extension=".nii.gz", session=sessid
+                subject=subjid, suffix="T1w", extension="nii.gz", session=sessid
             )
             if len(files) > 0:
                 t1_file = os.path.join(files[0].dirname, files[0].filename)
@@ -335,7 +335,7 @@ class fMRIPipeline(Pipeline):
                 )
 
             files = layout.get(
-                subject=subjid, suffix="T2w", extension=".nii.gz", session=sessid
+                subject=subjid, suffix="T2w", extension="nii.gz", session=sessid
             )
             if len(files) > 0:
                 t2_file = os.path.join(files[0].dirname, files[0].filename)

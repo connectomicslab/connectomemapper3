@@ -251,7 +251,7 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
             subject=subjid,
             session=None if (self.global_conf.subject_session == "") else sessid,
             suffix="T1w",
-            extension=".nii.gz",
+            extension="nii.gz",
         )
         if len(files) > 0:
             T1_file = files[0].filename
@@ -343,7 +343,7 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
                 suffix=self.stages["Parcellation"].config.custom_parcellation.suffix,
                 atlas=self.stages["Parcellation"].config.custom_parcellation.atlas,
                 resolution=self.stages["Parcellation"].config.custom_parcellation.resolution,
-                extension=".nii.gz",
+                extension="nii.gz",
             )
             if len(files) > 0:
                 custom_parc_file = os.path.join(files[0].dirname, files[0].filename)
@@ -358,7 +358,7 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
                          if self.global_conf.subject_session == ""
                          else self.global_conf.subject_session.split("-")[1]),
                 suffix=self.stages["Parcellation"].config.custom_parcellation.suffix,
-                extension=".tsv",
+                extension="tsv",
                 atlas=self.stages["Parcellation"].config.custom_parcellation.atlas,
                 resolution=self.stages["Parcellation"].config.custom_parcellation.resolution,
             )
@@ -379,7 +379,7 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
                              if self.global_conf.subject_session == ""
                              else self.global_conf.subject_session.split("-")[1]),
                     suffix=self.stages["Segmentation"].config.custom_brainmask.suffix,
-                    extension=".nii.gz",
+                    extension="nii.gz",
                     desc=self.stages["Segmentation"].config.custom_brainmask.desc,
             )
             if len(files) > 0:
@@ -399,7 +399,7 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
                          if self.global_conf.subject_session == ""
                          else self.global_conf.subject_session.split("-")[1]),
                 suffix=self.stages["Segmentation"].config.custom_gm_mask.suffix,
-                extension=".nii.gz",
+                extension="nii.gz",
                 label=self.stages["Segmentation"].config.custom_gm_mask.label,
             )
             if len(files) > 0:
@@ -419,7 +419,7 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
                          if self.global_conf.subject_session == ""
                          else self.global_conf.subject_session.split("-")[1]),
                 suffix=self.stages["Segmentation"].config.custom_wm_mask.suffix,
-                extension=".nii.gz",
+                extension="nii.gz",
                 label=self.stages["Segmentation"].config.custom_wm_mask.label,
             )
             if len(files) > 0:
@@ -439,7 +439,7 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
                          if self.global_conf.subject_session == ""
                          else self.global_conf.subject_session.split("-")[1]),
                 suffix=self.stages["Segmentation"].config.custom_csf_mask.suffix,
-                extension=".nii.gz",
+                extension="nii.gz",
                 label=self.stages["Segmentation"].config.custom_csf_mask.label,
             )
             if len(files) > 0:
@@ -459,7 +459,7 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
                          if self.global_conf.subject_session == ""
                          else self.global_conf.subject_session.split("-")[1]),
                 suffix=self.stages["Segmentation"].config.custom_aparcaseg.suffix,
-                extension=".nii.gz",
+                extension="nii.gz",
                 desc=self.stages["Segmentation"].config.custom_aparcaseg.desc,
             )
             if len(files) > 0:

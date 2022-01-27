@@ -216,8 +216,8 @@ class MainWindow(HasTraits):
         self.bidsapp_ui = cmp.bidsappmanager.gui.bidsapp.BIDSAppInterfaceWindow(
             project_info=self.project_info,
             bids_root=self.project_info.base_directory,
-            subjects=subjects,
-            list_of_subjects_to_be_processed=subjects,
+            subjects=sorted(subjects),
+            list_of_subjects_to_be_processed=sorted(subjects),
             # anat_config=self.project_info.anat_config_file,
             # dmri_config=self.project_info.dmri_config_file,
             # fmri_config=self.project_info.fmri_config_file

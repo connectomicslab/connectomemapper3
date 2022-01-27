@@ -382,7 +382,10 @@ class DiffusionStage(Stage):
         if self.config.dilate_rois:
 
             dilate_rois = pe.MapNode(
-                interface=fsl.DilateImage(), iterfield=["in_file"], name="dilate_rois"
+                interface=fsl.DilateImage(),
+                iterfield=["in_file"],
+                synchronize=True,
+                name="dilate_rois"
             )
             dilate_rois.inputs.operation = "modal"
 

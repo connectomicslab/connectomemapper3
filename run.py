@@ -530,8 +530,7 @@ if args.analysis_level == "participant":
                 print("        - Anatomical MRI (segmentation and parcellation)")
 
                 if args.dwi_pipeline_config is not None:
-                    print(
-                        "        - Diffusion MRI (structural connectivity matrices)")
+                    print("        - Diffusion MRI (structural connectivity matrices)")
 
                 if args.func_pipeline_config is not None:
                     print("        - fMRI (functional connectivity matrices)")
@@ -557,7 +556,11 @@ if args.analysis_level == "participant":
                                              run_fmri=run_fmri,
                                              number_of_threads=number_of_threads)
                     print_blue("... cmd : {}".format(cmd))
-
+                    if project.subject_session != "":
+                        log_file = '{}_{}_log.txt'.format(project.subject,
+                                                          project.subject_session)
+                    else:
+                        log_file = '{}_log.txt'.format(project.subject)
                     proc = run(command=cmd, env={},
                                log_filename=os.path.join(project.output_directory, __cmp_directory__,
                                                          project.subject, project.subject_session,
