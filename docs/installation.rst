@@ -22,6 +22,10 @@ The Connectome Mapper 3 is composed of a Docker image, namely the Connectome Map
 
 Make sure that you have installed the following prerequisites.
 
+.. important::
+
+    On Mac and Windows, if you want to track the carbon emission incurred by the processing with the ``--track_carbon_footprint`` option flag, you will need to install in addition the `Intel Power Gadget` tool available `here <https://www.intel.com/content/www/us/en/developer/articles/tool/power-gadget.html>`.
+
 The Connectome Mapper 3 BIDSApp
 ===============================
 
