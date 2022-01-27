@@ -16,7 +16,7 @@ from cmtklib.util import check_directory_exists
 from cmtklib.process import run
 from cmtklib.carbonfootprint import (
     create_emissions_tracker,
-    create_carbon_footprint_messages
+    create_carbon_footprint_message
 )
 
 
