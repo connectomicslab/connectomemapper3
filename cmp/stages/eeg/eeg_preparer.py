@@ -77,7 +77,7 @@ class EEGPreparerStage(Stage):
             inputnode.inputs.cmp3_dir = self.config.cmp3_dir
 
             if self.config.eeg_format == ".set":
-                
+
                 eeglab2fif_node = pe.Node(EEGLAB2fif(), name="eeglab2fif")
                 flow.connect([(inputnode, eeglab2fif_node,
                            [('epochs', 'eeg_ts_file'),
@@ -108,7 +108,7 @@ class EEGPreparerStage(Stage):
                             ('cmp3_dir', 'cmp3_dir'),
                             ]
                            )])
-            
+
             flow.connect([(createrois_node, outputnode,
                            [('output_query', 'output_query'),
                             ('derivative_list', 'derivative_list')]
@@ -126,15 +126,15 @@ class EEGPreparerStage(Stage):
             flow.connect([(ii, outputnode,
                            [('invsol_params', 'invsol_params')]
                            )])
-            
+
         elif self.config.invsol_format.split('-')[0] == "mne":
-            
+
             createsrc_node = pe.Node(CreateSrc(), name="createsrc")
             createbem_node = pe.Node(CreateBEM(), name="createbem")
             inputnode.inputs.base_dir = self.bids_dir
-            
+
             if self.config.eeg_format == ".set":
-                
+
                 eeglab2fif_node = pe.Node(EEGLAB2fif(), name="eeglab2fif")
                 
                 flow.connect([(inputnode, eeglab2fif_node,
@@ -153,7 +153,7 @@ class EEGPreparerStage(Stage):
                            [('output_query', 'output_query'),
                             ('derivative_list', 'derivative_list')]                           
                            )])  
-                
+
                 # create source space
                 flow.connect([(inputnode, createsrc_node,
                            [('subject', 'subject'),
@@ -170,24 +170,24 @@ class EEGPreparerStage(Stage):
                                 ('bids_dir', 'bids_dir')]
                                )])
 
-            # create boundary element model (BEM) 
+            # create boundary element model (BEM)
             flow.connect([(inputnode, createbem_node,
                            [('subject', 'subject'),
                             ('bids_dir', 'bids_dir'),
                             ]
                            )])
-            
+
             flow.connect([(createsrc_node, createbem_node,
                            [('output_query', 'output_query'),
                             ('derivative_list', 'derivative_list')]
                            )])
-            
-            # outputnode  
+
+            # outputnode
             flow.connect([(createbem_node, outputnode,
                            [('output_query', 'output_query'),
                             ('derivative_list', 'derivative_list')]
                            )])
-            
+
             flow.connect([(eeglab2fif_node, outputnode,
                            [('epochs_fif_fname','epochs_fif_fname')]
                            )])

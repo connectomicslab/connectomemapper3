@@ -133,7 +133,7 @@ def create_parser():
         help="Configuration .txt file for processing stages of "
         "the fMRI processing pipeline",
     )
-    
+
     p.add_argument(
         "--eeg_pipeline_config",
         help="Configuration .txt file for processing stages of "

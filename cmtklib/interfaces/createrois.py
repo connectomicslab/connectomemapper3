@@ -1,8 +1,9 @@
-import pycartool as cart
-import nibabel
+
 import os
 import pickle
 import numpy as np
+import nibabel
+import pycartool as cart
 from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, traits, TraitedSpec
 
 
@@ -11,7 +12,7 @@ class CreateRoisInputSpec(BaseInterfaceInputSpec):
 
     subject = traits.Str(
         desc='subject', mandatory=True)
-    
+
     bids_dir = traits.Str(
         desc='base directory', mandatory=True)
 

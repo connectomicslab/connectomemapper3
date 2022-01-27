@@ -12,7 +12,7 @@ import mne
 import numpy as np
 from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, traits, TraitedSpec
 
-# own imports 
+# own imports
 from cmtklib.bids.io import (__cmp_directory__, __freesurfer_directory__)
 
 
@@ -51,9 +51,9 @@ class CreateBEM(BaseInterface):
         bids_dir = self.inputs.bids_dir
         self.derivative_list = self.inputs.derivative_list
         self.output_query = self.inputs.output_query
-        
+
         self._create_BEM(subject, bids_dir)
-        
+
         if __cmp_directory__ not in self.derivative_list:
             self.derivative_list.append(__cmp_directory__)
 
@@ -66,22 +66,27 @@ class CreateBEM(BaseInterface):
 
     @staticmethod
     def _create_BEM(subject,bids_dir):
-        # create the boundaries between the tissues, using segmentation file 
+        # create the boundaries between the tissues, using segmentation file
         subjects_dir = os.path.join(bids_dir,'derivatives',__freesurfer_directory__)
-        bemfilename = os.path.join(bids_dir,'derivatives',__cmp_directory__,subject,'eeg',subject+'_bem.fif')
-        if not "bem" in os.listdir(os.path.join(subjects_dir,subject)):
+        bemfilename = os.path.join(
+            bids_dir,'derivatives',__cmp_directory__,subject,'eeg',subject+'_bem.fif')
+        if not "bem" in os.listdir(
+                os.path.join(subjects_dir,subject)):
             mne.bem.make_watershed_bem(subject,subjects_dir,overwrite=True) # still need to check if this actually works
-            # file names required by mne's make_bem_model not consistent with file names outputted by mne's make_watershed_bem - copy and rename 
+            # file names required by mne's make_bem_model not consistent with file names outputted by mne's make_watershed_bem - copy and rename
             for elem in ["inner_skull","outer_skull","outer_skin"]:
-                elem1 = subject+'_'+elem+'_surface' # file name used by make_watershed_bem 
+                elem1 = subject+'_'+elem+'_surface' # file name used by make_watershed_bem
                 elem2 = elem+'.surf' # file name used by make_bem_model
-                if (elem2 not in os.listdir(os.path.join(subjects_dir,subject,'bem'))) and ("watershed" in os.listdir(os.path.join(subjects_dir,subject,'bem'))):
+                if (elem2 not in os.listdir(
+                        os.path.join(subjects_dir,subject,'bem')))\
+                        and ("watershed" in os.listdir(
+                        os.path.join(subjects_dir,subject,'bem'))):
                     cmd = 'cp '+ os.path.join(subjects_dir,subject,'bem','watershed',elem1) + ' ' + os.path.join(subjects_dir,subject,'bem',elem2)
-                    os.system(cmd)  
-            
+                    os.system(cmd)
+
         if not os.path.exists(bemfilename):
-            # create the conductor model 
-            conductivity = (0.3, 0.006, 0.3)  # for three layers 
+            # create the conductor model
+            conductivity = (0.3, 0.006, 0.3)  # for three layers
             model = mne.make_bem_model(subject=subject, ico=4, conductivity=conductivity, subjects_dir=subjects_dir)
             bem = mne.make_bem_solution(model)
             mne.write_bem_solution(bemfilename,bem)

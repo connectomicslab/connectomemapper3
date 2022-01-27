@@ -11,7 +11,7 @@ class EEGLoaderInputSpec(BaseInterfaceInputSpec):
 
     subject = traits.Str(
         desc='subject', mandatory=True)
-    
+
     invsol_format = traits.Enum('Cartool-LAURA', 'Cartool-LORETA', 'mne-sLORETA',
             desc='Cartool vs mne')
 

@@ -13,25 +13,25 @@ from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, traits
 
 class CreateFwdInputSpec(BaseInterfaceInputSpec):
     """Input specification for creating MNE source space."""
-    
+
     fwd_fname = traits.File(
-        desc='forward solution created with MNE')    
+        desc='forward solution created with MNE')
 
     src = traits.List(
         exists=True, desc='source space created with MNE', mandatory=True)
-    
+
     bem = traits.List(
         exists=True, desc='boundary surfaces for MNE head model', mandatory=True)
-    
+
     trans_fname = traits.File(
         exists=True, desc='trans.fif file containing co-registration information (electrodes x MRI)')
-    
+
     epochs_fif_fname = traits.File(
         desc='eeg * epochs in .fif format, containing information about electrode montage', mandatory=True)
 
 class CreateFwdOutputSpec(TraitedSpec):
     """Output specification for creating MNE source space."""
-    
+
     has_run = traits.Bool(False, desc='if true, forward solution has been produced')
 
 class CreateFwd(BaseInterface):
@@ -40,14 +40,14 @@ class CreateFwd(BaseInterface):
 
     def _run_interface(self, runtime):
 
-        fwd_fname = self.inputs.fwd_fname      
+        fwd_fname = self.inputs.fwd_fname
         src = self.inputs.src[0]
         bem = self.inputs.bem[0]
         trans = self.inputs.trans_fname
         epochs_fname = self.inputs.epochs_fif_fname
         epochs = mne.read_epochs(epochs_fname)
-        info = epochs.info 
-        
+        info = epochs.info
+
         if os.path.exists(fwd_fname):
             self.has_run = True
         else:
