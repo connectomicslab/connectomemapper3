@@ -82,6 +82,19 @@ Connectome Mapper 3 provides two Python commandline wrappers
 (`connectomemapper3_docker` and `connectomemapper3_singularity`) that will
 generate and run the appropriate command.
 
+.. role:: raw-html(raw)
+    :format: html
+
+.. admonition:: New in ``v3.0.2`` ✨
+
+    You can now be aware about the adverse impact :raw-html:`&#x1f3ed;` of your processing on the environment :raw-html:`&#x1F30D;`:raw-html:`&#x1f333;`!
+
+    With the new `--track_carbon_footprint` option of the `connectomemapper3_docker` and `connectomemapper3_singularity` BIDS App python wrappers, you can use `codecarbon <https://codecarbon.io>`_ to estimate the amount of carbon dioxide (CO2) produced to execute the code by the computing resources and save the results in ``<bids_dir>/code/emissions.csv``.
+
+    Then, to visualize, interpret and track the evolution of the CO2 emissions incurred, you can use the visualization tool of `codecarbon` aka `carbonboard` that takes as input the `.csv` created::
+
+        $ carbonboard --filepath="<bids_dir>/code/emissions.csv" --port=xxxx
+
 .. _FSL: https://fsl.fmrib.ox.ac.uk/fsl/fslwiki
 
 .. _FreeSurfer: https://surfer.nmr.mgh.harvard.edu/fswiki/FreeSurferWiki

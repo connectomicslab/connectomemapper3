@@ -16,18 +16,6 @@ To enhance reproducibility and replicatibility, the processing pipelines with al
 
 To reduce the risk of misconfiguration and improve accessibility, Connectome Mapper 3 comes with an interactive GUI, aka `cmpbidsappmanager`, which supports the user in all the steps involved in the configuration of the pipelines, the configuration and execution of the BIDS App, and the control of the output quality. In addition, to facilitate the use by users not familiar with Docker and Singularity containers, Connectome Mapper 3 provides two Python commandline wrappers (`connectomemapper3_docker` and `connectomemapper3_singularity`) that will generate and run the appropriate command.
 
-###  New in ``v3.0.2``
-
-You can now be aware about the adverse impact 🏭 of your processing on the environment 🌍🌳!
-
-With the new `--track_carbon_footprint` option of the `connectomemapper3_docker` and `connectomemapper3_singularity` BIDS App python wrappers, you can use `codecarbon <https://codecarbon.io/>`_ to estimate the amount of carbon dioxide (CO2) produced to execute the code by the computing resources and save the results in ``<bids_dir>/code/emissions.csv``.
-
-Then, to visualize, interpret and track the evolution of the CO2 emissions incurred, you can use the visualization tool of `codecarbon` aka `carbonboard` that takes as input the `.csv` created::
-
-    carbonboard --filepath="<bids_dir>/code/emissions.csv" --port=xxxx
-
-
-
 ### How to install the python wrappers and the GUI?
 
 You need to have first either Docker or Singularity engine and miniconda installed. We refer to the [dedicated documentation page](https://connectome-mapper-3.readthedocs.io/en/latest/installation.html) for more instruction details.
@@ -46,6 +34,18 @@ $ conda activate py37cmp-gui
 ```
 
 You are ready to use Connectome Mapper 3!
+
+###  New in ``v3.0.2`` ✨
+
+You can now be aware about the adverse impact 🏭 of your processing on the environment 🌍🌳!
+
+With the new `--track_carbon_footprint` option of the `connectomemapper3_docker` and `connectomemapper3_singularity` BIDS App python wrappers, you can use [codecarbon](https://codecarbon.io) to estimate the amount of carbon dioxide (CO2) produced to execute the code by the computing resources and save the results in ``<bids_dir>/code/emissions.csv``.
+
+Then, to visualize, interpret and track the evolution of the CO2 emissions incurred, you can use the visualization tool of `codecarbon` aka `carbonboard` that takes as input the `.csv` created:
+
+```bash
+$ carbonboard --filepath="<bids_dir>/code/emissions.csv" --port=xxxx
+```
 
 ### Resources
 
