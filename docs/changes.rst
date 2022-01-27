@@ -22,7 +22,7 @@ It incorporates includes in particular the following changes.
 *Bug fix*
 
 *   Major update of the `conda/environment.yml` and `conda/environment_macosx.yml` to correct the problems of conflicts in the previous version,
-    as reported in `#137 <https://github.com/connectomicslab/connectomemapper3/issues/137>`_. This has resulted in the following package updates:
+    as reported in `issue #137 <https://github.com/connectomicslab/connectomemapper3/issues/137>`_. This has resulted in the following package updates:
 
     *   `pip`: 20.1.1 -> 21.3.1
     *   `numpy`: 1.19.2 -> 1.21.5
@@ -45,7 +45,7 @@ It incorporates includes in particular the following changes.
     *   `networkx`: 2.4 -> 2.6.3
     *   `pydicom`: 2.0.0 -> 2.2.2
 
-    See commit `483931f <https://github.com/connectomicslab/connectomemapper3/pull/136/commits/483931fba69c79847ad62e7a09dc9866919dbe9f>` for more details.
+    See commit `483931f <https://github.com/connectomicslab/connectomemapper3/pull/136/commits/483931fba69c79847ad62e7a09dc9866919dbe9f>`_ for more details.
 
 *Documentation*
 
@@ -68,7 +68,9 @@ It incorporates includes in particular the following changes.
 
 *   `Joan Rue Queralt <https://github.com/connectomicslab/connectomemapper3/issues?q=is%3Apr+author%3Ajoanrue>`_
 
-Please check the `main pull request 140 page <https://github.com/connectomicslab/connectomemapper3/pull/140>`_ for more details.
+*More...*
+
+Please check the main `PR #140 <https://github.com/connectomicslab/connectomemapper3/pull/140>`_ page for more details.
 
 
 ****************************
