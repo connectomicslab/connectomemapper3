@@ -75,7 +75,7 @@ class CreateRois(BaseInterface):
 
     @staticmethod
     def _create_roi_files(subject, parcellation, parcellation_name, cartool_dir, cmp3_dir):
-        spipath = os.path.join(cartool_dir, subject, subject + '.spi')
+        spipath = os.path.join(cartool_dir, subject, 'eeg',subject + '_eeg.spi')
         source = cart.source_space.read_spi(spipath)
 
         impath = os.path.join(parcellation)
@@ -107,9 +107,10 @@ class CreateRois(BaseInterface):
                                                                    groups_of_indexes=groups_of_indexes,
                                                                    source_space=source)
 
-        if not os.path.isdir(os.path.join(cartool_dir, subject, 'Rois')):
-            os.mkdir(os.path.join(cartool_dir, subject, 'Rois'))
-        filename_pkl = os.path.join(cartool_dir, subject, 'Rois', parcellation_name + '.pickle.rois')
+        rois_dir = os.path.join(cartool_dir, subject, 'eeg', 'Rois')
+        if not os.path.isdir(rois_dir):
+            os.mkdir(rois_dir)
+        filename_pkl = os.path.join(rois_dir, parcellation_name + '.pickle.rois')
         filehandler = open(filename_pkl, 'wb')
         pickle.dump(rois_file_new, filehandler)
         filehandler.close()

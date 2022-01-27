@@ -4,7 +4,7 @@ import mne
 import numpy as np
 from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, traits, TraitedSpec
 
-# own imports 
+# own imports
 from cmp.info import __version__
 
 
@@ -19,13 +19,14 @@ class EEGLAB2fifInputSpec(BaseInterfaceInputSpec):
 
     epochs_fif_fname = traits.File(
         desc='eeg * epochs in .fif format', mandatory=True)
-    
+
     electrode_positions_file = traits.File(
         exists=True, desc='positions of EEG electrodes in a txt file')
-    
+
     MRI_align_transform_file = traits.File(
-        exists=True, desc='file containing transformation matrix to align electrode positions in electrode_positions_file with the MRI')
-    
+        exists=True, desc='file containing transformation matrix to align '\
+            'electrode positions in electrode_positions_file with the MRI')
+
     EEG_params = traits.Dict(
         desc='dictionary defining EEG parameters')
 
@@ -63,17 +64,18 @@ class EEGLAB2fif(BaseInterface):
     def _run_interface(self, runtime):
         epochs_file = self.inputs.eeg_ts_file[0]
         behav_file = self.inputs.behav_file[0]
-        
+
         montage_fname = self.inputs.electrode_positions_file
         dev_head_t_fname = self.inputs.MRI_align_transform_file
-        
-        epochs_fif_fname = self.inputs.epochs_fif_fname
+
         EEG_params = self.inputs.EEG_params
         self.epochs_fif_fname = self.inputs.epochs_fif_fname
         self.derivative_list = self.inputs.derivative_list
         self.output_query = self.inputs.output_query
-        if not os.path.exists(self.epochs_fif_fname): 
-            self._convert_eeglab2fif(epochs_file, behav_file, self.epochs_fif_fname, montage_fname, dev_head_t_fname, EEG_params)
+        if not os.path.exists(self.epochs_fif_fname):
+            self._convert_eeglab2fif(
+                epochs_file, behav_file, self.epochs_fif_fname, montage_fname,
+                dev_head_t_fname, EEG_params)
         self.derivative_list.append(f'cmp-{__version__}')
         self.output_query['EEG'] = {
             'suffix': 'epo',
@@ -82,41 +84,51 @@ class EEGLAB2fif(BaseInterface):
         return runtime
 
     @staticmethod
-    def _convert_eeglab2fif(epochs_file, behav_file, epochs_fif_fname, montage_fname, dev_head_t_fname, EEG_params):
+    def _convert_eeglab2fif(
+            epochs_file, behav_file, epochs_fif_fname, montage_fname,
+            dev_head_t_fname, EEG_params):
         behav = pd.read_csv(behav_file, sep="\t")
         behav = behav[behav.bad_trials == 0]
-        epochs = mne.read_epochs_eeglab(epochs_file, events=None, event_id=None, eog=(), verbose=None,
-                                        uint16_codec=None)
+        epochs = mne.read_epochs_eeglab(
+            epochs_file, events=None, event_id=None, eog=(), verbose=None,
+            uint16_codec=None)
         epochs.events[:, 2] = list(behav.iloc[:,0])
         epochs.event_id = EEG_params['EEG_event_IDs']
-        
+
         # apply user-defined EEG parameters
         start_t = EEG_params['start_t']
         end_t = EEG_params['end_t']
         epochs.apply_baseline((start_t,0))
         epochs.set_eeg_reference(ref_channels='average',projection = True)
         epochs.crop(tmin=start_t,tmax=end_t)
-        
-        # in case electrode position file was supplied, create info object with information about electrode positions
+
+        # in case electrode position file was supplied, create info object
+        # with information about electrode positions
         try:
             n = int(open(montage_fname).readline().lstrip().split(' ')[0])
         except:
             pass
         else:
-            all_coord = np.loadtxt(montage_fname, skiprows=1, usecols=(0, 1, 2), max_rows=n)
-            all_names = np.loadtxt(montage_fname, skiprows=1, usecols=3, max_rows=n,dtype=np.dtype(str)).tolist()
+            all_coord = np.loadtxt(montage_fname,skiprows=1,usecols=(0, 1, 2),max_rows=n)
+            all_names = np.loadtxt(
+                montage_fname,skiprows=1,usecols=3,max_rows=n,
+                dtype=np.dtype(str)).tolist()
             all_coord = list(map(lambda x: x/1000,all_coord))
-            ch_coord  = [all_coord[idx] for idx, chan in  enumerate(all_names) if chan not in ['lpa','rpa','nasion']]
+            ch_coord  = [all_coord[idx] for idx, chan in  enumerate(all_names)\
+                         if chan not in ['lpa','rpa','nasion']]
             # overwrite channel names?
-            ch_names  = [all_names[idx] for idx, chan in  enumerate(all_names) if chan not in ['lpa','rpa','nasion']]   
-            
-            # create the montage object with the channel names and positions read from the file 
-            montage = mne.channels.make_dig_montage(ch_pos=dict(zip(ch_names, ch_coord)),coord_frame='head')
-            # align with MRI 
+            ch_names  = [all_names[idx] for idx, chan in  enumerate(all_names)\
+                         if chan not in ['lpa','rpa','nasion']]
+
+            # create the montage object with the channel names and positions
+            # read from the file
+            montage = mne.channels.make_dig_montage(
+                ch_pos=dict(zip(ch_names, ch_coord)),coord_frame='head')
+            # align with MRI
             dev_head_t = np.loadtxt(dev_head_t_fname)
             montage.dev_head_t = dev_head_t
             epochs.info.set_montage(montage)
-        
+
         epochs.save(epochs_fif_fname, overwrite=True)
 
     def _list_outputs(self):

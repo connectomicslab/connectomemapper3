@@ -12,6 +12,9 @@ import mne
 import numpy as np
 from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, traits, TraitedSpec
 
+# own imports 
+from cmtklib.bids.io import (__cmp_directory__, __freesurfer_directory__)
+
 
 class CreateSrcInputSpec(BaseInterfaceInputSpec):
     """Input specification for creating MNE source space."""
@@ -50,15 +53,15 @@ class CreateSrc(BaseInterface):
         self.derivative_list = self.inputs.derivative_list
         self.output_query = self.inputs.output_query
         
-        src_fname = os.path.join(bids_dir,'derivatives','cmp',subject,'eeg',subject+'_src.fif')
+        src_fname = os.path.join(bids_dir,'derivatives',__cmp_directory__,subject,'eeg',subject+'_src.fif')
         if not os.path.exists(src_fname):
             self._create_src_space(subject,bids_dir,src_fname)
-        if 'cmp' not in self.derivative_list:
-            self.derivative_list.append('cmp') 
+        if __cmp_directory__ not in self.derivative_list:
+            self.derivative_list.append(__cmp_directory__) 
 
         self.output_query['src'] = {
             'suffix': 'src',
-            'extensions': ['fif']
+            'extension': ['fif']
         }
 
         return runtime
@@ -68,7 +71,7 @@ class CreateSrc(BaseInterface):
         # from notebook 
         overwrite_src = True 
         
-        subjects_dir = os.path.join(bids_dir,'derivatives','freesurfer')
+        subjects_dir = os.path.join(bids_dir,'derivatives',__freesurfer_directory__)
         src = mne.setup_source_space(subject=subject, spacing='oct6', subjects_dir=subjects_dir)
         mne.write_source_spaces(src_fname,src,overwrite=overwrite_src)
 

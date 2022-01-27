@@ -10,6 +10,9 @@ import numpy as  np
 import mne 
 from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, traits, TraitedSpec
 
+# own imports 
+from cmtklib.bids.io import __freesurfer_directory__
+
 class MNEInverseSolutionInputSpec(BaseInterfaceInputSpec):
     """Input specification for InverseSolution."""
     
@@ -118,7 +121,7 @@ class MNEInverseSolution(BaseInterface):
         stcs = mne.minimum_norm.apply_inverse_epochs(epochs, inverse_operator, lambda2, method, pick_ori=None, nave=evoked.nave,return_generator=False)
         # get ROI time courses 
         # read the labels of the source points 
-        subjects_dir = os.path.join(bids_dir,'derivatives','freesurfer')
+        subjects_dir = os.path.join(bids_dir,'derivatives',__freesurfer_directory__)
         labels_parc = mne.read_labels_from_annot(subject, parc=parcellation, subjects_dir=subjects_dir)
         # get the ROI time courses 
         data = mne.extract_label_time_course(stcs, labels_parc, src, mode='pca_flip', allow_empty=True,

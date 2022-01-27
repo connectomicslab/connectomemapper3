@@ -12,6 +12,9 @@ import mne
 import numpy as np
 from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, traits, TraitedSpec
 
+# own imports 
+from cmtklib.bids.io import (__cmp_directory__, __freesurfer_directory__)
+
 
 class CreateBEMInputSpec(BaseInterfaceInputSpec):
     """Input specification for creating MNE source space."""
@@ -49,16 +52,14 @@ class CreateBEM(BaseInterface):
         self.derivative_list = self.inputs.derivative_list
         self.output_query = self.inputs.output_query
         
-        # bem_dir = os.path.join(bids_dir,'derivatives','freesurfer','subjects',subject,'bem')
-        # if not os.path.isdir(bem_dir):
         self._create_BEM(subject, bids_dir)
         
-        if 'cmp' not in self.derivative_list:
-            self.derivative_list.append('cmp')
+        if __cmp_directory__ not in self.derivative_list:
+            self.derivative_list.append(__cmp_directory__)
 
         self.output_query['bem'] = {
             'suffix': 'bem',
-            'extensions': ['fif']
+            'extension': ['fif']
         }
 
         return runtime
@@ -66,8 +67,8 @@ class CreateBEM(BaseInterface):
     @staticmethod
     def _create_BEM(subject,bids_dir):
         # create the boundaries between the tissues, using segmentation file 
-        subjects_dir = os.path.join(bids_dir,'derivatives','freesurfer')
-        bemfilename = os.path.join(bids_dir,'derivatives','cmp',subject,'eeg',subject+'_bem.fif')
+        subjects_dir = os.path.join(bids_dir,'derivatives',__freesurfer_directory__)
+        bemfilename = os.path.join(bids_dir,'derivatives',__cmp_directory__,subject,'eeg',subject+'_bem.fif')
         if not "bem" in os.listdir(os.path.join(subjects_dir,subject)):
             mne.bem.make_watershed_bem(subject,subjects_dir,overwrite=True) # still need to check if this actually works
             # file names required by mne's make_bem_model not consistent with file names outputted by mne's make_watershed_bem - copy and rename 
