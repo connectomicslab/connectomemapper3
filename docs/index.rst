@@ -85,9 +85,9 @@ generate and run the appropriate command.
 .. role:: raw-html(raw)
     :format: html
 
-.. admonition:: New in ``v3.0.2`` ✨
+.. admonition:: New in v3.0.2 ✨
 
-    You can now be aware about the adverse impact :raw-html:`&#x1f3ed;` of your processing on the environment :raw-html:`&#x1F30D;`:raw-html:`&#x1f333;`!
+    You can now be aware about the adverse impact of your processing on the environment :raw-html:`&#x1F30D;`:raw-html:`&#x1f333;`!
 
     With the new `--track_carbon_footprint` option of the `connectomemapper3_docker` and `connectomemapper3_singularity` BIDS App python wrappers, you can use `codecarbon <https://codecarbon.io>`_ to estimate the amount of carbon dioxide (CO2) produced to execute the code by the computing resources and save the results in ``<bids_dir>/code/emissions.csv``.
 
