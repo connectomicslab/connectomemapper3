@@ -16,6 +16,18 @@ To enhance reproducibility and replicatibility, the processing pipelines with al
 
 To reduce the risk of misconfiguration and improve accessibility, Connectome Mapper 3 comes with an interactive GUI, aka `cmpbidsappmanager`, which supports the user in all the steps involved in the configuration of the pipelines, the configuration and execution of the BIDS App, and the control of the output quality. In addition, to facilitate the use by users not familiar with Docker and Singularity containers, Connectome Mapper 3 provides two Python commandline wrappers (`connectomemapper3_docker` and `connectomemapper3_singularity`) that will generate and run the appropriate command.
 
+###  New in ``v3.0.2``
+
+You can now be aware about the adverse impact 🏭 of your processing on the environment 🌍🌳!
+
+With the new `--track_carbon_footprint` option of the `connectomemapper3_docker` and `connectomemapper3_singularity` BIDS App python wrappers, you can use `codecarbon <https://codecarbon.io/>`_ to estimate the amount of carbon dioxide (CO2) produced to execute the code by the computing resources and save the results in ``<bids_dir>/code/emissions.csv``.
+
+Then, to visualize, interpret and track the evolution of the CO2 emissions incurred, you can use the visualization tool of `codecarbon` aka `carbonboard` that takes as input the `.csv` created::
+
+    carbonboard --filepath="<bids_dir>/code/emissions.csv" --port=xxxx
+
+
+
 ### How to install the python wrappers and the GUI?
 
 You need to have first either Docker or Singularity engine and miniconda installed. We refer to the [dedicated documentation page](https://connectome-mapper-3.readthedocs.io/en/latest/installation.html) for more instruction details.
@@ -46,24 +58,25 @@ You are ready to use Connectome Mapper 3!
 
 Having the `py37cmp-gui` conda environment previously installed activated, the BIDS App can easily be run using `connectomemapper3_docker`, the python wrapper for Docker, as follows:
 
-        (py37cmp-gui)$ connectomemapper3_docker -h
-
         usage: connectomemapper3_docker [-h]
-              [--participant_label PARTICIPANT_LABEL [PARTICIPANT_LABEL ...]]
-              [--session_label SESSION_LABEL [SESSION_LABEL ...]]
-              [--anat_pipeline_config ANAT_PIPELINE_CONFIG]
-              [--dwi_pipeline_config DWI_PIPELINE_CONFIG]
-              [--func_pipeline_config FUNC_PIPELINE_CONFIG]
-              [--number_of_threads NUMBER_OF_THREADS]
-              [--number_of_participants_processed_in_parallel NUMBER_OF_PARTICIPANTS_PROCESSED_IN_PARALLEL]
-              [--mrtrix_random_seed MRTRIX_RANDOM_SEED]
-              [--ants_random_seed ANTS_RANDOM_SEED]
-              [--ants_number_of_threads ANTS_NUMBER_OF_THREADS]
-              [--fs_license FS_LICENSE] [--coverage] [--notrack] [-v]
-              bids_dir output_dir {participant,group}
+                                [--participant_label PARTICIPANT_LABEL [PARTICIPANT_LABEL ...]]
+                                [--session_label SESSION_LABEL [SESSION_LABEL ...]]
+                                [--anat_pipeline_config ANAT_PIPELINE_CONFIG]
+                                [--dwi_pipeline_config DWI_PIPELINE_CONFIG]
+                                [--func_pipeline_config FUNC_PIPELINE_CONFIG]
+                                [--number_of_threads NUMBER_OF_THREADS]
+                                [--number_of_participants_processed_in_parallel NUMBER_OF_PARTICIPANTS_PROCESSED_IN_PARALLEL]
+                                [--mrtrix_random_seed MRTRIX_RANDOM_SEED]
+                                [--ants_random_seed ANTS_RANDOM_SEED]
+                                [--ants_number_of_threads ANTS_NUMBER_OF_THREADS]
+                                [--fs_license FS_LICENSE] [--coverage]
+                                [--notrack] [-v] [--track_carbon_footprint]
+                                [--docker_image DOCKER_IMAGE]
+                                [--config_dir CONFIG_DIR]
+                                bids_dir output_dir {participant,group}
 
-        Entrypoint script of the BIDS-App Connectome Mapper version v3.0.1 via Docker
-
+        Entrypoint script of the Connectome Mapper BIDS-App version v3.0.2 via Docker.
+        
         positional arguments:
           bids_dir              The directory with the input dataset formatted
                                 according to the BIDS standard.
@@ -74,7 +87,7 @@ Having the `py37cmp-gui` conda environment previously installed activated, the B
           {participant,group}   Level of the analysis that will be performed. Multiple
                                 participant level analyses can be run independently
                                 (in parallel) using the same output_dir.
-
+        
         optional arguments:
           -h, --help            show this help message and exit
           --participant_label PARTICIPANT_LABEL [PARTICIPANT_LABEL ...]
@@ -102,7 +115,8 @@ Having the `py37cmp-gui` conda environment previously installed activated, the B
                                 fMRI processing pipeline
           --number_of_threads NUMBER_OF_THREADS
                                 The number of OpenMP threads used for multi-threading
-                                by Freesurfer (Set to [Number of available CPUs -1] by default).
+                                by Freesurfer (Set to [Number of available CPUs -1] by
+                                default).
           --number_of_participants_processed_in_parallel NUMBER_OF_PARTICIPANTS_PROCESSED_IN_PARALLEL
                                 The number of subjects to be processed in parallel
                                 (One by default).
@@ -122,6 +136,16 @@ Having the `py37cmp-gui` conda environment previously installed activated, the B
           --notrack             Do not send event to Google analytics to report BIDS
                                 App execution, which is enabled by default.
           -v, --version         show program's version number and exit
+          --track_carbon_footprint
+                                Track carbon footprint with `codecarbon
+                                <https://codecarbon.io/>`_ and save results in a CSV
+                                file called ``emissions.csv`` in the
+                                ``<bids_dir>/code`` directory.
+          --docker_image DOCKER_IMAGE
+                                The path to the docker image.
+          --config_dir CONFIG_DIR
+                                The path to the directory containing the configuration
+                                files.
 
 ## Contributors ✨
 
