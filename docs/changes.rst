@@ -14,10 +14,10 @@ It incorporates includes in particular the following changes.
 
 *New features*
 
-*   Allow the estimation of the carbon footprint of the execution of CMP3 while using the BIDS App python wrappers and the GUI.
+*   Allow the estimation of the carbon footprint while using the BIDS App python wrappers and the GUI.
     Estimations are conducted using `codecarbon <https://github.com/mlco2/codecarbon>`_. All functions supporting
     this features have been implemented in the new module :py:mod:`cmtklib.carbonfootprint`.
-    See `PR #136 <>`_ for more details.
+    See `PR #136 <https://github.com/connectomicslab/connectomemapper3/pull/136>`_ for more details.
 
 *Bug fix*
 
@@ -53,7 +53,8 @@ It incorporates includes in particular the following changes.
 
 *Misc*
 
-*   Add bootstrap CSS and jquery JS used to display toe carbon footprint report in the GUI as resources to `cmtklib/data/report/carbonfootprint`.
+*   Add bootstrap CSS and jquery JS as resources to `cmtklib/data/report/carbonfootprint`.
+    They are used to display the carbon footprint report in the GUI.
 
 *   Clean the resources related to parcellation in `cmtklib/data/parcellation` and rename all files and mentions of lausanne2008 to lausanne2018.
 
@@ -67,7 +68,7 @@ It incorporates includes in particular the following changes.
 
 *   `Joan Rue Queralt <https://github.com/connectomicslab/connectomemapper3/issues?q=is%3Apr+author%3Ajoanrue>`_
 
-Please check the `main pull request 140 page <https://github.com/connectomicslab/connectomemapper3/pull/132>`_ for more details.
+Please check the `main pull request 140 page <https://github.com/connectomicslab/connectomemapper3/pull/140>`_ for more details.
 
 
 ****************************
