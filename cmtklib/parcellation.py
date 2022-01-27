@@ -840,7 +840,7 @@ class CombineParcellations(BaseInterface):
                 for elem in outprefix_name.split("_"):
                     if "scale" in elem:
                         scale = elem
-                rh_annot_file = 'rh.lausanne2008.%s.annot' % scale
+                rh_annot_file = 'rh.lausanne2018.%s.annot' % scale
                 iflogger.info("  > Load {}".format(rh_annot_file))
                 rh_annot = ni.freesurfer.io.read_annot(
                     op.join(self.inputs.subjects_dir, self.inputs.subject_id, 'label', rh_annot_file))
@@ -1115,7 +1115,7 @@ class CombineParcellations(BaseInterface):
                 for elem in outprefix_name.split("_"):
                     if "scale" in elem:
                         scale = elem
-                lh_annot_file = 'lh.lausanne2008.%s.annot' % scale
+                lh_annot_file = 'lh.lausanne2018.%s.annot' % scale
                 iflogger.info("  > Load {}".format(lh_annot_file))
                 lh_annot = ni.freesurfer.io.read_annot(
                     op.join(self.inputs.subjects_dir, self.inputs.subject_id, 'label', lh_annot_file))
@@ -2440,12 +2440,12 @@ def create_roi(subject_id, subjects_dir, v=True):
     fs_string = 'export SUBJECTS_DIR=' + freesurfer_subj
 
     # Multiscale parcellation - define annotation and segmentation variables
-    rh_annot_files = ['rh.lausanne2008.scale1.annot', 'rh.lausanne2008.scale2.annot', 'rh.lausanne2008.scale3.annot',
-                      'rh.lausanne2008.scale4.annot', 'rh.lausanne2008.scale5.annot']
-    lh_annot_files = ['lh.lausanne2008.scale1.annot', 'lh.lausanne2008.scale2.annot', 'lh.lausanne2008.scale3.annot',
-                      'lh.lausanne2008.scale4.annot', 'lh.lausanne2008.scale5.annot']
-    annot = ['lausanne2008.scale1', 'lausanne2008.scale2', 'lausanne2008.scale3', 'lausanne2008.scale4',
-             'lausanne2008.scale5']
+    rh_annot_files = ['rh.lausanne2018.scale1.annot', 'rh.lausanne2018.scale2.annot', 'rh.lausanne2018.scale3.annot',
+                      'rh.lausanne2018.scale4.annot', 'rh.lausanne2018.scale5.annot']
+    lh_annot_files = ['lh.lausanne2018.scale1.annot', 'lh.lausanne2018.scale2.annot', 'lh.lausanne2018.scale3.annot',
+                      'lh.lausanne2018.scale4.annot', 'lh.lausanne2018.scale5.annot']
+    annot = ['lausanne2018.scale1', 'lausanne2018.scale2', 'lausanne2018.scale3', 'lausanne2018.scale4',
+             'lausanne2018.scale5']
     rois_output = ['ROI_scale1_Lausanne2018.nii.gz', 'ROI_scale2_Lausanne2018.nii.gz', 'ROI_scale3_Lausanne2018.nii.gz',
                    'ROI_scale4_Lausanne2018.nii.gz', 'ROI_scale5_Lausanne2018.nii.gz']
     roivs_output = ['ROIv_scale1_Lausanne2018.nii.gz', 'ROIv_scale2_Lausanne2018.nii.gz',
@@ -2468,7 +2468,8 @@ def create_roi(subject_id, subjects_dir, v=True):
             subject_id,
             pkg_resources.resource_filename('cmtklib',
                                             op.join('data', 'parcellation', 'lausanne2018', lh_annot_files[i])),
-            os.path.join(subject_dir, 'label', lh_annot_files[i]))
+            os.path.join(subject_dir, 'label', lh_annot_files[i])
+        )
         if v == 2:
             _ = subprocess.call(mri_cmd, shell=True)
         else:
@@ -2479,7 +2480,8 @@ def create_roi(subject_id, subjects_dir, v=True):
             subject_id,
             pkg_resources.resource_filename('cmtklib',
                                             op.join('data', 'parcellation', 'lausanne2018', rh_annot_files[i])),
-            os.path.join(subject_dir, 'label', rh_annot_files[i]))
+            os.path.join(subject_dir, 'label', rh_annot_files[i])
+        )
         if v == 2:
             status = subprocess.call(mri_cmd, shell=True)
         else:
@@ -2493,7 +2495,8 @@ def create_roi(subject_id, subjects_dir, v=True):
         mri_cmd = fs_string + '; mri_aparc2aseg --s %s --annot %s --wmparc-dmax 0 --labelwm --hypo-as-wm --new-ribbon --o %s' % (
             subject_id,
             annot[i],
-            os.path.join(subject_dir, 'tmp', rois_output[i]))
+            os.path.join(subject_dir, 'tmp', rois_output[i])
+        )
         if v == 2:
             subprocess.call(mri_cmd, shell=True)
         else:
@@ -2502,8 +2505,8 @@ def create_roi(subject_id, subjects_dir, v=True):
         # 3. Update numerical IDs of cortical and subcortical regions
         # Load Nifti volume
         if v:
-            print(
-                '     > relabel cortical and subcortical regions for consistency between resolutions')
+            print('     > relabel cortical and subcortical regions'
+                  ' for consistency between resolutions')
         this_nifti = ni.load(os.path.join(subject_dir, 'tmp', rois_output[i]))
         vol = this_nifti.get_data()  # numpy.ndarray
         hdr = this_nifti.header
@@ -2558,7 +2561,6 @@ def create_roi(subject_id, subjects_dir, v=True):
         # 4. Dilate cortical regions
         if v:
             print("     > dilating cortical regions")
-        # dilatestart = time()
         # loop throughout all the voxels belonging to the aseg GM volume
         for j in range(xx.size):
             if newrois[xx[j], yy[j], zz[j]] == 0:
@@ -2591,7 +2593,6 @@ def create_roi(subject_id, subjects_dir, v=True):
         else:
             status = subprocess.call(
                 mri_cmd, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
-        # os.remove(os.path.join(subject_dir, 'tmp', rois_output[i]))
 
         # Create Gray Matter mask
         if i == 0:
@@ -2712,24 +2713,26 @@ def create_wm_mask(subject_id, subjects_dir, v=True):
 
     csfA = imerode(imerode(csfA, se1), se)
 
-    # thalmus proper and cuadate are put back because they are not lateral ventricles
+    # thalamus proper and caudate are put back because
+    # they are not lateral ventricles
     idx = np.where((asegd == 11) |
                    (asegd == 50) |
                    (asegd == 10) |
                    (asegd == 49))
     csfA[idx] = 0
 
-    # REST CSF, IE 3RD AND 4TH VENTRICULE AND EXTRACEREBRAL CSF
-    idx = np.where((asegd == 5) |
-                   (asegd == 14) |
-                   (asegd == 15) |
-                   (asegd == 24) |
-                   (asegd == 44) |
-                   (asegd == 72) |
-                   (asegd == 75) |
-                   (asegd == 76) |
-                   (asegd == 213) |
-                   (asegd == 221))
+    # REST CSF, IE 3RD AND 4TH VENTRICULE
+    # and EXTRACEREBRAL CSF
+    # idx = np.where((asegd == 5) |
+    #                (asegd == 14) |
+    #                (asegd == 15) |
+    #                (asegd == 24) |
+    #                (asegd == 44) |
+    #                (asegd == 72) |
+    #                (asegd == 75) |
+    #                (asegd == 76) |
+    #                (asegd == 213) |
+    #                (asegd == 221))
     # 43 ??, 4??  213?, 221?
     # more to discuss.
     for i in [5, 14, 15, 24, 44, 72, 75, 76, 213, 221]:
@@ -2792,46 +2795,6 @@ def create_wm_mask(subject_id, subjects_dir, v=True):
     #    fsmask.img(cc_unknown.img==4)    =  1;
 
     # output white matter mask. crop and move it afterwards
-    # wm_out = op.join(fs_dir, 'mri', 'fsmask_1mm_all.nii.gz')
-    # img = ni.Nifti1Image(wmmask, fsmask.get_affine(), fsmask.get_header() )
-    # iflogger.info("Save white matter mask: %s" % wm_out)
-    # ni.save(img, wm_out)
-
-    # Extract cortical gray matter mask
-    # remove remaining structure, e.g. brainstem
-    gmmask = np.zeros(asegd.shape)
-
-    # XXX: subtracting wmmask from ROI. necessary?
-    # for parkey, parval in get_parcellation('Lausanne2018').items():
-    #
-    #     print parkey
-    #
-    #     # check if we should subtract the cortical rois from this parcellation
-    #     if parval.has_key('subtract_from_wm_mask'):
-    #         if not bool(int(parval['subtract_from_wm_mask'])):
-    #             continue
-    #     else:
-    #         continue
-    #
-    #     iflogger.info("Loading %s to subtract cortical ROIs from white matter mask" % ('ROI_%s.nii.gz' % parkey) )
-    #     roi = ni.load(op.join(fs_dir, 'mri', 'ROIv_%s.nii.gz' % parkey))
-    #     roid = roi.get_data()
-    #
-    #     assert roid.shape[0] == wmmask.shape[0]
-    #
-    #     pg = nx.read_graphml(parval['node_information_graphml'])
-    #
-    #     for brk, brv in pg.nodes(data=True):
-    #
-    #         if brv['dn_region'] == 'cortical':
-    #
-    #             iflogger.info("Subtracting region %s with intensity value %s" % (brv['dn_region'], brv['dn_multiscaleID']))
-    #
-    #             idx = np.where(roid == int(brv['dn_multiscaleID']))
-    #             wmmask[idx] = 0
-    #             gmmask[idx] = 1
-
-    # output white matter mask. crop and move it afterwards
     wm_out = op.join(fs_dir, 'mri', 'fsmask_1mm.nii.gz')
     img = ni.Nifti1Image(wmmask, fsmask.get_affine(), fsmask.get_header())
     if v:
@@ -2839,15 +2802,8 @@ def create_wm_mask(subject_id, subjects_dir, v=True):
     ni.save(img, wm_out)
     del img
 
-    gm_out = op.join(fs_dir, 'mri', 'gmmask.nii.gz')
-    img = ni.Nifti1Image(gmmask, fsmask.get_affine(), fsmask.get_header())
-    if v:
-        iflogger.info("    > Save gray matter mask: %s" % gm_out)
-    ni.save(img, gm_out)
-    del img
-
-    # Redirect ouput if low verbose
-    FNULL = open(os.devnull, 'w')
+    # Redirect output if low verbose
+    fnull = open(os.devnull, 'w')
 
     # Convert whole brain mask
     mri_cmd = ['mri_convert', '-i', op.join(fs_dir, 'mri', 'brainmask.mgz'), '-o',
@@ -2856,7 +2812,7 @@ def create_wm_mask(subject_id, subjects_dir, v=True):
         status = subprocess.call(' '.join(mri_cmd), shell=True)
     else:
         status = subprocess.call(
-            ' '.join(mri_cmd), shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
+            ' '.join(mri_cmd), shell=True, stdout=fnull, stderr=subprocess.STDOUT)
     iflogger.info(status)
 
     mri_cmd = ['fslmaths', op.join(fs_dir, 'mri', 'brainmask.nii.gz'), '-bin',
@@ -2865,7 +2821,7 @@ def create_wm_mask(subject_id, subjects_dir, v=True):
         status = subprocess.call(' '.join(mri_cmd), shell=True)
     else:
         status = subprocess.call(
-            ' '.join(mri_cmd), shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
+            ' '.join(mri_cmd), shell=True, stdout=fnull, stderr=subprocess.STDOUT)
     iflogger.info(status)
 
 
