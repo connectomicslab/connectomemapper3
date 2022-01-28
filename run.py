@@ -367,9 +367,10 @@ if args.number_of_threads is not None:
         total_number_of_threads = parallel_number_of_subjects * number_of_threads
         if total_number_of_threads > max_number_of_cores:
             print(BColors.WARNING +
-                  '  * Total number of cores used (Subjects in parallel: {}, Threads in parallel: {}, Total: {})'.format(parallel_number_of_subjects,
-                                                                                                                         number_of_threads,
-                                                                                                                         total_number_of_threads) +
+                  '  * Total number of cores used ' +
+                  '(Subjects in parallel: {}, Threads in parallel: {}, Total: {})'.format(parallel_number_of_subjects,
+                                                                                          number_of_threads,
+                                                                                          total_number_of_threads) +
                   'is greater than the number of available cores ({})'.format(max_number_of_cores) + BColors.ENDC)
             number_of_threads = 1
             parallel_number_of_subjects = max_number_of_cores
