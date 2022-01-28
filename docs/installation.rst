@@ -89,7 +89,7 @@ Installation of the Connectome Mapper 3 has been facilitated through the distrib
 
         $ docker images
 
-You should see the docker image "connectomemapper-bidsapp" with tag "|release|" is now available.
+    You should see the docker image "connectomemapper-bidsapp" with tag "|release|" is now available.
 
 *   You are ready to use the Connectome Mapper 3 BIDS App from the terminal. See its `commandline usage <usage.html>`_.
 
@@ -110,20 +110,20 @@ The installation of the Connectome Mapper 3, including `cmpbidsappmanager`, cons
 
 *   Download the appropriate `environment.yml <https://github.com/connectomicslab/connectomemapper3/raw/master/conda/environment.yml>`_ / `environment_macosx.yml <https://github.com/connectomicslab/connectomemapper3/raw/master/conda/environment_macosx.yml>`_.
 
+    .. important::
+        It seems there is no conda package for `git-annex` available on Mac.
+        For your convenience, we created an additional `conda/environment_macosx.yml`
+        miniconda3 environment where the line `- git-annex=XXXXXXX` has been removed.
+        Git-annex should be installed on MacOSX using `brew <https://brew.sh/index_fr>`_
+        i.e. ``brew install git-annex``. See https://git-annex.branchable.com/install/ for more details.
+
+        Note that `git-annex` is only necessary if you wish to use BIDS datasets managed by Datalad (`https://www.datalad.org/ <https://www.datalad.org/>`_).
+
 *   Open a terminal.
 
 *   Create a miniconda3 environment where all python dependencies will be installed::
 
         $ conda env create -f /path/to/downloaded/conda/environment[_macosx].yml
-
-.. important::
-  It seems there is no conda package for `git-annex` available on Mac.
-  For your convenience, we created an additional `conda/environment_macosx.yml`
-  miniconda3 environment where the line `- git-annex=XXXXXXX` has been removed.
-  Git-annex should be installed on MacOSX using `brew <https://brew.sh/index_fr>`_
-  i.e. ``brew install git-annex``. See https://git-annex.branchable.com/install/ for more details.
-
-  Note that `git-annex` is only necessary if you wish to use BIDS datasets managed by Datalad (`https://www.datalad.org/ <https://www.datalad.org/>`_).
 
 *   Activate the conda environment::
 
