@@ -164,7 +164,6 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                     ) + '.graphml'
                 }
             }
-            print(f' .. DEBUG : Updated custom parcellation atlas_info = {self.atlas_info}')
 
     def check_config(self):
         """Check if custom white matter mask and custom atlas files specified in the configuration exist.
@@ -400,8 +399,6 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             ]
             # Keep only unique custom derivatives to make the BIDSLayout happy
             custom_derivatives_dirnames = list(set(custom_derivatives_dirnames))
-            print(f"DEBUG: custom_derivatives_dirnames: {custom_derivatives_dirnames}")
-            print(f"DEBUG: layout.derivatives: {layout.derivatives}")
             for custom_derivatives_dirname in  custom_derivatives_dirnames:
                 if custom_derivatives_dirname not in layout.derivatives:
                     print(f"    * Add custom_derivatives_dirname: {custom_derivatives_dirname}")
@@ -1063,17 +1060,16 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             self.init_subject_derivatives_dirs()
 
         # Initialization
-        if os.path.isfile(os.path.join(nipype_anatomical_pipeline_subject_dir, "pypeline.log")):
-            os.unlink(os.path.join(nipype_anatomical_pipeline_subject_dir, "pypeline.log"))
+        log_file = os.path.join(nipype_anatomical_pipeline_subject_dir, "pypeline.log")
+        if os.path.isfile(log_file):
+            os.unlink(log_file)
 
         config.update_config(
             {
                 "logging": {
                     "workflow_level": "INFO",
                     "interface_level": "INFO",
-                    "log_directory": os.path.join(
-                        nipype_deriv_subject_directory, "anatomical_pipeline"
-                    ),
+                    "log_directory": nipype_anatomical_pipeline_subject_dir,
                     "log_to_file": True,
                 },
                 "execution": {

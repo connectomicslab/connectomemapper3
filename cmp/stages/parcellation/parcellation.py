@@ -318,7 +318,6 @@ class ParcellationStage(Stage):
                     synchronize=True,
                     name="createBIDSLabelIndexMappingFile"
                 )
-                createBIDSLabelIndexMappingFile.inputs.verbose = True
                 # fmt: off
                 flow.connect(
                     [
@@ -383,7 +382,6 @@ class ParcellationStage(Stage):
                     synchronize=True,
                     name="createBIDSLabelIndexMappingFile"
                 )
-                createBIDSLabelIndexMappingFile.inputs.verbose = True
                 # fmt: off
                 flow.connect(
                     [

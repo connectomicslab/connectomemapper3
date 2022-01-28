@@ -879,14 +879,14 @@ class fMRIPipeline(Pipeline):
 
         return fMRI_flow
 
-    def process(self):
-        """Executes the fMRI pipeline workflow and returns True if successful."""
-        # Enable the use of the the W3C PROV data model to capture and represent provenance in Nipype
-        # config.enable_provenance()
+    def init_subject_derivatives_dirs(self):
+        """Return the paths to Nipype and CMP derivatives folders of a given subject / session.
 
-        # Process time
-        self.now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
-
+        Notes
+        -----
+        `self.subject` is updated to "sub-<participant_label>_ses-<session_label>"
+        when subject has multiple sessions.
+        """
         if "_" in self.subject:
             self.subject = self.subject.split("_")[0]
 
@@ -913,42 +913,44 @@ class fMRIPipeline(Pipeline):
 
             self.subject = "_".join((self.subject, self.global_conf.subject_session))
 
-        if not os.path.exists(
-            os.path.join(nipype_deriv_subject_directory, "fMRI_pipeline")
-        ):
+        nipype_fmri_pipeline_subject_dir = os.path.join(nipype_deriv_subject_directory, "fMRI_pipeline")
+        if not os.path.exists(nipype_fmri_pipeline_subject_dir):
             try:
-                os.makedirs(
-                    os.path.join(nipype_deriv_subject_directory, "fMRI_pipeline")
-                )
+                os.makedirs(nipype_fmri_pipeline_subject_dir)
             except os.error:
-                print(
-                    "%s was already existing"
-                    % os.path.join(nipype_deriv_subject_directory, "fMRI_pipeline")
-                )
+                print(f"{nipype_fmri_pipeline_subject_dir} was already existing")
+
+        return cmp_deriv_subject_directory, nipype_deriv_subject_directory, nipype_fmri_pipeline_subject_dir
+
+    def process(self):
+        """Executes the fMRI pipeline workflow and returns True if successful."""
+        # Enable the use of the the W3C PROV data model to capture and represent provenance in Nipype
+        # config.enable_provenance()
+
+        # Process time
+        self.now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
+
+        cmp_deriv_subject_directory, nipype_deriv_subject_directory, nipype_fmri_pipeline_subject_dir = \
+            self.init_subject_derivatives_dirs()
 
         # Initialization
-        if os.path.isfile(
-            os.path.join(
-                nipype_deriv_subject_directory, "fMRI_pipeline", "pypeline.log"
-            )
-        ):
-            os.unlink(
-                os.path.join(
-                    nipype_deriv_subject_directory, "fMRI_pipeline", "pypeline.log"
-                )
-            )
+        log_file = os.path.join(nipype_fmri_pipeline_subject_dir, "pypeline.log")
+        if os.path.isfile(log_file):
+            os.unlink(log_file)
+
         config.update_config(
             {
                 "logging": {
-                    "log_directory": os.path.join(
-                        nipype_deriv_subject_directory, "fMRI_pipeline"
-                    ),
+                    "workflow_level": "INFO",
+                    "interface_level": "INFO",
+                    "log_directory": nipype_fmri_pipeline_subject_dir,
                     "log_to_file": True,
                 },
                 "execution": {
                     "remove_unnecessary_outputs": False,
                     "stop_on_first_crash": True,
                     "stop_on_first_rerun": False,
+                    "try_hard_link_datasink": True,
                     "use_relative_paths": True,
                     "crashfile_format": "txt",
                 },
@@ -966,10 +968,7 @@ class fMRIPipeline(Pipeline):
         )
         flow.write_graph(graph2use="colored", format="svg", simple_form=False)
 
-        if self.number_of_cores != 1:
-            flow.run(plugin="MultiProc", plugin_args={"n_procs": self.number_of_cores})
-        else:
-            flow.run()
+        flow.run(plugin="MultiProc", plugin_args={"n_procs": self.number_of_cores})
 
         iflogger.info("**** Processing finished ****")
 

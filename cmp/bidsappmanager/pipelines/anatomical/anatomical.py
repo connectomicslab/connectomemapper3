@@ -328,8 +328,6 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
             ]
             # Keep only unique custom derivatives to make the BIDSLayout happy
             custom_derivatives_dirnames = list(set(custom_derivatives_dirnames))
-            print(f"DEBUG: custom_derivatives_dirnames: {custom_derivatives_dirnames}")
-            print(f"DEBUG: layout.derivatives: {layout.derivatives}")
             for custom_derivatives_dirname in  custom_derivatives_dirnames:
                 if custom_derivatives_dirname not in layout.derivatives:
                     print(f"    * Add custom_derivatives_dirname: {custom_derivatives_dirname}")
