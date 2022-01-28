@@ -57,17 +57,17 @@ Prerequisites
 
     *   Create the docker group::
 
-      $ sudo groupadd docker
+            $ sudo groupadd docker
 
     *   Add the current user to the docker group::
 
-      $ sudo usermod -G docker -a $USER
+            $ sudo usermod -G docker -a $USER
 
     *   Reboot
 
-      After reboot, test if docker is managed as non-root::
+    *   After reboot, test if docker is managed as non-root::
 
-          $ docker run hello-world
+            $ docker run hello-world
 
 
 .. _manual-install-cmpbidsapp:
@@ -87,7 +87,7 @@ Installation of the Connectome Mapper 3 has been facilitated through the distrib
 
 *   To display all docker images available::
 
-    $ docker images
+        $ docker images
 
 You should see the docker image "connectomemapper-bidsapp" with tag "|release|" is now available.
 
@@ -114,7 +114,7 @@ The installation of the Connectome Mapper 3, including `cmpbidsappmanager`, cons
 
 *   Create a miniconda3 environment where all python dependencies will be installed::
 
-    $ conda env create -f /path/to/downloaded/conda/environment[_macosx].yml
+        $ conda env create -f /path/to/downloaded/conda/environment[_macosx].yml
 
 .. important::
   It seems there is no conda package for `git-annex` available on Mac.
@@ -127,15 +127,15 @@ The installation of the Connectome Mapper 3, including `cmpbidsappmanager`, cons
 
 *   Activate the conda environment::
 
-    $ source activate py37cmp-gui
+        $ source activate py37cmp-gui
 
   or::
 
-    $ conda activate py37cmp-gui
+        $ conda activate py37cmp-gui
 
 *   Install finally the latest released version of Connectome Mapper 3 with the Python Package Index (PyPI) using `pip`::
 
-    (py37cmp-gui)$ pip install connectomemapper
+        (py37cmp-gui)$ pip install connectomemapper
 
 *   You are ready to use the Connectome Mapper 3 (1) via its Graphical User Interface (GUI) aka CMP BIDS App Manager
     (See :ref:`guiusage` for the user guide), (2) via its python ``connectomemapper3_docker`` and
