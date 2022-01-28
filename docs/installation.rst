@@ -109,33 +109,15 @@ Prerequisites
 
 Installation
 ---------------------------------------
-The installation of the Connectome Mapper 3 BIDS App Manager (CMPBIDSAPPManager) consists of a clone of the source code repository, the creation of conda environment with all python dependencies installed, and eventually the installation of the CMPBIDSAPPManager itself, as follows:
+The installation of the Connectome Mapper 3, including `cmpbidsappmanager`, consists of the creation of conda environment with all python dependencies installed, and the installation of `connectomemapper` via the Python Package Index (PyPI) as follows:
 
-* Open a terminal
+* Download the appropriate `environment.yml <https://github.com/connectomicslab/connectomemapper3/raw/master/conda/environment.yml>`_ / `environment_macosx.yml <https://github.com/connectomicslab/connectomemapper3/raw/master/conda/environment_macosx.yml>`_.
 
-* Go to the folder in which you would like to clone the source code repository::
-
-  $ cd <INSTALLATION DIRECTORY>
-
-* Clone the source code repository::
-
-  $ git clone https://github.com/connectomicslab/connectomemapper3.git connectomemapper3
-
-* Create a branch and checkout the code corresponding to this version release:
-
-  .. parsed-literal::
-
-    $ cd connectomemapper3
-    $ git fetch
-    $ git checkout tags/|release| -b |release|
-
-.. note::
-  If a few bugs related to the Graphical User Interface were fixed after releasing the version, you might want to use the code at its latest version on the master branch (i.e. ``git checkout master``).
+* Open a terminal.
 
 * Create a miniconda3 environment where all python dependencies will be installed::
 
-    $ cd connectomemapper3
-    $ conda env create -f conda/environment.yml
+    $ conda env create -f /path/to/downloaded/conda/environment[_macosx].yml
 
 .. important::
   It seems there is no conda package for `git-annex` available on Mac.
@@ -144,20 +126,21 @@ The installation of the Connectome Mapper 3 BIDS App Manager (CMPBIDSAPPManager)
   Git-annex should be installed on MacOSX using `brew <https://brew.sh/index_fr>`_
   i.e. ``brew install git-annex``. See https://git-annex.branchable.com/install/ for more details.
 
-  Note that `git-annex` is only necessary if you wish to use BIDS datasets managed by Datalad (https://www.datalad.org/).
+  Note that `git-annex` is only necessary if you wish to use BIDS datasets managed by Datalad (`https://www.datalad.org/ <https://www.datalad.org/>`_).
 
 * Activate the conda environment::
 
-  $ source activate py37cmp-gui
+    $ source activate py37cmp-gui
 
   or::
 
-  $ conda activate py37cmp-gui
+    $ conda activate py37cmp-gui
 
-* Install the Connectome Mapper BIDS App Manager from the Bash Shell using `pip`::
+*   Install finally Connectome Mapper 3 with the Python Package Index (PyPI) using `pip`:
 
-    (py37cmp-gui)$ cd connectomemapper3/
-    (py37cmp-gui)$ pip install .
+    .. parsed-literal::
+
+        (py37cmp-gui)$ pip install connectomemapper==|release|
 
 * You are ready to use the Connectome Mapper 3 (1) via its Graphical User Interface (GUI) aka CMP BIDS App Manager
   (See :ref:`guiusage` for the user guide), (2) via its python ``connectomemapper3_docker`` and
@@ -167,8 +150,7 @@ The installation of the Connectome Mapper 3 BIDS App Manager (CMPBIDSAPPManager)
 .. admonition:: In the future
 
     If you wish to update Connectome Mapper 3 and the Connectome Mapper 3 BIDS App Manager,
-    this could be easily done by (1) updating the git repository to a new tag with `git fetch` and
-    `git checkout tags/|release| -b |release|` and (2) running `pip install .`.
+    this could be easily done by running `pip install connectomemapper==<new_version>`.
 
 Help/Questions
 --------------
