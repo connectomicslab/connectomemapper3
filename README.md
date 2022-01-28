@@ -35,7 +35,7 @@ $ conda activate py37cmp-gui
 
 You are ready to use Connectome Mapper 3!
 
-###  New in ``v3.0.2`` ✨
+### New in ``v3.0.2`` ✨
 
 In active support to the Organisation for Human Brain Mapping (OHBM) 
 Sustainability and Environmental Action (OHBM-SEA) group, you can now be aware about the adverse impact

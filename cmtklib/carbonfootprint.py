@@ -18,21 +18,21 @@ from cmp.info import __version__
 
 def create_emissions_tracker(bids_root):
     """Return a new instance of `codecarbon.EmissionsTracker`.
-    
+
     Parameters
     ----------
     bids_root : string
         Path to the root directory of the BIDS dataset
-    
+
     Returns
     -------
     tracker: `codecarbon.EmissionsTracker`
         Return a new instance of `codecarbon.EmissionsTracker`
-        
+
     References
     ----------
     https://github.com/mlco2/codecarbon/blob/v1.2.0/codecarbon/emissions_tracker.py
-    
+
     """
     # Create the code folder if it does not exist yet
     if not os.path.exists(str(Path(bids_root) / "code")):
@@ -105,7 +105,7 @@ def load_and_compute_carbon_footprint_metrics(emissions_csv_file, nb_of_subjects
     country_name = emissions_df['country_name'][last_index]
     region_name = emissions_df['region'][last_index]
     del emissions_df
-    
+
     country_emissions_per_kwh = float(emissions / energy_consumed)
     car_kms = get_emission_car_miles_equivalent(emissions)
     tv_time = get_emission_tv_time_equivalent(emissions)
@@ -114,7 +114,7 @@ def load_and_compute_carbon_footprint_metrics(emissions_csv_file, nb_of_subjects
     pred_emissions = 100 * emissions / nb_of_subjects_processed
     pred_car_kms = get_emission_car_miles_equivalent(pred_emissions)
     pred_tv_time = get_emission_tv_time_equivalent(pred_emissions)
-    
+
     carbon_footprint_metrics = {
         'country_name': f'{country_name}',
         'region_name': f'{region_name}',
@@ -192,7 +192,7 @@ def create_carbon_footprint_message(bids_dir, emissions_csv_file, nb_of_subjects
 
 def create_html_carbon_footprint_report(emissions_csv_file, nb_of_subjects_processed):
     """Return a string containing the content of html report to be passed to traits `Str` with `HTMLEditor`.
-    
+
     Parameters
     ----------
     emissions_csv_file : string
@@ -200,6 +200,7 @@ def create_html_carbon_footprint_report(emissions_csv_file, nb_of_subjects_proce
 
     nb_of_subjects_processed : int
         Number of subject processed.
+
     """
     carbon_footprint_metrics = load_and_compute_carbon_footprint_metrics(
         emissions_csv_file=emissions_csv_file,
