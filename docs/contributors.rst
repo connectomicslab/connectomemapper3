@@ -53,6 +53,6 @@ Thanks also goes to all these wonderful people that contributed to the two first
     *   Rudolph Pienaar (rudolphpienaar)
     *   Nicolas Rannou (NicolasRannou)
 
-This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
+This project follows the `all-contributors <https://github.com/all-contributors/all-contributors>`_ specification. Contributions of any kind are welcome!
 
 See :ref:`contributing page <contributing>` for more details about how to join us!
