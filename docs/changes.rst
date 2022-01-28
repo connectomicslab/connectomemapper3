@@ -19,6 +19,13 @@ It incorporates includes in particular the following changes.
     this features have been implemented in the new module :py:mod:`cmtklib.carbonfootprint`.
     See `PR #136 <https://github.com/connectomicslab/connectomemapper3/pull/136>`_ for more details.
 
+*Code refactoring*
+
+*   Creation of `init_subject_derivatives_dirs()` for `AnatomicalPipeline`, `DifusionPipeline`, and `fMRIPipeline`
+    that return the paths to Nipype and CMP derivatives folders of a given subject / session for a given pipeline.
+    This removed all the implicated code from the `process()` method and improve modularity and readability.
+    In the future, the different functions could be merged as there is a lot of code duplication between them.
+
 *Bug fix*
 
 *   Major update of the `conda/environment.yml` and `conda/environment_macosx.yml` to correct the problems of conflicts in the previous version,
@@ -50,6 +57,8 @@ It incorporates includes in particular the following changes.
 *Documentation*
 
 *   Add description of carbon footprint estimation feature.
+
+*   Improve description on how to use already computed Freesurfer derivatives.
 
 *Misc*
 
