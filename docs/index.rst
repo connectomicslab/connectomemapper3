@@ -87,13 +87,20 @@ generate and run the appropriate command.
 
 .. admonition:: New in v3.0.2 ✨
 
-    You can now be aware about the adverse impact of your processing on the environment :raw-html:`&#x1F30D;`:raw-html:`&#x1f333;`!
+    In active support to the Organisation for Human Brain Mapping (OHBM)
+    Sustainability and Environmental Action (OHBM-SEA) group, you can now be aware about the adverse impact
+    of your processing with CMP 3 on the environment :raw-html:`&#x1F30D;`:raw-html:`&#x1f333;`!
 
-    With the new `--track_carbon_footprint` option of the `connectomemapper3_docker` and `connectomemapper3_singularity` BIDS App python wrappers, you can use `codecarbon <https://codecarbon.io>`_ to estimate the amount of carbon dioxide (CO2) produced to execute the code by the computing resources and save the results in ``<bids_dir>/code/emissions.csv``.
+    With the new `--track_carbon_footprint` option of the `connectomemapper3_docker` and `connectomemapper3_singularity` BIDS App python wrappers, and
+    the new `"Track carbon footprint"` option of the BIDS Interface Window of `cmpbidsappmanager`, you can estimate the carbon footprint incurred by the
+    execution of the BIDS App. Estimations are conducted using `codecarbon <https://codecarbon.io>`_ to estimate the amount of carbon dioxide (CO2)
+    produced to execute the code by the computing resources and save the results in ``<bids_dir>/code/emissions.csv``.
 
-    Then, to visualize, interpret and track the evolution of the CO2 emissions incurred, you can use the visualization tool of `codecarbon` aka `carbonboard` that takes as input the `.csv` created::
+    Then, to visualize, interpret and track the evolution of the emitted CO2 emissions, you can use the visualization tool of `codecarbon` aka `carbonboard` that takes as input the `.csv` created::
 
         $ carbonboard --filepath="<bids_dir>/code/emissions.csv" --port=xxxx
+
+    Please check https://ohbm-environment.org to learn more about OHBM-SEA!
 
 .. _FSL: https://fsl.fmrib.ox.ac.uk/fsl/fslwiki
 
