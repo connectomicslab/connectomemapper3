@@ -1275,7 +1275,6 @@ class DiffusionPipeline(Pipeline):
                 },
             }
         )
-
         logging.update_logging(config)
 
         iflogger = logging.getLogger("nipype.interface")
@@ -1286,8 +1285,13 @@ class DiffusionPipeline(Pipeline):
             nipype_deriv_subject_directory=nipype_deriv_subject_directory,
         )
         flow.write_graph(graph2use="colored", format="svg", simple_form=True)
-
-        flow.run(plugin="MultiProc", plugin_args={"n_procs": self.number_of_cores})
+        # Create dictionary of arguments passed to plugin_args
+        plugin_args = {
+            'maxtasksperchild': 1,
+            'n_procs': self.number_of_cores,
+            'raise_insufficient': False,
+        }
+        flow.run(plugin="MultiProc", plugin_args=plugin_args)
 
         iflogger.info("**** Processing finished ****")
 

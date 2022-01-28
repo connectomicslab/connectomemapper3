@@ -1,5 +1,5 @@
 #!/bin/bash
-echo User: $(id -un $USER) && echo Group: $(id -gn $USER) &&
+echo User: "$(id -un "$USER")" && echo Group: "$(id -gn "$USER")" &&
 . "$FSLDIR/etc/fslconf/fsl.sh" &&
 export && \
 echo "SHELL: $SHELL" && \

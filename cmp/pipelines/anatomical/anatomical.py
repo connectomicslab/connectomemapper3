@@ -1092,10 +1092,13 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             nipype_deriv_subject_directory=nipype_deriv_subject_directory,
         )
         anat_flow.write_graph(graph2use="colored", format="svg", simple_form=True)
-
-        anat_flow.run(
-            plugin="MultiProc", plugin_args={"n_procs": self.number_of_cores}
-        )
+        # Create dictionary of arguments passed to plugin_args
+        plugin_args = {
+            'maxtasksperchild': 1,
+            'n_procs': self.number_of_cores,
+            'raise_insufficient': False,
+        }
+        anat_flow.run(plugin="MultiProc", plugin_args=plugin_args)
 
         self._update_parcellation_scheme()
 
