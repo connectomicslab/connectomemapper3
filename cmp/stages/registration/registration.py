@@ -1282,7 +1282,7 @@ class RegistrationStage(Stage):
         # print("stage_dir : %s" % self.stage_dir)
         if self.config.pipeline == "Diffusion":
             dwi_sinker_dir = os.path.join(
-                os.path.dirname(self.stage_dir), "diffusion_sinker"
+                os.path.dirname(self.stage_dir), "dwi_datasinker"
             )
             dwi_sinker_report = os.path.join(dwi_sinker_dir, "_report", "report.rst")
 

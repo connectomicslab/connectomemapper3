@@ -1085,7 +1085,7 @@ class PreprocessingStage(Stage):
 
         It contains a dictionary of stage outputs with corresponding commands for visual inspection.
         """
-        # print "stage_dir : %s" % self.stage_dir
+        # print("stage_dir : %s" % self.stage_dir)
 
         if self.config.denoising:
 
