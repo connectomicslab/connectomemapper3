@@ -35,11 +35,18 @@ $ conda activate py37cmp-gui
 
 You are ready to use Connectome Mapper 3!
 
-### New in ``v3.0.2`` ✨
+### Resources
 
-In active support to the Organisation for Human Brain Mapping (OHBM) 
-Sustainability and Environmental Action (OHBM-SEA) group, you can now be aware about the adverse impact
-of your processing with CMP 3 on the environment 🌍🌳!
+  * **Documentation:** [https://connectome-mapper-3.readthedocs.io](https://connectome-mapper-3.readthedocs.io)
+  * **Mailing list:** [https://groups.google.com/forum/#!forum/cmtk-users](https://groups.google.com/forum/#!forum/cmtk-users)
+  * **Source:** [https://github.com/connectomicslab/connectomemapper3](https://github.com/connectomicslab/connectomemapper3)
+  * **Bug reports:** [https://github.com/connectomicslab/connectomemapper3/issues](https://github.com/connectomicslab/connectomemapper3/issues)
+
+### New in ``v3.0.2`` 🌍🌳✨
+
+In support to the Organisation for Human Brain Mapping (OHBM) 
+Sustainability and Environmental Action (OHBM-SEA) group, CMP3 enables you now to be aware about the adverse impact
+of your processing on the environment!
 
 With the new `--track_carbon_footprint` option of the `connectomemapper3_docker` and `connectomemapper3_singularity`
 BIDS App python wrappers, and the new `"Track carbon footprint"` option of the `cmpbidsappmanager` BIDS Interface Window,
@@ -55,13 +62,6 @@ $ carbonboard --filepath="<bids_dir>/code/emissions.csv" --port=xxxx
 ```
 
 Please check [https://ohbm-environment.org](https://ohbm-environment.org) to learn more about OHBM-SEA!
-
-### Resources
-
-  * **Documentation:** [https://connectome-mapper-3.readthedocs.io](https://connectome-mapper-3.readthedocs.io)
-  * **Mailing list:** [https://groups.google.com/forum/#!forum/cmtk-users](https://groups.google.com/forum/#!forum/cmtk-users)
-  * **Source:** [https://github.com/connectomicslab/connectomemapper3](https://github.com/connectomicslab/connectomemapper3)
-  * **Bug reports:** [https://github.com/connectomicslab/connectomemapper3/issues](https://github.com/connectomicslab/connectomemapper3/issues)
 
 ### Usage
 

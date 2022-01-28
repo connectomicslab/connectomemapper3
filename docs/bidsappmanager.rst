@@ -503,10 +503,10 @@ Run configuration
 
 You are ready to launch the BIDS App run!
 
-Launch the BIDS App run
--------------------------
+Execute the BIDS App
+---------------------
 
-* Click on the `Run BIDS App` button to launch the BIDS App run
+* Click on the `Run BIDS App` button to execute the BIDS App
 
     .. image:: images/bidsapp_run.png
         :align: center
@@ -561,7 +561,7 @@ Start the Inspector Window
 .. image:: images/mainWindow_outputs.png
     :align: center
 
-* The window of the Connectome Mapper BIDS App Inspector will appear, which will assist you in inspecting outputs of the different pipeline stages (each pipeline has a tab panel).
+* The Connectome Mapper 3 Inspector Window will appear, which will assist you in inspecting outputs of the different pipeline stages (each pipeline has a tab panel).
 
 Anatomical pipeline stages
 ---------------------------

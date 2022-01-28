@@ -87,9 +87,9 @@ generate and run the appropriate command.
 
 .. admonition:: New in v3.0.2 ✨
 
-    In active support to the Organisation for Human Brain Mapping (OHBM)
-    Sustainability and Environmental Action (OHBM-SEA) group, you can now be aware about the adverse impact
-    of your processing with CMP 3 on the environment :raw-html:`&#x1F30D;`:raw-html:`&#x1f333;`!
+    In support to the Organisation for Human Brain Mapping (OHBM) Sustainability and Environmental
+    Action (OHBM-SEA) group, CMP3 enables you now to be aware about the adverse impact
+    of your processing on the environment :raw-html:`&#x1F30D;`:raw-html:`&#x1f333;`!
 
     With the new `--track_carbon_footprint` option of the `connectomemapper3_docker` and `connectomemapper3_singularity` BIDS App python wrappers, and
     the new `"Track carbon footprint"` option of the BIDS Interface Window of `cmpbidsappmanager`, you can estimate the carbon footprint incurred by the
