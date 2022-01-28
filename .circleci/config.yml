@@ -1391,6 +1391,8 @@ workflows:
   version: 2.1
   build_test_cov_deploy:
     jobs:
+      # JOB taking maximum 1hour (CircleCI hard limit)
+
       - test-python-install:
           version: "3.7"
           filters:
@@ -1419,30 +1421,9 @@ workflows:
             tags:
               only: /.*/
 
-      # - build_docs:
-      #     requires:
-      #       - build_docker
-      #     filters:
-      #       branches:
-      #         ignore:
-      #           - /ds-sample\/.*/
-      #       tags:
-      #         only: /.*/
-
-      # - update_cache:
-      #     requires:
-      #       - build_docker
-      #     filters:
-      #       branches:
-      #         ignore:
-      #           - /docs?\/.*/
-      #       tags:
-      #         only: /.*/
-      # JOB taking more than 5hours (CircleCI hard limit)
       - test1_docker_parcellation:
           requires:
             - get_data
-            # - update_cache
             - build_docker
           filters:
             branches:
@@ -1454,7 +1435,6 @@ workflows:
       - test2_docker_parcellation:
           requires:
             - get_data
-            # - update_cache
             - build_docker
           filters:
             branches:
@@ -1572,7 +1552,6 @@ workflows:
 
       - deploy-pypi-release:
           requires:
-            # - build_docs
             - codacy_coverage_report
             - send_codecov_report
           filters:
@@ -1586,7 +1565,6 @@ workflows:
 
       - deploy_docker_release:
           requires:
-            # - build_docs
             - codacy_coverage_report
             - send_codecov_report
           filters:
@@ -1600,7 +1578,6 @@ workflows:
 
       - deploy_docker_latest:
           requires:
-            # - build_docs
             - codacy_coverage_report
             - send_codecov_report
           filters:
@@ -1610,7 +1587,6 @@ workflows:
 
       - deploy_singularity_release:
           requires:
-            # - build_docs
             - codacy_coverage_report
             - send_codecov_report
           filters:
