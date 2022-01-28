@@ -145,7 +145,7 @@ The installation of the Connectome Mapper 3, including `cmpbidsappmanager`, cons
 .. admonition:: In the future
 
     If you wish to update Connectome Mapper 3 and the Connectome Mapper 3 BIDS App Manager,
-    this could be easily done by running `pip install connectomemapper==[new_version]>`.
+    this could be easily done by running `pip install connectomemapper==v3.X.Y`.
 
 Help/Questions
 --------------
