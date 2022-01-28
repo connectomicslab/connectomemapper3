@@ -482,7 +482,6 @@ class BIDSAppInterfaceWindow(HasTraits):
         project_info=None,
         bids_root="",
         subjects=None,
-        list_of_subjects_to_be_processed=None,
         anat_config="",
         dmri_config="",
         fmri_config="",
@@ -499,9 +498,6 @@ class BIDSAppInterfaceWindow(HasTraits):
 
         subjects : List of string
             List of subjects in the dataset (Default: None)
-
-        list_of_subjects_to_be_processed : List of string
-            List of subjects to be processed (Default: None)
 
         anat_config : string
             Path to anatomical pipeline configuration file (Default: \'\')
@@ -573,7 +569,6 @@ class BIDSAppInterfaceWindow(HasTraits):
         self.output_dir = os.path.join(bids_root, "derivatives")
 
         self.subjects = subjects
-        # self.list_of_subjects_to_be_processed = list_of_subjects_to_be_processed
         self.anat_config = anat_config
         self.dmri_config = dmri_config
         self.fmri_config = fmri_config
@@ -747,32 +742,32 @@ class BIDSAppInterfaceWindow(HasTraits):
         # fmt: off
         cmd = [
             "docker", "run", "-it", "--rm",
-            "-v", "{}:/bids_dir".format(self.bids_root),
-            "-v", "{}:/output_dir".format(self.output_dir),
-            "-v", "{}:/bids_dir/code/license.txt".format(self.fs_license),
-            "-v", "{}:/code/ref_anatomical_config.json".format(self.anat_config),
+            "-v", f"{self.bids_root}:/bids_dir",
+            "-v", f"{self.output_dir}:/output_dir",
+            "-v", f"{self.fs_license}:/bids_dir/code/license.txt",
+            "-v", f"{self.anat_config}:/code/ref_anatomical_config.json",
         ]
         # fmt: on
 
         if self.run_dmri_pipeline:
             cmd.append("-v")
-            cmd.append("{}:/code/ref_diffusion_config.json".format(self.dmri_config))
+            cmd.append(f"{self.dmri_config}:/code/ref_diffusion_config.json")
 
         if self.run_fmri_pipeline:
             cmd.append("-v")
-            cmd.append("{}:/code/ref_fMRI_config.json".format(self.fmri_config))
+            cmd.append(f"{self.fmri_config}:/code/ref_fMRI_config.json")
 
         cmd.append("-u")
-        cmd.append("{}:{}".format(os.geteuid(), os.getegid()))
+        cmd.append(f"{os.geteuid()}:{os.getegid()}")
 
-        cmd.append("sebastientourbier/connectomemapper-bidsapp:{}".format(bidsapp_tag))
+        cmd.append(f"sebastientourbier/connectomemapper-bidsapp:{bidsapp_tag}")
         cmd.append("/bids_dir")
         cmd.append("/output_dir")
         cmd.append("participant")
 
         cmd.append("--participant_label")
         for label in participant_labels:
-            cmd.append("{}".format(label))
+            cmd.append(f"{label}".format())
 
         cmd.append("--anat_pipeline_config")
         cmd.append("/code/ref_anatomical_config.json")
@@ -786,34 +781,34 @@ class BIDSAppInterfaceWindow(HasTraits):
             cmd.append("/code/ref_fMRI_config.json")
 
         cmd.append("--fs_license")
-        cmd.append("{}".format("/bids_dir/code/license.txt"))
+        cmd.append("/bids_dir/code/license.txt")
 
         cmd.append("--number_of_participants_processed_in_parallel")
-        cmd.append("{}".format(self.number_of_participants_processed_in_parallel))
+        cmd.append(f"{self.number_of_participants_processed_in_parallel}")
 
         cmd.append("--number_of_threads")
-        cmd.append("{}".format(self.number_of_threads))
+        cmd.append(f"{self.number_of_threads}")
 
         if self.fix_ants_number_of_threads:
             cmd.append("--ants_number_of_threads")
-            cmd.append("{}".format(self.ants_number_of_threads))
+            cmd.append(f"{self.ants_number_of_threads}")
 
         if self.fix_ants_random_seed:
             cmd.append("--ants_random_seed")
-            cmd.append("{}".format(self.ants_random_seed))
+            cmd.append(f"{self.ants_random_seed}")
 
         if self.fix_mrtrix_random_seed:
             cmd.append("--mrtrix_random_seed")
-            cmd.append("{}".format(self.mrtrix_random_seed))
+            cmd.append(f"{self.mrtrix_random_seed}")
 
-        print_blue("... BIDS App execution command: {}".format(" ".join(cmd)))
+        print_blue(f'... BIDS App execution command: {" ".join(cmd)}')
 
         proc = Popen(cmd)
 
         return proc
 
     def start_bidsapp_participant_level_process_with_datalad(
-            self, bidsapp_tag, participant_labels
+        self, bidsapp_tag, participant_labels
     ):
         """Create and run the BIDS App command with Datalad.
 
@@ -827,12 +822,10 @@ class BIDSAppInterfaceWindow(HasTraits):
         """
         # fmt: off
         cmd = [
-                "datalad", "containers-run",
-                "--container-name", "connectomemapper-bidsapp-{}".format(
-                    "-".join(bidsapp_tag.split("."))
-                ),
-                "-m", "Processing with connectomemapper-bidsapp {}".format(bidsapp_tag),
-                "--input", f"{self.anat_config}",
+            "datalad", "containers-run",
+            "--container-name", f'connectomemapper-bidsapp-{"-".join(bidsapp_tag.split("."))}',
+            "-m", f"Processing with connectomemapper-bidsapp {bidsapp_tag}",
+            "--input", f"{self.anat_config}",
         ]
         # fmt: on
 
@@ -852,21 +845,21 @@ class BIDSAppInterfaceWindow(HasTraits):
 
         cmd.append("--participant_label")
         for label in participant_labels:
-            cmd.append("{}".format(label))
+            cmd.append(f"{label}")
 
         # Counter to track position of config file as --input
         i = 0
         cmd.append("--anat_pipeline_config")
-        cmd.append("/{{inputs[{}]}}".format(i))
+        cmd.append(f"/{{inputs[{i}]}}")
         i += 1
         if self.run_dmri_pipeline:
             cmd.append("--dwi_pipeline_config")
-            cmd.append("/{{inputs[{}]}}".format(i))
+            cmd.append(f"/{{inputs[{i}]}}")
             i += 1
 
         if self.run_fmri_pipeline:
             cmd.append("--func_pipeline_config")
-            cmd.append("/{{inputs[{}]}}".format(i))
+            cmd.append(f"/{{inputs[{i}]}}")
 
         print_blue("... Datalad cmd : {}".format(" ".join(cmd)))
 
@@ -913,12 +906,12 @@ class BIDSAppInterfaceWindow(HasTraits):
         if env is not None:
             merged_env.update(env)
         process = Popen(
-                command,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-                shell=True,
-                env=merged_env,
-                cwd=cwd,
+            command,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            shell=True,
+            env=merged_env,
+            cwd=cwd,
         )
         while True:
             line = process.stdout.readline()
@@ -929,9 +922,7 @@ class BIDSAppInterfaceWindow(HasTraits):
                 break
         if process.returncode != 0:
             raise Exception(
-                    BColors.FAIL
-                    + f"Non zero return code: {process.returncode}"
-                    + BColors.ENDC
+                f"{BColors.FAIL}Non zero return code: {process.returncode}{BColors.ENDC}"
             )
 
     def start_bids_app(self):
@@ -955,7 +946,7 @@ class BIDSAppInterfaceWindow(HasTraits):
             shutil.copy2(src=self.fs_license, dst=dst)
         else:
             print_warning(
-                    "> FreeSurfer license copy skipped as it already exists(BIDS App Manager) "
+                "> FreeSurfer license copy skipped as it already exists(BIDS App Manager) "
             )
 
         print("> Datalad available: {}".format(self.datalad_is_available))
@@ -979,33 +970,25 @@ class BIDSAppInterfaceWindow(HasTraits):
             #    >> datalad containers-add connectomemapper-bidsapp-{} --url dhub://sebastientourbier/connectomemapper-bidsapp:{}
             if not os.path.isdir(os.path.join(self.bids_root, ".datalad")):
                 cmd = [
-                        "datalad",
-                        "create",
-                        "--force",
-                        "-D",
-                        f'"Creation of datalad dataset to be processed by the connectome mapper bidsapp (tag:{self.bidsapp_tag})"',
-                        "-c",
-                        "text2git",
-                        "-d",
-                        f"{self.bids_root}",
+                    "datalad", "create",
+                    "--force",
+                    "-D", f'"Creation of datalad dataset to be processed by the connectome mapper bidsapp (tag:{self.bidsapp_tag})"',
+                    "-c", "text2git", "-c", "bids",
+                    "-d", f"{self.bids_root}",
                 ]
                 cmd = " ".join(cmd)
                 try:
                     print_blue(f"... cmd: {cmd}")
                     self.run(cmd, env={}, cwd=os.path.abspath(self.bids_root))
                     print(
-                            "    INFO: A datalad dataset has been created with success at the root directory!"
+                        "    INFO: A datalad dataset has been created with success at the root directory!"
                     )
-                    msg = (
-                            "Add all files to datalad. "
-                            "Dataset ready to be linked with the BIDS App."
-                    )
+                    msg = ("Add all files to datalad. "
+                           "Dataset ready to be linked with the BIDS App.")
 
                 except Exception:
                     msg = "Save state after error at datalad dataset creation"
-                    print_error(
-                            "    DATALAD ERROR: Failed to create the datalad dataset"
-                    )
+                    print_error("    DATALAD ERROR: Failed to create the datalad dataset")
             else:
                 msg = "Datalad dataset up-to-date and ready to be linked with the BIDS App."
                 print("    INFO: A datalad dataset already exists!")
@@ -1027,32 +1010,29 @@ class BIDSAppInterfaceWindow(HasTraits):
                 print_error("    DATALAD ERROR: Failed to add changes to dataset")
 
             datalad_container = os.path.join(
-                    self.bids_root,
-                    ".datalad",
-                    "environments",
-                    "connectomemapper-bidsapp-{}".format(
-                            "-".join(self.bidsapp_tag.split("."))
-                    ),
-                    "image",
+                self.bids_root,
+                ".datalad",
+                "environments",
+                f'connectomemapper-bidsapp-{"-".join(self.bidsapp_tag.split("."))}',
+                "image",
             )
-            add_container = True
-            update_container = False
+
             if os.path.isdir(datalad_container):
                 if self.datalad_update_environment:
                     print(
-                            "    INFO: Container already listed in the datalad dataset and will be updated!"
+                        "    INFO: Container already listed in the datalad dataset and will be updated!"
                     )
                     shutil.rmtree(datalad_container)
                     add_container = True
                 else:
                     add_container = False
                     print(
-                            "    INFO: Container already listed in the datalad dataset and will NOT be updated!"
+                        "    INFO: Container already listed in the datalad dataset and will NOT be updated!"
                     )
             else:
                 add_container = True
                 print(
-                        "    INFO: Add a new computing environment (container image) to the datalad dataset!"
+                    "    INFO: Add a new computing environment (container image) to the datalad dataset!"
                 )
 
             if add_container:
