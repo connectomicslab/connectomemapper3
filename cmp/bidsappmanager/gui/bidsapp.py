@@ -1196,6 +1196,7 @@ class BIDSAppInterfaceWindow(HasTraits):
 
         # Create and start the carbon footprint tracker
         if self.track_carbon_footprint:
+            logging.basicConfig()
             tracker = create_emissions_tracker(bids_root=self.bids_root)
             tracker.start()
 
