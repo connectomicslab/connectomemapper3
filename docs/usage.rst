@@ -126,11 +126,31 @@ For instance, the previous call to the ``connectomemapper3_singularity`` wrapper
 
 .. note:: At least a configuration file describing the processing stages of the anatomical pipeline should be provided. Diffusion and/or Functional MRI pipeline are performed only if a configuration file is set. The generation of such configuration files, the execution of the BIDS App docker image and output inpection are facilitated through the use of the Connectome Mapper GUI, i.e. cmpbidsappmanager (see `dedicated documentation page <bidsappmanager.html>`_)
 
+
 Debugging
 =========
 
 Logs are outputted into
 ``<output dir>/cmp/sub-<participant_label>/sub-<participant_label>_log-cmpbidsapp.txt``.
+
+Already have Freesurfer outputs?
+================================
+
+If you have already Freesurfer v5 / v6 output data available, CMP3 can use them if there are properly placed in your output / derivatives directory.
+Since ``v3.0.0``, CMP3 expects to find a ``freesurfer-6.0.1``, so make sure that your derivatives are organized as
+follows::
+
+    your_bids_dataset
+      |______ derivatives/
+      |         |______ freesurfer-6.0.1/
+      |                   |______ sub-01[_ses-01]/
+      |                   |           |______ label/
+      |                   |           |______ mri/
+      |                   |           |______ surf/
+      |                   |           |______ ...
+      |                   |______ ...
+      |______ sub-01/
+      |______ ...
 
 Support, bugs and new feature requests
 =======================================
@@ -138,7 +158,6 @@ Support, bugs and new feature requests
 If you need any support or have any questions, you can post to the `CMTK-users group <http://groups.google.com/group/cmtk-users>`_.
 
 All bugs, concerns and enhancement requests for this software are managed on GitHub and can be submitted at `https://github.com/connectomicslab/connectomemapper3/issues <https://github.com/connectomicslab/connectomemapper3/issues>`_.
-
 
 Not running on a local machine?
 ================================

@@ -91,7 +91,22 @@ Performs tissue segmentation using Freesurfer.
     * *Brain extraction tools:* alternative brain extraction methods injected in Freesurfer
     * *Freesurfer args:* used to specify extra Freesurfer processing options
 
-    .. note:: If you have already Freesurfer output data available, CMP3 can use them if there are placed in your output / derivatives directory.
+    .. note::
+        If you have already Freesurfer v5 / v6 output data available, CMP3 can use them if there are placed in your output / derivatives directory.
+        Note however that since ``v3.0.0``, CMP3 expects to find a ``freesurfer-6.0.1``, so make sure that your derivatives are organized as
+        follows::
+
+        your_bids_dataset
+          |______ derivatives/
+          |         |______ freesurfer-6.0.1/
+          |                   |______ sub-01[_ses-01]/
+          |                   |           |______ label/
+          |                   |           |______ mri/
+          |                   |           |______ surf/
+          |                   |           |______ ...
+          |                   |______ ...
+          |______ sub-01/
+          |______ ...
 
 Parcellation
 """"""""""""""
