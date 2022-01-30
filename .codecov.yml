@@ -1,5 +1,6 @@
 fixes:
-   - "/app/::"
+   - "/opt/conda/envs/py37cmp-core/lib/python3.7/site-packages/cmp::connectomemapper3/cmp"
+   - "/opt/conda/envs/py37cmp-core/lib/python3.7/site-packages/cmtklib::connectomemapper3/cmtklib"
 
 codecov:
   token: 0eeff7e5-26c0-4c28-bd9f-2b419cf14f32
