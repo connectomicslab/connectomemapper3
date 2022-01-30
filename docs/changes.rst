@@ -19,16 +19,18 @@ It incorporates includes in particular the following changes.
     this features have been implemented in the new module :py:mod:`cmtklib.carbonfootprint`.
     See `PR #136 <https://github.com/connectomicslab/connectomemapper3/pull/136>`_ for more details.
 
-*Code refactoring*
+*Code changes*
 
-*   Creation of `init_subject_derivatives_dirs()` for `AnatomicalPipeline`, `DifusionPipeline`, and `fMRIPipeline`
+*   Creation of ``init_subject_derivatives_dirs()`` for ``AnatomicalPipeline``, ``DifusionPipeline``, and ``fMRIPipeline``
     that return the paths to Nipype and CMP derivatives folders of a given subject / session for a given pipeline.
-    This removed all the implicated code from the `process()` method and improve modularity and readability.
+    This removed all the implicated code from the ``process()`` method and improve modularity and readability.
     In the future, the different functions could be merged as there is a lot of code duplication between them.
+
+*   ``AnatomicalPipeline``, ``DiffusionPipeline``, and ``fMRIPipeline`` workflows are run with the `MultiProc` plugin.
 
 *Bug fix*
 
-*   Major update of the `conda/environment.yml` and `conda/environment_macosx.yml` to correct the problems of conflicts in the previous version,
+*   Major update of the ``conda/environment.yml`` and ``conda/environment_macosx.yml`` to correct the problems of conflicts in the previous version,
     as reported in `issue #137 <https://github.com/connectomicslab/connectomemapper3/issues/137>`_. This has resulted in the following package updates:
 
     *   `pip`: 20.1.1 -> 21.3.1
@@ -62,10 +64,18 @@ It incorporates includes in particular the following changes.
 
 *Misc*
 
-*   Add bootstrap CSS and jquery JS as resources to `cmtklib/data/report/carbonfootprint`.
+*   Add bootstrap CSS and jquery JS as resources to ``cmtklib/data/report/carbonfootprint``.
     They are used to display the carbon footprint report in the GUI.
 
-*   Clean the resources related to parcellation in `cmtklib/data/parcellation` and rename all files and mentions of lausanne2008 to lausanne2018.
+*   Clean the resources related to parcellation in ``cmtklib/data/parcellation`` and rename all files and mentions of lausanne2008 to lausanne2018.
+
+*   Removed unused ``cmtklib.interfaces.camino``, ``cmtklib.interfaces.camino2trackvis``,
+    and ``cmtklib.interfaces.diffusion`` modules
+
+*   Specify to `Coverage.py` with ``# pragma: no cover`` part of the code we know it won’t be executed
+
+*   Create and use a `.coveragerc` file to set the run of `Coverage.py` with `--concurrency=multiprocessing`
+    to be allow to track code inside Nipype interfaces, now managed by multiprocessing.
 
 *Code style*
 
