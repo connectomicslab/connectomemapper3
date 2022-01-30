@@ -180,7 +180,7 @@ def remove_files(path, debug=False):
         If `True`, print output
     """
     for f in glob(path):
-        if debug:
+        if debug:  # pragma: no cover
             print('  ... DEL: {}'.format(f))
         try:
             os.remove(f)
@@ -200,7 +200,7 @@ def remove_dirs(path, debug=False):
         If `True`, print output
     """
     for d in glob(path):
-        if debug:
+        if debug:  # pragma: no cover
             print('  ... DEL: {}'.format(d))
         try:
             shutil.rmtree(d)
@@ -219,7 +219,7 @@ def clean_cache(bids_root, debug=False):
     debug : bool
         If `True`, debugging mode with extra printed outputs
     """
-    if debug:
+    if debug:  # pragma: no cover
         print('> Clean docker image cache stored in /tmp')
     # Clean cache (issue related that the dataset directory is mounted into /tmp,
     # which is used for caching by java/matlab/matplotlib/xvfb-run in the docker image)

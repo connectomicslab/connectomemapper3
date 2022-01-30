@@ -234,28 +234,6 @@ class PreprocessingStage(Stage):
             name="processing_input",
         )
 
-        # For DSI acquisition: extract the hemisphere that contains the data
-        # if self.config.start_vol > 0 or self.config.end_vol < self.config.max_vol:
-        #
-        #     split_vol = pe.Node(interface=SplitDiffusion(),name='split_vol')
-        #     split_vol.inputs.start = self.config.start_vol
-        #     split_vol.inputs.end = self.config.end_vol
-        #
-        #     split_bvecbval = pe.Node(interface=splitBvecBval(),name='split_bvecsbvals')
-        #     split_bvecbval.inputs.start = self.config.start_vol
-        #     split_bvecbval.inputs.end = self.config.end_vol
-        #     split_bvecbval.inputs.orientation = 'h'
-        #     split_bvecbval.inputs.delimiter = ' '
-        #
-        #     flow.connect([
-        #                 (inputnode,split_vol,[('diffusion','in_file')]),
-        #                 (split_vol,processing_input,[('data','diffusion')]),
-        #                 (inputnode,split_bvecbval,[('bvecs','bvecs'),('bvals','bvals')]),
-        #                 (split_bvecbval,processing_input,[('bvecs_split','bvecs'),('bvals_split','bvals')])
-        #                 ])
-        #
-        # else:
-
         # fmt: off
         flow.connect(
             [
@@ -1080,7 +1058,7 @@ class PreprocessingStage(Stage):
             )
             # fmt: on
 
-    def define_inspect_outputs(self):
+    def define_inspect_outputs(self):  # pragma: no cover
         """Update the `inspect_outputs` class attribute.
 
         It contains a dictionary of stage outputs with corresponding commands for visual inspection.

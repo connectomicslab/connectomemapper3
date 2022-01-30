@@ -679,7 +679,7 @@ class DiffusionStage(Stage):
         #         print(
         #             "Invalid tractography input format. Valid formats are .tck (MRtrix) and .trk (DTK/Trackvis)")
 
-    def define_inspect_outputs(self):
+    def define_inspect_outputs(self):  # pragma: no cover
         """Update the `inspect_outputs` class attribute.
 
         It contains a dictionary of stage outputs with corresponding commands for visual inspection.

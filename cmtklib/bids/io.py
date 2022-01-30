@@ -149,7 +149,7 @@ class CustomBIDSFile(HasTraits):
             fname += f'_desc-{self.desc}'
         fname += f'_{self.suffix}'
         filepath = os.path.join(filepath, "anat", fname)
-        if debug:
+        if debug:  # pragma: no cover
             print(f" .. DEBUG : Generated parcellation file path (no extension) = {filepath}")
         return filepath
 
@@ -187,12 +187,12 @@ class CustomParcellationBIDSFile(CustomBIDSFile):
         ) + '.tsv'
 
         if os.path.exists(parc_filepath):
-            if debug:
+            if debug:  # pragma: no cover
                 print(f" .. DEBUG : Open {parc_filepath} to get number of regions")
             with open(parc_filepath) as file:
                 tsv_file = csv.reader(file, delimiter="\t")
                 nb_of_regions = len(list(tsv_file)) - 1  # Remove 1 to account for the header (# of lines - 1 = # regions)
-                if debug:
+                if debug:  # pragma: no cover
                     print(f" .. DEBUG : Number of regions = {nb_of_regions}")
             return nb_of_regions
         else:

@@ -16,7 +16,7 @@ import numpy as np
 warnings.simplefilter("ignore")
 
 
-def unicode2str(text):
+def unicode2str(text):  # pragma: no cover
     """Convert a unicode to a string using system's encoding.
 
     Parameters
@@ -33,7 +33,7 @@ def unicode2str(text):
     return out_str
 
 
-def isavailable(file):
+def isavailable(file):  # pragma: no cover
     """Check if file is available and return the file if it is.
 
     Used for debugging.
@@ -114,7 +114,7 @@ def print_blue(message):
     print(BColors.OKBLUE + message + BColors.ENDC)
 
 
-def return_button_style_sheet(image, image_disabled=None, verbose=False):
+def return_button_style_sheet(image, image_disabled=None, verbose=False):  # pragma: no cover
     """Return Qt style sheet for QPushButton with image
 
     Parameters
@@ -314,7 +314,7 @@ def extract_freesurfer_subject_dir(reconall_report, local_output_dir=None, debug
         line = fp.readline()
         cnt = 1
         while line:
-            if debug:
+            if debug:  # pragma: no cover
                 print("Line {}: {}".format(cnt, line.strip()))
 
             # Extract line containing listing of node outputs
@@ -322,7 +322,7 @@ def extract_freesurfer_subject_dir(reconall_report, local_output_dir=None, debug
                 fs_subject_dir = line.strip()
                 prefix = "* subject_id : "
                 fs_subject_dir = str.replace(fs_subject_dir, prefix, "")
-                if debug:
+                if debug:  # pragma: no cover
                     print(fs_subject_dir)
 
                 # Update from BIDS App /output_dir to local output directory
@@ -376,7 +376,7 @@ def extract_reconall_base_dir(file):
 
 def get_pipeline_dictionary_outputs(
     datasink_report, local_output_dir=None, debug=False
-):
+):  # pragma: no cover
     """Read the Nipype datasink report and return a dictionary of pipeline outputs.
 
     Parameters
@@ -420,56 +420,8 @@ def get_pipeline_dictionary_outputs(
 
     # Convert the extracted JSON-structured string to a dictionary
     dict_outputs = json.loads("{}".format(str_outputs))
-    if debug:
+    if debug:  # pragma: no cover
         print("Dictionary of datasink outputs: {}".format(dict_outputs))
-    return dict_outputs
-
-
-def get_node_dictionary_outputs(node_report, local_output_dir=None, debug=False):
-    """Read the Nipype node report and return a dictionary of node outputs.
-
-    Parameters
-    ----------
-    node_report : string
-        Path to node report
-
-    local_output_dir : string
-        Local output / derivatives directory
-
-    debug : bool
-        If `True`, print output dictionary
-
-    Returns
-    -------
-    dict_outputs : dict
-        dictionary of outputs extracted from node execution report
-    """
-    # Read rst report of a datasink node
-    with open(node_report) as fp:
-        while True:
-            line = fp.readline()
-            if not line:
-                break
-
-            # Extract line containing listing of node outputs and stop
-            if "_outputs :" in line:
-                str_outputs = line.strip()
-                prefix = "* _outputs : "
-                str_outputs = str.replace(str_outputs, prefix, "")
-                str_outputs = str.replace(str_outputs, "'", '"')
-
-                # Update from BIDS App /output_dir to local output directory
-                # specified by local_output_dir
-                if local_output_dir is not None:
-                    str_outputs = str.replace(
-                        str_outputs, "/output_dir", local_output_dir
-                    )
-                break
-
-    # Convert the extracted JSON-structured string to a dictionary
-    dict_outputs = json.loads("{}".format(str_outputs))
-    if debug:
-        print("Dictionary of node outputs: {}".format(dict_outputs))
     return dict_outputs
 
 
@@ -490,7 +442,7 @@ def convert_list_to_tuple(lists):
     return tuple(lists)
 
 
-def check_directory_exists(mandatory_dir):
+def check_directory_exists(mandatory_dir):  # pragma: no cover
     """Makes sure the mandatory directory exists.
 
     Raises

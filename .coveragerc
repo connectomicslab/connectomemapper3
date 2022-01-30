@@ -15,4 +15,5 @@ omit =
     */process*
     # omit any network* in a bids directory anywhere
     */bids/network*
-
+    # omit cmtklib/carbonfootprint.py which is called outside coverage
+    cmtklib/carbonfootprint.py

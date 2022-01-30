@@ -141,7 +141,7 @@ def get() -> argparse.ArgumentParser:
     return p
 
 
-def get_wrapper_parser() -> argparse.ArgumentParser:
+def get_wrapper_parser() -> argparse.ArgumentParser:  # pragma: no cover
     """Create and return the parser object of the python wrappers of the BIDS App."""
     p: argparse.ArgumentParser = get()
     p.add_argument(
@@ -154,7 +154,7 @@ def get_wrapper_parser() -> argparse.ArgumentParser:
     return p
 
 
-def get_docker_wrapper_parser() -> argparse.ArgumentParser:
+def get_docker_wrapper_parser() -> argparse.ArgumentParser:  # pragma: no cover
     """Return the argparse parser of the Docker BIDS App.
     
     Returns
@@ -179,7 +179,7 @@ def get_docker_wrapper_parser() -> argparse.ArgumentParser:
     return p
 
 
-def get_singularity_wrapper_parser() -> argparse.ArgumentParser:
+def get_singularity_wrapper_parser() -> argparse.ArgumentParser:  # pragma: no cover
     """Return the argparse parser of the Singularity BIDS App.
     
     Returns

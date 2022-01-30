@@ -579,7 +579,7 @@ class SegmentationStage(Stage):
                 )
                 fs_path = self.config.freesurfer_subject_id
                 if os.path.exists(reconall_report_path):
-                    if debug:
+                    if debug:  # pragma: no cover
                         print("Read {}".format(reconall_report_path))
                     fs_path = extract_freesurfer_subject_dir(
                         reconall_report_path, self.output_dir, debug=debug
@@ -590,7 +590,7 @@ class SegmentationStage(Stage):
                     self.config.freesurfer_subject_id,
                 )
 
-            if debug:
+            if debug:  # pragma: no cover
                 print("fs_path : %s" % fs_path)
 
             self.inspect_outputs_dict["T1/brainmask"] = [
