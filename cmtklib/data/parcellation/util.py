@@ -4,7 +4,7 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-"""Module that defines CMTK functions for converting C02 emissions estimated with `codecarbon`."""
+"""Module that defines CMTK utility functions for retrieving Lausanne parcellation files."""
 
 import os
 from pkg_resources import resource_filename
