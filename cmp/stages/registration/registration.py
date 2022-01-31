@@ -22,7 +22,7 @@ import nipype.interfaces.ants as ants
 # Own imports
 from cmp.stages.common import Stage
 from cmtklib.interfaces.mrtrix3 import DWI2Tensor, MRConvert, ExtractMRTrixGrad
-from cmtklib.interfaces.fsl import ApplymultipleXfm, ApplymultipleWarp
+from cmtklib.interfaces.fsl import ApplymultipleXfm
 import cmtklib.interfaces.freesurfer as cmp_fs
 import cmtklib.interfaces.fsl as cmp_fsl
 from cmtklib.interfaces.ants import MultipleANTsApplyTransforms

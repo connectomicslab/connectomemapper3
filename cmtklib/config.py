@@ -542,7 +542,6 @@ def set_pipeline_attributes_from_config(pipeline, config, debug=False):
                                         + f"{sub_config}.{sub_key} to {conf_value}"
                                     )
                                     print_error(f"    {e}")
-                                pass
             else:
                 if stage.name in config.keys():
                     if key in config[stage.name].keys():
@@ -573,8 +572,6 @@ def set_pipeline_attributes_from_config(pipeline, config, debug=False):
                                     + f"{stage.config}.{key} to {conf_value}"
                                 )
                                 print_error(f"   {e}")
-                            pass
-
     setattr(
         pipeline, "number_of_cores", int(config["Multi-processing"]["number_of_cores"])
     )

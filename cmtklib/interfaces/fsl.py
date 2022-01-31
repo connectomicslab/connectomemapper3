@@ -403,7 +403,7 @@ class EddyOpenMP(FSLCommand):
     output_spec = EddyOutputSpec
 
     def __init__(self, **inputs):
-        return super(EddyOpenMP, self).__init__(**inputs)
+        super(EddyOpenMP, self).__init__(**inputs)
 
     def _run_interface(self, runtime):
         if not isdefined(self.inputs.out_file):

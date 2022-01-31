@@ -798,7 +798,6 @@ class DirectionGetterTractography(DipyBaseInterface):
     def _run_interface(self, runtime):
         from dipy.tracking import utils
         from dipy.direction import DeterministicMaximumDirectionGetter, ProbabilisticDirectionGetter
-        # from dipy.tracking.local import ThresholdStoppingCriterion, ActStoppingCriterion
         from dipy.tracking.stopping_criterion import BinaryStoppingCriterion, CmcStoppingCriterion
         from dipy.tracking.local_tracking import LocalTracking, ParticleFilteringTracking
         from dipy.direction.peaks import peaks_from_model
@@ -1138,20 +1137,14 @@ class MAPMRI(DipyDiffusionInterface):
 
     def _run_interface(self, runtime):
         from dipy.reconst import mapmri
-        # from dipy.data import fetch_cenir_multib, read_cenir_multib
         from dipy.core.gradients import gradient_table
-        # import marshal as pickle
         import pickle as pickle
         import gzip
 
         img = nib.load(self.inputs.in_file)
-        imref = nib.four_to_three(img)[0]
         affine = img.affine
 
         data = img.get_data().astype(np.float32)
-
-        hdr = imref.header.copy()
-
         gtab = self._get_gradient_table()
         gtab = gradient_table(
             bvals=gtab.bvals, bvecs=gtab.bvecs,

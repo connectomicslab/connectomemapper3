@@ -19,6 +19,7 @@ def get() -> argparse.ArgumentParser:
     -------
     p : argparse.ArgumentParser
        Instance of :class:`argparse.ArgumentParser`
+
     """
 
     p = argparse.ArgumentParser(
@@ -156,11 +157,12 @@ def get_wrapper_parser() -> argparse.ArgumentParser:  # pragma: no cover
 
 def get_docker_wrapper_parser() -> argparse.ArgumentParser:  # pragma: no cover
     """Return the argparse parser of the Docker BIDS App.
-    
+
     Returns
     -------
     p : argparse.ArgumentParser
        Instance of :class:`argparse.ArgumentParser`
+
     """
     p: argparse.ArgumentParser = get_wrapper_parser()
     p.description = f"Entrypoint script of the Connectome Mapper BIDS-App version {__version__} via Docker."
@@ -181,11 +183,12 @@ def get_docker_wrapper_parser() -> argparse.ArgumentParser:  # pragma: no cover
 
 def get_singularity_wrapper_parser() -> argparse.ArgumentParser:  # pragma: no cover
     """Return the argparse parser of the Singularity BIDS App.
-    
+
     Returns
     -------
     p : argparse.ArgumentParser
        Instance of :class:`argparse.ArgumentParser`
+
     """
     p: argparse.ArgumentParser = get_wrapper_parser()
     p.description = f"Entrypoint script of the Connectome Mapper BIDS-App version {__version__} via Singularity."
