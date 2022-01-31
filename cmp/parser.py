@@ -12,13 +12,13 @@ from .info import __version__
 from .info import __release_date__
 
 
-def get():
+def get() -> argparse.ArgumentParser:
     """Return the argparse parser of the BIDS App.
 
     Returns
     -------
-    p : object
-       Instance of :class:`argparse.ArgumentParser` class
+    p : argparse.ArgumentParser
+       Instance of :class:`argparse.ArgumentParser`
     """
 
     p = argparse.ArgumentParser(
@@ -141,16 +141,29 @@ def get():
     return p
 
 
-def get_docker_wrapper_parser():
+def get_wrapper_parser() -> argparse.ArgumentParser:  # pragma: no cover
+    """Create and return the parser object of the python wrappers of the BIDS App."""
+    p: argparse.ArgumentParser = get()
+    p.add_argument(
+        '--track_carbon_footprint',
+        dest='track_carbon_footprint',
+        action='store_true',
+        help="Track carbon footprint with `codecarbon <https://codecarbon.io/>`_ and save results in "
+             "a CSV file called ``emissions.csv`` in the ``<bids_dir>/code`` directory.",
+    )
+    return p
+
+
+def get_docker_wrapper_parser() -> argparse.ArgumentParser:  # pragma: no cover
     """Return the argparse parser of the Docker BIDS App.
     
     Returns
     -------
-    p : object
-       Instance of :class:`argparse.ArgumentParser` class
+    p : argparse.ArgumentParser
+       Instance of :class:`argparse.ArgumentParser`
     """
-    p = get()
-    p.description = f"Entrypoint script of the BIDS-App Connectome Mapper version {__version__} via Docker."
+    p: argparse.ArgumentParser = get_wrapper_parser()
+    p.description = f"Entrypoint script of the Connectome Mapper BIDS-App version {__version__} via Docker."
     p.add_argument(
         '--docker_image',
         type=str,
@@ -166,16 +179,16 @@ def get_docker_wrapper_parser():
     return p
 
 
-def get_singularity_wrapper_parser():
+def get_singularity_wrapper_parser() -> argparse.ArgumentParser:  # pragma: no cover
     """Return the argparse parser of the Singularity BIDS App.
     
     Returns
     -------
-    p : object
-       Instance of :class:`argparse.ArgumentParser` class
+    p : argparse.ArgumentParser
+       Instance of :class:`argparse.ArgumentParser`
     """
-    p = get()
-    p.description = f"Entrypoint script of the BIDS-App Connectome Mapper version {__version__} via Singularity."
+    p: argparse.ArgumentParser = get_wrapper_parser()
+    p.description = f"Entrypoint script of the Connectome Mapper BIDS-App version {__version__} via Singularity."
     p.add_argument(
         '--singularity_image',
         type=str,

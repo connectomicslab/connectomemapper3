@@ -42,28 +42,50 @@ You are ready to use Connectome Mapper 3!
   * **Source:** [https://github.com/connectomicslab/connectomemapper3](https://github.com/connectomicslab/connectomemapper3)
   * **Bug reports:** [https://github.com/connectomicslab/connectomemapper3/issues](https://github.com/connectomicslab/connectomemapper3/issues)
 
+### New in ``v3.0.2`` 🌍🌳✨
+
+In support to the Organisation for Human Brain Mapping (OHBM) 
+Sustainability and Environmental Action (OHBM-SEA) group, CMP3 enables you now to be aware about the adverse impact
+of your processing on the environment!
+
+With the new `--track_carbon_footprint` option of the `connectomemapper3_docker` and `connectomemapper3_singularity`
+BIDS App python wrappers, and the new `"Track carbon footprint"` option of the `cmpbidsappmanager` BIDS Interface Window,
+you can estimate the carbon footprint incurred by the execution of the BIDS App.
+Estimations are conducted using [codecarbon](https://codecarbon.io) to estimate the amount of carbon dioxide (CO2)
+produced to execute the code by the computing resources and save the results in ``<bids_dir>/code/emissions.csv``.
+
+Then, to visualize, interpret and track the evolution of the emitted CO2 emissions, you can use the visualization
+tool of `codecarbon` aka `carbonboard` that takes as input the `.csv` created::
+
+```bash
+$ carbonboard --filepath="<bids_dir>/code/emissions.csv" --port=xxxx
+```
+
+Please check [https://ohbm-environment.org](https://ohbm-environment.org) to learn more about OHBM-SEA!
+
 ### Usage
 
 Having the `py37cmp-gui` conda environment previously installed activated, the BIDS App can easily be run using `connectomemapper3_docker`, the python wrapper for Docker, as follows:
 
-        (py37cmp-gui)$ connectomemapper3_docker -h
-
         usage: connectomemapper3_docker [-h]
-              [--participant_label PARTICIPANT_LABEL [PARTICIPANT_LABEL ...]]
-              [--session_label SESSION_LABEL [SESSION_LABEL ...]]
-              [--anat_pipeline_config ANAT_PIPELINE_CONFIG]
-              [--dwi_pipeline_config DWI_PIPELINE_CONFIG]
-              [--func_pipeline_config FUNC_PIPELINE_CONFIG]
-              [--number_of_threads NUMBER_OF_THREADS]
-              [--number_of_participants_processed_in_parallel NUMBER_OF_PARTICIPANTS_PROCESSED_IN_PARALLEL]
-              [--mrtrix_random_seed MRTRIX_RANDOM_SEED]
-              [--ants_random_seed ANTS_RANDOM_SEED]
-              [--ants_number_of_threads ANTS_NUMBER_OF_THREADS]
-              [--fs_license FS_LICENSE] [--coverage] [--notrack] [-v]
-              bids_dir output_dir {participant,group}
+                                [--participant_label PARTICIPANT_LABEL [PARTICIPANT_LABEL ...]]
+                                [--session_label SESSION_LABEL [SESSION_LABEL ...]]
+                                [--anat_pipeline_config ANAT_PIPELINE_CONFIG]
+                                [--dwi_pipeline_config DWI_PIPELINE_CONFIG]
+                                [--func_pipeline_config FUNC_PIPELINE_CONFIG]
+                                [--number_of_threads NUMBER_OF_THREADS]
+                                [--number_of_participants_processed_in_parallel NUMBER_OF_PARTICIPANTS_PROCESSED_IN_PARALLEL]
+                                [--mrtrix_random_seed MRTRIX_RANDOM_SEED]
+                                [--ants_random_seed ANTS_RANDOM_SEED]
+                                [--ants_number_of_threads ANTS_NUMBER_OF_THREADS]
+                                [--fs_license FS_LICENSE] [--coverage]
+                                [--notrack] [-v] [--track_carbon_footprint]
+                                [--docker_image DOCKER_IMAGE]
+                                [--config_dir CONFIG_DIR]
+                                bids_dir output_dir {participant,group}
 
-        Entrypoint script of the BIDS-App Connectome Mapper version v3.0.1 via Docker
-
+        Entrypoint script of the Connectome Mapper BIDS-App version v3.0.2 via Docker.
+        
         positional arguments:
           bids_dir              The directory with the input dataset formatted
                                 according to the BIDS standard.
@@ -74,7 +96,7 @@ Having the `py37cmp-gui` conda environment previously installed activated, the B
           {participant,group}   Level of the analysis that will be performed. Multiple
                                 participant level analyses can be run independently
                                 (in parallel) using the same output_dir.
-
+        
         optional arguments:
           -h, --help            show this help message and exit
           --participant_label PARTICIPANT_LABEL [PARTICIPANT_LABEL ...]
@@ -102,7 +124,8 @@ Having the `py37cmp-gui` conda environment previously installed activated, the B
                                 fMRI processing pipeline
           --number_of_threads NUMBER_OF_THREADS
                                 The number of OpenMP threads used for multi-threading
-                                by Freesurfer (Set to [Number of available CPUs -1] by default).
+                                by Freesurfer (Set to [Number of available CPUs -1] by
+                                default).
           --number_of_participants_processed_in_parallel NUMBER_OF_PARTICIPANTS_PROCESSED_IN_PARALLEL
                                 The number of subjects to be processed in parallel
                                 (One by default).
@@ -122,6 +145,16 @@ Having the `py37cmp-gui` conda environment previously installed activated, the B
           --notrack             Do not send event to Google analytics to report BIDS
                                 App execution, which is enabled by default.
           -v, --version         show program's version number and exit
+          --track_carbon_footprint
+                                Track carbon footprint with `codecarbon
+                                <https://codecarbon.io/>`_ and save results in a CSV
+                                file called ``emissions.csv`` in the
+                                ``<bids_dir>/code`` directory.
+          --docker_image DOCKER_IMAGE
+                                The path to the docker image.
+          --config_dir CONFIG_DIR
+                                The path to the directory containing the configuration
+                                files.
 
 ## Contributors ✨
 

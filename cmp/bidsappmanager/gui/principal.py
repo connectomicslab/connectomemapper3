@@ -51,8 +51,14 @@ class MainWindow(HasTraits):
     fmri_pipeline : Instance(HasTraits)
         Instance of functional MRI pipeline UI
 
-    bidsapp_ui : cmp.project.ProjectInfo
+    configurator_ui : `PipelineConfiguratorWindow`
+        Instance of :class:`PipelineConfiguratorWindow`
+
+    bidsapp_ui : `BIDSAppInterfaceWindow`
         Instance of :class:`BIDSAppInterfaceWindow`
+
+    quality_control_ui : `QualityInspectorWindow`
+        Instance of :class:`QualityInspectorWindow`
 
     load_dataset : traits.ui.Action
         TraitsUI Action to load a BIDS dataset
@@ -79,9 +85,9 @@ class MainWindow(HasTraits):
     dmri_pipeline = Instance(HasTraits)
     fmri_pipeline = Instance(HasTraits)
 
-    # configurator_ui = Instance(CMP_PipelineConfigurationWindow)
+    configurator_ui = Instance(cmp.bidsappmanager.gui.config.PipelineConfiguratorWindow)
     bidsapp_ui = Instance(cmp.bidsappmanager.gui.bidsapp.BIDSAppInterfaceWindow)
-    # quality_control_ui = Instance(CMP_QualityControlWindow)
+    quality_control_ui = Instance(cmp.bidsappmanager.gui.qc.QualityInspectorWindow)
 
     load_dataset = Action(name="Load BIDS Dataset...", action="load_dataset")
 
@@ -216,11 +222,7 @@ class MainWindow(HasTraits):
         self.bidsapp_ui = cmp.bidsappmanager.gui.bidsapp.BIDSAppInterfaceWindow(
             project_info=self.project_info,
             bids_root=self.project_info.base_directory,
-            subjects=subjects,
-            list_of_subjects_to_be_processed=subjects,
-            # anat_config=self.project_info.anat_config_file,
-            # dmri_config=self.project_info.dmri_config_file,
-            # fmri_config=self.project_info.fmri_config_file
+            subjects=sorted(subjects),
             anat_config=anat_config,
             dmri_config=dmri_config,
             fmri_config=fmri_config,

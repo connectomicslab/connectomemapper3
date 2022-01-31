@@ -257,7 +257,7 @@ class FunctionalMRIStage(Stage):
         flow.connect([(filter_output, outputnode, [("filter_output", "func_file")])])
         # fmt:on
 
-    def define_inspect_outputs(self):
+    def define_inspect_outputs(self):  # pragma: no cover
         """Update the `inspect_outputs` class attribute.
 
         It contains a dictionary of stage outputs with corresponding commands for visual inspection.

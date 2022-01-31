@@ -149,7 +149,7 @@ class CustomBIDSFile(HasTraits):
             fname += f'_desc-{self.desc}'
         fname += f'_{self.suffix}'
         filepath = os.path.join(filepath, "anat", fname)
-        if debug:
+        if debug:  # pragma: no cover
             print(f" .. DEBUG : Generated parcellation file path (no extension) = {filepath}")
         return filepath
 
@@ -158,7 +158,7 @@ class CustomParcellationBIDSFile(CustomBIDSFile):
     """Represent a custom parcellation files in the form `sub-<label>_atlas-<label>[_res-<label>]_dseg.nii.gz`."""
 
     def __init__(self):
-        super().__init__(p_suffix="dseg", p_atlas="L2018", p_extension=".nii.gz")
+        super().__init__(p_suffix="dseg", p_atlas="L2018", p_extension="nii.gz")
 
     def get_nb_of_regions(self, bids_dir, subject, session=None, debug=True):
         """Return the number of regions by reading its associated TSV side car file describing the nodes.
@@ -187,12 +187,12 @@ class CustomParcellationBIDSFile(CustomBIDSFile):
         ) + '.tsv'
 
         if os.path.exists(parc_filepath):
-            if debug:
+            if debug:  # pragma: no cover
                 print(f" .. DEBUG : Open {parc_filepath} to get number of regions")
             with open(parc_filepath) as file:
                 tsv_file = csv.reader(file, delimiter="\t")
                 nb_of_regions = len(list(tsv_file)) - 1  # Remove 1 to account for the header (# of lines - 1 = # regions)
-                if debug:
+                if debug:  # pragma: no cover
                     print(f" .. DEBUG : Number of regions = {nb_of_regions}")
             return nb_of_regions
         else:
@@ -203,32 +203,32 @@ class CustomBrainMaskBIDSFile(CustomBIDSFile):
     """Represent a custom brain mask in the form `sub-<label>_desc-brain_mask.nii.gz`."""
 
     def __init__(self):
-        super().__init__(p_suffix="mask", p_desc="brain", p_extension=".nii.gz")
+        super().__init__(p_suffix="mask", p_desc="brain", p_extension="nii.gz")
 
 
 class CustomWMMaskBIDSFile(CustomBIDSFile):
     """Represent a custom white-matter mask in the form `sub-<label>_label-WM_dseg.nii.gz`."""
 
     def __init__(self):
-        super().__init__(p_suffix="dseg", p_label="WM", p_extension=".nii.gz")
+        super().__init__(p_suffix="dseg", p_label="WM", p_extension="nii.gz")
 
 
 class CustomGMMaskBIDSFile(CustomBIDSFile):
     """Represent a custom gray-matter mask in the form `sub-<label>_label-GM_dseg.nii.gz`."""
 
     def __init__(self):
-        super().__init__(p_suffix="dseg", p_label="GM", p_extension=".nii.gz")
+        super().__init__(p_suffix="dseg", p_label="GM", p_extension="nii.gz")
 
 
 class CustomCSFMaskBIDSFile(CustomBIDSFile):
     """Represent a custom CSF mask in the form `sub-<label>_label-CSF_dseg.nii.gz`."""
 
     def __init__(self):
-        super().__init__(p_suffix="dseg", p_label="CSF", p_extension=".nii.gz")
+        super().__init__(p_suffix="dseg", p_label="CSF", p_extension="nii.gz")
 
 
 class CustomAparcAsegBIDSFile(CustomBIDSFile):
     """Represent a custom BIDS-formatted Freesurfer aparc+aseg file in the form `sub-<label>_desc-aparcaseg_dseg.nii.gz`."""
 
     def __init__(self):
-        super().__init__(p_suffix="dseg", p_desc="aparcaseg", p_extension=".nii.gz")
+        super().__init__(p_suffix="dseg", p_desc="aparcaseg", p_extension="nii.gz")

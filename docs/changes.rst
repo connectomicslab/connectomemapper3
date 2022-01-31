@@ -2,6 +2,96 @@
 Changes
 ========
 
+
+****************************
+Version 3.0.2
+****************************
+
+Date: Jan 28, 2021
+
+This version mostly introduces the capability to estimate carbon footprint of CMP3 execution and fix problem of conflicts during the creation of the conda environment.
+It incorporates includes in particular the following changes.
+
+*New features*
+
+*   Allow the estimation of the carbon footprint while using the BIDS App python wrappers and the GUI.
+    Estimations are conducted using `codecarbon <https://github.com/mlco2/codecarbon>`_. All functions supporting
+    this features have been implemented in the new module :py:mod:`cmtklib.carbonfootprint`.
+    See `PR #136 <https://github.com/connectomicslab/connectomemapper3/pull/136>`_ for more details.
+
+*Code changes*
+
+*   Creation of ``init_subject_derivatives_dirs()`` for ``AnatomicalPipeline``, ``DifusionPipeline``, and ``fMRIPipeline``
+    that return the paths to Nipype and CMP derivatives folders of a given subject / session for a given pipeline.
+    This removed all the implicated code from the ``process()`` method and improve modularity and readability.
+    In the future, the different functions could be merged as there is a lot of code duplication between them.
+
+*   ``AnatomicalPipeline``, ``DiffusionPipeline``, and ``fMRIPipeline`` workflows are run with the `MultiProc` plugin.
+
+*Bug fix*
+
+*   Major update of the ``conda/environment.yml`` and ``conda/environment_macosx.yml`` to correct the problems of conflicts in the previous version,
+    as reported in `issue #137 <https://github.com/connectomicslab/connectomemapper3/issues/137>`_. This has resulted in the following package updates:
+
+    *   `pip`: 20.1.1 -> 21.3.1
+    *   `numpy`: 1.19.2 -> 1.21.5
+    *   `matplotlib`: 3.2.2 -> 3.5.1
+    *   `traits`: 6.2.0 -> 6.3.2
+    *   `traitsui`: 7.0.0 -> 7.2.0
+    *   `graphviz`: 2.40.1 -> 2.50.0
+    *   `configparser`: 5.0.0 -> 5.2.0
+    *   `git-annex`: 8.20210127 -> 8.20211123
+    *   `pyside2`: 5.9.0a1 -> 5.13.2
+    *   `indexed_gzip`: 1.2.0 -> 1.6.4
+    *   `cvxpy`: 1.1.7 -> 1.1.18
+    *   `fsleyes`: 0.33.0 -> 1.3.3
+    *   `mrtrix3`: 3.0.2 -> 3.0.3
+    *   `duecredit`: 0.8.0 -> 0.9.1
+    *   `mne`: 0.20.7 -> 0.24.1
+    *   `datalad`: 0.14.0 -> 0.15.4
+    *   `datalad-container`: 1.1.2 -> 1.1.5
+    *   `statsmodels`: 0.11.1 -> 0.13.1
+    *   `networkx`: 2.4 -> 2.6.3
+    *   `pydicom`: 2.0.0 -> 2.2.2
+
+    See commit `483931f <https://github.com/connectomicslab/connectomemapper3/pull/136/commits/483931fba69c79847ad62e7a09dc9866919dbe9f>`_ for more details.
+
+*Documentation*
+
+*   Add description of carbon footprint estimation feature.
+
+*   Improve description on how to use already computed Freesurfer derivatives.
+
+*Misc*
+
+*   Add bootstrap CSS and jquery JS as resources to ``cmtklib/data/report/carbonfootprint``.
+    They are used to display the carbon footprint report in the GUI.
+
+*   Clean the resources related to parcellation in ``cmtklib/data/parcellation`` and rename all files and mentions of lausanne2008 to lausanne2018.
+
+*   Removed unused ``cmtklib.interfaces.camino``, ``cmtklib.interfaces.camino2trackvis``,
+    and ``cmtklib.interfaces.diffusion`` modules
+
+*   Specify to `Coverage.py` with ``# pragma: no cover`` part of the code we know it won’t be executed
+
+*   Create and use a `.coveragerc` file to set the run of `Coverage.py` with `--concurrency=multiprocessing`
+    to be allow to track code inside Nipype interfaces, now managed by multiprocessing.
+
+*Code style*
+
+*   Correct a number of code style issues with class names.
+
+*Contributors*
+
+*   `Sebastien Tourbier <https://github.com/connectomicslab/connectomemapper3/issues?q=is%3Apr+author%3Asebastientourbier>`_
+
+*   `Joan Rue Queralt <https://github.com/connectomicslab/connectomemapper3/issues?q=is%3Apr+author%3Ajoanrue>`_
+
+*More...*
+
+Please check the main `PR #140 <https://github.com/connectomicslab/connectomemapper3/pull/140>`_ page for more details.
+
+
 ****************************
 Version 3.0.1
 ****************************

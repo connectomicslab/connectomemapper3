@@ -180,7 +180,7 @@ def remove_files(path, debug=False):
         If `True`, print output
     """
     for f in glob(path):
-        if debug:
+        if debug:  # pragma: no cover
             print('  ... DEL: {}'.format(f))
         try:
             os.remove(f)
@@ -200,7 +200,7 @@ def remove_dirs(path, debug=False):
         If `True`, print output
     """
     for d in glob(path):
-        if debug:
+        if debug:  # pragma: no cover
             print('  ... DEL: {}'.format(d))
         try:
             shutil.rmtree(d)
@@ -219,7 +219,7 @@ def clean_cache(bids_root, debug=False):
     debug : bool
         If `True`, debugging mode with extra printed outputs
     """
-    if debug:
+    if debug:  # pragma: no cover
         print('> Clean docker image cache stored in /tmp')
     # Clean cache (issue related that the dataset directory is mounted into /tmp,
     # which is used for caching by java/matlab/matplotlib/xvfb-run in the docker image)
@@ -367,9 +367,10 @@ if args.number_of_threads is not None:
         total_number_of_threads = parallel_number_of_subjects * number_of_threads
         if total_number_of_threads > max_number_of_cores:
             print(BColors.WARNING +
-                  '  * Total number of cores used (Subjects in parallel: {}, Threads in parallel: {}, Total: {})'.format(parallel_number_of_subjects,
-                                                                                                                         number_of_threads,
-                                                                                                                         total_number_of_threads) +
+                  '  * Total number of cores used ' +
+                  '(Subjects in parallel: {}, Threads in parallel: {}, Total: {})'.format(parallel_number_of_subjects,
+                                                                                          number_of_threads,
+                                                                                          total_number_of_threads) +
                   'is greater than the number of available cores ({})'.format(max_number_of_cores) + BColors.ENDC)
             number_of_threads = 1
             parallel_number_of_subjects = max_number_of_cores
@@ -530,8 +531,7 @@ if args.analysis_level == "participant":
                 print("        - Anatomical MRI (segmentation and parcellation)")
 
                 if args.dwi_pipeline_config is not None:
-                    print(
-                        "        - Diffusion MRI (structural connectivity matrices)")
+                    print("        - Diffusion MRI (structural connectivity matrices)")
 
                 if args.func_pipeline_config is not None:
                     print("        - fMRI (functional connectivity matrices)")
@@ -557,7 +557,11 @@ if args.analysis_level == "participant":
                                              run_fmri=run_fmri,
                                              number_of_threads=number_of_threads)
                     print_blue("... cmd : {}".format(cmd))
-
+                    if project.subject_session != "":
+                        log_file = '{}_{}_log.txt'.format(project.subject,
+                                                          project.subject_session)
+                    else:
+                        log_file = '{}_log.txt'.format(project.subject)
                     proc = run(command=cmd, env={},
                                log_filename=os.path.join(project.output_directory, __cmp_directory__,
                                                          project.subject, project.subject_session,

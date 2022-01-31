@@ -314,10 +314,10 @@ class ParcellationStage(Stage):
                 # fmt: on
                 createBIDSLabelIndexMappingFile = pe.MapNode(
                     interface=CreateBIDSStandardParcellationLabelIndexMappingFile(),
-                    name="createBIDSLabelIndexMappingFile",
-                    iterfield=['roi_graphml', 'roi_colorlut']
+                    iterfield=['roi_graphml', 'roi_colorlut'],
+                    synchronize=True,
+                    name="createBIDSLabelIndexMappingFile"
                 )
-                createBIDSLabelIndexMappingFile.inputs.verbose = True
                 # fmt: off
                 flow.connect(
                     [
@@ -377,11 +377,11 @@ class ParcellationStage(Stage):
                 )
                 # fmt: on
                 createBIDSLabelIndexMappingFile = pe.MapNode(
-                        interface=CreateBIDSStandardParcellationLabelIndexMappingFile(),
-                        name="createBIDSLabelIndexMappingFile",
-                        iterfield=['roi_graphml', 'roi_colorlut']
+                    interface=CreateBIDSStandardParcellationLabelIndexMappingFile(),
+                    iterfield=['roi_graphml', 'roi_colorlut'],
+                    synchronize=True,
+                    name="createBIDSLabelIndexMappingFile"
                 )
-                createBIDSLabelIndexMappingFile.inputs.verbose = True
                 # fmt: off
                 flow.connect(
                     [
@@ -510,7 +510,7 @@ class ParcellationStage(Stage):
         )
         # fmt: on
 
-    def define_inspect_outputs(self):
+    def define_inspect_outputs(self):  # pragma: no cover
         """Update the `inspect_outputs` class attribute.
 
         It contains a dictionary of stage outputs with corresponding commands for visual inspection.
