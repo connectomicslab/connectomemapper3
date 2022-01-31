@@ -21,7 +21,6 @@ from nipype.interfaces.base import (
     OutputMultiPath,
     InputMultiPath,
 )
-from nipype.utils.filemanip import split_filename
 
 from traits.trait_types import List, Str, Int, Enum
 
@@ -44,32 +43,32 @@ def compute_length_array(trkfile=None, streams=None, savefname="lengths.npy"):
 
     Returns
     -------
-    leng : numpy.array
+    fibers_length : numpy.array
         Array of fiber lengths
     """
     if streams is None and trkfile is not None:
-        print("Compute length array for fibers in %s" % trkfile)
+        print(f'Compute length array for fibers in {trkfile}')
         streams, hdr = tv.read(trkfile, as_generator=True)
         n_fibers = hdr["n_count"]
         if n_fibers == 0:
             msg = (
-                "Header field n_count of trackfile %s is set to 0. No track seem to exist in this file."
-                % trkfile
+                f'Header field n_count of trackfile {trkfile} is set to 0. '
+                "No track seem to exist in this file."
             )
             print(msg)
             raise Exception(msg)
     else:
         n_fibers = len(streams)
 
-    leng = np.zeros(n_fibers, dtype=np.float)
+    fibers_length = np.zeros(n_fibers, dtype=np.float)
     for i, fib in enumerate(streams):
-        leng[i] = length(fib[0])
+        fibers_length[i] = length(fib[0])
 
     # store length array
-    np.save(savefname, leng)
-    print("Store lengths array to: %s" % savefname)
+    np.save(savefname, fibers_length)
+    print(f'Store lengths array to: {savefname}')
 
-    return leng
+    return fibers_length
 
 
 def filter_fibers(intrk, outtrk="", fiber_cutoff_lower=20, fiber_cutoff_upper=500):
@@ -92,7 +91,7 @@ def filter_fibers(intrk, outtrk="", fiber_cutoff_lower=20, fiber_cutoff_upper=50
     print("Cut Fiber Filtering")
     print("===================")
 
-    print("Input file for fiber cutting is: %s" % intrk)
+    print(f'Input file for fiber cutting is: {intrk}')
 
     if outtrk == "":
         _, filename = os.path.split(intrk)
@@ -119,10 +118,10 @@ def filter_fibers(intrk, outtrk="", fiber_cutoff_lower=20, fiber_cutoff_upper=50
 
     # print("Compute length array for cutted fibers")
     # le = compute_length_array(streams=outstreams)
-    print("Write out file: %s" % outtrk)
-    print("Number of fibers out : %d" % hdrnew["n_count"])
+    print(f'Write out file: {outtrk}')
+    print(f'Number of fibers out : {hdrnew["n_count"]}')
     tv.write(outtrk, outstreams, hdrnew)
-    print("File wrote : %d" % os.path.exists(outtrk))
+    print(f'File wrote : {os.path.exists(outtrk)}')
 
     # ----
     # extension idea
@@ -174,7 +173,7 @@ class FlipTable(BaseInterface):
         axis_dict = {"x": 0, "y": 1, "z": 2}
         f = open(self.inputs.table, "r")
         header = ""
-        for h in range(self.inputs.header_lines):
+        for _ in range(self.inputs.header_lines):
             header += f.readline()
         if self.inputs.delimiter == " ":
             table = np.loadtxt(f)
@@ -303,7 +302,7 @@ class ExtractPVEsFrom5TT(BaseInterface):
         process = subprocess.Popen(
             fslmaths_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
         )
-        proc_stdout = process.communicate()[0].strip()
+        _ = process.communicate()[0].strip()
 
         fslmaths_cmd = "fslmaths %s -kernel sphere %s -dilD %s" % (
             os.path.abspath(self.inputs.pve_wm_file),
@@ -315,7 +314,7 @@ class ExtractPVEsFrom5TT(BaseInterface):
         process = subprocess.Popen(
             fslmaths_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
         )
-        proc_stdout = process.communicate()[0].strip()
+        _ = process.communicate()[0].strip()
 
         fslmaths_cmd = "fslmaths %s -kernel sphere %s -dilD %s" % (
             os.path.abspath(self.inputs.pve_gm_file),
@@ -327,7 +326,7 @@ class ExtractPVEsFrom5TT(BaseInterface):
         process = subprocess.Popen(
             fslmaths_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
         )
-        proc_stdout = process.communicate()[0].strip()
+        _ = process.communicate()[0].strip()
 
         fslmaths_cmd = "fslmaths %s -kernel gauss %s -fmean %s" % (
             os.path.abspath(self.inputs.pve_csf_file),
@@ -339,7 +338,7 @@ class ExtractPVEsFrom5TT(BaseInterface):
         process = subprocess.Popen(
             fslmaths_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
         )
-        proc_stdout = process.communicate()[0].strip()
+        _ = process.communicate()[0].strip()
 
         fslmaths_cmd = "fslmaths %s -kernel gauss %s -fmean %s" % (
             os.path.abspath(self.inputs.pve_wm_file),
@@ -351,7 +350,7 @@ class ExtractPVEsFrom5TT(BaseInterface):
         process = subprocess.Popen(
             fslmaths_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
         )
-        proc_stdout = process.communicate()[0].strip()
+        _ = process.communicate()[0].strip()
 
         fslmaths_cmd = "fslmaths %s -kernel gauss %s -fmean %s" % (
             os.path.abspath(self.inputs.pve_gm_file),
@@ -363,7 +362,7 @@ class ExtractPVEsFrom5TT(BaseInterface):
         process = subprocess.Popen(
             fslmaths_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
         )
-        proc_stdout = process.communicate()[0].strip()
+        _ = process.communicate()[0].strip()
 
         pve_csf = nib.load(os.path.abspath(self.inputs.pve_csf_file)).get_data()
         pve_wm = nib.load(os.path.abspath(self.inputs.pve_wm_file)).get_data()
@@ -387,14 +386,11 @@ class ExtractPVEsFrom5TT(BaseInterface):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-
-        pve_files = []
-        pve_files.append(os.path.abspath(self.inputs.pve_csf_file))
-        pve_files.append(os.path.abspath(self.inputs.pve_gm_file))
-        pve_files.append(os.path.abspath(self.inputs.pve_wm_file))
-
-        outputs["partial_volume_files"] = pve_files
-
+        outputs["partial_volume_files"] = [
+            os.path.abspath(self.inputs.pve_csf_file),
+            os.path.abspath(self.inputs.pve_gm_file),
+            os.path.abspath(self.inputs.pve_wm_file)
+        ]
         return outputs
 
 
@@ -505,7 +501,7 @@ class FlipBvec(BaseInterface):
 
         f = open(self.inputs.bvecs, "r")
         header = ""
-        for h in range(self.inputs.header_lines):
+        for _ in range(self.inputs.header_lines):
             header += f.readline()
         if self.inputs.delimiter == " ":
             table = np.loadtxt(f)
@@ -526,14 +522,6 @@ class FlipBvec(BaseInterface):
             else:
                 np.savetxt(out_f, table, delimiter=self.inputs.delimiter)
 
-        # with open(os.path.abspath('flipped_bvecs.bvec'), 'w') as out_f:
-        #    np.savetxt(out_f, table, header=header, delimiter=self.inputs.delimiter)
-
-        # out_f = file(os.path.abspath('flipped_bvecs.bvec'), 'w')
-        # if self.inputs.header_lines > 0:
-        #     out_f.write(header)
-        # np.savetxt(out_f, table, header=header, delimiter=self.inputs.delimiter)
-        # out_f.close()
         return runtime
 
     def _list_outputs(self):
@@ -657,7 +645,5 @@ class UpdateGMWMInterfaceSeeding(BaseInterface):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-
         outputs["out_gmwmi_file"] = os.path.abspath(self.inputs.out_gmwmi_file)
-
         return outputs

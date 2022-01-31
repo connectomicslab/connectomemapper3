@@ -2373,7 +2373,7 @@ def create_roi(subject_id, subjects_dir, v=True):
     if not (os.access(freesurfer_subj, os.F_OK)):
         print('ERROR: FreeSurfer subjects directory ($SUBJECTS_DIR) does not exist')
     else:
-        if v:
+        if v:  # pragma: no cover
             print(
                 '- FreeSurfer subjects directory ($SUBJECTS_DIR):\n  {}\n'.format(freesurfer_subj))
 
@@ -2390,14 +2390,14 @@ def create_roi(subject_id, subjects_dir, v=True):
         print('         -> Copy fsaverage')
         shutil.copytree(src, dst)
     else:
-        if v:
+        if v:  # pragma: no cover
             print(
                 '-  FreeSurfer subjects directory ($SUBJECTS_DIR) DOES contain \'fsaverage\'\n')
 
     if not (os.access(subject_dir, os.F_OK)):
         print('ERROR: No input subject directory was found in FreeSurfer $SUBJECTS_DIR')
     else:
-        if v:
+        if v:  # pragma: no cover
             print('- Freesurfer subject id:\n  {}\n'.format(subject_id))
             print('- Freesurfer subject directory:\n  {}\n'.format(subject_dir))
 
@@ -2434,7 +2434,7 @@ def create_roi(subject_id, subjects_dir, v=True):
             os.makedirs(this_dir)
 
     # Loop over parcellation scales
-    if v:
+    if v:  # pragma: no cover
         print('Generate MULTISCALE PARCELLATION for input subject')
 
     fs_string = 'export SUBJECTS_DIR=' + freesurfer_subj
@@ -2456,12 +2456,12 @@ def create_roi(subject_id, subjects_dir, v=True):
 
     for i in reversed(list(range(0, nscales))):
 
-        if v:
+        if v:  # pragma: no cover
             print(' ... working on multiscale parcellation, SCALE {}'.format(i + 1))
 
         # 1. Resample fsaverage CorticalSurface onto SUBJECT_ID CorticalSurface and map annotation for current scale
         # Left hemisphere
-        if v:
+        if v:  # pragma: no cover
             print(
                 '     > resample fsaverage CorticalSurface to individual CorticalSurface')
         mri_cmd = fs_string + '; mri_surf2surf --srcsubject fsaverage --trgsubject %s --hemi lh --sval-annot %s --tval %s' % (
@@ -2471,10 +2471,10 @@ def create_roi(subject_id, subjects_dir, v=True):
             os.path.join(subject_dir, 'label', lh_annot_files[i])
         )
         if v == 2:
-            _ = subprocess.call(mri_cmd, shell=True)
+            subprocess.call(mri_cmd, shell=True)
         else:
-            _ = subprocess.call(
-                mri_cmd, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
+            subprocess.call(mri_cmd, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
+
         # Right hemisphere
         mri_cmd = fs_string + '; mri_surf2surf --srcsubject fsaverage --trgsubject %s --hemi rh --sval-annot %s --tval %s' % (
             subject_id,
@@ -2483,14 +2483,13 @@ def create_roi(subject_id, subjects_dir, v=True):
             os.path.join(subject_dir, 'label', rh_annot_files[i])
         )
         if v == 2:
-            status = subprocess.call(mri_cmd, shell=True)
+            subprocess.call(mri_cmd, shell=True)
         else:
-            status = subprocess.call(
-                mri_cmd, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
+            subprocess.call(mri_cmd, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
 
         # 2. Generate Nifti volume from annotation
         #    Note: change here --wmparc-dmax (FS default 5mm) to dilate cortical regions toward the WM
-        if v:
+        if v:  # pragma: no cover
             print('     > generate Nifti volume from annotation')
         mri_cmd = fs_string + '; mri_aparc2aseg --s %s --annot %s --wmparc-dmax 0 --labelwm --hypo-as-wm --new-ribbon --o %s' % (
             subject_id,
@@ -2504,7 +2503,7 @@ def create_roi(subject_id, subjects_dir, v=True):
 
         # 3. Update numerical IDs of cortical and subcortical regions
         # Load Nifti volume
-        if v:
+        if v:  # pragma: no cover
             print('     > relabel cortical and subcortical regions'
                   ' for consistency between resolutions')
         this_nifti = ni.load(os.path.join(subject_dir, 'tmp', rois_output[i]))
@@ -2551,7 +2550,7 @@ def create_roi(subject_id, subjects_dir, v=True):
                         value = np.argmax(counts)
                     newrois[xxMax[j], yyMax[j], zzMax[j]] = value
             # print("Cortical ROIs adaptation took %s seconds to process." % (time()-adaptstart))
-        if v:
+        if v:  # pragma: no cover
             print('     ... save output volumes')
         this_out = os.path.join(subject_dir, 'mri', rois_output[i])
         img = ni.Nifti1Image(newrois, this_nifti.affine, hdr2)
@@ -2559,7 +2558,7 @@ def create_roi(subject_id, subjects_dir, v=True):
         del img
 
         # 4. Dilate cortical regions
-        if v:
+        if v:  # pragma: no cover
             print("     > dilating cortical regions")
         # loop throughout all the voxels belonging to the aseg GM volume
         for j in range(xx.size):
@@ -2578,7 +2577,7 @@ def create_roi(subject_id, subjects_dir, v=True):
                 newrois[xx[j], yy[j], zz[j]] = value
 
         # 5. Save Nifti and mgz volumes
-        if v:
+        if v:  # pragma: no cover
             print('     ... save output volumes ')
         this_out = os.path.join(subject_dir, 'mri', roivs_output[i])
         img = ni.Nifti1Image(newrois, this_nifti.affine, hdr2)
@@ -2589,9 +2588,9 @@ def create_roi(subject_id, subjects_dir, v=True):
             this_out,
             os.path.join(subject_dir, 'mri', roivs_output[i][0:-4] + '.mgz'))
         if v == 2:
-            status = subprocess.call(mri_cmd, shell=True)
+            _ = subprocess.call(mri_cmd, shell=True)
         else:
-            status = subprocess.call(
+            _ = subprocess.call(
                 mri_cmd, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
 
         # Create Gray Matter mask
@@ -2628,16 +2627,16 @@ def create_wm_mask(subject_id, subjects_dir, v=True):
     v : Boolean
         Verbose mode
     """
-    if v:
+    if v:  # pragma: no cover
         iflogger.info("  > Create white matter mask")
 
     fs_dir = op.join(subjects_dir, subject_id)
 
-    if v:
+    if v:  # pragma: no cover
         iflogger.info("    ... FreeSurfer dir: %s" % fs_dir)
 
     # load ribbon as basis for white matter mask
-    if v:
+    if v:  # pragma: no cover
         iflogger.info("    > load ribbon")
     fsmask = ni.load(op.join(fs_dir, 'mri', 'ribbon.nii.gz'))
     fsmaskd = fsmask.get_data()
@@ -2648,7 +2647,7 @@ def create_wm_mask(subject_id, subjects_dir, v=True):
 
     # FIXME understand when ribbon file has default value or has "aseg" value
     # extract right and left white matter
-    if v:
+    if v:  # pragma: no cover
         iflogger.info("    > Extract right and left wm")
     # Ribbon labels by default
     if fsmaskd.max() == 120:
@@ -2664,7 +2663,7 @@ def create_wm_mask(subject_id, subjects_dir, v=True):
     wmmask[idx_rh] = 1
 
     # remove subcortical nuclei from white matter mask
-    if v:
+    if v:  # pragma: no cover
         iflogger.info("     > Load aseg")
     aseg = ni.load(op.join(fs_dir, 'mri', 'aseg.nii.gz'))
     asegd = aseg.get_data()
@@ -2705,7 +2704,7 @@ def create_wm_mask(subject_id, subjects_dir, v=True):
                    (asegd == 49))
     csfA[idx] = 1
 
-    if v:
+    if v:  # pragma: no cover
         iflogger.info("    > Save CSF mask")
     img = ni.Nifti1Image(csfA, aseg.get_affine(), aseg.get_header())
     ni.save(img, op.join(fs_dir, 'mri', 'csf_mask.nii.gz'))
@@ -2744,7 +2743,7 @@ def create_wm_mask(subject_id, subjects_dir, v=True):
     # would stop the fiber going to the segmented "brainstem"
 
     # grey nuclei, either with or without erosion
-    if v:
+    if v:  # pragma: no cover
         iflogger.info("    > Grey nuclei, either with or without erosion")
     gr_ncl = np.zeros(asegd.shape)
 
@@ -2764,7 +2763,7 @@ def create_wm_mask(subject_id, subjects_dir, v=True):
         gr_ncl[idx] = 1
 
     # remove remaining structure, e.g. brainstem
-    if v:
+    if v:  # pragma: no cover
         iflogger.info("    > Remove remaining structure, e.g. brainstem")
     remaining = np.zeros(asegd.shape)
     idx = np.where(asegd == 16)
@@ -2774,7 +2773,7 @@ def create_wm_mask(subject_id, subjects_dir, v=True):
     idx = np.where((csfA != 0) | (csfB != 0) |
                    (gr_ncl != 0) | (remaining != 0))
     wmmask[idx] = 0
-    if v:
+    if v:  # pragma: no cover
         iflogger.info(
             "    > Removing lateral ventricles and eroded grey nuclei and brainstem from white matter mask")
 
@@ -2797,7 +2796,7 @@ def create_wm_mask(subject_id, subjects_dir, v=True):
     # output white matter mask. crop and move it afterwards
     wm_out = op.join(fs_dir, 'mri', 'fsmask_1mm.nii.gz')
     img = ni.Nifti1Image(wmmask, fsmask.get_affine(), fsmask.get_header())
-    if v:
+    if v:  # pragma: no cover
         iflogger.info("    > Save white matter mask: %s" % wm_out)
     ni.save(img, wm_out)
     del img

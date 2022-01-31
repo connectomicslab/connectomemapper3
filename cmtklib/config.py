@@ -180,7 +180,6 @@ def save_configparser_as_json(config, config_json_path, ini_mode=False, debug=Fa
                         print_error(
                             f"  .. EXCEPTION: String {value} COULD NOT BE evaluated"
                         )
-                    pass
 
             if isinstance(value, dict):
                 if debug:  # pragma: no cover

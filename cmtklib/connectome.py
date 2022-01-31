@@ -30,7 +30,6 @@ from nipype.interfaces.base import (
     InputMultiPath,
     OutputMultiPath,
 )
-from nipype.interfaces import cmtk
 from nipype.utils.filemanip import split_filename
 
 from .util import mean_curvature, length
