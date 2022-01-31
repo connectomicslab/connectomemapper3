@@ -63,6 +63,7 @@ packages = [
     "cmp.bidsappmanager.pipelines.functional",
     "cmtklib",
     "cmtklib.bids",
+    "cmtklib.data.parcellation",
     "cmtklib.interfaces",
     "resources",
 ]
