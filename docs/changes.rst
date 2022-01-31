@@ -7,7 +7,7 @@ Changes
 Version 3.0.2
 ****************************
 
-Date: Jan 28, 2021
+Date: Jan 31, 2021
 
 This version mostly introduces the capability to estimate carbon footprint of CMP3 execution and fix problem of conflicts during the creation of the conda environment.
 It incorporates includes in particular the following changes.
