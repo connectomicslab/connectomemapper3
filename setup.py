@@ -86,6 +86,8 @@ package_data = {
         "data/segmentation/ants_MICCAI2012_multi-atlas_challenge_data/*/*.*",
         "data/segmentation/ants_MICCAI2012_multi-atlas_challenge_data/*.*",
         "data/segmentation/thalamus2018/*.*",
+        "data/report/carbonfootprint/css/*.*",
+        "data/report/carbonfootprint/js/*.*",
     ],
 }
 
@@ -118,8 +120,11 @@ if include_conda_pip_dependencies:
                 dependency_links.append(line)
                 # Adds package name to dependencies
                 install_requires.append(line)
-print(f"Install requires: {install_requires}")
-print(f"Dependency links: {dependency_links}")
+# Install automatically codecarbon with CMP3
+install_requires.append('codecarbon==1.2.0')
+install_requires.append('dash-bootstrap-components==0.13.1')
+print(f'Install requires: {install_requires}')
+print(f'Dependency links: {dependency_links}')
 
 
 # Read the contents of your README file

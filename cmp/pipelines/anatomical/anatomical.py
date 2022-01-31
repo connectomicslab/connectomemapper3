@@ -164,7 +164,6 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                     ) + '.graphml'
                 }
             }
-            print(f' .. DEBUG : Updated custom parcellation atlas_info = {self.atlas_info}')
 
     def check_config(self):
         """Check if custom white matter mask and custom atlas files specified in the configuration exist.
@@ -246,7 +245,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         subjid = self.subject.split("-")[1]
 
         if self.global_conf.subject_session == "":
-            files = layout.get(subject=subjid, suffix="T1w", extension=".nii.gz")
+            files = layout.get(subject=subjid, suffix="T1w", extension="nii.gz")
             if len(files) > 0:
                 T1_file = os.path.join(files[0].dirname, files[0].filename)
                 print(T1_file)
@@ -255,7 +254,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         else:
             sessid = self.global_conf.subject_session.split("-")[1]
             files = layout.get(
-                subject=subjid, suffix="T1w", extension=".nii.gz", session=sessid
+                subject=subjid, suffix="T1w", extension="nii.gz", session=sessid
             )
             if len(files) > 0:
                 T1_file = os.path.join(files[0].dirname, files[0].filename)
@@ -266,7 +265,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         print("... t1_file : %s" % T1_file)
 
         if self.global_conf.subject_session == "":
-            files = layout.get(subject=subjid, suffix="T1w", extension=".json")
+            files = layout.get(subject=subjid, suffix="T1w", extension="json")
             if len(files) > 0:
                 T1_json_file = os.path.join(files[0].dirname, files[0].filename)
                 print(T1_json_file)
@@ -275,7 +274,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         else:
             sessid = self.global_conf.subject_session.split("-")[1]
             files = layout.get(
-                subject=subjid, suffix="T1w", extension=".json", session=sessid
+                subject=subjid, suffix="T1w", extension="json", session=sessid
             )
             if len(files) > 0:
                 T1_json_file = os.path.join(files[0].dirname, files[0].filename)
@@ -400,8 +399,6 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             ]
             # Keep only unique custom derivatives to make the BIDSLayout happy
             custom_derivatives_dirnames = list(set(custom_derivatives_dirnames))
-            print(f"DEBUG: custom_derivatives_dirnames: {custom_derivatives_dirnames}")
-            print(f"DEBUG: layout.derivatives: {layout.derivatives}")
             for custom_derivatives_dirname in  custom_derivatives_dirnames:
                 if custom_derivatives_dirname not in layout.derivatives:
                     print(f"    * Add custom_derivatives_dirname: {custom_derivatives_dirname}")
@@ -413,7 +410,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                          if self.global_conf.subject_session != ""
                          else None),
                 suffix=self.stages["Parcellation"].config.custom_parcellation.suffix,
-                extension=".nii.gz",
+                extension="nii.gz",
                 atlas=self.stages["Parcellation"].config.custom_parcellation.atlas,
                 res=self.stages["Parcellation"].config.custom_parcellation.res,
             )
@@ -430,7 +427,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                          if self.global_conf.subject_session != ""
                          else None),
                 suffix=self.stages["Parcellation"].config.custom_parcellation.suffix,
-                extension=".tsv",
+                extension="tsv",
                 atlas=self.stages["Parcellation"].config.custom_parcellation.atlas,
                 res=self.stages["Parcellation"].config.custom_parcellation.res,
             )
@@ -450,7 +447,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                              if self.global_conf.subject_session != ""
                              else None),
                     suffix=self.stages["Segmentation"].config.custom_brainmask.suffix,
-                    extension=".nii.gz",
+                    extension="nii.gz",
                     desc=self.stages["Segmentation"].config.custom_brainmask.desc,
             )
             if len(files) > 0:
@@ -469,7 +466,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                          if self.global_conf.subject_session != ""
                          else None),
                 suffix=self.stages["Segmentation"].config.custom_gm_mask.suffix,
-                extension=".nii.gz",
+                extension="nii.gz",
                 label=self.stages["Segmentation"].config.custom_gm_mask.label,
             )
             if len(files) > 0:
@@ -488,7 +485,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                          if self.global_conf.subject_session != ""
                          else None),
                 suffix=self.stages["Segmentation"].config.custom_wm_mask.suffix,
-                extension=".nii.gz",
+                extension="nii.gz",
                 label=self.stages["Segmentation"].config.custom_wm_mask.label,
             )
             if len(files) > 0:
@@ -507,7 +504,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                          if self.global_conf.subject_session != ""
                          else None),
                 suffix=self.stages["Segmentation"].config.custom_csf_mask.suffix,
-                extension=".nii.gz",
+                extension="nii.gz",
                 label=self.stages["Segmentation"].config.custom_csf_mask.label,
             )
             if len(files) > 0:
@@ -526,7 +523,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                          if self.global_conf.subject_session != ""
                          else None),
                 suffix=self.stages["Segmentation"].config.custom_aparcaseg.suffix,
-                extension=".nii.gz",
+                extension="nii.gz",
                 desc=self.stages["Segmentation"].config.custom_aparcaseg.desc,
             )
             if len(files) > 0:
@@ -897,7 +894,19 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         )
         # fmt:on
 
+        self.stages[
+            "Segmentation"
+        ].config.freesurfer_subjects_dir = os.path.join(
+            self.output_directory, __freesurfer_directory__
+        )
+        self.stages[
+            "Segmentation"
+        ].config.freesurfer_subject_id = os.path.join(
+            self.output_directory, __freesurfer_directory__, self.subject
+        )
+
         seg_flow = self.create_stage_flow("Segmentation")
+
         # fmt: off
         anat_flow.connect(
             [
@@ -909,17 +918,6 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         parc_flow = self.create_stage_flow("Parcellation")
 
         if self.stages["Segmentation"].config.seg_tool == "Freesurfer":
-
-            self.stages[
-                "Segmentation"
-            ].config.freesurfer_subjects_dir = os.path.join(
-                self.output_directory, __freesurfer_directory__
-            )
-            self.stages[
-                "Segmentation"
-            ].config.freesurfer_subject_id = os.path.join(
-                self.output_directory, __freesurfer_directory__, self.subject
-            )
 
             # fmt: off
             anat_flow.connect(
@@ -1001,14 +999,14 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         self.flow = anat_flow
         return anat_flow
 
-    def process(self):
-        """Executes the anatomical pipeline workflow and returns True if successful."""
-        # Enable the use of the W3C PROV data model to capture and represent provenance in Nipype
-        # config.enable_provenance()
+    def init_subject_derivatives_dirs(self):
+        """Return the paths to Nipype and CMP derivatives folders of a given subject / session.
 
-        # Process time
-        self.now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
-
+        Notes
+        -----
+        `self.subject` is updated to "sub-<participant_label>_ses-<session_label>"
+        when subject has multiple sessions.
+        """
         if "_" in self.subject:
             self.subject = self.subject.split("_")[0]
 
@@ -1042,18 +1040,36 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             except os.error:
                 print("%s was already existing" % nipype_anatomical_pipeline_subject_dir)
 
+        return cmp_deriv_subject_directory, nipype_deriv_subject_directory, nipype_anatomical_pipeline_subject_dir
+
+    def process(self):
+        """Executes the anatomical pipeline workflow and returns True if successful."""
+        anat_flow = None  # noqa
+
+        # Enable the use of the W3C PROV data model to capture and represent provenance in Nipype
+        # config.enable_provenance()
+
+        # Process time
+        self.now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
+
+        # Create the paths <output_dir>/cmp-<version>/sub-<label>(/ses-<label>)
+        # and <output_dir>/nipype-<version>/sub-<label>(/ses-<label>)
+        # self.subject is updated to "sub-<label>_ses-<label>"
+        # when subject has multiple sessions.
+        cmp_deriv_subject_directory, nipype_deriv_subject_directory, nipype_anatomical_pipeline_subject_dir = \
+            self.init_subject_derivatives_dirs()
+
         # Initialization
-        if os.path.isfile(os.path.join(nipype_anatomical_pipeline_subject_dir, "pypeline.log")):
-            os.unlink(os.path.join(nipype_anatomical_pipeline_subject_dir, "pypeline.log"))
+        log_file = os.path.join(nipype_anatomical_pipeline_subject_dir, "pypeline.log")
+        if os.path.isfile(log_file):
+            os.unlink(log_file)
 
         config.update_config(
             {
                 "logging": {
-                    "workflow_level": "DEBUG",
-                    "interface_level": "DEBUG",
-                    "log_directory": os.path.join(
-                        nipype_deriv_subject_directory, "anatomical_pipeline"
-                    ),
+                    "workflow_level": "INFO",
+                    "interface_level": "INFO",
+                    "log_directory": nipype_anatomical_pipeline_subject_dir,
                     "log_to_file": True,
                 },
                 "execution": {
@@ -1076,13 +1092,13 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             nipype_deriv_subject_directory=nipype_deriv_subject_directory,
         )
         anat_flow.write_graph(graph2use="colored", format="svg", simple_form=True)
-
-        if self.number_of_cores != 1:
-            anat_flow.run(
-                plugin="MultiProc", plugin_args={"n_procs": self.number_of_cores}
-            )
-        else:
-            anat_flow.run()
+        # Create dictionary of arguments passed to plugin_args
+        plugin_args = {
+            'maxtasksperchild': 1,
+            'n_procs': self.number_of_cores,
+            'raise_insufficient': False,
+        }
+        anat_flow.run(plugin="MultiProc", plugin_args=plugin_args)
 
         self._update_parcellation_scheme()
 

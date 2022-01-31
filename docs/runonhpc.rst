@@ -7,8 +7,8 @@ Running on a cluster (HPC)
 Connectome Mapper 3 BIDS App can be run on a cluster using Singularity.
 
 For your convenience, the Singularity image is automatically built along
-the docker image using Singularity 3.5.1 and deployed to
-`Sylabs.io <https://sylabs.io/>`_  as (equivalent of DockerHub for Singularity)
+the docker image using Singularity ``3.8.4`` and deployed to
+`Sylabs.io <https://sylabs.io/>`_  (equivalent of DockerHub for Singularity)
 during continuous integration on CircleCI. It can be freely downloaded
 with the following command:
 

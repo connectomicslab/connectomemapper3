@@ -171,14 +171,14 @@ class ConnectomeStage(Stage):
         )
         # fmt: on
 
-    def define_inspect_outputs(self):
+    def define_inspect_outputs(self):  # pragma: no cover
         """Update the `inspect_outputs` class attribute.
 
         It contains a dictionary of stage outputs with corresponding commands for visual inspection.
         """
         # print('inspect outputs connectome stage')
         dwi_sinker_dir = os.path.join(
-            os.path.dirname(self.stage_dir), "diffusion_sinker"
+            os.path.dirname(self.stage_dir), "dwi_datasinker"
         )
         dwi_sinker_report = os.path.join(dwi_sinker_dir, "_report", "report.rst")
 
