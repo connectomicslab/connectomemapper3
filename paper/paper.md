@@ -155,6 +155,10 @@ CMP3 revisits the multiscale cortical parcellation proposed by [@Cammoun2012:Map
   and its implementation, and extends with new structures including a subdivision for each
   brain hemisphere of the thalamus into 7 nuclei, the hippocampus into 12 subfields and the brainstem into
   4 sub-structures (\autoref{fig:parc}).
+
+![\textbf{Creation of the new Lausanne2018 Connectome Parcellation.}
+\label{fig:parc}](Lausanne2018_parcellation_diagram.png)
+
 The parcellation derived from the Desikan-Killiany atlas [@Desikan2006AnInterest] has been
   made symmetric by projecting the right hemisphere labels to the left hemisphere, matching the
   boundaries of the projected regions of the left hemisphere to the boundaries of the original regions
@@ -167,50 +171,45 @@ All segmented structures are combined at the end of process to create the final 
   at each scale along with the corresponding label index color mapping file in accordance to the BIDS Derivatives
   specifications.
 
-![\textbf{Creation of the new Lausanne2018 Connectome Parcellation.}
-\label{fig:parc}](Lausanne2018_parcellation_diagram.png)
-
 \textbf{A Graphical User Interface reflecting the workflow structure.}
 CMP3 takes advantage of Traits/TraitsUI framework
   (\href{http://docs.enthought.com/traits/}{http://docs.enthought.com/traits/}) for building an
   interactive Graphical User Interface (GUI), to give to pipelines and stages a graphical representation,
   which is easy to understand and extend.
 This has enabled the design of a GUI aka `cmpbidsappmanager` (\autoref{fig:gui}) that reflects
-  the modular structure of the processing workflow. It has been designed to facilitate the configuration
-  of all pipeline stages, to guarantee the formatting of the `.json` pipeline configuration files
-  (\autoref{fig:gui} b), to support their execution within the BIDS App (\autoref{fig:gui} c), and to allow seamless
-  inspection of stage outputs with native visualization tools bundled with each software package
-  involved in the processing stage (\autoref{fig:gui} d).
-In particular, all sMRI are inspected with the fsleyes viewer shipped with fsl, brain tissue
-  segmentation and parcellation are inspected with freeview, mrview is used to visualize the fiber
-  orientation distribution functions estimated by the diffusion signal model, and TrackVis is used
-  to render the fiber bundles estimated with tractography.
-Each pipeline can be individually configured and executed with the aid of the user-friendly
-  GUI and the output of each stage can be visually reviewed, enabling the user to keep
-  an eye on the data being processed and easily understand the cause of the problems, change the
-  parameters and re-execute when results at a given stage are found not to be satisfactory.
-CMP3 simplifies the creation of connectomes and makes it a straightforward process
-  even for users not familiar with Nipype and software container technology. Nevertheless,
-  it still fulfils the needs of advanced users in charge of analyzing huge amount of data,
-  offering them the possibility to tune and save all the parameters in configuration files and create a batch
-  job to automatically process all data with the BIDS App.
+  the modular structure of the processing workflow.
+It has been designed designed to guide and support the user in all the steps required to
+  perform an analysis (\autoref{fig:gui}).
 
 ![\textbf{Graphical User Interface of the Connectome Mapper 3.}
 It is designed to guide and support the user in all the steps required to
   perform an analysis.
 A typical procedure would consists of
-  (a) the selection of the root directory of the BIDS dataset to be analyzed,
-  (b) the creation/edition of the different pipeline configuration files,
-  (c) the configuration of the BIDS App run and its execution, and
-  (d) the inspection of stage outputs using multiple native viewers
-  depending on the tool involved in the stage.
+  (a)   the selection of the root directory of the BIDS dataset to be analyzed,
+  (b)   the creation/edition of the different pipeline configuration files,
+  (c)   the configuration of the BIDS App run and its execution, and
+  (d)   the inspection of stage outputs with fsleyes, freeview, mrview, or TrackVis
+        depending on the tool involved in the stage.
 \label{fig:gui}](cmp3-gui-paper.png)
+
+Each pipeline can be individually configured and executed with the aid of the user-friendly
+  GUI and the output of each stage can be visually reviewed, enabling the user to keep
+  an eye on the data being processed and easily understand the cause of the problems, change the
+  parameters and re-execute when results at a given stage are found not to be satisfactory.
+In this way, CMP3 simplifies the creation of connectomes and makes it a straightforward process
+  even for users not familiar with Nipype and software container technology.
+Nevertheless, it still fulfils the needs of advanced users in charge of analyzing huge amount of data,
+  offering them the possibility to tune and save all the parameters in configuration files and create a batch
+  job to automatically process all data with the BIDS App.
 
 \textbf{Outputs ready to be consumed in the BIDS ecosystem.}
 CMP3 outputs follow as close as possible the BIDS Derivatives specifications,
   which facilitates the sharing of the derivatives in the BIDS App ecosystem,
   and allows the user to easily retrieve any of the files generated by CMP3
   with tools of the BIDS ecosystem such as pybids [@Yarkoni:2019].
+However, it introduces a new BIDS entity ``atlas-<atlas_label>``that is used in combination
+  with the res-<atlas_scale> entity to distinguish imaging and network data derived
+  from different parcellation atlases and scales.
 While the BIDS-Derivatives extension to organize network data is being developed, in which we
   are actively participating, both structural and functional connectomes generated with CMP3 are
   saved by default as graph edge lists in `.tsv` files, that can be directly analyzed using
@@ -260,7 +259,7 @@ More details about CMP3, the different processing steps and generated outputs to
 Connectome Mapper 3 has been employed with success in a number of methodological
   [@Zheng2020GeometricConnectomeb] [@GlombNeuro:2020] [@GlombNet:2020] [@AkselrodHBM:2021]
   [@RueQueraltNeuro:2021] [@PascucciNet:2021], clinical [@Carboni2019TheOutcome] 
-  [@Vorderwulbecke2020High-densityPoint] [@CarboniNeuro:2020], and data [@ds003505:1.0.1]
+  [@Vorderwulbecke2020High-densityPoint] [@CarboniNeuro:2020], and data [@Pascucci2022]
   research articles. 
 
 # Acknowledgements
