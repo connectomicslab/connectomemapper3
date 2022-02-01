@@ -116,6 +116,10 @@ As illustrated by \autoref{fig:cmp3-diagram} CMP3's workflow is composed of thre
   pipeline (anatomical, diffusion, and fMRI) dedicated to the processing of each modality (sMRI, dMRI, rfMRI).
 Each pipeline is represented by a Nipype workflow that takes a BIDS formatted dataset as input, and
   runs a number of sub-workflows (stages).
+
+![\textbf{Overview of participant-level analysis workflow of the Connectome Mapper 3 BIDS App.}
+\label{fig:cmp3-diagram}](cmp3-diagram.png)
+
 Each stage implements one or multiple tasks, where each task can interface with either
   a specific tool including in FSL [@Jenkinson2012FSL], FreeSurfer [@Fischl2012FreeSurfer],
   ANTs [@AVANTS2008SymmetricBrain], dipy [@Garyfallidis2014DipyData],
@@ -124,9 +128,6 @@ Each stage implements one or multiple tasks, where each task can interface with 
 BIDS allows CMP3 to automatically identify the structure of the input data, to check the
   availability of sMRI, dMRI, rfMRI, and derived data, and to collect all the available acquisition
   metadata.
-
-![\textbf{Overview of participant-level analysis workflow of the Connectome Mapper 3 BIDS App.}
-\label{fig:cmp3-diagram}](cmp3-diagram.png)
 
 To guarantee consistent processing in large neuroimaging cohorts,
   pipeline and stage parameters can be set by loading pipeline
@@ -137,17 +138,17 @@ This enables CMP3 to self-adapt to the type of dMRI acquisition scheme (DTI, DSI
   to appropriately set up the set of available pipeline configuration parameters for its processing.
 Empowered by the Nipype workflow engine, the re-execution of the workflow will resume the
   processing at any stages a change of parameter occurred.
-This also enables the addition of new steps, stages or pipelines with relatively little effort to account for additional
-  imaging modalities and algorithms.
+
 To ensure reproducibility and maximize re-usability of the tool, the implemented pipelines are encapsulated
   in a Docker [@merkeldocker:2014] and a Singularity [@Kurtzer2017Singularity:Compute] software image
   containers, in concordance to the BIDS App framework [@GorgolewskiBIDSMethods:2017].
 This means that the BIDS App of CMP3 can be run on diversity of datasets Linux, MacOSX, Windows computers,
   and on high performance computing systems (clusters) for large-scale analysis.
+
 Design considerations makes CMP3 not only easy to install and use (as it provides the user with a computing
   environment in which the pipelines are guarantee to run, and where all dependencies
-  are already installed) on a diversity of multi-modal BIDS datasets, but also efficient in managing and scaling the pipeline execution
-  while recording provenance, and easy to customize it for specific needs.
+  are already installed) on a diversity of multi-modal BIDS datasets, but also efficient in managing and
+  scaling the pipeline execution while recording provenance, and easy to customize it for specific needs.
 At the time EEG is being integrated, CMP3 already provides a collection of interfaces dedicated
   for this modality that would allow anyone to map the connectivity derived from EEG in
   the CMP3 framework, as demonstrated in a tutorial notebook.
