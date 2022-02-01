@@ -74,34 +74,32 @@ The size and organization of these datasets as well as the increasing complexity
 
 The last ten years have indeed witnessed a number of technical advances and a trend towards the adoption
   by the community of open research practices, which promotes `open data` and `open method`,
-  to address these challenges [@Nichols:2017] [@EglenTowardNeuroscience:2017] [@Kennedy:2019].
+  to address these challenges [@Nichols:2017] [@EglenTowardNeuroscience:2017] [@Kennedy2019].
 This has led in particular to the creation of a community standard, know as the Brain Imaging Data Structure (BIDS)
   standard, initially designed to ease the practice of sharing raw MRI data [@GorgolewskiTheExperiments:2016]. 
 [@GorgolewskiBIDSMethods:2017].
 Combined with advances in software virtualization, BIDS has enabled the creation of the BIDS Apps
-  framework which uses software container technology to achieve portability and reproducibiliy,
-  creating, testing, versioning and archiving portable applications for analyzing neuroimaging data organized
-  and described in compliance with the Brain Imaging Data Structure (BIDS).
+  framework which uses software container technology to encapsulate neuroimaging processing pipelines
+  and ensure portability and reproducibility.
 A large ecosystem of processing pipelines supporting the mapping of connectomes has evolved around this framework,
   including C-PAC [@cpac:2013], NIAK [@BellecNeuroimagingNIAK:2016], fMRIPrep [@Ghosh:2018], dMRIPrep [@dmriprep:2019],
   QSIPREP [@CieslakQSIPrep:2020], MRtrix3_connectome [@Smith2019:BIDSApp], NDMG [@KiarAVariability:2018]
   and PyNets [@PisnerPyNets:2020], which have all demonstrated their capability in addressing all challenges related to
   data sharing, portability, computing scalability, reliability, reproducibility and transparency.
-However, none of the existing solutions provide a direct alternative to Connectome Mapper (CMP),
-  whose has been created, and two major versions released, before the emergence of the BIDS standard and
-  the containerization technologies, to simplify the organisation and the analysis of sMRI, dMRI, and rfMRI from raw data to multi-scale
+However, none of the existing solutions provide a direct alternative to Connectome Mapper.
+
+Connectome Mapper (CMP) is an open-source pipeline software with a graphical user interface, designed
+  to simplify the organisation and the analysis of sMRI, dMRI, and rfMRI from raw data to multi-scale
   structural weighted and functional connectomes [@Daducci:2012], using in a common framework
   a multi-scale extension of the Desikan-Killiany parcellation [@Desikan2006AnInterest],
-  the so-called Lausanne brain parcellation [@Cammoun2012:MappingMRI], that opened the doors to a number
-  of integrative multimodal analysis.
-While CMP3 derives from the two preceding versions, it has made CMP massively evolve over the years
-  in terms of the underlying codebase, the tools used, and the scope of the functionality provided, including
-  the migration to Python 3, a brand-new Lausanne parcellation scheme, the adoption of the BIDS standard for
-  data organization, the encapsulation of the processing pipelines in software container images,
-  continuously tested in concordance to the BIDS Apps standard, major upgrades of the diffusion and
+  the so-called Lausanne brain parcellation [@Cammoun2012:MappingMRI], before the emergence of BIDS.
+While CMP3 derives from the two preceding versions and keeps the same philosophy, it has made CMP massively
+  evolve over the years in terms of the underlying codebase, the tools used, and the scope of the functionality
+  provided, including the migration to Python 3, a brand-new Lausanne parcellation scheme, the adoption
+  of the BIDS standard for data organization, the encapsulation of the processing pipelines in software
+  container images, continuously tested in concordance to the BIDS Apps standard, major upgrades of the diffusion and
   fMRI pipelines, and the current extension to ElectroEncephaloGraphy (EEG), initiated during OHBM BrainHack 2020
-  ([https://github.com/ohbm/hackathon2020/issues/214](https://github.com/ohbm/hackathon2020/issues/214)),
-  keeps. 
+  ([https://github.com/ohbm/hackathon2020/issues/214](https://github.com/ohbm/hackathon2020/issues/214)).
 
 # Summary
 
@@ -219,18 +217,15 @@ CMP3 outputs follow as close as possible the BIDS Derivatives specifications,
   with tools of the BIDS ecosystem such as pybids [@Yarkoni:2019].
 While the BIDS-Derivatives extension to organize network data is being developed, in which we
   are actively participating, both structural and functional connectomes generated with CMP3 are
-  saved by default in `.tsv` files and as graph objects with Python pickle format,
-  that can be directly analyzed using the
-  \href{https://networkx.org/documentation/stable/tutorial.html}{NetworkX} Python library, which
-  offers many general purpose algorithms to explore graphs as well as tools to compute local and
-  global network properties.
-Connectivity matrices can also be exported to Matlab as MAT-files and fed to the
+  saved by default as graph edge lists in `.tsv` files, that can be directly analyzed using
+  the \href{https://networkx.org/documentation/stable/tutorial.html}{NetworkX}, a Python library which
+  offers many algorithms and tools to explore graphs and compute local and global network properties.
+Connectivity matrices exported to Matlab as MAT-files and fed to the
   \href{www.brain-connectivity-toolbox.net}{Brain Connectivity Toolbox}, which is a powerful
   toolbox containing a large selection of network measures for the characterization of brain
   connectivity datasets.
-Finally, connectomes can be saved in generic file formats such as GraphML, GML and DOT to
-  interface with a lot of general purpose software packages for graph analysis such as
-  \href{www.cytoscape.org}{Cytoscape} or \href{www.gephi.org}{Gephi}.
+Finally, connectomes can be saved in GraphML format to interface with a lot of general purpose
+  software packages for graph analysis such as \href{www.cytoscape.org}{Cytoscape} or \href{www.gephi.org}{Gephi}.
 Not only this ensures that the connectome files can be opened by
   the most popular software packages used in this field to perform complex network
   analyzes, but also this eases the reuse of all outputs in the BIDS ecosystem.
@@ -246,7 +241,11 @@ The documentations also provides a \href{https://connectome-mapper-3.readthedocs
   license's disclaimers of warranty are maintained.
 The source code for CMP3 is hosted at
   [https://github.com/sebastientourbier/connectomemapper3](https://github.com/sebastientourbier/connectomemapper3),
-  and each release is archived to Zenodo [@ZenodoCMP:2021].
+  where all bugs and contributions are transparently discussed and managed through issues, and each release is
+  archived to Zenodo [@ZenodoCMP:2021].
+In case of problems, CMP3 has a dedicated forum at
+  [groups.google.com/group/cmtk-users](groups.google.com/group/cmtk-users) where a
+  community of users is active to support and have scientific discussions.
 To be robust to adverse code changes, versions are released through continuous integration building
   and testing.
 Specifically, this involves testing the installation of the python package, the build of
@@ -254,20 +253,11 @@ Specifically, this involves testing the installation of the python package, the 
   images adopting multiple pipeline configurations, using a sample multi-modal MRI dataset [@Tourbier2020SampleDataset]
   that has been created for this purpose.
 Doing so, we can guarantee the full functionality of each new released version of CMP3.
-A detailed documentation is available
-  at [connectome-mapper-3.readthedocs.io](connectome-mapper-3.readthedocs.io) that is
+More details about CMP3, the different processing steps and generated outputs together with
+  installation and usage instructions, and different tutorials supporting the analysis, and the interpretation of
+  the generated outputs with popular tools, can be found in the documentation
+  ([connectome-mapper-3.readthedocs.io](connectome-mapper-3.readthedocs.io)) that is
   kept up to date with the current release and can be retrieved for older versions.
-It includes in particular step-by-step guides for installation and usage together with the
-  description of all processing steps and
-  \href{https://connectome-mapper-3.readthedocs.io/en/latest/outputs.html}{generated outputs},
-  and some tutorials that support the analysis with Datalad, and the interpretation of
-  its outputs with popular tools.
-In case of problems, CMP3 has a dedicated forum at
-  [groups.google.com/group/cmtk-users](groups.google.com/group/cmtk-users) where a
-  community of users is active to support and have scientific discussions.
-Furthermore, bugs as well as both internal and external developer contributions are
-  discussed and managed through issues directly on GitHub for transparent software
-  development.
 
 # Mention
 
