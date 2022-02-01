@@ -198,7 +198,7 @@ class Despike(AFNICommand):
         if isdefined(self.inputs.out_file):
             if outputs[name]:
                 print('out_file: {}'.format(outputs[name]))
-                _, base, ext = split_filename(outputs[name])
+                _, _, ext = split_filename(outputs[name])
                 if ext == "":
                     outputs[name] = outputs[name] + "+orig.BRIK"
         else:

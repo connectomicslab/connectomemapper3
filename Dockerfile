@@ -175,7 +175,8 @@ COPY README.md ./README.md
 COPY cmp ./cmp
 COPY cmtklib ./cmtklib
 COPY resources ./resources
-COPY run.py ./run.py
+COPY run.py ../run.py
+COPY .coveragerc ../.coveragerc
 
 # Create cache directory for python eggs
 RUN mkdir -p /cache/python-eggs && \
@@ -201,7 +202,8 @@ RUN cat /app/run_coverage_cmp3.sh
 ##################################################################
 # Acquire script to be executed
 ##################################################################
-RUN chmod 775 /app/connectomemapper3/run.py && \
+RUN chmod 775 /app/.coveragerc && \
+    chmod 775 /app/run.py && \
     chmod 775 /app/run_cmp3.sh && \
     chmod 775 /app/run_coverage_cmp3.sh && \
     chmod 777 /opt/freesurfer

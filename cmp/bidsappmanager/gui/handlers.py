@@ -1498,20 +1498,20 @@ class MainWindowHandler(Handler):
 
                 loaded_project.subjects = []
                 for subj in bids_layout.get_subjects():
-                    if debug:
+                    if debug:  # pragma: no cover
                         print("sub: %s" % subj)
                     if "sub-" + str(subj) not in loaded_project.subjects:
                         loaded_project.subjects.append("sub-" + str(subj))
                 # loaded_project.subjects = ['sub-'+str(subj) for subj in bids_layout.get_subjects()]
                 loaded_project.subjects.sort()
 
-                if debug:
+                if debug:  # pragma: no cover
                     print("Available subjects : ")
                     print(loaded_project.subjects)
                 loaded_project.number_of_subjects = len(loaded_project.subjects)
 
                 loaded_project.subject = loaded_project.subjects[0]
-                if debug:
+                if debug:  # pragma: no cover
                     print(loaded_project.subject)
 
                 subject = loaded_project.subject.split("-")[1]
@@ -1520,7 +1520,7 @@ class MainWindowHandler(Handler):
                     target="session", return_type="id", subject=subject
                 )
 
-                if debug:
+                if debug:  # pragma: no cover
                     print("Sessions: ")
                     print(sessions)
 
@@ -1542,7 +1542,7 @@ class MainWindowHandler(Handler):
                             subject=subject,
                             session=sessions[0],
                             suffix="bold",
-                            extensions=["nii", "nii.gz"],
+                            extension=["nii", "nii.gz"],
                         )
                     ]
                     if len(query_files) > 0:
@@ -1555,7 +1555,7 @@ class MainWindowHandler(Handler):
                             subject=subject,
                             session=sessions[0],
                             suffix="T1w",
-                            extensions=["nii", "nii.gz"],
+                            extension=["nii", "nii.gz"],
                         )
                     ]
                     if len(query_files) > 0:
@@ -1568,7 +1568,7 @@ class MainWindowHandler(Handler):
                             subject=subject,
                             session=sessions[0],
                             suffix="T2w",
-                            extensions=["nii", "nii.gz"],
+                            extension=["nii", "nii.gz"],
                         )
                     ]
                     if len(query_files) > 0:
@@ -1581,7 +1581,7 @@ class MainWindowHandler(Handler):
                             subject=subject,
                             session=sessions[0],
                             suffix="dwi",
-                            extensions=["nii", "nii.gz"],
+                            extension=["nii", "nii.gz"],
                         )
                     ]
                     if len(query_files) > 0:
@@ -1595,7 +1595,7 @@ class MainWindowHandler(Handler):
                     query_files = [
                         f.filename
                         for f in bids_layout.get(
-                            subject=subject, suffix="T1w", extensions=["nii", "nii.gz"]
+                            subject=subject, suffix="T1w", extension=["nii", "nii.gz"]
                         )
                     ]
                     if len(query_files) > 0:
@@ -1605,7 +1605,7 @@ class MainWindowHandler(Handler):
                     query_files = [
                         f.filename
                         for f in bids_layout.get(
-                            subject=subject, suffix="T2w", extensions=["nii", "nii.gz"]
+                            subject=subject, suffix="T2w", extension=["nii", "nii.gz"]
                         )
                     ]
                     if len(query_files) > 0:
@@ -1615,7 +1615,7 @@ class MainWindowHandler(Handler):
                     query_files = [
                         f.filename
                         for f in bids_layout.get(
-                            subject=subject, suffix="dwi", extensions=["nii", "nii.gz"]
+                            subject=subject, suffix="dwi", extension=["nii", "nii.gz"]
                         )
                     ]
                     if len(query_files) > 0:
@@ -1625,7 +1625,7 @@ class MainWindowHandler(Handler):
                     query_files = [
                         f.filename
                         for f in bids_layout.get(
-                            subject=subject, suffix="bold", extensions=["nii", "nii.gz"]
+                            subject=subject, suffix="bold", extension=["nii", "nii.gz"]
                         )
                     ]
                     if len(query_files) > 0:
@@ -1655,7 +1655,7 @@ class MainWindowHandler(Handler):
             fmri_inputs_checked = False
             if t1_available and fmri_available:
                 fmri_inputs_checked = True
-                if debug:
+                if debug:  # pragma: no cover
                     print("fmri input check : {}".format(fmri_inputs_checked))
 
             self.anat_inputs_checked = anat_inputs_checked
@@ -1783,10 +1783,10 @@ class MainWindowHandler(Handler):
                                     suffix="dwi",
                                     target="acquisition",
                                     return_type="id",
-                                    extensions=["nii", "nii.gz"],
+                                    extension=["nii", "nii.gz"],
                                 )
                             ]
-                            if debug:
+                            if debug:  # pragma: no cover
                                 print(
                                     "DIFFUSION IMAGING MODELS : {}".format(
                                         diffusion_imaging_models
@@ -1842,11 +1842,11 @@ class MainWindowHandler(Handler):
                                     subject=subject,
                                     session=session,
                                     suffix="dwi",
-                                    extensions=["nii", "nii.gz"],
+                                    extension=["nii", "nii.gz"],
                                 )
                             ]
 
-                            if debug:
+                            if debug:  # pragma: no cover
                                 print("****************************************")
                                 print(files)
                                 print("****************************************")
@@ -1855,7 +1855,7 @@ class MainWindowHandler(Handler):
                                 for file in files:
                                     if loaded_project.dmri_bids_acq in file:
                                         dwi_file = file
-                                        if debug:
+                                        if debug:  # pragma: no cover
                                             print(
                                                 "Loaded DWI file: {}".format(dwi_file)
                                             )
@@ -1870,7 +1870,7 @@ class MainWindowHandler(Handler):
                                     suffix="dwi",
                                     target="acquisition",
                                     return_type="id",
-                                    extensions=["nii", "nii.gz"],
+                                    extension=["nii", "nii.gz"],
                                 )
                             ]
 

@@ -22,7 +22,7 @@ import nipype.interfaces.ants as ants
 # Own imports
 from cmp.stages.common import Stage
 from cmtklib.interfaces.mrtrix3 import DWI2Tensor, MRConvert, ExtractMRTrixGrad
-from cmtklib.interfaces.fsl import ApplymultipleXfm, ApplymultipleWarp
+from cmtklib.interfaces.fsl import ApplymultipleXfm
 import cmtklib.interfaces.freesurfer as cmp_fs
 import cmtklib.interfaces.fsl as cmp_fsl
 from cmtklib.interfaces.ants import MultipleANTsApplyTransforms
@@ -1274,7 +1274,7 @@ class RegistrationStage(Stage):
 
         return flow
 
-    def define_inspect_outputs(self):
+    def define_inspect_outputs(self):  # pragma: no cover
         """Update the `inspect_outputs` class attribute.
 
         It contains a dictionary of stage outputs with corresponding commands for visual inspection.
@@ -1282,7 +1282,7 @@ class RegistrationStage(Stage):
         # print("stage_dir : %s" % self.stage_dir)
         if self.config.pipeline == "Diffusion":
             dwi_sinker_dir = os.path.join(
-                os.path.dirname(self.stage_dir), "diffusion_sinker"
+                os.path.dirname(self.stage_dir), "dwi_datasinker"
             )
             dwi_sinker_report = os.path.join(dwi_sinker_dir, "_report", "report.rst")
 

@@ -268,13 +268,13 @@ class SegmentationStage(Stage):
         if self.config.seg_tool == "Freesurfer":
 
             def correct_freesurfer_subjectid_path(path):
-                if '/output_dir' not in path:
+                if os.path.exists('/output_dir') and '/output_dir' not in path:
                     subject_id = path.split(f"{__freesurfer_directory__}/")[-1]
                     path = os.path.abspath(f'/output_dir/{__freesurfer_directory__}/{subject_id}')
                 return path
 
             def correct_freesurfer_subjects_path(path):
-                if '/output_dir' not in path:
+                if os.path.exists('/output_dir') and '/output_dir' not in path:
                     path = os.path.abspath(f'/output_dir/{__freesurfer_directory__}')
                 return path
 
@@ -579,7 +579,7 @@ class SegmentationStage(Stage):
                 )
                 fs_path = self.config.freesurfer_subject_id
                 if os.path.exists(reconall_report_path):
-                    if debug:
+                    if debug:  # pragma: no cover
                         print("Read {}".format(reconall_report_path))
                     fs_path = extract_freesurfer_subject_dir(
                         reconall_report_path, self.output_dir, debug=debug
@@ -590,7 +590,7 @@ class SegmentationStage(Stage):
                     self.config.freesurfer_subject_id,
                 )
 
-            if debug:
+            if debug:  # pragma: no cover
                 print("fs_path : %s" % fs_path)
 
             self.inspect_outputs_dict["T1/brainmask"] = [

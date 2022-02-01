@@ -21,7 +21,6 @@ from nipype.interfaces.base import (
     OutputMultiPath,
     InputMultiPath,
 )
-from nipype.utils.filemanip import split_filename
 
 from traits.trait_types import List, Str, Int, Enum
 
@@ -44,32 +43,32 @@ def compute_length_array(trkfile=None, streams=None, savefname="lengths.npy"):
 
     Returns
     -------
-    leng : numpy.array
+    fibers_length : numpy.array
         Array of fiber lengths
     """
     if streams is None and trkfile is not None:
-        print("Compute length array for fibers in %s" % trkfile)
+        print(f'Compute length array for fibers in {trkfile}')
         streams, hdr = tv.read(trkfile, as_generator=True)
         n_fibers = hdr["n_count"]
         if n_fibers == 0:
             msg = (
-                "Header field n_count of trackfile %s is set to 0. No track seem to exist in this file."
-                % trkfile
+                f'Header field n_count of trackfile {trkfile} is set to 0. '
+                "No track seem to exist in this file."
             )
             print(msg)
             raise Exception(msg)
     else:
         n_fibers = len(streams)
 
-    leng = np.zeros(n_fibers, dtype=np.float)
+    fibers_length = np.zeros(n_fibers, dtype=np.float)
     for i, fib in enumerate(streams):
-        leng[i] = length(fib[0])
+        fibers_length[i] = length(fib[0])
 
     # store length array
-    np.save(savefname, leng)
-    print("Store lengths array to: %s" % savefname)
+    np.save(savefname, fibers_length)
+    print(f'Store lengths array to: {savefname}')
 
-    return leng
+    return fibers_length
 
 
 def filter_fibers(intrk, outtrk="", fiber_cutoff_lower=20, fiber_cutoff_upper=500):
@@ -92,7 +91,7 @@ def filter_fibers(intrk, outtrk="", fiber_cutoff_lower=20, fiber_cutoff_upper=50
     print("Cut Fiber Filtering")
     print("===================")
 
-    print("Input file for fiber cutting is: %s" % intrk)
+    print(f'Input file for fiber cutting is: {intrk}')
 
     if outtrk == "":
         _, filename = os.path.split(intrk)
@@ -119,10 +118,10 @@ def filter_fibers(intrk, outtrk="", fiber_cutoff_lower=20, fiber_cutoff_upper=50
 
     # print("Compute length array for cutted fibers")
     # le = compute_length_array(streams=outstreams)
-    print("Write out file: %s" % outtrk)
-    print("Number of fibers out : %d" % hdrnew["n_count"])
+    print(f'Write out file: {outtrk}')
+    print(f'Number of fibers out : {hdrnew["n_count"]}')
     tv.write(outtrk, outstreams, hdrnew)
-    print("File wrote : %d" % os.path.exists(outtrk))
+    print(f'File wrote : {os.path.exists(outtrk)}')
 
     # ----
     # extension idea
@@ -174,7 +173,7 @@ class FlipTable(BaseInterface):
         axis_dict = {"x": 0, "y": 1, "z": 2}
         f = open(self.inputs.table, "r")
         header = ""
-        for h in range(self.inputs.header_lines):
+        for _ in range(self.inputs.header_lines):
             header += f.readline()
         if self.inputs.delimiter == " ":
             table = np.loadtxt(f)
@@ -303,7 +302,7 @@ class ExtractPVEsFrom5TT(BaseInterface):
         process = subprocess.Popen(
             fslmaths_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
         )
-        proc_stdout = process.communicate()[0].strip()
+        _ = process.communicate()[0].strip()
 
         fslmaths_cmd = "fslmaths %s -kernel sphere %s -dilD %s" % (
             os.path.abspath(self.inputs.pve_wm_file),
@@ -315,7 +314,7 @@ class ExtractPVEsFrom5TT(BaseInterface):
         process = subprocess.Popen(
             fslmaths_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
         )
-        proc_stdout = process.communicate()[0].strip()
+        _ = process.communicate()[0].strip()
 
         fslmaths_cmd = "fslmaths %s -kernel sphere %s -dilD %s" % (
             os.path.abspath(self.inputs.pve_gm_file),
@@ -327,7 +326,7 @@ class ExtractPVEsFrom5TT(BaseInterface):
         process = subprocess.Popen(
             fslmaths_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
         )
-        proc_stdout = process.communicate()[0].strip()
+        _ = process.communicate()[0].strip()
 
         fslmaths_cmd = "fslmaths %s -kernel gauss %s -fmean %s" % (
             os.path.abspath(self.inputs.pve_csf_file),
@@ -339,7 +338,7 @@ class ExtractPVEsFrom5TT(BaseInterface):
         process = subprocess.Popen(
             fslmaths_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
         )
-        proc_stdout = process.communicate()[0].strip()
+        _ = process.communicate()[0].strip()
 
         fslmaths_cmd = "fslmaths %s -kernel gauss %s -fmean %s" % (
             os.path.abspath(self.inputs.pve_wm_file),
@@ -351,7 +350,7 @@ class ExtractPVEsFrom5TT(BaseInterface):
         process = subprocess.Popen(
             fslmaths_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
         )
-        proc_stdout = process.communicate()[0].strip()
+        _ = process.communicate()[0].strip()
 
         fslmaths_cmd = "fslmaths %s -kernel gauss %s -fmean %s" % (
             os.path.abspath(self.inputs.pve_gm_file),
@@ -363,7 +362,7 @@ class ExtractPVEsFrom5TT(BaseInterface):
         process = subprocess.Popen(
             fslmaths_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
         )
-        proc_stdout = process.communicate()[0].strip()
+        _ = process.communicate()[0].strip()
 
         pve_csf = nib.load(os.path.abspath(self.inputs.pve_csf_file)).get_data()
         pve_wm = nib.load(os.path.abspath(self.inputs.pve_wm_file)).get_data()
@@ -387,14 +386,11 @@ class ExtractPVEsFrom5TT(BaseInterface):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-
-        pve_files = []
-        pve_files.append(os.path.abspath(self.inputs.pve_csf_file))
-        pve_files.append(os.path.abspath(self.inputs.pve_gm_file))
-        pve_files.append(os.path.abspath(self.inputs.pve_wm_file))
-
-        outputs["partial_volume_files"] = pve_files
-
+        outputs["partial_volume_files"] = [
+            os.path.abspath(self.inputs.pve_csf_file),
+            os.path.abspath(self.inputs.pve_gm_file),
+            os.path.abspath(self.inputs.pve_wm_file)
+        ]
         return outputs
 
 
@@ -505,7 +501,7 @@ class FlipBvec(BaseInterface):
 
         f = open(self.inputs.bvecs, "r")
         header = ""
-        for h in range(self.inputs.header_lines):
+        for _ in range(self.inputs.header_lines):
             header += f.readline()
         if self.inputs.delimiter == " ":
             table = np.loadtxt(f)
@@ -526,14 +522,6 @@ class FlipBvec(BaseInterface):
             else:
                 np.savetxt(out_f, table, delimiter=self.inputs.delimiter)
 
-        # with open(os.path.abspath('flipped_bvecs.bvec'), 'w') as out_f:
-        #    np.savetxt(out_f, table, header=header, delimiter=self.inputs.delimiter)
-
-        # out_f = file(os.path.abspath('flipped_bvecs.bvec'), 'w')
-        # if self.inputs.header_lines > 0:
-        #     out_f.write(header)
-        # np.savetxt(out_f, table, header=header, delimiter=self.inputs.delimiter)
-        # out_f.close()
         return runtime
 
     def _list_outputs(self):
@@ -657,238 +645,5 @@ class UpdateGMWMInterfaceSeeding(BaseInterface):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-
         outputs["out_gmwmi_file"] = os.path.abspath(self.inputs.out_gmwmi_file)
-
-        return outputs
-
-
-class MakeSeedsInputSpec(BaseInterfaceInputSpec):
-    ROI_files = InputMultiPath(
-        File(exists=True), desc="ROI files registered to diffusion space"
-    )
-
-    WM_file = File(mandatory=True, desc="WM mask file registered to diffusion space")
-    # DWI = File(mandatory=True,desc='Diffusion data file for probabilistic tractography')
-
-
-class MakeSeedsOutputSpec(TraitedSpec):
-    seed_files = OutputMultiPath(
-        File(exists=True), desc="Seed files for probabilistic tractography"
-    )
-
-
-class MakeSeeds(BaseInterface):
-    """Creates seeding ROIs by intersecting dilated ROIs with WM mask for `Dipy`.
-
-    Examples
-    --------
-    >>> from cmtklib.diffusion import MakeSeeds
-    >>> make_dipy_seeds = MakeSeeds()
-    >>> make_dipy_seeds.inputs.ROI_files  = ['sub-01_space-DWI_atlas-L2018_desc-scale1_dseg.nii.gz',
-    >>>                                 'sub-01_space-DWI_atlas-L2018_desc-scale2_dseg.nii.gz',
-    >>>                                 'sub-01_space-DWI_atlas-L2018_desc-scale3_dseg.nii.gz',
-    >>>                                 'sub-01_space-DWI_atlas-L2018_desc-scale4_dseg.nii.gz',
-    >>>                                 'sub-01_space-DWI_atlas-L2018_desc-scale5_dseg.nii.gz']
-    >>> make_dipy_seeds.inputs.WM_file = 'sub-01_space-DWI_label-WM_dseg.nii.gz'
-    >>> make_dipy_seeds.run()  # doctest: +SKIP
-
-    """
-
-    input_spec = MakeSeedsInputSpec
-    output_spec = MakeSeedsOutputSpec
-    ROI_idx = []
-    base_name = ""
-
-    def _run_interface(self, runtime):
-        print(
-            "Computing seed files for probabilistic tractography\n"
-            "==================================================="
-        )
-        # Load ROI file
-        txt_file = open(self.base_name + "_seeds.txt", "w")
-
-        print(self.inputs.ROI_files)
-
-        for ROI_file in self.inputs.ROI_files:
-            ROI_vol = nib.load(ROI_file)
-            ROI_data = ROI_vol.get_data()
-            ROI_affine = ROI_vol.get_affine()
-            # Load WM mask
-            WM_vol = nib.load(self.inputs.WM_file)
-            WM_data = WM_vol.get_data()
-            # Extract ROI indexes, define number of ROIs, overlap code and start ROI dilation
-            print("ROI dilation...")
-            tmp_data = np.unique(ROI_data[ROI_data != 0]).astype(int)
-            print(tmp_data.shape)
-            self.ROI_idx = np.unique(tmp_data).astype(int)
-            bins = np.arange(83)
-            counts = np.histogram(self.ROI_idx, bins=bins)
-            print(counts)
-            print(self.ROI_idx.shape)
-            print(self.ROI_idx)
-            # Take overlap between dilated ROIs and WM to define seeding regions
-            border = (np.multiply(ROI_data, WM_data)).astype(int)
-            # Save one nifti file per seeding ROI
-            temp = border.copy()
-            # print border.max
-            _, self.base_name, _ = split_filename(ROI_file)
-            for i in self.ROI_idx:
-                temp[border == i] = 1
-                temp[border != i] = 0
-                new_image = nib.Nifti1Image(temp, ROI_affine)
-                save_as = os.path.abspath(
-                    self.base_name + "_seed_" + str(i) + ".nii.gz"
-                )
-                txt_file.write(
-                    str(self.base_name + "_seed_" + str(i) + ".nii.gz" + "\n")
-                )
-                nib.save(new_image, save_as)
-        txt_file.close()
-        return runtime
-
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs["seed_files"] = self.gen_outputfilelist()
-        return outputs
-
-    def gen_outputfilelist(self):
-        output_list = []
-        for i in self.ROI_idx:
-            output_list.append(
-                os.path.abspath(self.base_name + "_seed_" + str(i) + ".nii.gz")
-            )
-        return output_list
-
-
-class Make_Mrtrix_Seeds(BaseInterface):
-    """Creates seeding ROIs by intersecting dilated ROIs with WM mask for `mrtrix`.
-
-    Examples
-    --------
-    >>> from cmtklib.diffusion import Make_Mrtrix_Seeds
-    >>> make_mrtrix_seeds = Make_Mrtrix_Seeds()
-    >>> make_mrtrix_seeds.inputs.ROI_files  = ['sub-01_space-DWI_atlas-L2018_desc-scale1_dseg.nii.gz',
-    >>>                                 'sub-01_space-DWI_atlas-L2018_desc-scale2_dseg.nii.gz',
-    >>>                                 'sub-01_space-DWI_atlas-L2018_desc-scale3_dseg.nii.gz',
-    >>>                                 'sub-01_space-DWI_atlas-L2018_desc-scale4_dseg.nii.gz',
-    >>>                                 'sub-01_space-DWI_atlas-L2018_desc-scale5_dseg.nii.gz']
-    >>> make_mrtrix_seeds.inputs.WM_file = 'sub-01_space-DWI_label-WM_dseg.nii.gz'
-    >>> make_mrtrix_seeds.run()  # doctest: +SKIP
-
-    """
-
-    input_spec = MakeSeedsInputSpec
-    output_spec = MakeSeedsOutputSpec
-    ROI_idx = []
-    base_name = ""
-
-    def _run_interface(self, runtime):
-        print(
-            "Computing seed files for probabilistic tractography\n==================================================="
-        )
-        # Load ROI file
-        print(self.inputs.ROI_files)
-
-        for ROI_file in self.inputs.ROI_files:
-            ROI_vol = nib.load(ROI_file)
-            ROI_data = ROI_vol.get_data()
-            ROI_affine = ROI_vol.get_affine()
-            # Load WM mask
-            WM_vol = nib.load(self.inputs.WM_file)
-            WM_data = WM_vol.get_data()
-            # Extract ROI indexes, define number of ROIs, overlap code and start ROI dilation
-            print("ROI dilation...")
-            tmp_data = np.unique(ROI_data[ROI_data != 0]).astype(int)
-            print(tmp_data.shape)
-            self.ROI_idx = np.unique(tmp_data).astype(int)
-            bins = np.arange(83)
-            counts = np.histogram(self.ROI_idx, bins=bins)
-            print(counts)
-            print(self.ROI_idx.shape)
-            print(self.ROI_idx)
-            # Take overlap between dilated ROIs and WM to define seeding regions
-            border = (np.multiply(ROI_data, WM_data)).astype(int)
-            # Save one nifti file per seeding ROI
-            _, self.base_name, _ = split_filename(ROI_file)
-
-            new_image = nib.Nifti1Image(border, ROI_affine)
-            save_as = os.path.abspath(self.base_name + "_seeds.nii.gz")
-            nib.save(new_image, save_as)
-        return runtime
-
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs["seed_files"] = os.path.abspath(self.base_name + "_seeds.nii.gz")
-        return outputs
-
-
-class SplitDiffusionInputSpec(BaseInterfaceInputSpec):
-    in_file = File(exists=True, desc="Input diffusion MRI file")
-
-    start = Int(0, desc="Volume index to start the split")
-
-    end = Int(desc="Volume index to end the split")
-
-
-class SplitDiffusionOutputSpec(TraitedSpec):
-    data = File(exists=True, desc="Extracted volumes")
-
-    padding1 = File(exists=False, desc="Extracted volumes with padding 1")
-
-    padding2 = File(exists=False, desc="Extracted volumes with padding 2")
-
-
-class SplitDiffusion(BaseInterface):
-    """Extract volumes from diffusion MRI data given a start and end index.
-
-    Examples
-    --------
-    >>> from cmtklib.diffusion import SplitDiffusion
-    >>> split_dwi = SplitDiffusion()
-    >>> split_dwi.inputs.in_file  = 'sub-01_dwi.nii.gz'
-    >>> split_dwi.inputs.start  = 5
-    >>> split_dwi.inputs.in_file  = 30
-    >>> split_dwi.run()  # doctest: +SKIP
-
-    """
-
-    input_spec = SplitDiffusionInputSpec
-    output_spec = SplitDiffusionOutputSpec
-
-    def _run_interface(self, runtime):
-        diffusion_file = nib.load(self.inputs.in_file)
-        diffusion = diffusion_file.get_data()
-        affine = diffusion_file.get_affine()
-        dim = diffusion.shape
-        if self.inputs.start > 0 and self.inputs.end > dim[3] - 1:
-            print(
-                "End volume is set to {} but it should be bellow {}".format(
-                    self.inputs.end, dim[3] - 1
-                )
-            )
-        padding_idx1 = list(range(0, self.inputs.start))
-        if len(padding_idx1) > 0:
-            temp = diffusion[:, :, :, 0 : self.inputs.start]
-            nib.save(
-                nib.nifti1.Nifti1Image(temp, affine), os.path.abspath("padding1.nii.gz")
-            )
-        temp = diffusion[:, :, :, self.inputs.start : self.inputs.end + 1]
-        nib.save(nib.nifti1.Nifti1Image(temp, affine), os.path.abspath("data.nii.gz"))
-        padding_idx2 = list(range(self.inputs.end, dim[3] - 1))
-        if len(padding_idx2) > 0:
-            temp = diffusion[:, :, :, self.inputs.end + 1 : dim[3]]
-            nib.save(
-                nib.nifti1.Nifti1Image(temp, affine), os.path.abspath("padding2.nii.gz")
-            )
-
-        return runtime
-
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs["data"] = os.path.abspath("data.nii.gz")
-        if os.path.exists(os.path.abspath("padding1.nii.gz")):
-            outputs["padding1"] = os.path.abspath("padding1.nii.gz")
-        if os.path.exists(os.path.abspath("padding2.nii.gz")):
-            outputs["padding2"] = os.path.abspath("padding2.nii.gz")
         return outputs
