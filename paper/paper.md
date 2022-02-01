@@ -74,12 +74,10 @@ The size and organization of these datasets as well as the increasing complexity
 
 The last ten years have indeed witnessed a number of technical advances and a trend towards the adoption
   by the community of open research practices, which promotes `open data` and `open method`,
-  to address these challenges.
+  to address these challenges [@Nichols:2017] [@EglenTowardNeuroscience:2017] [@Kennedy:2019].
 This has led in particular to the creation of a community standard, know as the Brain Imaging Data Structure (BIDS)
   standard, initially designed to ease the practice of sharing raw MRI data [@GorgolewskiTheExperiments:2016]. 
-[@GorgolewskiBIDSMethods:2017], and the elaboration of the principles of open and reproducible research for
-  neuroimaging using Magnetic Resonance Imaging (MRI) [@Nichols:2017] and to the recommendation of
-  standard practices for sharing code and programs [@EglenTowardNeuroscience:2017].
+[@GorgolewskiBIDSMethods:2017].
 Combined with advances in software virtualization, BIDS has enabled the creation of the BIDS Apps
   framework which uses software container technology to achieve portability and reproducibiliy,
   creating, testing, versioning and archiving portable applications for analyzing neuroimaging data organized
@@ -90,7 +88,7 @@ A large ecosystem of processing pipelines supporting the mapping of connectomes 
   and PyNets [@PisnerPyNets:2020], which have all demonstrated their capability in addressing all challenges related to
   data sharing, portability, computing scalability, reliability, reproducibility and transparency.
 However, none of the existing solutions provide a direct alternative to Connectome Mapper (CMP),
-  whose has been created, and two versions released, before the emergence of the BIDS standard and
+  whose has been created, and two major versions released, before the emergence of the BIDS standard and
   the containerization technologies, to simplify the organisation and the analysis of sMRI, dMRI, and rfMRI from raw data to multi-scale
   structural weighted and functional connectomes [@Daducci:2012], using in a common framework
   a multi-scale extension of the Desikan-Killiany parcellation [@Desikan2006AnInterest],
