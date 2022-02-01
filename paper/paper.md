@@ -100,18 +100,15 @@ While CMP3 derives from the two preceding versions and keeps the same philosophy
   container images, continuously tested in concordance to the BIDS Apps standard, major upgrades of the diffusion and
   fMRI pipelines, and the current extension to ElectroEncephaloGraphy (EEG), initiated during OHBM BrainHack 2020
   ([https://github.com/ohbm/hackathon2020/issues/214](https://github.com/ohbm/hackathon2020/issues/214)).
+CMP3 has been designed around different characteristics and principles along which it is summarized.
 
 # Summary
 
-Connectome Mapper 3 (CMP3) provides a unique open-source software pipeline solution, written in Python 3,
-  with a Graphical User Interface (GUI) for researchers to easily, reliably and transparently
-  interface with a number of widely adopted neuroimaging tools to create a hierarchical multi-scale
-  connectome representation of the structural and functional brain systems, from any sMRI / dMRI /
-  rfMRI dataset structured according to the BIDS standard.
-CMP3 has been designed around different characteristics and principles along which we will present it.
-
 \textbf{A flexible and interoperable workflow for multi-modal human connectome mapping.}
-CMP3 relies on Nipype [@GorgolewskiNipype:2011] and adopts a modular architecture.
+Connectome Mapper 3 (CMP3) 's workflow allows the creation a hierarchical multi-scale
+  connectome representation of the structural and functional brain systems, from any
+  sMRI / dMRI / rfMRI dataset structured according to the BIDS standard.
+It relies on Nipype [@GorgolewskiNipype:2011] and adopts a modular architecture.
 As illustrated by \autoref{fig:cmp3-diagram} CMP3's workflow is composed of three different
   pipeline (anatomical, diffusion, and fMRI) dedicated to the processing of each modality (sMRI, dMRI, rfMRI).
 Each pipeline is represented by a Nipype workflow that takes a BIDS formatted dataset as input, and
