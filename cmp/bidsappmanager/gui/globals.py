@@ -7,7 +7,8 @@
 """Modules that defines multiple variables and functions used by the different windows of the GUI."""
 
 import os
-from pyface.api import ImageResource
+from pyface.ui_traits import Image
+from pkg_resources import resource_filename
 
 # Remove warnings visible whenever you import scipy (or another package)
 # that was compiled against an older numpy than is installed.
@@ -101,23 +102,27 @@ style_sheet = """
         """
 
 
-def get_icon(path):
+def get_icon(icon_fname):  # pragma: no cover
     """Return an instance of `ImageResource` or None is there is not graphical backend.
 
     Parameters
     ----------
-    path : string
-        Path to an image file
+    icon_fname : string
+        Filename to an icon image
 
     Returns
     -------
-    icon : ImageResource
-        Return an instance of `ImageResource` or None is there is not graphical backend.
+    icon : string
+        Return the full path to the icon file or None is there is not graphical backend.
     """
     on_rtd = os.environ.get("READTHEDOCS") == "True"
     if on_rtd:
         print("READTHEDOCS: Return None for icon")
         icon = None
     else:
-        icon = ImageResource(path)
+        icon = resource_filename(
+            "cmp.bidsappmanager",
+            os.path.join("images", f"{icon_fname}")
+        )
+    print(icon)
     return icon
