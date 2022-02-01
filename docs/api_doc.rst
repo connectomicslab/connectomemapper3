@@ -107,7 +107,7 @@ Submodules
 ----------
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 4
 
    api/generated/cmtklib.carbonfootprint
    api/generated/cmtklib.config
