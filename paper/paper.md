@@ -61,7 +61,6 @@ It has revolutionized the way to investigate `in-vivo`, `non-invasively` and
   `safely` at different macroscopic scales the structural and functional systems of the 
   brain by modeling connections between brain areas as a graph or network, the so-called
   `connectome`, and has become a widely used method in Neuroscience [@Bassett2017]. 
-
 While brain areas are usually derived from high resolution T1 weighted  MR imaging, so-called
   structural MRI (sMRI), structural brain connectomes are mapped from diffusion MR imaging (dMRI)
   tractography, which exploits the diffusion of water molecules in biological tissues, and
@@ -73,23 +72,23 @@ The size and organization of these datasets as well as the increasing complexity
   pipelines to analyze them present important challenges for scalable computing, data sharing,
   reproducibility and transparency of the analysis.
 
-The last ten years have indeed witnessed an evolution of research incentives and a trend towards the adoption by the community of open research
-  practices, which promotes `open data` and `open method`, to address these challenges.
-This has led for instance to the elaboration of the principles of open and reproducible research for
+The last ten years have indeed witnessed a number of technical advances and a trend towards the adoption
+  by the community of open research practices, which promotes `open data` and `open method`,
+  to address these challenges.
+This has led in particular to the creation of a community standard, know as the Brain Imaging Data Structure (BIDS)
+  standard, initially designed to ease the practice of sharing raw MRI data [@GorgolewskiTheExperiments:2016]. 
+[@GorgolewskiBIDSMethods:2017], and the elaboration of the principles of open and reproducible research for
   neuroimaging using Magnetic Resonance Imaging (MRI) [@Nichols:2017] and to the recommendation of
-  standard practices for sharing code and programs [@EglenTowardNeuroscience:2017]. 
-To ease and automate the practice of sharing raw and processed neuroimaging data and code with
-  appropriate metadata and provenance records, multiple initiatives have developed new standards,
-  tools, and educational resources [@GorgolewskiNipype:2011] [@GorgolewskiTheExperiments:2016]
-  [@GorgolewskiBIDSMethods:2017] [@Kennedy2019].
-
-Following these advances, a number of processing pipelines, supporting the mapping of connectomes
-  derived from MRI data organized following the BIDS standard, such as C-PAC [@cpac:2013],
-  NIAK [@BellecNeuroimagingNIAK:2016], fMRIPrep [@Ghosh:2018], dMRIPrep [@dmriprep:2019],
+  standard practices for sharing code and programs [@EglenTowardNeuroscience:2017].
+Combined with advances in software virtualization, BIDS has enabled the creation of the BIDS Apps
+  framework which uses software container technology to achieve portability and reproducibiliy,
+  creating, testing, versioning and archiving portable applications for analyzing neuroimaging data organized
+  and described in compliance with the Brain Imaging Data Structure (BIDS).
+A large ecosystem of processing pipelines supporting the mapping of connectomes has evolved around this framework,
+  including C-PAC [@cpac:2013], NIAK [@BellecNeuroimagingNIAK:2016], fMRIPrep [@Ghosh:2018], dMRIPrep [@dmriprep:2019],
   QSIPREP [@CieslakQSIPrep:2020], MRtrix3_connectome [@Smith2019:BIDSApp], NDMG [@KiarAVariability:2018]
-  and PyNets [@PisnerPyNets:2020] have been developed.
-They have demonstrated their capability in addressing all the challenges of data sharing,
-  portability, computing scalability, reliability, reproducibility and transparency.
+  and PyNets [@PisnerPyNets:2020], which have all demonstrated their capability in addressing all challenges related to
+  data sharing, portability, computing scalability, reliability, reproducibility and transparency.
 However, none of the existing solutions provide a direct alternative to Connectome Mapper (CMP),
   whose has been created, and two versions released, before the emergence of the BIDS standard and
   the containerization technologies, to simplify the organisation and the analysis of sMRI, dMRI, and rfMRI from raw data to multi-scale
@@ -147,7 +146,7 @@ This also enables the addition of new steps, stages or pipelines with relatively
   imaging modalities and algorithms.
 To ensure reproducibility and maximize re-usability of the tool, the implemented pipelines are encapsulated
   in a Docker [@merkeldocker:2014] and a Singularity [@Kurtzer2017Singularity:Compute] software image
-  containers, in concordance to the BIDS App standard [@GorgolewskiBIDSMethods:2017].
+  containers, in concordance to the BIDS App framework [@GorgolewskiBIDSMethods:2017].
 This means that the BIDS App of CMP3 can be run on diversity of datasets Linux, MacOSX, Windows computers,
   and on high performance computing systems (clusters) for large-scale analysis.
 Design considerations makes CMP3 not only easy to install and use (as it provides the user with a computing
