@@ -2,6 +2,7 @@ on:
   push:
     branches:
       - joss-paper
+      - pull/142
 jobs:
   paper:
     runs-on: ubuntu-latest
