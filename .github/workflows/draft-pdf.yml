@@ -1,7 +1,8 @@
 on: 
   push:
     branches:
-      - add-joss-paper
+      - joss-paper
+      - pull/142
 jobs:
   paper:
     runs-on: ubuntu-latest
