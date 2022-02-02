@@ -106,18 +106,18 @@ CMP3 has been designed around different characteristics and principles along whi
 # Summary
 
 \textbf{A flexible and interoperable workflow for multi-modal human connectome mapping.}
-Connectome Mapper 3 (CMP3) 's workflow allows the creation a hierarchical multi-scale
+Connectome Mapper 3 (CMP3) implements a workflow that creates a hierarchical multi-scale
   connectome representation of the structural and functional brain systems, from any
   sMRI / dMRI / rfMRI dataset structured according to the BIDS standard.
 It relies on Nipype [@GorgolewskiNipype:2011] and adopts a modular architecture.
-As illustrated by \autoref{fig:cmp3-diagram} CMP3's workflow is composed of three different
-  pipeline (anatomical, diffusion, and fMRI) dedicated to the processing of each modality (sMRI, dMRI, rfMRI).
-Each pipeline is represented by a Nipype workflow that takes a BIDS formatted dataset as input, and
-  runs a number of sub-workflows (stages).
+As illustrated by \autoref{fig:cmp3-diagram}, the workflow is composed of three different
+  pipelines (anatomical, diffusion, and fMRI) dedicated to the processing of each modality (sMRI, dMRI, rfMRI).
 
 ![\textbf{Overview of the Connectome Mapper 3 BIDS App's workflow.}
 \label{fig:cmp3-diagram}](cmp3-diagram.png)
 
+Each pipeline is represented by a Nipype workflow that takes a BIDS formatted dataset as input, and
+  runs a number of sub-workflows (stages).
 Each stage implements one or multiple tasks, where each task can interface with either
   a specific tool including in FSL [@Jenkinson2012FSL], FreeSurfer [@Fischl2012FreeSurfer],
   ANTs [@AVANTS2008SymmetricBrain], dipy [@Garyfallidis2014DipyData],
@@ -143,7 +143,7 @@ This means that the BIDS App of CMP3 can be run on diversity of datasets Linux, 
 Design considerations makes CMP3 not only easy to install and use (as it provides the user with a computing
   environment in which the pipelines are guarantee to run, and where all dependencies
   are already installed) on a diversity of multi-modal BIDS datasets, but also efficient in managing and
-  scaling the pipeline execution while recording provenance, and easy to customize it for specific needs.
+  scaling the pipeline execution while recording provenance, and easy to customize and extend it for specific needs.
 At the time EEG is being integrated, CMP3 already provides a collection of interfaces dedicated
   for this modality that would allow anyone to map the connectivity derived from EEG in
   the CMP3 framework, as demonstrated in a tutorial notebook.
