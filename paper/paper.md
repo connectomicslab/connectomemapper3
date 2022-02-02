@@ -65,7 +65,7 @@ While brain areas are usually derived from high resolution structural T1 weighte
   structural brain connectomes are mapped from diffusion MR imaging (dMRI) tractography, and
   functional brain connectomes are usually mapped from resting-state functional MRI (rfMRI).
 As MRI is being increasingly more accessible and used in both clinical and research settings,
-  such multi-modal MR datasets are being gathered at an unprecedented rate.
+  such multi-modal MRI datasets are being gathered at an unprecedented rate.
 The size and organization of these datasets as well as the increasing complexity of the processing
   pipelines to analyze them present important challenges for scalable computing, data sharing,
   reproducibility and transparency of the analysis.
@@ -246,11 +246,15 @@ More details about CMP3, the different processing steps and generated outputs to
 
 # Mention
 
-Connectome Mapper 3 has been successfully employed in a number of methodological
+CMP3 has been successfully employed in a number of methodological
   [@Zheng2020GeometricConnectomeb] [@GlombNeuro:2020] [@GlombNet:2020] [@AkselrodHBM:2021]
   [@RueQueraltNeuro:2021] [@PascucciNet:2021], clinical [@Carboni2019TheOutcome] 
   [@Vorderwulbecke2020High-densityPoint] [@CarboniNeuro:2020], and data [@Pascucci2022]
-  research articles. 
+  research articles.
+CMP3 is also part of [`ReproNim/containers`](https://github.com/ReproNim/containers),
+  a Datalad dataset with a collection of 40 popular neuroimaging research pipelines,
+  which allows one easily include it as a subdataset within larger study (super)datasets
+  and to run it directly with Datalad to achieve fully reproducible analysis.
 
 # Acknowledgements
 
