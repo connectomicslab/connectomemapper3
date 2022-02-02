@@ -1378,6 +1378,7 @@ workflows:
             branches:
               ignore:
                 - paper-joss
+                - pull/142
             tags:
               only: /.*/
 
@@ -1388,6 +1389,7 @@ workflows:
             branches:
               ignore:
                 - paper-joss
+                - pull/142
             tags:
               only: /.*/
 
@@ -1398,6 +1400,7 @@ workflows:
             branches:
               ignore:
                 - paper-joss
+                - pull/142
             tags:
               only: /.*/
 
@@ -1407,6 +1410,7 @@ workflows:
               ignore:
                 - /docs?\/.*/
                 - paper-joss
+                - pull/142
             tags:
               only: /.*/
 
@@ -1419,6 +1423,7 @@ workflows:
               ignore:
                 - /docs?\/.*/
                 - paper-joss
+                - pull/142
             tags:
               only: /.*/
 
@@ -1431,6 +1436,7 @@ workflows:
               ignore:
                 - /docs?\/.*/
                 - paper-joss
+                - pull/142
             tags:
               only: /.*/
 
@@ -1442,6 +1448,7 @@ workflows:
               ignore:
                 - /docs?\/.*/
                 - paper-joss
+                - pull/142
             tags:
               only: /.*/
 
@@ -1453,6 +1460,7 @@ workflows:
               ignore:
                 - /docs?\/.*/
                 - paper-joss
+                - pull/142
             tags:
               only: /.*/
 
@@ -1464,6 +1472,7 @@ workflows:
               ignore:
                 - /docs?\/.*/
                 - paper-joss
+                - pull/142
             tags:
               only: /.*/
 
@@ -1475,6 +1484,7 @@ workflows:
               ignore:
                 - /docs?\/.*/
                 - paper-joss
+                - pull/142
             tags:
               only: /.*/
 
@@ -1486,6 +1496,7 @@ workflows:
               ignore:
                 - /docs?\/.*/
                 - paper-joss
+                - pull/142
             tags:
               only: /.*/
 
@@ -1497,6 +1508,7 @@ workflows:
               ignore:
                 - /docs?\/.*/
                 - paper-joss
+                - pull/142
             tags:
               only: /.*/
 
@@ -1509,6 +1521,7 @@ workflows:
               ignore:
                 - /docs?\/.*/
                 - paper-joss
+                - pull/142
             tags:
               only: /.*/
 
@@ -1528,6 +1541,7 @@ workflows:
                 ignore:
                   - /docs?\/.*/
                   - paper-joss
+                  - pull/142
               tags:
                 only: /.*/
 
@@ -1547,6 +1561,7 @@ workflows:
               ignore:
                 - /docs?\/.*/
                 - paper-joss
+                - pull/142
             tags:
               only: /.*/
 
