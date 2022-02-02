@@ -34,6 +34,15 @@ authors:
   - name: Jonathan Wirsich
     orcid: 0000-0003-0588-9710
     affiliation: 3
+  - name: Anil Tuncel
+    orcid: 0000-0003-0317-2556
+    affiliation: 4
+  - name: Jakub Jancovic
+    orcid: 0000-0002-3312-3918
+    affiliation: 5
+  - name: Meritxell Bach Cuadra
+    affiliation: 3,6
+    orcid: 0000-0003-2730-4285
   - name: Patric Hagmann
     orcid: 0000-0002-2854-6561
     affiliation: 1
@@ -44,7 +53,13 @@ affiliations:
    index: 2
  - name: Departement des Neurosciences Cliniques, University of Geneva, Switzerland
    index: 3
-date: 14 December 2021
+ - name: Blue Brain Project, BBP-CORE, Ecole Polytechnique Federale de Lausanne (EPFL), Switzerland
+   index: 4
+ - name: Foxight, Geneva, Switzerland
+   index: 5
+ - name: CIBM Center for Biomedical Imaging, Geneva, Switzerland
+   index: 6
+date: 02 February 2021
 bibliography: paper.bib
 
 # Optional fields if submitting to a AAS journal too, see this blog post:
@@ -252,9 +267,9 @@ CMP3 has been successfully employed in a number of methodological
   [@Vorderwulbecke2020High-densityPoint] [@CarboniNeuro:2020], and data [@Pascucci2022]
   research articles.
 CMP3 is also part of [`ReproNim/containers`](https://github.com/ReproNim/containers),
-  a Datalad dataset with a collection of 40 popular neuroimaging research pipelines,
-  which allows one easily include it as a subdataset within larger study (super)datasets
-  and to run it directly with Datalad to achieve fully reproducible analysis.
+  a Datalad dataset with a collection of containerized 40 popular neuroimaging research pipelines,
+  which allows one to easily include it as a subdataset within Datalad-controlled BIDS datasets,
+  and achieve fully reproducible analysis by running CMP3 directly with Datalad.
 
 # Acknowledgements
 
