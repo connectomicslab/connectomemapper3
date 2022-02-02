@@ -55,17 +55,15 @@ bibliography: paper.bib
 
 # Statement of Need
 
-The field of Magnetic Resonance (MR) Connectomics has rapidly expanded since its advent 
+The field of Magnetic Resonance Imaging (MRI) Connectomics has rapidly expanded since its advent 
   in the 2000s [@SpornsTheBrain:2005], [@HagmannFromConnectomics:2005], [@SpornsEditorialConnectomics:2018].
 It has revolutionized the way to investigate `in-vivo`, `non-invasively` and 
   `safely` at different macroscopic scales the structural and functional systems of the 
   brain by modeling connections between brain areas as a graph or network, the so-called
   `connectome`, and has become a widely used method in Neuroscience [@Bassett2017]. 
-While brain areas are usually derived from high resolution T1 weighted  MR imaging, so-called
-  structural MRI (sMRI), structural brain connectomes are mapped from diffusion MR imaging (dMRI)
-  tractography, which exploits the diffusion of water molecules in biological tissues, and
-  functional brain connectomes are usually mapped from resting-state functional MRI (rfMRI), which exploits
-  the blood oxygen-level dependent (BOLD) signals of the different regions at rest.
+While brain areas are usually derived from high resolution structural T1 weighted MRI (sMRI),
+  structural brain connectomes are mapped from diffusion MR imaging (dMRI) tractography, and
+  functional brain connectomes are usually mapped from resting-state functional MRI (rfMRI).
 As MRI is being increasingly more accessible and used in both clinical and research settings,
   such multi-modal MR datasets are being gathered at an unprecedented rate.
 The size and organization of these datasets as well as the increasing complexity of the processing
@@ -75,7 +73,7 @@ The size and organization of these datasets as well as the increasing complexity
 The last ten years have indeed witnessed a number of technical advances and a trend towards the adoption
   by the community of open research practices, which promotes `open data` and `open method`,
   to address these challenges [@Nichols:2017] [@EglenTowardNeuroscience:2017] [@Kennedy2019].
-This has led in particular to the creation of a community standard, know as the Brain Imaging Data Structure (BIDS),
+This has led in particular to the creation of a community standard, known as the Brain Imaging Data Structure (BIDS),
   initially designed to ease the practice of sharing raw MRI data [@GorgolewskiTheExperiments:2016]. 
 [@GorgolewskiBIDSMethods:2017].
 Combined with advances in software virtualization, BIDS has enabled the creation of the BIDS Apps
@@ -137,7 +135,7 @@ Empowered by the Nipype workflow engine, the re-execution of the workflow will r
 To ensure reproducibility and maximize re-usability of the tool, the implemented pipelines are encapsulated
   in a Docker [@merkeldocker:2014] and a Singularity [@Kurtzer2017Singularity:Compute] software image
   containers, in concordance to the BIDS App framework [@GorgolewskiBIDSMethods:2017].
-This means that the BIDS App of CMP3 can be run on diversity of datasets Linux, MacOSX, Windows computers,
+This means that the BIDS App of CMP3 can be run on a large diversity of datasets on Linux, MacOSX, Windows computers,
   and on high performance computing systems (clusters) for large-scale analysis.
 
 Design considerations makes CMP3 not only easy to install and use (as it provides the user with a computing
@@ -169,20 +167,18 @@ All segmented structures are combined at the end of process to create the final 
   at each scale along with the corresponding label index color mapping file in accordance to the BIDS Derivatives
   specifications.
 
-\textbf{A Graphical User Interface reflecting the workflow structure.}
+\textbf{A graphical user interface reflecting the workflow structure.}
 CMP3 takes advantage of Traits/TraitsUI framework
   (\href{http://docs.enthought.com/traits/}{http://docs.enthought.com/traits/}) for building an
   interactive Graphical User Interface (GUI), to give to pipelines and stages a graphical representation,
   which is easy to understand and extend.
 This has enabled the design of a GUI aka `cmpbidsappmanager` (\autoref{fig:gui}) that reflects
   the modular structure of the processing workflow.
-It has been designed designed to guide and support the user in all the steps required to
+It has been designed to guide and support the user in all the steps required to
   perform an analysis (\autoref{fig:gui}).
 
 ![\textbf{Graphical User Interface of the Connectome Mapper 3.}
-It is designed to guide and support the user in all the steps required to
-  perform an analysis.
-A typical procedure would consists of
+A typical procedure to perform an analysis would consists of
   (a)   the selection of the root directory of the BIDS dataset to be analyzed,
   (b)   the creation/edition of the different pipeline configuration files,
   (c)   the configuration of the BIDS App run and its execution, and
@@ -262,6 +258,5 @@ This work was supported by Swiss National Science Foundation Sinergia
   [grant no. 170873](https://p3.snf.ch/project-170873).
 All the contributors listed in the project’s Zenodo and GitHub repository have contributed code and
   intellectual labor to further improve CMP3.
-The same holds true for users that reported issues and continue to do so.
 
 # References
