@@ -153,8 +153,8 @@ To ensure reproducibility and maximize re-usability of the tool, the implemented
 This means that the BIDS App of CMP3 can be run on a large diversity of datasets on Linux, MacOSX, Windows computers,
   and on high performance computing systems (clusters) for large-scale analysis.
 
-Design considerations makes CMP3 not only easy to install and use (as it provides the user with a computing
-  environment in which the pipelines are guarantee to run, and where all dependencies
+Design considerations make CMP3 not only easy to install and use (as it provides the user with a computing
+  environment in which the pipelines are guaranteed to run, and where all dependencies
   are already installed) on a diversity of multi-modal BIDS datasets, but also efficient in managing and
   scaling the pipeline execution while recording provenance, and easy to customize and extend it for specific needs.
 At the time EEG is being integrated, CMP3 already provides a collection of interfaces dedicated
@@ -179,7 +179,7 @@ After generating the volumetric parcellations from the annotation files, one can
   to perform brainstem parcellation [@Iglesias2015BayesianMRI], hippocampal subfields segmentation [@Iglesias2015AMRI],
   and / or probabilistic atlas-based segmentation of the thalamic nuclei [@Najdenovska2018In-vivoImaging].
 All segmented structures are combined at the end of process to create the final parcellation nifti image
-  at each scale along with the corresponding label index color mapping file in accordance to the BIDS Derivatives
+  at each scale along with the corresponding label index color mapping file in accordance with the BIDS Derivatives
   specifications.
 
 \textbf{A graphical user interface reflecting the workflow structure.}
@@ -207,7 +207,7 @@ Each pipeline can be individually configured and executed with the aid of the us
   parameters and re-execute when results at a given stage are found not to be satisfactory.
 In this way, CMP3 simplifies the creation of connectomes and makes it a straightforward process
   even for users not familiar with Nipype and software container technology.
-Nevertheless, it still fulfils the needs of advanced users in charge of analyzing huge amount of data,
+Nevertheless, it still fulfils the needs of advanced users in charge of analyzing a huge amount of data,
   offering them the possibility to tune and save all the parameters in configuration files and create a batch
   job to automatically process all data with the BIDS App.
 
@@ -252,7 +252,7 @@ Specifically, this involves testing the installation of the python package, the 
   the Docker and Singularity container images, and the execution of the BIDS App via the different container
   images adopting multiple pipeline configurations, using a sample multi-modal MRI dataset [@Tourbier2020SampleDataset]
   that has been created for this purpose.
-Doing so, we can guarantee the full functionality of each new released version of CMP3.
+Doing so, we can guarantee the full functionality of each newly released version of CMP3.
 More details about CMP3, the different processing steps and generated outputs together with
   installation and usage instructions, and different tutorials supporting the analysis,
   and the interpretation of the generated outputs with popular tools, can be found in
