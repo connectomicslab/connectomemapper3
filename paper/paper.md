@@ -77,7 +77,7 @@ The field of Magnetic Resonance Imaging (MRI) Connectomics has rapidly expanded 
   in the 2000s [@SpornsTheBrain:2005], [@HagmannFromConnectomics:2005], [@SpornsEditorialConnectomics:2018].
 It has revolutionized the way to investigate *in-vivo*, *non-invasively* and 
   *safely* at different macroscopic scales the structural and functional systems of the 
-  brain by modeling connections between brain areas as a graph or network, the so-called
+  brain by modeling connections between brain areas as a graph or network, known as
   `connectome`, and has become a widely used set of methods in Neuroscience [@Bassett2017]. 
 While brain areas are usually derived from high resolution structural T1 weighted MRI (sMRI),
   structural brain connectomes are mapped from diffusion MR imaging (dMRI) tractography, and
@@ -100,17 +100,17 @@ Combined with advances in software virtualization, BIDS has enabled the creation
 A large ecosystem of processing pipelines supporting the mapping of connectomes has evolved around this framework,
   including C-PAC [@cpac:2013], NIAK [@BellecNeuroimagingNIAK:2016], fMRIPrep [@Ghosh:2018], dMRIPrep [@dmriprep:2019],
   QSIPREP [@CieslakQSIPrep:2020], MRtrix3_connectome [@Smith2019:BIDSApp], NDMG [@KiarAVariability:2018]
-  and PyNets [@PisnerPyNets:2020], which have all demonstrated their capability in addressing all the previously-mentioned
+  PyNets [@PisnerPyNets:2020], and Micapipe [@Rodriguez:2022] which have all demonstrated their capability in addressing all the previously-mentioned
   challenges.
 However, none of the existing solutions provide a direct alternative to Connectome Mapper
   when dealing with multimodal datasets with the goal to create connectomes at multiple
   scales with hierarchical region grouping.
 
-Connectome Mapper (CMP) is an open-source pipeline software with a graphical user interface, designed
-  to simplify the organisation and the analysis of sMRI, dMRI, and rfMRI from raw data to multi-scale
-  structural weighted and functional connectomes [@Daducci:2012], using in a common framework
-  a multi-scale extension of the Desikan-Killiany parcellation [@Desikan2006AnInterest],
-  the so-called Lausanne brain parcellation [@Cammoun2012:MappingMRI], before the emergence of BIDS.
+Connectome Mapper (CMP), an open-source pipeline software with a graphical user interface,
+  was created before the emergence of BIDS to simplify the organization and the analysis of
+  sMRI, dMRI, and rfMRI from raw data to multi-scale structural weighted and functional
+  connectomes [@Daducci:2012], using in a common framework a multi-scale extension of
+  the Desikan-Killiany parcellation [@Desikan2006AnInterest], known as the Lausanne brain parcellation [@Cammoun2012:MappingMRI].
 While CMP3 derives from the two preceding versions and keeps the same philosophy, it has massively
   evolved over the years in terms of the underlying codebase, the tools used, and the scope of the functionality
   provided. This includes the migration to Python 3, a brand-new Lausanne parcellation scheme, the adoption
