@@ -54,7 +54,7 @@ affiliations:
    index: 1
  - name: Medical Image Processing Lab (MIP:Lab), Ecole Polytechnique Federale de Lausanne (EPFL), Switzerland
    index: 2
- - name: Departement des Neurosciences Cliniques, University of Geneva, Switzerland
+ - name: EEG and Epilepsy Unit, University Hospitals and Faculty of Medicine of Geneva, University of Geneva, Geneva, Switzerland
    index: 3
  - name: Blue Brain Project, BBP-CORE, Ecole Polytechnique Federale de Lausanne (EPFL), Switzerland
    index: 4
@@ -102,7 +102,9 @@ A large ecosystem of processing pipelines supporting the mapping of connectomes 
   QSIPREP [@CieslakQSIPrep:2020], MRtrix3_connectome [@Smith2019:BIDSApp], NDMG [@KiarAVariability:2018]
   and PyNets [@PisnerPyNets:2020], which have all demonstrated their capability in addressing all the previously-mentioned
   challenges.
-However, none of the existing solutions provide a direct alternative to Connectome Mapper.
+However, none of the existing solutions provide a direct alternative to Connectome Mapper
+  when dealing with multimodal datasets with the goal to create connectomes at multiple
+  scales with hierarchical region grouping.
 
 Connectome Mapper (CMP) is an open-source pipeline software with a graphical user interface, designed
   to simplify the organisation and the analysis of sMRI, dMRI, and rfMRI from raw data to multi-scale
@@ -268,7 +270,7 @@ More details about CMP3, the different processing steps and generated outputs to
 CMP3 has been successfully employed in a number of methodological
   [@Zheng2020GeometricConnectomeb] [@GlombNeuro:2020] [@GlombNet:2020] [@AkselrodHBM:2021]
   [@RueQueraltNeuro:2021] [@PascucciNet:2021], clinical [@Carboni2019TheOutcome] 
-  [@Vorderwulbecke2020High-densityPoint] [@CarboniNeuro:2020], and data [@Pascucci2022]
+  [@Vorderwulbecke2020High-densityPoint] [@CarboniNeuro:2020] [@Carboni:2022], and data [@Pascucci2022]
   research articles.
 CMP3 is also part of [`ReproNim/containers`](https://github.com/ReproNim/containers),
   a Datalad dataset with a collection of 40 popular containerized neuroimaging research pipelines,
