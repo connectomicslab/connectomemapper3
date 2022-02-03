@@ -34,7 +34,7 @@ authors:
   - name: Jonathan Wirsich
     orcid: 0000-0003-0588-9710
     affiliation: 3
-  - name: Anil Tuncel
+  - name: Anıl Tuncel
     orcid: 0000-0003-0317-2556
     affiliation: 4
   - name: Jakub Jancovic
@@ -240,7 +240,7 @@ CMP3 is published under the terms of the open source 3-Clause Berkeley Software
   and commercial use in source and binary forms as long as its copyright notices, and the
   license's disclaimers of warranty are maintained.
 The source code for CMP3 is hosted at
-  [https://github.com/sebastientourbier/connectomemapper3](https://github.com/sebastientourbier/connectomemapper3),
+  [https://github.com/connectomicslab/connectomemapper3](https://github.com/connectomicslab/connectomemapper3),
   where all bugs and contributions are transparently discussed and managed through issues, and each release is
   archived to Zenodo [@ZenodoCMP:2021].
 In case of problems, CMP3 has a dedicated forum at
