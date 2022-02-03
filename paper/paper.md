@@ -226,14 +226,14 @@ However, it introduces a new BIDS entity ``atlas-<atlas_label>`` that is used in
 While the BIDS-Derivatives extension to organize network data is being developed, in which we
   are actively participating, both structural and functional connectomes generated with CMP3 are
   saved by default as graph edge lists in ``.tsv`` files, that can be directly analyzed using
-  the \href{https://networkx.org/documentation/stable/tutorial.html}{NetworkX}, a Python library which
+  the \href{https://networkx.org/documentation/stable/tutorial.html}{NetworkX} [@Hagberg:2008], a Python library which
   offers many algorithms and tools to explore graphs and compute local and global network properties.
 Connectivity matrices exported to Matlab as MAT-files can be fed to the
-  \href{www.brain-connectivity-toolbox.net}{Brain Connectivity Toolbox}, which is a powerful
+  \href{www.brain-connectivity-toolbox.net}{Brain Connectivity Toolbox} [@Rubinov:2010], which is a powerful
   toolbox containing a large selection of network measures for the characterization of brain
   connectivity datasets.
 Finally, connectomes can be saved in GraphML format to interface with a lot of general purpose
-  software packages for graph analysis such as \href{www.cytoscape.org}{Cytoscape} or \href{www.gephi.org}{Gephi}.
+  software packages for graph analysis such as \href{www.cytoscape.org}{Cytoscape} [@Shannon:2003] [@Gustavsen:2019] or \href{www.gephi.org}{Gephi} [@Bastian:2009].
 Structuring outputs as BIDS Derivatives and saving them in a range of file formats
   thus has a lot of advantages. Not only does it ensure that the connectome files can 
   be opened by the most popular software packages used in this field to perform complex 
