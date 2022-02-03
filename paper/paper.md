@@ -2,6 +2,9 @@
 title: 'Connectome Mapper 3: A Flexible and Open-Source Pipeline Software for Multiscale Multimodal Human Connectome Mapping'
 tags:
   - Python
+  - neuroscience
+  - pipeline
+  - workflow
   - connectome
   - multi-scale
   - MRI
