@@ -162,7 +162,7 @@ Design considerations make CMP3 not only easy to install and use (as it provides
   are already installed) on a diversity of multi-modal BIDS datasets, but also efficient in managing and
   scaling the pipeline execution while recording provenance, and easy to customize and extend it for specific needs.
 At the time EEG is being integrated, CMP3 already provides a collection of interfaces dedicated
-  for this modality that would allow anyone to map the connectivity derived from EEG in
+  for this modality that would allow anyone to map the connectivity at the source level derived from EEG in
   the CMP3 framework, as demonstrated in a tutorial notebook.
 
 \textbf{A revisited and extended multi-scale cortical parcellation scheme.}
