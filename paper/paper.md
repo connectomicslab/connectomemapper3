@@ -75,10 +75,10 @@ bibliography: paper.bib
 
 The field of Magnetic Resonance Imaging (MRI) Connectomics has rapidly expanded since its advent 
   in the 2000s [@SpornsTheBrain:2005], [@HagmannFromConnectomics:2005], [@SpornsEditorialConnectomics:2018].
-It has revolutionized the way to investigate `in-vivo`, `non-invasively` and 
-  `safely` at different macroscopic scales the structural and functional systems of the 
+It has revolutionized the way to investigate *in-vivo*, *non-invasively* and 
+  *safely* at different macroscopic scales the structural and functional systems of the 
   brain by modeling connections between brain areas as a graph or network, the so-called
-  `connectome`, and has become a widely used method in Neuroscience [@Bassett2017]. 
+  `connectome`, and has become a widely used set of methods in Neuroscience [@Bassett2017]. 
 While brain areas are usually derived from high resolution structural T1 weighted MRI (sMRI),
   structural brain connectomes are mapped from diffusion MR imaging (dMRI) tractography, and
   functional brain connectomes are usually mapped from resting-state functional MRI (rfMRI).
@@ -89,14 +89,14 @@ The size and organization of these datasets as well as the increasing complexity
   reproducibility and transparency of the analysis.
 
 The last ten years have indeed witnessed a number of technical advances and a trend towards the adoption
-  by the community of open research practices, which promotes `open data` and `open method`,
+ of open research practices such as *open data* and *open methodology*,
   to address these challenges [@Nichols:2017] [@EglenTowardNeuroscience:2017] [@Kennedy2019].
-This has led in particular to the creation of a community standard, known as the Brain Imaging Data Structure (BIDS),
+This has led in particular to the creation of a community standard for dataset organization, known as the Brain Imaging Data Structure (BIDS),
   initially designed to ease the practice of sharing raw MRI data [@GorgolewskiTheExperiments:2016]. 
 [@GorgolewskiBIDSMethods:2017].
 Combined with advances in software virtualization, BIDS has enabled the creation of the BIDS Apps
   framework which uses software container technology to encapsulate neuroimaging processing pipelines
-  and ensure portability and reproducibility.
+  and ensures portability and reproducibility.
 A large ecosystem of processing pipelines supporting the mapping of connectomes has evolved around this framework,
   including C-PAC [@cpac:2013], NIAK [@BellecNeuroimagingNIAK:2016], fMRIPrep [@Ghosh:2018], dMRIPrep [@dmriprep:2019],
   QSIPREP [@CieslakQSIPrep:2020], MRtrix3_connectome [@Smith2019:BIDSApp], NDMG [@KiarAVariability:2018]
@@ -109,12 +109,12 @@ Connectome Mapper (CMP) is an open-source pipeline software with a graphical use
   structural weighted and functional connectomes [@Daducci:2012], using in a common framework
   a multi-scale extension of the Desikan-Killiany parcellation [@Desikan2006AnInterest],
   the so-called Lausanne brain parcellation [@Cammoun2012:MappingMRI], before the emergence of BIDS.
-While CMP3 derives from the two preceding versions and keeps the same philosophy, it has made CMP massively
-  evolve over the years in terms of the underlying codebase, the tools used, and the scope of the functionality
-  provided, including the migration to Python 3, a brand-new Lausanne parcellation scheme, the adoption
+While CMP3 derives from the two preceding versions and keeps the same philosophy, it has massively
+  evolved over the years in terms of the underlying codebase, the tools used, and the scope of the functionality
+  provided. This includes the migration to Python 3, a brand-new Lausanne parcellation scheme, the adoption
   of the BIDS standard for data organization, the encapsulation of the processing pipelines in software
-  container images, continuously tested in concordance to the BIDS Apps standard, major upgrades of the diffusion and
-  fMRI pipelines, and the current extension to Electro-EncephaloGraphy (EEG), initiated during OHBM BrainHack 2020
+  container images, continuous testing in concordance to the BIDS Apps standard, major upgrades of the diffusion and
+  fMRI pipelines, and the current extension to electroencephalography (EEG), initiated during OHBM BrainHack 2020
   ([https://github.com/ohbm/hackathon2020/issues/214](https://github.com/ohbm/hackathon2020/issues/214)).
 CMP3 has been designed around different characteristics and principles along which it is summarized
   in this manuscript.
@@ -135,25 +135,26 @@ As illustrated by \autoref{fig:cmp3-diagram}, the workflow is composed of three 
 Each pipeline is represented by a Nipype workflow that takes a BIDS formatted dataset as input, and
   runs a number of sub-workflows (stages).
 Each stage implements one or multiple tasks, where each task can interface with either
-  a specific tool including in FSL [@Jenkinson2012FSL], FreeSurfer [@Fischl2012FreeSurfer],
+  a specific tool including FSL [@Jenkinson2012FSL], FreeSurfer [@Fischl2012FreeSurfer],
   ANTs [@AVANTS2008SymmetricBrain], dipy [@Garyfallidis2014DipyData],
   mrtrix3 [@Tournier2019MRtrix3:Visualisation], AFNI [@Cox2012], or with an in-house tool
   (\autoref{fig:cmp3-diagram}).
 
 To guarantee consistent processing in large neuroimaging cohorts,
-  pipeline and stage parameters can be set by loading pipeline
+  pipeline and stage parameters can be set by creating and loading pipeline
   configuration files in `.json` format.
 Adopting BIDS allows CMP3 to automatically identify the structure of the input data, and to check the
   availability of sMRI, dMRI, rfMRI, and derived data.
 Depending on the input data, the processing pipelines and stages are then dynamically built and configured
   based on the parameters set in the different configuration files.
 Empowered by the Nipype workflow engine, the re-execution of the workflow will resume the
-  processing at any stages a change of parameter occurred.
+  processing at the stage where a change of parameter occurred, thus not needing to recompute
+  outputs not affected by the change.
 
 To ensure reproducibility and maximize re-usability of the tool, the implemented pipelines are encapsulated
-  in a Docker [@merkeldocker:2014] and a Singularity [@Kurtzer2017Singularity:Compute] software image
+  in Docker [@merkeldocker:2014] and Singularity [@Kurtzer2017Singularity:Compute] software image
   containers, in concordance to the BIDS App framework [@GorgolewskiBIDSMethods:2017].
-This means that the BIDS App of CMP3 can be run on a large diversity of datasets on Linux, MacOSX, Windows computers,
+This means that the BIDS App of CMP3 can be run on a large diversity of datasets, on Linux, MacOSX, and Windows computers,
   and on high performance computing systems (clusters) for large-scale analysis.
 
 Design considerations make CMP3 not only easy to install and use (as it provides the user with a computing
@@ -165,9 +166,7 @@ At the time EEG is being integrated, CMP3 already provides a collection of inter
   the CMP3 framework, as demonstrated in a tutorial notebook.
 
 \textbf{A revisited and extended multi-scale cortical parcellation scheme.}
-CMP3 revisits the multiscale cortical parcellation proposed by [@Cammoun2012:MappingMRI]
-  and its implementation, and extends with new structures including a subdivision for each
-  brain hemisphere of the thalamus into 7 nuclei, the hippocampus into 12 subfields and the brainstem into
+CMP3 revisits the multiscale cortical parcellation proposed by [@Cammoun2012:MappingMRI] and extends it with new structures including a subdivision of the thalamus into 7 nuclei per hemisphere, of the hippocampus into 12 subfields, and of the brainstem into
   4 sub-structures (\autoref{fig:parc}).
 
 ![\textbf{Creation of the new Lausanne2018 Connectome Parcellation.}
@@ -178,19 +177,19 @@ The parcellation derived from the Desikan-Killiany atlas [@Desikan2006AnInterest
   boundaries of the projected regions of the left hemisphere to the boundaries of the original regions
   of the left hemisphere, applying this transformation to the rest of the scales, and saving
   each parcellation scale in a Freesurfer annotation file.
-After generating the volumetric parcellations from the annotation files, one can now decide or not
+After generating the volumetric parcellations from the annotation files, one can now decide whether
   to perform brainstem parcellation [@Iglesias2015BayesianMRI], hippocampal subfields segmentation [@Iglesias2015AMRI],
-  and / or probabilistic atlas-based segmentation of the thalamic nuclei [@Najdenovska2018In-vivoImaging].
+  and/or probabilistic atlas-based segmentation of the thalamic nuclei [@Najdenovska2018In-vivoImaging].
 All segmented structures are combined at the end of process to create the final parcellation nifti image
   at each scale along with the corresponding label index color mapping file in accordance with the BIDS Derivatives
   specifications.
 
 \textbf{A graphical user interface reflecting the workflow structure.}
-CMP3 takes advantage of Traits/TraitsUI framework
+CMP3 takes advantage of the Traits/TraitsUI framework
   (\href{http://docs.enthought.com/traits/}{http://docs.enthought.com/traits/}) for building an
-  interactive Graphical User Interface (GUI), to give to pipelines and stages a graphical representation,
+  interactive Graphical User Interface (GUI), to give to pipelines and stages a graphical representation
   which is easy to understand and extend.
-This has enabled the design of a GUI aka `cmpbidsappmanager` (\autoref{fig:gui}) that reflects
+This has enabled the design of a GUI which we call the `cmpbidsappmanager` (\autoref{fig:gui}) that reflects
   the modular structure of the processing workflow.
 It has been designed to guide and support the user in all the steps required to
   perform an analysis (\autoref{fig:gui}).
@@ -215,7 +214,7 @@ Nevertheless, it still fulfils the needs of advanced users in charge of analyzin
   job to automatically process all data with the BIDS App.
 
 \textbf{Outputs ready to be consumed in the BIDS ecosystem.}
-CMP3 outputs follow as close as possible the BIDS Derivatives specifications,
+CMP3 outputs follow the BIDS Derivatives specifications wherever possible,
   which facilitates the sharing of the derivatives in the BIDS App ecosystem,
   and allows the user to easily retrieve any of the files generated by CMP3
   with tools of the BIDS ecosystem such as pybids [@Yarkoni:2019].
@@ -227,20 +226,21 @@ While the BIDS-Derivatives extension to organize network data is being developed
   saved by default as graph edge lists in ``.tsv`` files, that can be directly analyzed using
   the \href{https://networkx.org/documentation/stable/tutorial.html}{NetworkX}, a Python library which
   offers many algorithms and tools to explore graphs and compute local and global network properties.
-Connectivity matrices exported to Matlab as MAT-files and fed to the
+Connectivity matrices exported to Matlab as MAT-files can be fed to the
   \href{www.brain-connectivity-toolbox.net}{Brain Connectivity Toolbox}, which is a powerful
   toolbox containing a large selection of network measures for the characterization of brain
   connectivity datasets.
 Finally, connectomes can be saved in GraphML format to interface with a lot of general purpose
   software packages for graph analysis such as \href{www.cytoscape.org}{Cytoscape} or \href{www.gephi.org}{Gephi}.
-Not only this ensures that the connectome files can be opened by
-  the most popular software packages used in this field to perform complex network
-  analyzes, but also this eases the reuse of all outputs in the BIDS ecosystem.
+Structuring outputs as BIDS Derivatives and saving them in a range of file formats
+  thus has a lot of advantages. Not only does it ensure that the connectome files can 
+  be opened by the most popular software packages used in this field to perform complex 
+  network analyzes, but it also eases the reuse of all outputs in the BIDS ecosystem.
 
 \textbf{Developed with openness, transparency, and good practices in mind.}
 CMP3 is published under the terms of the open source 3-Clause Berkeley Software
   Distribution (3-Clause BSD) license, which allows unlimited modification, redistribution
-  and commercial use in source and binary forms as long as its copyright notices, and the
+  and commercial use in source and binary forms, as long as the copyright notice is retained and the
   license's disclaimers of warranty are maintained.
 The source code for CMP3 is hosted at
   [https://github.com/connectomicslab/connectomemapper3](https://github.com/connectomicslab/connectomemapper3),
@@ -248,16 +248,17 @@ The source code for CMP3 is hosted at
   archived to Zenodo [@ZenodoCMP:2021].
 In case of problems, CMP3 has a dedicated forum at
   [groups.google.com/group/cmtk-users](groups.google.com/group/cmtk-users) where a
-  community of users is active to support and have scientific discussions.
+  community of users is active to support each other and have scientific discussions.
 To be robust to adverse code changes, versions are released through continuous integration building
   and testing.
 Specifically, this involves testing the installation of the python package, the build of
   the Docker and Singularity container images, and the execution of the BIDS App via the different container
   images adopting multiple pipeline configurations, using a sample multi-modal MRI dataset [@Tourbier2020SampleDataset]
   that has been created for this purpose.
-Doing so, we can guarantee the full functionality of each newly released version of CMP3.
+Doing so, we can guarantee the full functionality of each newly released version of CMP3
+  for a range of different use cases.
 More details about CMP3, the different processing steps and generated outputs together with
-  installation and usage instructions, and different tutorials supporting the analysis,
+  installation and usage instructions, different tutorials supporting the analysis,
   and the interpretation of the generated outputs with popular tools, can be found in
   the documentation ([connectome-mapper-3.readthedocs.io](connectome-mapper-3.readthedocs.io))
   that is kept up to date with the current release and can be retrieved for older versions.
@@ -270,7 +271,7 @@ CMP3 has been successfully employed in a number of methodological
   [@Vorderwulbecke2020High-densityPoint] [@CarboniNeuro:2020], and data [@Pascucci2022]
   research articles.
 CMP3 is also part of [`ReproNim/containers`](https://github.com/ReproNim/containers),
-  a Datalad dataset with a collection of containerized 40 popular neuroimaging research pipelines,
+  a Datalad dataset with a collection of 40 popular containerized neuroimaging research pipelines,
   which allows one to easily include it as a subdataset within Datalad-controlled BIDS datasets,
   and achieve fully reproducible analysis by running CMP3 directly with Datalad.
 
