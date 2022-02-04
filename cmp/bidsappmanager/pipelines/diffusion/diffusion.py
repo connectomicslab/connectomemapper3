@@ -313,7 +313,7 @@ class DiffusionPipelineUI(DiffusionPipeline):
 
             if self.global_conf.subject_session == "":
 
-                files = layout.get(subject=subjid, suffix="dwi", extensions=".nii.gz")
+                files = layout.get(subject=subjid, suffix="dwi", extension="nii.gz")
                 if len(files) > 0:
                     dwi_file = os.path.join(files[0].dirname, files[0].filename)
                     print(dwi_file)
@@ -326,7 +326,7 @@ class DiffusionPipelineUI(DiffusionPipeline):
                     )
                     return
 
-                files = layout.get(subject=subjid, suffix="dwi", extensions=".bval")
+                files = layout.get(subject=subjid, suffix="dwi", extension="bval")
                 if len(files) > 0:
                     bval_file = os.path.join(files[0].dirname, files[0].filename)
                     print(bval_file)
@@ -340,7 +340,7 @@ class DiffusionPipelineUI(DiffusionPipeline):
                     )
                     return
 
-                files = layout.get(subject=subjid, suffix="dwi", extensions=".bvec")
+                files = layout.get(subject=subjid, suffix="dwi", extension="bvec")
                 if len(files) > 0:
                     bvec_file = os.path.join(files[0].dirname, files[0].filename)
                     print(bvec_file)
@@ -357,7 +357,7 @@ class DiffusionPipelineUI(DiffusionPipeline):
                 sessid = self.global_conf.subject_session.split("-")[1]
 
                 files = layout.get(
-                    subject=subjid, suffix="dwi", extensions=".nii.gz", session=sessid
+                    subject=subjid, suffix="dwi", extension="nii.gz", session=sessid
                 )
                 if len(files) > 0:
                     dwi_file = os.path.join(files[0].dirname, files[0].filename)
@@ -373,7 +373,7 @@ class DiffusionPipelineUI(DiffusionPipeline):
                     return
 
                 files = layout.get(
-                    subject=subjid, suffix="dwi", extensions=".bval", session=sessid
+                    subject=subjid, suffix="dwi", extension="bval", session=sessid
                 )
                 if len(files) > 0:
                     bval_file = os.path.join(files[0].dirname, files[0].filename)
@@ -389,7 +389,7 @@ class DiffusionPipelineUI(DiffusionPipeline):
                     return
 
                 files = layout.get(
-                    subject=subjid, suffix="dwi", extensions=".bvec", session=sessid
+                    subject=subjid, suffix="dwi", extension="bvec", session=sessid
                 )
                 if len(files) > 0:
                     bvec_file = os.path.join(files[0].dirname, files[0].filename)
