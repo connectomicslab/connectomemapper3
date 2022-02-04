@@ -320,7 +320,7 @@ class DiffusionPipeline(Pipeline):
     def _atlas_info_changed(self, new):
         pass
 
-    def get_file(self, layout, subject, suffix, extensions, session=None):
+    def get_file(self, layout, subject, suffix, extension, session=None):
         """Query files with PyBIDS and take the first file in the returned list or get a specific dmri file if BIDS acq- keyword is used in filename.
 
         Parameters
@@ -334,7 +334,7 @@ class DiffusionPipeline(Pipeline):
         suffix : str
             BIDS file suffix i.e. "T1w", "dwi", ...
 
-        extensions : str
+        extension : str
             File extension i.e. ".nii.gz", ".json", ".bval", ...
 
         session : str
@@ -346,9 +346,9 @@ class DiffusionPipeline(Pipeline):
             The output filepath or None if no file was found
         """
         if session is None:
-            files = layout.get(subject=subject, suffix=suffix, extension=extensions)
+            files = layout.get(subject=subject, suffix=suffix, extension=extension)
         else:
-            files = layout.get(subject=subject, suffix=suffix, extension=extensions, session=session)
+            files = layout.get(subject=subject, suffix=suffix, extension=extension, session=session)
 
         if len(files) > 0:
             out_file = os.path.join(files[0].dirname, files[0].filename)
@@ -406,12 +406,12 @@ class DiffusionPipeline(Pipeline):
 
             if self.global_conf.subject_session == "":
 
-                dwi_file = self.get_file(layout, subject=subjid, suffix="dwi", extensions=".nii.gz")
+                dwi_file = self.get_file(layout, subject=subjid, suffix="dwi", extension="nii.gz")
                 if dwi_file is None:
                     print("ERROR : Diffusion image not found for subject %s." % subjid)
                     return
 
-                json_file = self.get_file(layout, subject=subjid, suffix="dwi", extensions=".json")
+                json_file = self.get_file(layout, subject=subjid, suffix="dwi", extension="json")
                 if json_file is None:
                     json_file = "NotFound"
                     print(
@@ -419,7 +419,7 @@ class DiffusionPipeline(Pipeline):
                         % subjid
                     )
 
-                bval_file = self.get_file(layout, subject=subjid, suffix="dwi", extensions=".bval")
+                bval_file = self.get_file(layout, subject=subjid, suffix="dwi", extension="bval")
                 if bval_file is None:
                     print(
                         "ERROR : Diffusion bval image not found for subject %s."
@@ -427,7 +427,7 @@ class DiffusionPipeline(Pipeline):
                     )
                     return
 
-                bvec_file = self.get_file(layout, subject=subjid, suffix="dwi", extensions=".bvec")
+                bvec_file = self.get_file(layout, subject=subjid, suffix="dwi", extension="bvec")
                 if bvec_file is None:
                     print(
                         "ERROR : Diffusion bvec image not found for subject %s."
@@ -437,7 +437,7 @@ class DiffusionPipeline(Pipeline):
             else:
                 sessid = self.global_conf.subject_session.split("-")[1]
 
-                dwi_file = self.get_file(layout, subject=subjid, suffix="dwi", extensions=".nii.gz", session=sessid)
+                dwi_file = self.get_file(layout, subject=subjid, suffix="dwi", extension="nii.gz", session=sessid)
                 if dwi_file is None:
                     print(
                         "ERROR : Diffusion image not found for subject %s, session %s."
@@ -446,7 +446,7 @@ class DiffusionPipeline(Pipeline):
                     return
 
                 json_file = self.get_file(
-                    layout, subject=subjid, suffix="dwi", extensions=".json", session=sessid
+                    layout, subject=subjid, suffix="dwi", extension="json", session=sessid
                 )
                 if json_file is None:
                     json_file = "NotFound"
@@ -456,7 +456,7 @@ class DiffusionPipeline(Pipeline):
                     )
 
                 bval_file = self.get_file(
-                    layout, subject=subjid, suffix="dwi", extensions=".bval", session=sessid
+                    layout, subject=subjid, suffix="dwi", extension="bval", session=sessid
                 )
                 if bval_file is None:
                     print(
@@ -466,7 +466,7 @@ class DiffusionPipeline(Pipeline):
                     return
 
                 bvec_file = self.get_file(
-                    layout, subject=subjid, suffix="dwi", extensions=".bvec", session=sessid
+                    layout, subject=subjid, suffix="dwi", extension="bvec", session=sessid
                 )
                 if bvec_file is None:
                     print(
@@ -729,7 +729,6 @@ class DiffusionPipeline(Pipeline):
                 roi_graphml_s5="anat/" + self.subject + "_atlas-" + bids_atlas_label + "_res-scale5_dseg.graphml",
             )
             # fmt:on
-        print(f' .. DEBUG : Field template : {field_template}')
         return field_template
 
     def create_datagrabber_node(self, base_directory, bids_atlas_label):
@@ -1197,14 +1196,14 @@ class DiffusionPipeline(Pipeline):
 
         return diffusion_flow
 
-    def process(self):
-        """Executes the diffusion pipeline workflow and returns True if successful."""
-        # Enable the use of the the W3C PROV data model to capture and represent provenance in Nipype
-        # config.enable_provenance()
+    def init_subject_derivatives_dirs(self):
+        """Return the paths to Nipype and CMP derivatives folders of a given subject / session.
 
-        # Process time
-        self.now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
-
+        Notes
+        -----
+        `self.subject` is updated to "sub-<participant_label>_ses-<session_label>"
+        when subject has multiple sessions.
+        """
         if "_" in self.subject:
             self.subject = self.subject.split("_")[0]
 
@@ -1231,21 +1230,29 @@ class DiffusionPipeline(Pipeline):
 
             self.subject = "_".join((self.subject, self.global_conf.subject_session))
 
-        if not os.path.exists(
-            os.path.join(nipype_deriv_subject_directory, "diffusion_pipeline")
-        ):
+        nipype_diffusion_pipeline_subject_dir = os.path.join(nipype_deriv_subject_directory,
+                                                             "diffusion_pipeline")
+        if not os.path.exists(nipype_diffusion_pipeline_subject_dir):
             try:
-                os.makedirs(
-                    os.path.join(nipype_deriv_subject_directory, "diffusion_pipeline")
-                )
+                os.makedirs(nipype_diffusion_pipeline_subject_dir)
             except os.error:
-                print(
-                    "%s was already existing"
-                    % os.path.join(nipype_deriv_subject_directory, "diffusion_pipeline")
-                )
+                print(f"{nipype_diffusion_pipeline_subject_dir} was already existing")
+
+        return cmp_deriv_subject_directory, nipype_deriv_subject_directory, nipype_diffusion_pipeline_subject_dir
+
+    def process(self):
+        """Executes the diffusion pipeline workflow and returns True if successful."""
+        # Enable the use of the the W3C PROV data model to capture and represent provenance in Nipype
+        # config.enable_provenance()
+
+        # Process time
+        self.now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
+
+        cmp_deriv_subject_directory, nipype_deriv_subject_directory, nipype_diffusion_pipeline_subject_dir = \
+            self.init_subject_derivatives_dirs()
 
         # Initialization
-        log_file = os.path.join(nipype_deriv_subject_directory, "diffusion_pipeline", "pypeline.log")
+        log_file = os.path.join(nipype_diffusion_pipeline_subject_dir, "pypeline.log")
 
         if os.path.isfile(log_file):
             os.unlink(log_file)
@@ -1253,11 +1260,9 @@ class DiffusionPipeline(Pipeline):
         config.update_config(
             {
                 "logging": {
-                    "workflow_level": "DEBUG",
-                    "interface_level": "DEBUG",
-                    "log_directory": os.path.join(
-                        nipype_deriv_subject_directory, "diffusion_pipeline"
-                    ),
+                    "workflow_level": "INFO",
+                    "interface_level": "INFO",
+                    "log_directory": nipype_diffusion_pipeline_subject_dir,
                     "log_to_file": True,
                 },
                 "execution": {
@@ -1270,7 +1275,6 @@ class DiffusionPipeline(Pipeline):
                 },
             }
         )
-
         logging.update_logging(config)
 
         iflogger = logging.getLogger("nipype.interface")
@@ -1281,11 +1285,13 @@ class DiffusionPipeline(Pipeline):
             nipype_deriv_subject_directory=nipype_deriv_subject_directory,
         )
         flow.write_graph(graph2use="colored", format="svg", simple_form=True)
-
-        if self.number_of_cores != 1:
-            flow.run(plugin="MultiProc", plugin_args={"n_procs": self.number_of_cores})
-        else:
-            flow.run()
+        # Create dictionary of arguments passed to plugin_args
+        plugin_args = {
+            'maxtasksperchild': 1,
+            'n_procs': self.number_of_cores,
+            'raise_insufficient': False,
+        }
+        flow.run(plugin="MultiProc", plugin_args=plugin_args)
 
         iflogger.info("**** Processing finished ****")
 

@@ -82,6 +82,26 @@ Connectome Mapper 3 provides two Python commandline wrappers
 (`connectomemapper3_docker` and `connectomemapper3_singularity`) that will
 generate and run the appropriate command.
 
+.. role:: raw-html(raw)
+    :format: html
+
+.. admonition:: New in v3.0.2 🌍🌳✨
+
+    In support to the Organisation for Human Brain Mapping (OHBM) Sustainability and Environmental
+    Action (OHBM-SEA) group, CMP3 enables you now to be aware about the adverse impact
+    of your processing on the environment!
+
+    With the new `--track_carbon_footprint` option of the `connectomemapper3_docker` and `connectomemapper3_singularity` BIDS App python wrappers, and
+    the new `"Track carbon footprint"` option of the BIDS Interface Window of `cmpbidsappmanager`, you can estimate the carbon footprint incurred by the
+    execution of the BIDS App. Estimations are conducted using `codecarbon <https://codecarbon.io>`_ to estimate the amount of carbon dioxide (CO2)
+    produced to execute the code by the computing resources and save the results in ``<bids_dir>/code/emissions.csv``.
+
+    Then, to visualize, interpret and track the evolution of the emitted CO2 emissions, you can use the visualization tool of `codecarbon` aka `carbonboard` that takes as input the `.csv` created::
+
+        $ carbonboard --filepath="<bids_dir>/code/emissions.csv" --port=xxxx
+
+    Please check https://ohbm-environment.org to learn more about OHBM-SEA!
+
 .. _FSL: https://fsl.fmrib.ox.ac.uk/fsl/fslwiki
 
 .. _FreeSurfer: https://surfer.nmr.mgh.harvard.edu/fswiki/FreeSurferWiki

@@ -798,7 +798,6 @@ class DirectionGetterTractography(DipyBaseInterface):
     def _run_interface(self, runtime):
         from dipy.tracking import utils
         from dipy.direction import DeterministicMaximumDirectionGetter, ProbabilisticDirectionGetter
-        # from dipy.tracking.local import ThresholdStoppingCriterion, ActStoppingCriterion
         from dipy.tracking.stopping_criterion import BinaryStoppingCriterion, CmcStoppingCriterion
         from dipy.tracking.local_tracking import LocalTracking, ParticleFilteringTracking
         from dipy.direction.peaks import peaks_from_model
@@ -1138,50 +1137,44 @@ class MAPMRI(DipyDiffusionInterface):
 
     def _run_interface(self, runtime):
         from dipy.reconst import mapmri
-        # from dipy.data import fetch_cenir_multib, read_cenir_multib
         from dipy.core.gradients import gradient_table
-        # import marshal as pickle
         import pickle as pickle
         import gzip
 
         img = nib.load(self.inputs.in_file)
-        imref = nib.four_to_three(img)[0]
         affine = img.affine
 
         data = img.get_data().astype(np.float32)
-
-        hdr = imref.header.copy()
-
         gtab = self._get_gradient_table()
-        gtab = gradient_table(bvals=gtab.bvals, bvecs=gtab.bvecs,
-                              small_delta=self.inputs.small_delta,
-                              big_delta=self.inputs.big_delta)
+        gtab = gradient_table(
+            bvals=gtab.bvals, bvecs=gtab.bvecs,
+            small_delta=self.inputs.small_delta,
+            big_delta=self.inputs.big_delta
+        )
 
-        map_model_both_aniso = mapmri.MapmriModel(gtab,
-                                                  radial_order=self.inputs.radial_order,
-                                                  anisotropic_scaling=True,
-                                                  laplacian_regularization=self.inputs.laplacian_regularization,
-                                                  laplacian_weighting=self.inputs.laplacian_weighting,
-                                                  positivity_constraint=self.inputs.positivity_constraint
-                                                  )
+        map_model_both_aniso = mapmri.MapmriModel(
+            gtab,
+            radial_order=self.inputs.radial_order,
+            anisotropic_scaling=True,
+            laplacian_regularization=self.inputs.laplacian_regularization,
+            laplacian_weighting=self.inputs.laplacian_weighting,
+            positivity_constraint=self.inputs.positivity_constraint
+        )
 
         IFLOGGER.info('Fitting MAP-MRI model')
         mapfit_both_aniso = map_model_both_aniso.fit(data)
 
         '''maps'''
-        maps = {}
-        maps["rtop"] = mapfit_both_aniso.rtop()  # '''1/Volume of pore'''
-        maps["rtap"] = mapfit_both_aniso.rtap()  # '''1/AREA ...'''
-        maps["rtpp"] = mapfit_both_aniso.rtpp()  # '''1/length ...'''
-        maps["msd"] = mapfit_both_aniso.msd(
-        )  # '''similar to mean diffusivity'''
-        maps["qiv"] = mapfit_both_aniso.qiv(
-        )  # '''almost reciprocal of rtop'''
-        maps["ng"] = mapfit_both_aniso.ng()  # '''general non Gaussianity'''
-        maps[
-            "ng_perp"] = mapfit_both_aniso.ng_perpendicular()  # '''perpendicular to main direction (likely to be non gaussian in white matter)'''
-        maps["ng_para"] = mapfit_both_aniso.ng_parallel(
-        )  # '''along main direction (likely to be gaussian)'''
+        maps = {
+            "rtop": mapfit_both_aniso.rtop(),
+            "rtap": mapfit_both_aniso.rtap(),
+            "rtpp": mapfit_both_aniso.rtpp(),
+            "msd": mapfit_both_aniso.msd(),
+            "qiv": mapfit_both_aniso.qiv(),
+            "ng": mapfit_both_aniso.ng(),
+            "ng_perp": mapfit_both_aniso.ng_perpendicular(),
+            "ng_para": mapfit_both_aniso.ng_parallel()
+        }
 
         ''' The most related to white matter anisotropy are:
             rtpp, for anisotropy
@@ -1208,7 +1201,6 @@ class MAPMRI(DipyDiffusionInterface):
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs['model'] = self._gen_filename('mapmri', ext='.pklz')
-
         for metric in ["rtop", "rtap", "rtpp", "msd", "qiv", "ng", "ng_perp", "ng_para"]:
             outputs["{}_file".format(metric)] = self._gen_filename(metric)
         return outputs

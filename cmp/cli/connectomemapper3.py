@@ -199,7 +199,7 @@ def main():
 
     try:
         bids_layout = BIDSLayout(project.base_directory)
-    except Exception:
+    except Exception:  # pragma: no cover
         print_error("  .. EXCEPTION: Raised at BIDSLayout")
         exit_code = 1
         return exit_code
@@ -230,7 +230,7 @@ def main():
 
             if anat_valid_inputs:
                 anat_pipeline.process()
-            else:
+            else:  # pragma: no cover
                 print_error("  .. ERROR: Invalid inputs")
                 exit_code = 1
                 return exit_code
@@ -254,7 +254,7 @@ def main():
             if anat_valid_inputs:
                 print(">> Process anatomical pipeline")
                 anat_pipeline.process()
-            else:
+            else:  # pragma: no cover
                 print_error("  .. ERROR: Invalid inputs")
                 exit_code = 1
                 return exit_code
@@ -276,11 +276,11 @@ def main():
 
                 if dmri_valid_inputs:
                     dmri_pipeline.process()
-                else:
+                else:  # pragma: no cover
                     print("  .. ERROR: Invalid inputs")
                     exit_code = 1
                     return exit_code
-        else:
+        else:  # pragma: no cover
             print_error(
                 f"  .. ERROR: Invalid anatomical outputs for diffusion pipeline"
             )
@@ -306,7 +306,7 @@ def main():
             if anat_valid_inputs:
                 print(">> Process anatomical pipeline")
                 anat_pipeline.process()
-            else:
+            else:  # pragma: no cover
                 print_error("  .. ERROR: Invalid inputs")
                 exit_code = 1
                 return exit_code
@@ -329,11 +329,11 @@ def main():
                 if fmri_valid_inputs:
                     print(">> Process fmri pipeline")
                     fmri_pipeline.process()
-                else:
+                else:  # pragma: no cover
                     print("  .. ERROR: Invalid inputs")
                     exit_code = 1
                     return exit_code
-        else:
+        else:  # pragma: no cover
             print_error(f"  .. ERROR: Invalid anatomical outputs for fMRI pipeline")
             print_error(f"{msg}")
             exit_code = 1
@@ -360,7 +360,7 @@ def main():
             if anat_valid_inputs:
                 print(">> Process anatomical pipeline")
                 anat_pipeline.process()
-            else:
+            else:  # pragma: no cover
                 print_error("  .. ERROR: Invalid inputs")
                 exit_code = 1
                 return exit_code
@@ -383,7 +383,7 @@ def main():
                 if dmri_valid_inputs:
                     print(">> Process diffusion pipeline")
                     dmri_pipeline.process()
-                else:
+                else:  # pragma: no cover
                     print_error("  .. ERROR: Invalid inputs")
                     exit_code = 1
                     return exit_code
@@ -401,11 +401,11 @@ def main():
                 if fmri_valid_inputs:
                     print(">> Process fmri pipeline")
                     fmri_pipeline.process()
-                else:
+                else:  # pragma: no cover
                     print_error("  .. ERROR: Invalid inputs")
                     exit_code = 1
                     return exit_code
-        else:
+        else:  # pragma: no cover
             print_error(
                 f"  .. ERROR: Invalid anatomical outputs for diffusion and fMRI pipelines"
             )

@@ -1,5 +1,29 @@
 fixes:
-   - "/app/::"
+   - "/opt/conda/envs/py37cmp-core/lib/python3.7/site-packages/cmp::connectomemapper3/cmp"
+   - "/opt/conda/envs/py37cmp-core/lib/python3.7/site-packages/cmtklib::connectomemapper3/cmtklib"
+
+coverage:
+  range: "0...100"
+  status:
+    patch: off
+    project:
+      default:
+        target: 0
+        threshold: 100
+  ignore:
+    - "cmp/bidsappmanager/*"
+    - "cmp/cli/*"
+    - "cmp/viz/*"
+    - "cmtklib/process.py"
+    - "cmtklib/bids/network.py"
+    - "cmtklib/carbonfootprint.py"
+    - "cmtklib/data/*"
+    - "docs/*"
+    - "conda/*"
+    - "notebooks/*"
+    - "resources/*"
+    - "scripts/*"
+    - "tests/*"
 
 codecov:
   token: 0eeff7e5-26c0-4c28-bd9f-2b419cf14f32

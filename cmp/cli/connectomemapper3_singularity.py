@@ -8,11 +8,16 @@
 
 # General imports
 import sys
+from pathlib import Path
 
 # Own imports
 from cmp.parser import get_singularity_wrapper_parser
 from cmtklib.util import check_directory_exists
 from cmtklib.process import run
+from cmtklib.carbonfootprint import (
+    create_emissions_tracker,
+    create_carbon_footprint_message
+)
 
 
 def create_singularity_cmd(args):
@@ -118,6 +123,11 @@ def main():
     # Create the singularity run command
     cmd = create_singularity_cmd(args)
 
+    if args.track_carbon_footprint:
+        # Create and start the carbon footprint tracker
+        tracker = create_emissions_tracker(bids_root=args.bids_dir)
+        tracker.start()
+
     # Execute the singularity run command
     try:
         print(f'... cmd: {cmd}')
@@ -127,6 +137,17 @@ def main():
         print('Failed')
         print(e)
         exit_code = 1
+
+    if args.track_carbon_footprint:
+        # Stop the carbon tracker
+        tracker.stop()
+        # Output the carbon footprint message to the terminal
+        carbonfootprint_msg = create_carbon_footprint_message(
+            bids_dir=args.bids_dir,
+            emissions_csv_file=str(Path(args.bids_dir) / 'code' / 'emissions.csv'),
+            nb_of_subjects_processed=len(args.participant_label)
+        )
+        print(carbonfootprint_msg)
 
     return exit_code
 

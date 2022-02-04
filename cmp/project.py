@@ -447,7 +447,7 @@ def init_dmri_project(project_info, bids_layout, is_new_project, gui=True, debug
                 )
                 dmri_save_config(dmri_pipeline, project_info.dmri_config_file)
         else:
-            if debug:
+            if debug:  # pragma: no cover
                 print("int_project dmri_pipeline.global_config.subjects : ")
                 print(dmri_pipeline.global_conf.subjects)
 
@@ -555,7 +555,7 @@ def init_fmri_project(project_info, bids_layout, is_new_project, gui=True, debug
                 )
                 fmri_save_config(fmri_pipeline, project_info.fmri_config_file)
         else:
-            if debug:
+            if debug:  # pragma: no cover
                 print("int_project fmri_pipeline.global_config.subjects : ")
                 print(fmri_pipeline.global_conf.subjects)
 
@@ -601,7 +601,7 @@ def init_anat_project(project_info, is_new_project, debug=False):
     if (project_info.subject_session != "") and (
         project_info.subject_session is not None
     ):
-        if debug:
+        if debug:  # pragma: no cover
             print("Refresh folder WITH session")
         refresh_folder(
             bids_directory,
@@ -611,7 +611,7 @@ def init_anat_project(project_info, is_new_project, debug=False):
             session=project_info.subject_session,
         )
     else:
-        if debug:
+        if debug:  # pragma: no cover
             print("Refresh folder WITHOUT session")
         refresh_folder(
             bids_directory,
@@ -653,7 +653,7 @@ def init_anat_project(project_info, is_new_project, debug=False):
             anat_save_config(anat_pipeline, project_info.anat_config_file)
 
     else:
-        if debug:
+        if debug:  # pragma: no cover
             print("int_project anat_pipeline.global_config.subjects : ")
             print(anat_pipeline.global_conf.subjects)
 
@@ -757,7 +757,7 @@ def init_eeg_project(project_info, bids_layout, is_new_project, gui=True, debug=
     return eeg_inputs_checked, eeg_pipeline
 
 
-def update_anat_last_processed(project_info, pipeline):
+def update_anat_last_processed(project_info, pipeline):  # pragma: no cover
     """Update last processing information of a :class:`~cmp.pipelines.anatomical.anatomical.AnatomicalPipeline`.
 
     Parameters
@@ -817,7 +817,7 @@ def update_anat_last_processed(project_info, pipeline):
     project_info.atlas_info = pipeline.atlas_info
 
 
-def update_dmri_last_processed(project_info, pipeline):
+def update_dmri_last_processed(project_info, pipeline):  # pragma: no cover
     """Update last processing information of an :class:`~cmp.pipelines.diffusion.diffusion.DiffusionPipeline`.
 
     Parameters
@@ -873,7 +873,7 @@ def update_dmri_last_processed(project_info, pipeline):
                 project_info.dmri_last_stage_processed = stage
 
 
-def update_fmri_last_processed(project_info, pipeline):
+def update_fmri_last_processed(project_info, pipeline):  # pragma: no cover
     """Update last processing information of an :class:`~cmp.pipelines.functional.fMRI.fMRIPipeline`.
 
     Parameters
@@ -1031,7 +1031,7 @@ def run_individual(
         project.subject_sessions = ["{}".format(session_label)]
         project.subject_session = "{}".format(session_label)
         print("INFO : Detected session(s)")
-    else:
+    else:  # pragma: no cover
         print("INFO : No detected session")
         project.subject_sessions = [""]
         project.subject_session = ""
@@ -1226,7 +1226,7 @@ def run_individual(
             if anat_valid_inputs:
                 print(">> Process anatomical pipeline")
                 anat_pipeline.process()
-            else:
+            else:  # pragma: no cover
                 print("ERROR : Invalid inputs")
                 sys.exit(1)
 
@@ -1248,7 +1248,7 @@ def run_individual(
             if anat_valid_inputs:
                 print(">> Process anatomical pipeline")
                 anat_pipeline.process()
-            else:
+            else:  # pragma: no cover
                 print("ERROR : Invalid inputs")
                 sys.exit(1)
 
@@ -1271,7 +1271,7 @@ def run_individual(
                     dmri_pipeline.custom_atlas_res = anat_pipeline.stages["Parcellation"].config.custom_parcellation.res
                 if dmri_valid_inputs:
                     dmri_pipeline.process()
-                else:
+                else:  # pragma: no cover
                     print("   ... ERROR : Invalid inputs")
                     sys.exit(1)
                 dmri_pipeline.check_stages_execution()
@@ -1295,7 +1295,7 @@ def run_individual(
             if anat_valid_inputs:
                 print(">> Process anatomical pipeline")
                 anat_pipeline.process()
-            else:
+            else:  # pragma: no cover
                 print("ERROR : Invalid inputs")
                 sys.exit(1)
 
@@ -1319,7 +1319,7 @@ def run_individual(
                 if fmri_valid_inputs:
                     print(">> Process fmri pipeline")
                     fmri_pipeline.process()
-                else:
+                else:  # pragma: no cover
                     print("   ... ERROR : Invalid inputs")
                     sys.exit(1)
                 fmri_pipeline.check_stages_execution()
@@ -1567,7 +1567,7 @@ def run_individual(
             if anat_valid_inputs:
                 print(">> Process anatomical pipeline")
                 anat_pipeline.process()
-            else:
+            else:  # pragma: no cover
                 print("   ... ERROR : Invalid inputs")
                 sys.exit(1)
 
@@ -1591,7 +1591,7 @@ def run_individual(
                 if dmri_valid_inputs:
                     print(">> Process diffusion pipeline")
                     dmri_pipeline.process()
-                else:
+                else:  # pragma: no cover
                     print("   ... ERROR : Invalid inputs")
                     sys.exit(1)
                 dmri_pipeline.check_stages_execution()
@@ -1615,7 +1615,7 @@ def run_individual(
                 if fmri_valid_inputs:
                     print(">> Process fmri pipeline")
                     fmri_pipeline.process()
-                else:
+                else:  # pragma: no cover
                     print("   ... ERROR : Invalid inputs")
                     sys.exit(1)
                 fmri_pipeline.check_stages_execution()

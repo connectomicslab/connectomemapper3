@@ -128,39 +128,39 @@ def save_configparser_as_json(config, config_json_path, ini_mode=False, debug=Fa
             if "segmentation_stage" in section:
                 if segmentation_tool == "Custom segmentation":
                     if "custom" not in name and "seg_tool" not in name:
-                        if debug:
+                        if debug:  # pragma: no cover
                             print_warning(f"  .. DEBUG: Skip parameter {section} / {name}")
                         continue
                 else:
                     if "custom" in name or "freesurfer_subjects_dir" in name or "freesurfer_subject_id" in name:
-                        if debug:
+                        if debug:  # pragma: no cover
                             print_warning(f"  .. DEBUG: Skip parameter {section} / {name}")
                         continue
 
             if "parcellation_stage" in section:
                 if parcellation_scheme == "Custom":
                     if "custom" not in name and "parcellation_scheme" not in name:
-                        if debug:
+                        if debug:  # pragma: no cover
                             print_warning(f"  .. DEBUG: Skip parameter {section} / {name}")
                         continue
                 else:
                     if "custom" in name:
-                        if debug:
+                        if debug:  # pragma: no cover
                             print_warning(f"  .. DEBUG: Skip parameter {section} / {name}")
                         continue
 
             if "_editor" in name:
-                if debug:
+                if debug:  # pragma: no cover
                     print_warning(f"  .. DEBUG: Skip parameter {section} / {name}")
                 continue
 
             if "log_visualization" in name:
-                if debug:
+                if debug:  # pragma: no cover
                     print_warning(f"  .. DEBUG: Skip parameter {section} / {name}")
                 continue
 
             if "circular_layout" in name:
-                if debug:
+                if debug:  # pragma: no cover
                     print_warning(f"  .. DEBUG: Skip parameter {section} / {name}")
                 continue
 
@@ -170,47 +170,46 @@ def save_configparser_as_json(config, config_json_path, ini_mode=False, debug=Fa
                 try:
                     if not(section == 'parcellation_stage' and name == 'ants_precision_type'):
                         value = literal_eval(value)
-                        if debug:
+                        if debug:  # pragma: no cover
                             print_warning(f"  .. DEBUG: String {value} evaluated")
                     else:
-                        if debug:
+                        if debug:  # pragma: no cover
                             print_warning(f"  .. DEBUG: String {value} not evaluated")
                 except Exception:
-                    if debug:
+                    if debug:  # pragma: no cover
                         print_error(
                             f"  .. EXCEPTION: String {value} COULD NOT BE evaluated"
                         )
-                    pass
 
             if isinstance(value, dict):
-                if debug:
+                if debug:  # pragma: no cover
                     print_warning(
                         f"  .. DEBUG: Processing {section} / {name} / {value} as dict"
                     )
                 config_json[section][name] = value
                 is_iterable = True
             elif isinstance(value, list):
-                if debug:
+                if debug:  # pragma: no cover
                     print_warning(
                         f"  .. DEBUG: Processing {section} / {name} / {value} as list"
                     )
                 config_json[section][name] = value
                 is_iterable = True
             elif isinstance(value, Iterable) and not isinstance(value, str):
-                if debug:
+                if debug:  # pragma: no cover
                     print_warning(
                         f"  .. DEBUG: Processing {section} / {name} / {value} as iterable"
                     )
                 config_json[section][name] = [x for x in value if x]
                 is_iterable = True
             elif isinstance(value, bool):
-                if debug:
+                if debug:  # pragma: no cover
                     print_warning(
                         f"  .. DEBUG: Processing {section} / {name} / {value} as boolean"
                     )
                 config_json[section][name] = [value]
             elif value and not isinstance(value, str):
-                if debug:
+                if debug:  # pragma: no cover
                     print_warning(
                         f"  .. DEBUG: Processing {section} / {name} / {value} as not a string"
                     )
@@ -218,7 +217,7 @@ def save_configparser_as_json(config, config_json_path, ini_mode=False, debug=Fa
             elif value and isinstance(value, str):
                 value = value.strip()
                 if value.isnumeric():
-                    if debug:
+                    if debug:  # pragma: no cover
                         print_warning(
                             f"  .. DEBUG: Processing {section} / {name} / {value} as number"
                         )
@@ -227,13 +226,13 @@ def save_configparser_as_json(config, config_json_path, ini_mode=False, debug=Fa
                         value = int(value)
                     config_json[section][name] = [value]
                 else:
-                    if debug:
+                    if debug:  # pragma: no cover
                         print_warning(
                             f"  .. DEBUG: Processing {section} / {name} / {value} as string"
                         )
                     config_json[section][name] = [value]
             else:
-                if debug:
+                if debug:  # pragma: no cover
                     print_warning(f"  .. DEBUG : Type: {type(value)} / value : {value}")
                 config_json[section][name] = ""
 
@@ -248,7 +247,7 @@ def save_configparser_as_json(config, config_json_path, ini_mode=False, debug=Fa
 
     config_json["Global"]["version"] = __version__
 
-    if debug:
+    if debug:  # pragma: no cover
         print_blue(f"  .. DEBUG: {config_json}")
 
     with open(config_json_path, "w") as outfile:
@@ -555,18 +554,17 @@ def set_pipeline_attributes_from_config(pipeline, config, debug=False):
                                 elif isinstance(getattr(sub_config, sub_key), float):
                                     conf_value = float(conf_value)
                                 setattr(sub_config, sub_key, conf_value)
-                                if debug:
+                                if debug:  # pragma: no cover
                                     print(
                                         f" .. DEBUG: Set {sub_config}.{sub_key} to {conf_value}"
                                     )
                             except Exception as e:
-                                if debug:
+                                if debug:  # pragma: no cover
                                     print_warning(
                                         "  .. EXCEPTION raised while setting "
                                         + f"{sub_config}.{sub_key} to {conf_value}"
                                     )
                                     print_error(f"    {e}")
-                                pass
             else:
                 if stage.name in config.keys():
                     if key in config[stage.name].keys():
@@ -586,19 +584,17 @@ def set_pipeline_attributes_from_config(pipeline, config, debug=False):
                             elif isinstance(getattr(stage.config, key), float):
                                 conf_value = float(conf_value)
                             setattr(stage.config, key, conf_value)
-                            if debug:
+                            if debug:  # pragma: no cover
                                 print(
                                     f" .. DEBUG: Set {stage.config}.{key} to {conf_value}"
                                 )
                         except Exception as e:
-                            if debug:
+                            if debug:  # pragma: no cover
                                 print_warning(
                                     "  .. EXCEPTION raised while setting "
                                     + f"{stage.config}.{key} to {conf_value}"
                                 )
                                 print_error(f"   {e}")
-                            pass
-
     setattr(
         pipeline, "number_of_cores", int(config["Multi-processing"]["number_of_cores"])
     )
@@ -628,7 +624,7 @@ def create_configparser_from_pipeline(pipeline, debug=False):
         for prop in list(pipeline.global_conf.traits().keys())
         if "trait" not in prop
     ]  # possibly dangerous..?
-    if debug:
+    if debug:  # pragma: no cover
         print(global_keys)
     for key in global_keys:
         # if key != "subject" and key != "subjects":
@@ -661,7 +657,7 @@ def create_configparser_from_pipeline(pipeline, debug=False):
     config.add_section("Multi-processing")
     config.set("Multi-processing", "number_of_cores", pipeline.number_of_cores)
 
-    if debug:
+    if debug:  # pragma: no cover
         print(config)
 
     return config

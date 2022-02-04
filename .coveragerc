@@ -1,0 +1,19 @@
+# .coveragerc to control coverage.py
+[run]
+branch = False
+concurrency = multiprocessing
+parallel = True
+source =
+    cmp
+    cmtklib
+omit =
+    # omit anything in a bidsappmanager directory anywhere
+    */bidsappmanager/*
+    # omit anything in a cli or viz directory anywhere
+    */cli/*,*/viz/*,
+    # omit any process* directory anywhere
+    */process*
+    # omit any network* in a bids directory anywhere
+    */bids/network*
+    # omit cmtklib/carbonfootprint.py which is called outside coverage
+    cmtklib/carbonfootprint.py
