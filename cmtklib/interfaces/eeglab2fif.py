@@ -23,10 +23,6 @@ class EEGLAB2fifInputSpec(BaseInterfaceInputSpec):
     electrode_positions_file = traits.File(
         exists=True, desc='positions of EEG electrodes in a txt file')
 
-    MRI_align_transform_file = traits.File(
-        exists=True, desc='file containing transformation matrix to align '\
-            'electrode positions in electrode_positions_file with the MRI')
-
     EEG_params = traits.Dict(
         desc='dictionary defining EEG parameters')
 
@@ -64,10 +60,7 @@ class EEGLAB2fif(BaseInterface):
     def _run_interface(self, runtime):
         epochs_file = self.inputs.eeg_ts_file[0]
         behav_file = self.inputs.behav_file[0]
-
         montage_fname = self.inputs.electrode_positions_file
-        dev_head_t_fname = self.inputs.MRI_align_transform_file
-
         EEG_params = self.inputs.EEG_params
         self.epochs_fif_fname = self.inputs.epochs_fif_fname
         self.derivative_list = self.inputs.derivative_list
@@ -75,7 +68,7 @@ class EEGLAB2fif(BaseInterface):
         if not os.path.exists(self.epochs_fif_fname):
             self._convert_eeglab2fif(
                 epochs_file, behav_file, self.epochs_fif_fname, montage_fname,
-                dev_head_t_fname, EEG_params)
+                EEG_params)
         self.derivative_list.append(f'cmp-{__version__}')
         self.output_query['EEG'] = {
             'suffix': 'epo',
@@ -85,8 +78,7 @@ class EEGLAB2fif(BaseInterface):
 
     @staticmethod
     def _convert_eeglab2fif(
-            epochs_file, behav_file, epochs_fif_fname, montage_fname,
-            dev_head_t_fname, EEG_params):
+            epochs_file, behav_file, epochs_fif_fname, montage_fname,EEG_params):
         behav = pd.read_csv(behav_file, sep="\t")
         behav = behav[behav.bad_trials == 0]
         epochs = mne.read_epochs_eeglab(
@@ -124,9 +116,6 @@ class EEGLAB2fif(BaseInterface):
             # read from the file
             montage = mne.channels.make_dig_montage(
                 ch_pos=dict(zip(ch_names, ch_coord)),coord_frame='head')
-            # align with MRI
-            dev_head_t = np.loadtxt(dev_head_t_fname)
-            montage.dev_head_t = dev_head_t
             epochs.info.set_montage(montage)
 
         epochs.save(epochs_fif_fname, overwrite=True)

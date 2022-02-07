@@ -57,7 +57,7 @@ class CreateRois(BaseInterface):
 
         self._create_roi_files(subject, parcellation_image_path, parcellation_name, cartool_dir, cmp3_dir)
 
-        self.derivative_list.append('cartool-v3.80')
+        self.derivative_list.append('Cartool-v3.80')
 
         self.output_query['rois'] = {
             # 'scope': 'cartool-v3.80',
