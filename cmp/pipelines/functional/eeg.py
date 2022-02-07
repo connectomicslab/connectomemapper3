@@ -25,6 +25,7 @@ from cmp.stages.eeg.eeg_loader import EEGLoaderStage
 from cmp.stages.eeg.eeg_preparer import EEGPreparerStage
 from cmp.stages.eeg.eeg_inverse_solution import EEGInverseSolutionStage
 from cmp.info import __version__
+from cmtklib.bids.io import __nipype_directory__
 
 
 class Global_Configuration(HasTraits):
@@ -364,7 +365,6 @@ class EEGPipeline(Pipeline):
 
         # Process time
         self.now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
-
         if '_' in self.subject:
             self.subject = self.subject.split('_')[0]
 
@@ -373,14 +373,14 @@ class EEGPipeline(Pipeline):
                 self.output_directory, f'cmp-{__version__}', self.subject
             )
             nipype_deriv_subject_directory = os.path.join(
-                self.output_directory, "nipype", self.subject
+                self.output_directory, __nipype_directory__, self.subject
             )
         else:
             cmp_deriv_subject_directory = os.path.join(
                 self.output_directory, f'cmp-{__version__}', self.subject, self.global_conf.subject_session
             )
             nipype_deriv_subject_directory = os.path.join(
-                self.output_directory, "nipype", self.subject, self.global_conf.subject_session
+                self.output_directory, __nipype_directory__, self.subject, self.global_conf.subject_session
             )
 
             self.subject = "_".join(

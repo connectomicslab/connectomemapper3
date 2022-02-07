@@ -106,10 +106,10 @@ class EEGLAB2fif(BaseInterface):
                 montage_fname,skiprows=1,usecols=3,max_rows=n,
                 dtype=np.dtype(str)).tolist()
             all_coord = list(map(lambda x: x/1000,all_coord))
-            ch_coord  = [all_coord[idx] for idx, chan in  enumerate(all_names)\
+            ch_coord  = [all_coord[idx] for idx, chan in enumerate(all_names)\
                          if chan not in ['lpa','rpa','nasion']]
             # overwrite channel names?
-            ch_names  = [all_names[idx] for idx, chan in  enumerate(all_names)\
+            ch_names  = [all_names[idx] for idx, chan in enumerate(all_names)\
                          if chan not in ['lpa','rpa','nasion']]
 
             # create the montage object with the channel names and positions

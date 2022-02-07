@@ -45,8 +45,6 @@ class EEGLoader(BaseInterface):
         self.base_directory = self.inputs.base_directory
         self.subject = self.inputs.subject
         self.derivative_list = self.inputs.derivative_list
-        import pdb
-        pdb.set_trace()
         self._run_datagrabber()
         return runtime
 
@@ -60,8 +58,6 @@ class EEGLoader(BaseInterface):
         print(bidsdatagrabber.inputs.output_query)
         print(bidsdatagrabber.inputs.base_dir)
         print(bidsdatagrabber.inputs.subject)
-        import pdb
-        pdb.set_trace()
         self.results = bidsdatagrabber.run()
 
     def _list_outputs(self):
