@@ -105,10 +105,10 @@ class MNEInverseSolution(BaseInterface):
         noise_cov = mne.read_cov(noise_cov_fname)
         src = mne.read_source_spaces(src_file, patch_stats=False, verbose=None)
         # compute the inverse operator
-        # inverse_operator = mne.minimum_norm.make_inverse_operator(
-        #     epochs.info, fwd, noise_cov, loose=1, depth=None, fixed=False)
         inverse_operator = mne.minimum_norm.make_inverse_operator(
-            epochs.info, fwd, noise_cov, loose=0, depth=None, fixed=True)
+            epochs.info, fwd, noise_cov, loose=1, depth=None, fixed=False)
+        # inverse_operator = mne.minimum_norm.make_inverse_operator(
+        #     epochs.info, fwd, noise_cov, loose=0, depth=None, fixed=True)
         mne.minimum_norm.write_inverse_operator(inv_fname, inverse_operator)        
         # compute the time courses of the source points
         # some parameters
