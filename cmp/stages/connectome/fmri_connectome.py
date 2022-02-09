@@ -154,7 +154,7 @@ class ConnectomeStage(Stage):
 
         It contains a dictionary of stage outputs with corresponding commands for visual inspection.
         """
-        func_sinker_dir = os.path.join(os.path.dirname(self.stage_dir), "bold_sinker")
+        func_sinker_dir = os.path.join(os.path.dirname(self.stage_dir), "func_datasinker")
         func_sinker_report = os.path.join(func_sinker_dir, "_report", "report.rst")
 
         if os.path.exists(func_sinker_report):
