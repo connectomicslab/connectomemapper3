@@ -327,7 +327,7 @@ class ParcellateHippocampalSubfields(BaseInterface):
         mov = op.join(self.inputs.subjects_dir, self.inputs.subject_id,
                       'mri', 'lh.hippoAmygLabels-T1.v21.mgz')
         targ = op.join(self.inputs.subjects_dir,
-                       self.inputs.subject_id, 'mri', 'raw.mgz')
+                       self.inputs.subject_id, 'mri', 'rawavg.mgz')
         out = op.abspath('lh_subFields.nii.gz')
         cmd = fs_string + '; mri_vol2vol --mov "%s" --targ "%s" --regheader --o "%s" --no-save-reg --interp nearest' % (
             mov, targ, out)
@@ -340,7 +340,7 @@ class ParcellateHippocampalSubfields(BaseInterface):
         mov = op.join(self.inputs.subjects_dir, self.inputs.subject_id,
                       'mri', 'rh.hippoAmygLabels-T1.v21.mgz')
         targ = op.join(self.inputs.subjects_dir,
-                       self.inputs.subject_id, 'mri', 'raw.mgz')
+                       self.inputs.subject_id, 'mri', 'rawavg.mgz')
         out = op.abspath('rh_subFields.nii.gz')
         cmd = fs_string + '; mri_vol2vol --mov "%s" --targ "%s" --regheader --o "%s" --no-save-reg --interp nearest' % (
             mov, targ, out)
@@ -415,7 +415,7 @@ class ParcellateBrainstemStructures(BaseInterface):
         mov = op.join(self.inputs.subjects_dir, self.inputs.subject_id,
                       'mri', 'brainstemSsLabels.v12.mgz')
         targ = op.join(self.inputs.subjects_dir,
-                       self.inputs.subject_id, 'mri', 'raw.mgz')
+                       self.inputs.subject_id, 'mri', 'rawavg.mgz')
         out = op.abspath('brainstem.nii.gz')
         cmd = fs_string + '; mri_vol2vol --mov "%s" --targ "%s" --regheader --o "%s" --no-save-reg --interp nearest' % (
             mov, targ, out)
@@ -1697,7 +1697,7 @@ class ParcellateThalamus(BaseInterface):
 
         # Moving aparc+aseg.mgz back to its original space for thalamic parcellation
         mov = op.join(self.inputs.subjects_dir, self.inputs.subject_id, 'mri', 'aparc+aseg.mgz')
-        targ = op.join(self.inputs.subjects_dir, self.inputs.subject_id, 'mri', 'raw.mgz')
+        targ = op.join(self.inputs.subjects_dir, self.inputs.subject_id, 'mri', 'rawavg.mgz')
         out = op.join(self.inputs.subjects_dir, self.inputs.subject_id, 'tmp', 'aparc+aseg.nii.gz')
         # cmd = fs_string + '; mri_vol2vol --mov "%s" --targ "%s" --regheader --o "%s" --no-save-reg --interp nearest' % (mov,targ,out)
         cmd = 'mri_vol2vol --mov "%s" --targ "%s" --regheader --o "%s" --no-save-reg --interp nearest' % (mov, targ, out)
