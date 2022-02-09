@@ -1,5 +1,3 @@
-<!--lint disable-->
-
 ---
 title: 'Connectome Mapper 3: A Flexible and Open-Source Pipeline Software for Multiscale Multimodal Human Connectome Mapping'
 tags:
@@ -32,21 +30,21 @@ authors:
     affiliation: 1
   - name: Alessandra Griffa
     orcid: 0000-0003-1923-1653
-    affiliation: 2
+    affiliation: 2,3
   - name: Mikkel Schöttner
     orcid: 0000-0002-4521-9837 
     affiliation: 1
   - name: Jonathan Wirsich
     orcid: 0000-0003-0588-9710
-    affiliation: 3
-  - name: Anıl Tuncel
-    orcid: 0000-0003-0317-2556
     affiliation: 4
+  - name: M. Anıl Tuncel
+    orcid: 0000-0003-0317-2556
+    affiliation: 5
   - name: Jakub Jancovic
     orcid: 0000-0002-3312-3918
-    affiliation: 5
+    affiliation: 6
   - name: Meritxell Bach Cuadra
-    affiliation: 3,6
+    affiliation: 1,7
     orcid: 0000-0003-2730-4285
   - name: Patric Hagmann
     orcid: 0000-0002-2854-6561
@@ -54,17 +52,19 @@ authors:
 affiliations:
  - name: Radiology Department, Centre Hospitalier Universitaire Vaudois and University of Lausanne (CHUV-UNIL), Switzerland
    index: 1
- - name: Medical Image Processing Lab (MIP:Lab), Ecole Polytechnique Federale de Lausanne (EPFL), Switzerland
+ - name: Department of Clinical Neurosciences, Division of Neurology, Geneva University Hospitals and Faculty of Medicine, University of Geneva, Geneva, Switzerland
    index: 2
- - name: EEG and Epilepsy Unit, University Hospitals and Faculty of Medicine of Geneva, University of Geneva, Geneva, Switzerland
+ - name: Institute of Bioengineering, Center of Neuroprosthetics, École Polytechnique Fédérale De Lausanne (EPFL), Geneva, Switzerland
    index: 3
- - name: Blue Brain Project, BBP-CORE, Ecole Polytechnique Federale de Lausanne (EPFL), Switzerland
+ - name: EEG and Epilepsy Unit, University Hospitals and Faculty of Medicine of Geneva, University of Geneva, Geneva, Switzerland
    index: 4
- - name: Foxight, Geneva, Switzerland
+ - name: Blue Brain Project, École polytechnique fédérale de Lausanne (EPFL), Campus Biotech, Geneva, Switzerland
    index: 5
- - name: CIBM Center for Biomedical Imaging, Geneva, Switzerland
+ - name: Foxight, Geneva, Switzerland
    index: 6
-date: 02 February 2021
+ - name: CIBM Center for Biomedical Imaging, Geneva, Switzerland
+   index: 7
+date: 16 February 2021
 bibliography: paper.bib
 
 # Optional fields if submitting to a AAS journal too, see this blog post:
@@ -72,8 +72,6 @@ bibliography: paper.bib
 # aas-doi: 10.3847/xxxxx <- update this with the DOI from AAS once you know it.
 # aas-journal: Astrophysical Journal <- The name of the AAS journal.
 ---
-
-<!--lint enable-->
 
 # Statement of Need
 
@@ -145,6 +143,8 @@ Each stage implements one or multiple tasks, where each task can interface with 
   ANTs [@AVANTS2008SymmetricBrain], dipy [@Garyfallidis2014DipyData],
   mrtrix3 [@Tournier2019MRtrix3:Visualisation], AFNI [@Cox2012], or with an in-house tool
   (\autoref{fig:cmp3-diagram}).
+We refer to the main documentation for more details about the different processing steps
+  involved in each pipeline.
 
 To guarantee consistent processing in large neuroimaging cohorts,
   pipeline and stage parameters can be set by creating and loading pipeline
@@ -163,13 +163,13 @@ To ensure reproducibility and maximize re-usability of the tool, the implemented
 This means that the BIDS App of CMP3 can be run on a large diversity of datasets, on Linux, MacOSX, and Windows computers,
   and on high performance computing systems (clusters) for large-scale analysis.
 
-Design considerations make CMP3 not only easy to install and use (as it provides the user with a computing
+All these design considerations make CMP3 not only easy to install and use (as it provides the user with a computing
   environment in which the pipelines are guaranteed to run, and where all dependencies
-  are already installed) on a diversity of multi-modal BIDS datasets, but also efficient in managing and
+  are already installed), and this on a diversity of multi-modal BIDS datasets, but also efficient in managing and
   scaling the pipeline execution while recording provenance, and easy to customize and extend it for specific needs.
 At the time EEG is being integrated, CMP3 already provides a collection of interfaces dedicated
   for this modality that would allow anyone to map the connectivity at the source level derived from EEG in
-  the CMP3 framework, as demonstrated in a tutorial notebook.
+  the CMP3 framework, as demonstrated by a tutorial notebook in the documentation.
 
 \textbf{A revisited and extended multi-scale cortical parcellation scheme.}
 CMP3 revisits the multiscale cortical parcellation proposed by [@Cammoun2012:MappingMRI] and extends it with new structures including a subdivision of the thalamus into 7 nuclei per hemisphere, of the hippocampus into 12 subfields, and of the brainstem into
@@ -189,6 +189,9 @@ After generating the volumetric parcellations from the annotation files, one can
 All segmented structures are combined at the end of process to create the final parcellation nifti image
   at each scale along with the corresponding label index color mapping file in accordance with the BIDS Derivatives
   specifications.
+
+The different segmentation and parcellation outputs of the anatomical pipeline are then taken as inputs of
+  the diffusion and fMRI pipeline
 
 \textbf{A graphical user interface reflecting the workflow structure.}
 CMP3 takes advantage of the Traits/TraitsUI framework
