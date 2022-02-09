@@ -91,31 +91,31 @@ The size and organization of these datasets as well as the increasing complexity
   reproducibility and transparency of the analysis.
 
 The last ten years have indeed witnessed a number of technical advances and a trend towards the adoption
- of open research practices such as *open data* and *open methodology*,
-  to address these challenges [@Nichols:2017] [@EglenTowardNeuroscience:2017] [@Kennedy2019].
+  of open research practices such as *open data* and *open methodology*
+  [@Nichols:2017] [@EglenTowardNeuroscience:2017] [@Kennedy2019].
 This has led in particular to the creation of a community standard for dataset organization, known as the Brain Imaging Data Structure (BIDS),
   initially designed to ease the practice of sharing raw MRI data [@GorgolewskiTheExperiments:2016]. 
-[@GorgolewskiBIDSMethods:2017].
 Combined with advances in software virtualization, BIDS has enabled the creation of the BIDS Apps
   framework which uses software container technology to encapsulate neuroimaging processing pipelines
-  and ensures portability and reproducibility.
+  and ensures portability and reproducibility [@GorgolewskiBIDSMethods:2017].
 A large ecosystem of processing pipelines supporting the mapping of connectomes has evolved around this framework,
   including C-PAC [@cpac:2013], NIAK [@BellecNeuroimagingNIAK:2016], fMRIPrep [@Ghosh:2018], dMRIPrep [@dmriprep:2019],
   QSIPREP [@CieslakQSIPrep:2020], MRtrix3_connectome [@Smith2019:BIDSApp], NDMG [@KiarAVariability:2018]
-  PyNets [@PisnerPyNets:2020], and Micapipe [@Rodriguez:2022] which have all demonstrated their capability in addressing all the previously-mentioned
-  challenges.
+  PyNets [@PisnerPyNets:2020], and Micapipe [@Rodriguez:2022] which have all demonstrated their capability in
+  addressing all the previously-mentioned challenges.
 However, none of the existing solutions provide a direct alternative to Connectome Mapper
   when dealing with multimodal datasets with the goal to create connectomes at multiple
   scales with hierarchical region grouping.
 
 Connectome Mapper (CMP), an open-source pipeline software with a graphical user interface,
-  was created before the emergence of BIDS to simplify the organization and the analysis of
+  was created before the emergence of BIDS to simplify the organization, processing, and analysis of
   sMRI, dMRI, and rfMRI from raw data to multi-scale structural weighted and functional
   connectomes [@Daducci:2012], using in a common framework a multi-scale extension of
-  the Desikan-Killiany parcellation [@Desikan2006AnInterest], known as the Lausanne brain parcellation [@Cammoun2012:MappingMRI].
-While CMP3 derives from the two preceding versions and keeps the same philosophy, it has massively
-  evolved over the years in terms of the underlying codebase, the tools used, and the scope of the functionality
-  provided. This includes the migration to Python 3, a brand-new Lausanne parcellation scheme, the adoption
+  the Desikan-Killiany parcellation [@Desikan2006AnInterest][@Cammoun2012:MappingMRI].
+CMP3 builds up on the two preceding versions of CMP and keeps the same philosophy. 
+It introduces massive improvements in terms of the underlying codebase, the tools used, and the scope of the functionality
+  provided.
+This includes the migration to Python 3, a brand-new multi-scale parcellation scheme, the adoption
   of the BIDS standard for data organization, the encapsulation of the processing pipelines in software
   container images, continuous testing in concordance to the BIDS Apps standard, major upgrades of the diffusion and
   fMRI pipelines, and the current extension to electroencephalography (EEG), initiated during OHBM BrainHack 2020
@@ -128,14 +128,15 @@ CMP3 has been designed around different characteristics and principles along whi
 \textbf{A flexible and interoperable workflow for multi-modal human connectome mapping.}
 Connectome Mapper 3 (CMP3) implements a workflow that creates a hierarchical multi-scale
   connectome representation of the structural and functional brain systems, from any
-  sMRI / dMRI / rfMRI dataset structured according to the BIDS standard.
-It relies on Nipype [@GorgolewskiNipype:2011] and adopts a modular architecture.
-As illustrated by \autoref{fig:cmp3-diagram}, the workflow is composed of three different
-  pipelines (anatomical, diffusion, and fMRI) dedicated to the processing of each modality (sMRI, dMRI, rfMRI).
+  sMRI / dMRI / rfMRI dataset structured according to the BIDS standard, as illustrated
+  by \autoref{fig:cmp3-diagram}.
 
 ![\textbf{Overview of the Connectome Mapper 3 BIDS App's workflow.}
 \label{fig:cmp3-diagram}](cmp3-diagram.png)
 
+It relies on Nipype [@GorgolewskiNipype:2011] and adopts a modular architecture, composed
+  of three different pipelines (anatomical, diffusion, and fMRI) dedicated to the processing
+  of each modality (sMRI, dMRI, rfMRI).
 Each pipeline is represented by a Nipype workflow that takes a BIDS formatted dataset as input, and
   runs a number of sub-workflows (stages).
 Each stage implements one or multiple tasks, where each task can interface with either
@@ -143,8 +144,8 @@ Each stage implements one or multiple tasks, where each task can interface with 
   ANTs [@AVANTS2008SymmetricBrain], dipy [@Garyfallidis2014DipyData],
   mrtrix3 [@Tournier2019MRtrix3:Visualisation], AFNI [@Cox2012], or with an in-house tool
   (\autoref{fig:cmp3-diagram}).
-We refer to the main documentation for more details about the different processing steps
-  involved in each pipeline.
+We refer to the [main documentation](https://connectome-mapper-3.readthedocs.io/en/latest/bidsappmanager.html#anatomical-pipeline-stages)
+  for more details about the different processing steps and parameters involved in each pipeline.
 
 To guarantee consistent processing in large neuroimaging cohorts,
   pipeline and stage parameters can be set by creating and loading pipeline
@@ -189,9 +190,9 @@ After generating the volumetric parcellations from the annotation files, one can
 All segmented structures are combined at the end of process to create the final parcellation nifti image
   at each scale along with the corresponding label index color mapping file in accordance with the BIDS Derivatives
   specifications.
-
 The different segmentation and parcellation outputs of the anatomical pipeline are then taken as inputs of
-  the diffusion and fMRI pipeline
+  the diffusion and fMRI pipelines that estimate the structural and functional connectomes from
+  raw dMRI and rfMRI data and the pairs of sub-cortical and cortical areas previously segmented.
 
 \textbf{A graphical user interface reflecting the workflow structure.}
 CMP3 takes advantage of the Traits/TraitsUI framework
