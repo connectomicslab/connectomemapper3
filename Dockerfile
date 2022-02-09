@@ -37,7 +37,7 @@ WORKDIR /opt/freesurfer
 # Download and install
 RUN apt-get update && \
     apt-get install -qq -y --no-install-recommends curl && \
-    curl -sSL https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/6.0.1/freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.1.tar.gz | tar zxv --no-same-owner -C /opt \
+    curl -sSL https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/7.2.0/freesurfer-linux-centos6_x86_64-7.2.0.tar.gz | tar zxv --no-same-owner -C /opt \
     --exclude='freesurfer/diffusion' \
     --exclude='freesurfer/docs' \
     --exclude='freesurfer/fsfast' \
@@ -69,8 +69,8 @@ RUN apt-get update && \
     curl "https://raw.githubusercontent.com/freesurfer/freesurfer/dev/scripts/fs_install_mcr" -o fs_install_mcr && \
     ls -al . && \
     chmod +x ./fs_install_mcr && \
-    ./fs_install_mcr R2012b && \
-    rm -rf ./fs_install_mcr ./R2012b && \
+    ./fs_install_mcr R2014b && \
+    rm -rf ./fs_install_mcr ./R2014b && \
     apt-get remove -y curl && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*

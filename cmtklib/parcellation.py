@@ -312,26 +312,22 @@ class ParcellateHippocampalSubfields(BaseInterface):
         iflogger.info(
             '- New FreeSurfer SUBJECTS_DIR:\n  {}\n'.format(self.inputs.subjects_dir))
 
-        reconall_cmd = fs_string + '; recon-all -no-isrunning -s "%s" -hippocampal-subfields-T1 ' % (
-            self.inputs.subject_id)
-        # reconall_cmd = [fs_string , ";" , "recon-all" , "-no-isrunning" , "-s" , "%s"% (self.inputs.subject_id) , "-hippocampal-subfields-T1" ]
+        # reconall_cmd = fs_string + '; recon-all -no-isrunning -s "%s" -hippocampal-subfields-T1 ' % (
+        #     self.inputs.subject_id)
+
+        reconall_cmd = f'{fs_string}; segmentHA_T1.sh {self.inputs.subject_id} {self.inputs.subjects_dir}'
 
         iflogger.info('Processing cmd: %s' % reconall_cmd)
 
         process = subprocess.Popen(
             reconall_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         proc_stdout = process.communicate()[0].strip()
-        # subprocess.check_call(reconall_cmd)
-
-        # cmd = ['recon-all', '-s', self.inputs.subject_id, '-hippocampal-subfields-T1']
-
-        # subprocess.check_call(cmd)
         iflogger.info(proc_stdout)
 
         mov = op.join(self.inputs.subjects_dir, self.inputs.subject_id,
-                      'mri', 'lh.hippoSfLabels-T1.v10.mgz')
+                      'mri', 'lh.hippoAmygLabels-T1.v21.mgz')
         targ = op.join(self.inputs.subjects_dir,
-                       self.inputs.subject_id, 'mri', 'orig/001.mgz')
+                       self.inputs.subject_id, 'mri', 'raw.mgz')
         out = op.abspath('lh_subFields.nii.gz')
         cmd = fs_string + '; mri_vol2vol --mov "%s" --targ "%s" --regheader --o "%s" --no-save-reg --interp nearest' % (
             mov, targ, out)
@@ -342,9 +338,9 @@ class ParcellateHippocampalSubfields(BaseInterface):
         iflogger.info(proc_stdout)
 
         mov = op.join(self.inputs.subjects_dir, self.inputs.subject_id,
-                      'mri', 'rh.hippoSfLabels-T1.v10.mgz')
+                      'mri', 'rh.hippoAmygLabels-T1.v21.mgz')
         targ = op.join(self.inputs.subjects_dir,
-                       self.inputs.subject_id, 'mri', 'orig/001.mgz')
+                       self.inputs.subject_id, 'mri', 'raw.mgz')
         out = op.abspath('rh_subFields.nii.gz')
         cmd = fs_string + '; mri_vol2vol --mov "%s" --targ "%s" --regheader --o "%s" --no-save-reg --interp nearest' % (
             mov, targ, out)
@@ -403,10 +399,11 @@ class ParcellateBrainstemStructures(BaseInterface):
         iflogger.info(
             '- New FreeSurfer SUBJECTS_DIR:\n  {}\n'.format(self.inputs.subjects_dir))
 
-        reconall_cmd = fs_string + \
-            '; recon-all -no-isrunning -s "%s" -brainstem-structures ' % (
-                self.inputs.subject_id)
-        # reconall_cmd = [fs_string , ";" , "recon-all" , "-no-isrunning" , "-s" , "%s"% (self.inputs.subject_id) , "-hippocampal-subfields-T1" ]
+        # reconall_cmd = fs_string + \
+        #             '; recon-all -no-isrunning -s "%s" -brainstem-structures ' % (
+        #         self.inputs.subject_id)
+
+        reconall_cmd = f'{fs_string}; segmentBS.sh {self.inputs.subject_id} {self.inputs.subjects_dir}'
 
         iflogger.info('Processing cmd: %s' % reconall_cmd)
 
@@ -416,9 +413,9 @@ class ParcellateBrainstemStructures(BaseInterface):
         iflogger.info(proc_stdout)
 
         mov = op.join(self.inputs.subjects_dir, self.inputs.subject_id,
-                      'mri', 'brainstemSsLabels.v10.mgz')
+                      'mri', 'brainstemSsLabels.v12.mgz')
         targ = op.join(self.inputs.subjects_dir,
-                       self.inputs.subject_id, 'mri', 'orig/001.mgz')
+                       self.inputs.subject_id, 'mri', 'raw.mgz')
         out = op.abspath('brainstem.nii.gz')
         cmd = fs_string + '; mri_vol2vol --mov "%s" --targ "%s" --regheader --o "%s" --no-save-reg --interp nearest' % (
             mov, targ, out)
@@ -1700,7 +1697,7 @@ class ParcellateThalamus(BaseInterface):
 
         # Moving aparc+aseg.mgz back to its original space for thalamic parcellation
         mov = op.join(self.inputs.subjects_dir, self.inputs.subject_id, 'mri', 'aparc+aseg.mgz')
-        targ = op.join(self.inputs.subjects_dir, self.inputs.subject_id, 'mri', 'orig/001.mgz')
+        targ = op.join(self.inputs.subjects_dir, self.inputs.subject_id, 'mri', 'raw.mgz')
         out = op.join(self.inputs.subjects_dir, self.inputs.subject_id, 'tmp', 'aparc+aseg.nii.gz')
         # cmd = fs_string + '; mri_vol2vol --mov "%s" --targ "%s" --regheader --o "%s" --no-save-reg --interp nearest' % (mov,targ,out)
         cmd = 'mri_vol2vol --mov "%s" --targ "%s" --regheader --o "%s" --no-save-reg --interp nearest' % (mov, targ, out)
