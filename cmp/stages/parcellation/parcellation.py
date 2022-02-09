@@ -517,7 +517,7 @@ class ParcellationStage(Stage):
 
         """
         anat_sinker_dir = os.path.join(
-            os.path.dirname(self.stage_dir), "anatomical_sinker"
+            os.path.dirname(self.stage_dir), "anat_datasinker"
         )
         anat_sinker_report = os.path.join(anat_sinker_dir, "_report", "report.rst")
 
