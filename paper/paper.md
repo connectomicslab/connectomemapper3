@@ -1,3 +1,5 @@
+<!--lint disable-->
+
 ---
 title: 'Connectome Mapper 3: A Flexible and Open-Source Pipeline Software for Multiscale Multimodal Human Connectome Mapping'
 tags:
@@ -70,6 +72,8 @@ bibliography: paper.bib
 # aas-doi: 10.3847/xxxxx <- update this with the DOI from AAS once you know it.
 # aas-journal: Astrophysical Journal <- The name of the AAS journal.
 ---
+
+<!--lint enable-->
 
 # Statement of Need
 
