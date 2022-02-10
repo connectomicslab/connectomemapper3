@@ -21,7 +21,7 @@ authors:
     affiliation: 1
   - name: Katharina Glomb
     orcid: 0000-0002-4596-4386
-    affiliation: 1
+    affiliation: 8
   - name: Yasser Aleman-Gomez
     orcid: 0000-0001-6067-8639
     affiliation: 1
@@ -64,6 +64,8 @@ affiliations:
    index: 6
  - name: CIBM Center for Biomedical Imaging, Geneva, Switzerland
    index: 7
+   - name: Berlin Institute of Health at Charité; Department of Neurology with Experimental Neurology, Brain Simulation Section, Charité Universitätsmedizin Berlin, corporate member of Freie Universität Berlin and Humboldt-Universität zu Berlin, Berlin, Germany
+   index: 8
 date: 16 February 2021
 bibliography: paper.bib
 
@@ -102,7 +104,7 @@ A large ecosystem of processing pipelines supporting the mapping of connectomes 
   including C-PAC [@cpac:2013], NIAK [@BellecNeuroimagingNIAK:2016], fMRIPrep [@Ghosh:2018], dMRIPrep [@dmriprep:2019],
   QSIPREP [@CieslakQSIPrep:2020], MRtrix3_connectome [@Smith2019:BIDSApp], NDMG [@KiarAVariability:2018]
   PyNets [@PisnerPyNets:2020], and Micapipe [@Rodriguez:2022] which have all demonstrated their capability in
-  addressing all the previously-mentioned challenges.
+  addressing the previously-mentioned challenges.
 However, none of the existing solutions provide a direct alternative to Connectome Mapper
   when dealing with multimodal datasets with the goal to create connectomes at multiple
   scales with hierarchical region grouping.
@@ -215,7 +217,7 @@ A typical procedure to perform an analysis would consists of
 
 Each pipeline can be individually configured and executed with the aid of the user-friendly
   GUI and the output of each stage can be visually reviewed, enabling the user to keep
-  an eye on the data being processed and easily understand the cause of the problems, change the
+  an eye on the data being processed and easily identify the cause of any problems, change the
   parameters and re-execute when results at a given stage are found not to be satisfactory.
 In this way, CMP3 simplifies the creation of connectomes and makes it a straightforward process
   even for users not familiar with Nipype and software container technology.
@@ -234,7 +236,7 @@ It introduces a new BIDS entity ``atlas-<atlas_label>`` (See [proposal](https://
 While the BIDS-Derivatives extension to organize network data is being developed, in which we
   are actively participating, both structural and functional connectomes generated with CMP3 are
   saved by default as graph edge lists in ``.tsv`` files, that can be directly analyzed using
-  the \href{https://networkx.org/documentation/stable/tutorial.html}{NetworkX} [@Hagberg:2008], a Python library which
+  \href{https://networkx.org/documentation/stable/tutorial.html}{NetworkX} [@Hagberg:2008], a Python library which
   offers many algorithms and tools to explore graphs and compute local and global network properties.
 Connectivity matrices exported to Matlab as MAT-files can be fed to the
   \href{www.brain-connectivity-toolbox.net}{Brain Connectivity Toolbox} [@Rubinov:2010], which is a powerful
@@ -245,7 +247,7 @@ Finally, connectomes can be saved in GraphML format to interface with a lot of g
 Structuring outputs as BIDS Derivatives and saving them in a range of file formats
   thus has a lot of advantages. Not only does it ensure that the connectome files can 
   be opened by the most popular software packages used in this field to perform complex 
-  network analyzes, but it also eases the reuse of all outputs in the BIDS ecosystem.
+  network analyses, but it also eases the reuse of all outputs in the BIDS ecosystem.
 
 \textbf{Developed with openness, transparency, and good practices in mind.}
 CMP3 is published under the terms of the open source 3-Clause Berkeley Software
