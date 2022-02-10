@@ -64,7 +64,7 @@ affiliations:
    index: 6
  - name: CIBM Center for Biomedical Imaging, Geneva, Switzerland
    index: 7
-   - name: Berlin Institute of Health at Charité; Department of Neurology with Experimental Neurology, Brain Simulation Section, Charité Universitätsmedizin Berlin, corporate member of Freie Universität Berlin and Humboldt-Universität zu Berlin, Berlin, Germany
+ - name: Berlin Institute of Health at Charité; Department of Neurology with Experimental Neurology, Brain Simulation Section, Charité Universitätsmedizin Berlin, corporate member of Freie Universität Berlin and Humboldt-Universität zu Berlin, Berlin, Germany
    index: 8
 date: 16 February 2021
 bibliography: paper.bib
