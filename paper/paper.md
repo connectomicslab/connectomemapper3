@@ -87,10 +87,10 @@ While brain areas are usually derived from high resolution structural T1 weighte
   structural brain connectomes are mapped from diffusion MR imaging (dMRI) tractography, and
   functional brain connectomes are usually mapped from resting-state functional MRI (rfMRI).
 Connectome Mapper (CMP), an open-source pipeline software with a graphical user interface (GUI),
-  was created before the emergence of BIDS to simplify the organization, processing, and analysis of
+  was created to simplify the organization, processing, and analysis of
   sMRI, dMRI, and rfMRI from raw data to multi-scale structural weighted and functional
-  connectomes [@Daducci:2012], using in a common framework a multi-scale extension of
-  the Desikan-Killiany parcellation [@Desikan2006AnInterest][@Cammoun2012:MappingMRI].
+  connectomes [@Daducci:2012], using in a common framework the Desikan-Killiany parcellation [@Desikan2006AnInterest]
+  and a multi-scale extension with hierarchical region grouping [@Cammoun2012:MappingMRI].
 
 As MRI is being increasingly more accessible and used in both clinical and research settings,
   such multi-modal MRI datasets are being gathered at an unprecedented rate.
@@ -112,7 +112,7 @@ A large ecosystem of processing pipelines supporting the mapping of connectomes 
   addressing the previously-mentioned challenges.
 However, none of the existing solutions provide a direct alternative to CMP
   when dealing with multimodal datasets with the goal to create connectomes at multiple
-  scales with hierarchical region grouping.
+  hierarchical scales.
 
 Connectome Mapper 3 (CMP3) builds up on the two preceding versions of CMP and keeps the same philosophy. 
 It introduces massive improvements in terms of the underlying codebase, the tools used, and the scope of the functionality
