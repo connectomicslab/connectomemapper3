@@ -620,7 +620,7 @@ def init_anat_project(project_info, is_new_project, debug=False):
             anat_pipeline.input_folders,
         )
 
-    if is_new_project and anat_pipeline is not None:  # and dmri_pipelineis not None:
+    if is_new_project and anat_pipeline is not None:
         print("> Initialize anatomical project")
         if not os.path.exists(derivatives_directory):
             try:
@@ -669,7 +669,7 @@ def init_anat_project(project_info, is_new_project, debug=False):
     return anat_pipeline
 
 
-def init_eeg_project(project_info, bids_layout, is_new_project, gui=True, debug=False):
+def init_eeg_project(project_info, bids_layout, is_new_project, gui=False, debug=False):  # pragma: no cover
     """Initialize the eeg processing pipeline.
 
     Parameters
@@ -701,12 +701,17 @@ def init_eeg_project(project_info, bids_layout, is_new_project, gui=True, debug=
     derivatives_directory = os.path.abspath(project_info.output_directory)
 
     if (project_info.subject_session != '') and (project_info.subject_session is not None):
-        if debug:
+        if debug:  # pragma: no cover
             print('Refresh folder WITH session')
-        refresh_folder(bids_directory, derivatives_directory, project_info.subject, eeg_pipeline.input_folders,
-                       session=project_info.subject_session)
+        refresh_folder(
+            bids_directory,
+            derivatives_directory,
+            project_info.subject,
+            eeg_pipeline.input_folders,
+            session=project_info.subject_session
+        )
     else:
-        if debug:
+        if debug:  # pragma: no cover
             print('Refresh folder WITHOUT session')
         refresh_folder(bids_directory, derivatives_directory,
                        project_info.subject, eeg_pipeline.input_folders)
@@ -718,7 +723,7 @@ def init_eeg_project(project_info, bids_layout, is_new_project, gui=True, debug=
             if not os.path.exists(derivatives_directory):
                 try:
                     os.makedirs(derivatives_directory)
-                except os.error:
+                except os.error:  # pragma: no cover
                     print("... Info: %s was already existing" %
                           derivatives_directory)
                 finally:
@@ -726,11 +731,12 @@ def init_eeg_project(project_info, bids_layout, is_new_project, gui=True, debug=
                           derivatives_directory)
 
             if (project_info.subject_session != '') and (project_info.subject_session is not None):
-                project_info.eeg_config_file = os.path.join(derivatives_directory, '%s_%s_eeg_config.ini' % (
-                    project_info.subject, project_info.subject_session))
+                project_info.eeg_config_file = os.path.join(
+                    derivatives_directory, '%s_%s_eeg_config.ini' % (project_info.subject,
+                                                                     project_info.subject_session))
             else:
-                project_info.eeg_config_file = os.path.join(derivatives_directory,
-                                                            '%s_eeg_config.ini' % project_info.subject)
+                project_info.eeg_config_file = os.path.join(
+                    derivatives_directory, '%s_eeg_config.ini' % project_info.subject)
 
             if os.path.exists(project_info.eeg_config_file):
                 warn_res = project_info.configure_traits(view='eeg_warning_view')
@@ -742,7 +748,7 @@ def init_eeg_project(project_info, bids_layout, is_new_project, gui=True, debug=
                 eeg_save_config(eeg_pipeline, project_info.eeg_config_file)
 
         else:
-            if debug:
+            if debug:  # pragma: no cover
                 print("int_project eeg_pipeline.global_config.subjects : ")
                 print(eeg_pipeline.global_conf.subjects)
 
@@ -772,14 +778,6 @@ def update_anat_last_processed(project_info, pipeline):  # pragma: no cover
     if os.path.exists(
         os.path.join(project_info.output_directory, __nipype_directory__, project_info.subject)
     ):
-        # out_dirs = os.listdir(os.path.join(
-        #     project_info.output_directory, 'nipype', project_info.subject))
-        # for out in out_dirs:
-        #     if (project_info.last_date_processed == "Not yet processed" or
-        #         out > project_info.last_date_processed):
-        #         pipeline.last_date_processed = out
-        #         project_info.last_date_processed = out
-
         if (
             project_info.anat_last_date_processed == "Not yet processed"
             or pipeline.now > project_info.anat_last_date_processed
@@ -832,14 +830,6 @@ def update_dmri_last_processed(project_info, pipeline):  # pragma: no cover
     if os.path.exists(
         os.path.join(project_info.output_directory, __nipype_directory__, project_info.subject)
     ):
-        # out_dirs = os.listdir(os.path.join(
-        #     project_info.output_directory, 'nipype', project_info.subject))
-        # for out in out_dirs:
-        #     if (project_info.last_date_processed == "Not yet processed" or
-        #         out > project_info.last_date_processed):
-        #         pipeline.last_date_processed = out
-        #         project_info.last_date_processed = out
-
         if (
             project_info.dmri_last_date_processed == "Not yet processed"
             or pipeline.now > project_info.dmri_last_date_processed
@@ -888,14 +878,6 @@ def update_fmri_last_processed(project_info, pipeline):  # pragma: no cover
     if os.path.exists(
         os.path.join(project_info.output_directory, __nipype_directory__, project_info.subject)
     ):
-        # out_dirs = os.listdir(os.path.join(
-        #     project_info.output_directory, 'nipype', project_info.subject))
-        # for out in out_dirs:
-        #     if (project_info.last_date_processed == "Not yet processed" or
-        #         out > project_info.last_date_processed):
-        #         pipeline.last_date_processed = out
-        #         project_info.last_date_processed = out
-
         if (
             project_info.fmri_last_date_processed == "Not yet processed"
             or pipeline.now > project_info.fmri_last_date_processed
@@ -909,8 +891,7 @@ def update_fmri_last_processed(project_info, pipeline):  # pragma: no cover
             project_info.output_directory,
             __nipype_directory__,
             project_info.subject,
-            "fMRI_pipeline",
-        )
+            "fMRI_pipeline")
     ):
         stage_dirs = []
         for _, dirnames, _ in os.walk(
@@ -929,7 +910,7 @@ def update_fmri_last_processed(project_info, pipeline):  # pragma: no cover
                 project_info.dmri_last_stage_processed = stage
 
 
-def update_eeg_last_processed(project_info, pipeline):
+def update_eeg_last_processed(project_info, pipeline):  # pragma: no cover
     """Update last processing information of a :py:class:`~cmp.pipelines.functional.eeg.EEGPipeline`.
 
     Parameters
@@ -941,26 +922,33 @@ def update_eeg_last_processed(project_info, pipeline):
         Instance of `EEGPipeline` object
     """
     # last date
-    if os.path.exists(os.path.join(project_info.output_directory, 'nipype', project_info.subject)):
-        # out_dirs = os.listdir(os.path.join(
-        #     project_info.output_directory, 'nipype', project_info.subject))
-        # for out in out_dirs:
-        #     if (project_info.last_date_processed == "Not yet processed" or
-        #         out > project_info.last_date_processed):
-        #         pipeline.last_date_processed = out
-        #         project_info.last_date_processed = out
-
-        if (project_info.eeg_last_date_processed == "Not yet processed" or
-                pipeline.now > project_info.anat_last_date_processed):
+    if os.path.exists(
+        os.path.join(project_info.output_directory, __nipype_directory__, project_info.subject)
+    ):
+        if (
+            project_info.eeg_last_date_processed == "Not yet processed"
+            or pipeline.now > project_info.anat_last_date_processed
+        ):
             pipeline.eeg_last_date_processed = pipeline.now
             project_info.eeg_last_date_processed = pipeline.now
 
     # last stage
     if os.path.exists(
-            os.path.join(project_info.output_directory, 'nipype', project_info.subject, 'eeg_pipeline')):
+        os.path.join(
+            project_info.output_directory,
+            __nipype_directory__,
+            project_info.subject,
+            'eeg_pipeline')
+    ):
         stage_dirs = []
         for _, dirnames, _ in os.walk(
-                os.path.join(project_info.output_directory, 'nipype', project_info.subject, 'eeg_pipeline')):
+            os.path.join(
+                project_info.output_directory,
+                __nipype_directory__,
+                project_info.subject,
+                'eeg_pipeline'
+            )
+        ):
             for dirname in fnmatch.filter(dirnames, '*_stage'):
                 stage_dirs.append(dirname)
         for stage in pipeline.ordered_stage_list:
@@ -981,7 +969,6 @@ def run_individual(
     anat_pipeline_config,
     dwi_pipeline_config,
     func_pipeline_config,
-    eeg_pipeline_config,
     number_of_threads=1,
 ):
     """Function that creates the processing pipeline for complete coverage.
@@ -1008,9 +995,6 @@ def run_individual(
 
     func_pipeline_config : string
         Path to fMRI pipeline configuration file
-
-    eeg_pipeline_config : string
-        Path to eeg pipeline configuration file
     
     number_of_threads : int
         Number of threads used by programs relying on the OpenMP library
@@ -1039,7 +1023,7 @@ def run_individual(
     project.anat_config_file = os.path.abspath(anat_pipeline_config)
 
     # Perform only the anatomical pipeline
-    if dwi_pipeline_config is None and func_pipeline_config is None and eeg_pipeline_config is None:
+    if dwi_pipeline_config is None and func_pipeline_config is None:
 
         anat_pipeline = init_anat_project(project, False)
         if anat_pipeline is not None:
@@ -1059,7 +1043,7 @@ def run_individual(
             anat_pipeline.fill_stages_outputs()
 
     # Perform the anatomical and the diffusion pipelines
-    elif dwi_pipeline_config is not None and func_pipeline_config is None and eeg_pipeline_config is None:
+    elif dwi_pipeline_config is not None and func_pipeline_config is None:
 
         project.dmri_config_file = os.path.abspath(dwi_pipeline_config)
 
@@ -1101,7 +1085,7 @@ def run_individual(
             sys.exit(1)
 
     # Perform the anatomical and the fMRI pipelines
-    elif dwi_pipeline_config is None and func_pipeline_config is not None and eeg_pipeline_config is None:
+    elif dwi_pipeline_config is None and func_pipeline_config is not None:
 
         project.fmri_config_file = os.path.abspath(func_pipeline_config)
 
@@ -1131,12 +1115,7 @@ def run_individual(
             if fmri_pipeline is not None:
                 fmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
                 fmri_pipeline.atlas_info = anat_pipeline.atlas_info
-                # fmri_pipeline.subjects_dir = anat_pipeline.stages['Segmentation'].config.freesurfer_subjects_dir
-                # fmri_pipeline.subject_id = anat_pipeline.stages['Segmentation'].config.freesurfer_subject_id
-                # print('Freesurfer subjects dir: {}'.format(fmri_pipeline.subjects_dir))
-                # print('Freesurfer subject id: {}'.format(fmri_pipeline.subject_id))
 
-                # print sys.argv[offset+9]
                 if fmri_valid_inputs:
                     print(">> Process fmri pipeline")
                     fmri_pipeline.process()
@@ -1149,8 +1128,8 @@ def run_individual(
             print(msg)
             sys.exit(1)
 
-    # Perform all pipelines except eeg (anatomical/diffusion/fMRI)
-    elif dwi_pipeline_config is not None and func_pipeline_config is not None and eeg_pipeline_config is None:
+    # Perform all pipelines (anatomical/diffusion/fMRI)
+    elif dwi_pipeline_config is not None and func_pipeline_config is not None:
 
         project.dmri_config_file = os.path.abspath(dwi_pipeline_config)
         project.fmri_config_file = os.path.abspath(func_pipeline_config)
@@ -1181,7 +1160,7 @@ def run_individual(
             if dmri_pipeline is not None:
                 dmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
                 dmri_pipeline.atlas_info = anat_pipeline.atlas_info
-                # print sys.argv[offset+7]
+
                 if dmri_valid_inputs:
                     print(">> Process diffusion pipeline")
                     dmri_pipeline.process()
@@ -1195,12 +1174,7 @@ def run_individual(
             if fmri_pipeline is not None:
                 fmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
                 fmri_pipeline.atlas_info = anat_pipeline.atlas_info
-                fmri_pipeline.subjects_dir = anat_pipeline.stages['Segmentation'].config.freesurfer_subjects_dir
-                fmri_pipeline.subject_id = anat_pipeline.stages['Segmentation'].config.freesurfer_subject_id
-                print('Freesurfer subjects dir: {}'.format(fmri_pipeline.subjects_dir))
-                print('Freesurfer subject id: {}'.format(fmri_pipeline.subject_id))
 
-                # print sys.argv[offset+9]
                 if fmri_valid_inputs:
                     print(">> Process fmri pipeline")
                     fmri_pipeline.process()
@@ -1209,429 +1183,6 @@ def run_individual(
                     sys.exit(1)
                 fmri_pipeline.check_stages_execution()
                 fmri_pipeline.fill_stages_outputs()
-        else:
-            print(msg)
-            sys.exit(1)
-
-    # Perform only the anatomical pipeline
-    if dwi_pipeline_config is None and func_pipeline_config is None and eeg_pipeline_config is None:
-
-        anat_pipeline = init_anat_project(project, False)
-        if anat_pipeline is not None:
-            anat_valid_inputs = anat_pipeline.check_input(bids_layout, gui=False)
-
-            print(f"--- Set Freesurfer and ANTs to use {number_of_threads} threads by the means of OpenMP")
-            anat_pipeline.stages["Segmentation"].config.number_of_threads = number_of_threads
-
-            if anat_valid_inputs:
-                print(">> Process anatomical pipeline")
-                anat_pipeline.process()
-            else:  # pragma: no cover
-                print("ERROR : Invalid inputs")
-                sys.exit(1)
-
-            anat_pipeline.check_stages_execution()
-            anat_pipeline.fill_stages_outputs()
-
-    # Perform the anatomical and the diffusion pipelines
-    elif dwi_pipeline_config is not None and func_pipeline_config is None and eeg_pipeline_config is None:
-
-        project.dmri_config_file = os.path.abspath(dwi_pipeline_config)
-
-        anat_pipeline = init_anat_project(project, False)
-        if anat_pipeline is not None:
-            anat_valid_inputs = anat_pipeline.check_input(bids_layout, gui=False)
-
-            print(f"--- Set Freesurfer and ANTs to use {number_of_threads} threads by the means of OpenMP")
-            anat_pipeline.stages[ "Segmentation"].config.number_of_threads = number_of_threads
-
-            if anat_valid_inputs:
-                print(">> Process anatomical pipeline")
-                anat_pipeline.process()
-            else:  # pragma: no cover
-                print("ERROR : Invalid inputs")
-                sys.exit(1)
-
-        anat_valid_outputs, msg = anat_pipeline.check_output()
-        anat_pipeline.check_stages_execution()
-        anat_pipeline.fill_stages_outputs()
-
-        project.freesurfer_subjects_dir = anat_pipeline.stages["Segmentation"].config.freesurfer_subjects_dir
-        project.freesurfer_subject_id = anat_pipeline.stages["Segmentation"].config.freesurfer_subject_id
-
-        if anat_valid_outputs:
-            dmri_valid_inputs, dmri_pipeline = init_dmri_project(
-                project, bids_layout, False
-            )
-            if dmri_pipeline is not None:
-                dmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
-                dmri_pipeline.atlas_info = anat_pipeline.atlas_info
-                if anat_pipeline.parcellation_scheme == "Custom":
-                    dmri_pipeline.custom_atlas_name = anat_pipeline.stages["Parcellation"].config.custom_parcellation.atlas
-                    dmri_pipeline.custom_atlas_res = anat_pipeline.stages["Parcellation"].config.custom_parcellation.res
-                if dmri_valid_inputs:
-                    dmri_pipeline.process()
-                else:  # pragma: no cover
-                    print("   ... ERROR : Invalid inputs")
-                    sys.exit(1)
-                dmri_pipeline.check_stages_execution()
-                dmri_pipeline.fill_stages_outputs()
-        else:
-            print(msg)
-            sys.exit(1)
-
-    # Perform the anatomical and the fMRI pipelines
-    elif dwi_pipeline_config is None and func_pipeline_config is not None and eeg_pipeline_config is None:
-
-        project.fmri_config_file = os.path.abspath(func_pipeline_config)
-
-        anat_pipeline = init_anat_project(project, False)
-        if anat_pipeline is not None:
-            anat_valid_inputs = anat_pipeline.check_input(bids_layout, gui=False)
-
-            print(f"--- Set Freesurfer and ANTs to use {number_of_threads} threads by the means of OpenMP")
-            anat_pipeline.stages[ "Segmentation"].config.number_of_threads = number_of_threads
-
-            if anat_valid_inputs:
-                print(">> Process anatomical pipeline")
-                anat_pipeline.process()
-            else:  # pragma: no cover
-                print("ERROR : Invalid inputs")
-                sys.exit(1)
-
-        anat_valid_outputs, msg = anat_pipeline.check_output()
-        anat_pipeline.check_stages_execution()
-        anat_pipeline.fill_stages_outputs()
-
-        project.freesurfer_subjects_dir = anat_pipeline.stages["Segmentation"].config.freesurfer_subjects_dir
-        project.freesurfer_subject_id = anat_pipeline.stages["Segmentation"].config.freesurfer_subject_id
-
-        if anat_valid_outputs:
-            fmri_valid_inputs, fmri_pipeline = init_fmri_project(
-                project, bids_layout, False
-            )
-            if fmri_pipeline is not None:
-                fmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
-                fmri_pipeline.atlas_info = anat_pipeline.atlas_info
-                if anat_pipeline.parcellation_scheme == "Custom":
-                    fmri_pipeline.custom_atlas_name = anat_pipeline.stages["Parcellation"].config.custom_parcellation.atlas
-                    fmri_pipeline.custom_atlas_res = anat_pipeline.stages["Parcellation"].config.custom_parcellation.res
-                if fmri_valid_inputs:
-                    print(">> Process fmri pipeline")
-                    fmri_pipeline.process()
-                else:  # pragma: no cover
-                    print("   ... ERROR : Invalid inputs")
-                    sys.exit(1)
-                fmri_pipeline.check_stages_execution()
-                fmri_pipeline.fill_stages_outputs()
-        else:
-            print(msg)
-            sys.exit(1)
-
-    # Perform all pipelines except eeg (anatomical/diffusion/fMRI)
-    elif dwi_pipeline_config is not None and func_pipeline_config is not None and eeg_pipeline_config is None:
-
-        project.dmri_config_file = os.path.abspath(dwi_pipeline_config)
-        project.fmri_config_file = os.path.abspath(func_pipeline_config)
-
-        anat_pipeline = init_anat_project(project, False)
-        if anat_pipeline is not None:
-            anat_valid_inputs = anat_pipeline.check_input(bids_layout, gui=False)
-
-            print('--- Set Freesurfer and ANTs to use {} threads by the means of OpenMP'.format(number_of_threads))
-            anat_pipeline.stages['Segmentation'].config.number_of_threads = number_of_threads
-
-            if anat_valid_inputs:
-                print(">> Process anatomical pipeline")
-                anat_pipeline.process()
-            else:
-                print("   ... ERROR : Invalid inputs")
-                sys.exit(1)
-
-        anat_valid_outputs, msg = anat_pipeline.check_output()
-        anat_pipeline.check_stages_execution()
-        anat_pipeline.fill_stages_outputs()
-
-        project.freesurfer_subjects_dir = anat_pipeline.stages['Segmentation'].config.freesurfer_subjects_dir
-        project.freesurfer_subject_id = anat_pipeline.stages['Segmentation'].config.freesurfer_subject_id
-
-        if anat_valid_outputs:
-            dmri_valid_inputs, dmri_pipeline = init_dmri_project(project, bids_layout, False)
-            if dmri_pipeline is not None:
-                dmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
-                dmri_pipeline.atlas_info = anat_pipeline.atlas_info
-                # print sys.argv[offset+7]
-                if dmri_valid_inputs:
-                    print(">> Process diffusion pipeline")
-                    dmri_pipeline.process()
-                else:
-                    print("   ... ERROR : Invalid inputs")
-                    sys.exit(1)
-                dmri_pipeline.check_stages_execution()
-                dmri_pipeline.fill_stages_outputs()
-
-            fmri_valid_inputs, fmri_pipeline = init_fmri_project(project, bids_layout, False)
-            if fmri_pipeline is not None:
-                fmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
-                fmri_pipeline.atlas_info = anat_pipeline.atlas_info
-                fmri_pipeline.subjects_dir = anat_pipeline.stages['Segmentation'].config.freesurfer_subjects_dir
-                fmri_pipeline.subject_id = anat_pipeline.stages['Segmentation'].config.freesurfer_subject_id
-                print('Freesurfer subjects dir: {}'.format(fmri_pipeline.subjects_dir))
-                print('Freesurfer subject id: {}'.format(fmri_pipeline.subject_id))
-
-                # print sys.argv[offset+9]
-                if fmri_valid_inputs:
-                    print(">> Process fmri pipeline")
-                    fmri_pipeline.process()
-                else:
-                    print("   ... ERROR : Invalid inputs")
-                    sys.exit(1)
-                fmri_pipeline.check_stages_execution()
-                fmri_pipeline.fill_stages_outputs()
-        else:
-            print(msg)
-            sys.exit(1)
-
-    # Perform only the anatomical and eeg pipeline
-    elif dwi_pipeline_config is None and func_pipeline_config is None and eeg_pipeline_config is not None:
-
-        project.eeg_config_file = os.path.abspath(eeg_pipeline_config)
-
-        anat_pipeline = init_anat_project(project, False)
-        if anat_pipeline is not None:
-            anat_valid_inputs = anat_pipeline.check_input(bids_layout, gui=False)
-
-            print('--- Set Freesurfer and ANTs to use {} threads by the means of OpenMP'.format(number_of_threads))
-            anat_pipeline.stages['Segmentation'].config.number_of_threads = number_of_threads
-
-            if anat_valid_inputs:
-                print(">> Process anatomical pipeline")
-                anat_pipeline.process()
-            else:
-                print("ERROR : Invalid inputs")
-                sys.exit(1)
-
-        anat_valid_outputs, msg = anat_pipeline.check_output()
-        anat_pipeline.check_stages_execution()
-        anat_pipeline.fill_stages_outputs()
-
-        project.freesurfer_subjects_dir = anat_pipeline.stages['Segmentation'].config.freesurfer_subjects_dir
-        project.freesurfer_subject_id = anat_pipeline.stages['Segmentation'].config.freesurfer_subject_id
-
-        if anat_valid_outputs:
-            eeg_valid_inputs, eeg_pipeline = init_eeg_project(project, bids_layout, False)
-            if eeg_pipeline is not None:
-                eeg_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
-                eeg_pipeline.atlas_info = anat_pipeline.atlas_info
-                if eeg_valid_inputs:
-                    print(">> Process eeg pipeline")
-                    eeg_pipeline.process()
-                else:
-                    print("   ... ERROR : Invalid inputs")
-                    sys.exit(1)
-                eeg_pipeline.check_stages_execution()
-                eeg_pipeline.fill_stages_outputs()
-        else:
-            print(msg)
-            sys.exit(1)
-
-    # Perform the anatomical, the diffusion and the eeg pipelines
-    elif dwi_pipeline_config is not None and func_pipeline_config is None and eeg_pipeline_config is not None:
-        project.eeg_config_file = os.path.abspath(eeg_pipeline_config)
-        project.dmri_config_file = os.path.abspath(dwi_pipeline_config)
-
-        anat_pipeline = init_anat_project(project, False)
-        if anat_pipeline is not None:
-            anat_valid_inputs = anat_pipeline.check_input(bids_layout, gui=False)
-
-            print('--- Set Freesurfer and ANTs to use {} threads by the means of OpenMP'.format(number_of_threads))
-            anat_pipeline.stages['Segmentation'].config.number_of_threads = number_of_threads
-
-            if anat_valid_inputs:
-                print(">> Process anatomical pipeline")
-                anat_pipeline.process()
-            else:
-                print("ERROR : Invalid inputs")
-                sys.exit(1)
-
-        anat_valid_outputs, msg = anat_pipeline.check_output()
-        anat_pipeline.check_stages_execution()
-        anat_pipeline.fill_stages_outputs()
-
-        project.freesurfer_subjects_dir = anat_pipeline.stages['Segmentation'].config.freesurfer_subjects_dir
-        project.freesurfer_subject_id = anat_pipeline.stages['Segmentation'].config.freesurfer_subject_id
-
-        if anat_valid_outputs:
-            dmri_valid_inputs, dmri_pipeline = init_dmri_project(project, bids_layout, False)
-            if dmri_pipeline is not None:
-                dmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
-                dmri_pipeline.atlas_info = anat_pipeline.atlas_info
-                if dmri_valid_inputs:
-                    dmri_pipeline.process()
-                else:
-                    print("   ... ERROR : Invalid inputs")
-                    sys.exit(1)
-                dmri_pipeline.check_stages_execution()
-                dmri_pipeline.fill_stages_outputs()
-            eeg_valid_inputs, eeg_pipeline = init_eeg_project(project, bids_layout, False)
-            if eeg_pipeline is not None:
-                eeg_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
-                eeg_pipeline.atlas_info = anat_pipeline.atlas_info
-                if eeg_valid_inputs:
-                    print(">> Process eeg pipeline")
-                    eeg_pipeline.process()
-                else:
-                    print("   ... ERROR : Invalid inputs")
-                    sys.exit(1)
-                eeg_pipeline.check_stages_execution()
-                eeg_pipeline.fill_stages_outputs()
-
-        else:
-            print(msg)
-            sys.exit(1)
-
-    # Perform the anatomical, the fMRI and the eeg pipelines
-    elif dwi_pipeline_config is None and func_pipeline_config is not None and eeg_pipeline_config is not None:
-        project.eeg_config_file = os.path.abspath(eeg_pipeline_config)
-        project.fmri_config_file = os.path.abspath(func_pipeline_config)
-
-        anat_pipeline = init_anat_project(project, False)
-        if anat_pipeline is not None:
-            anat_valid_inputs = anat_pipeline.check_input(bids_layout, gui=False)
-
-            print('--- Set Freesurfer and ANTs to use {} threads by the means of OpenMP'.format(number_of_threads))
-            anat_pipeline.stages['Segmentation'].config.number_of_threads = number_of_threads
-
-            if anat_valid_inputs:
-                print(">> Process anatomical pipeline")
-                anat_pipeline.process()
-            else:
-                print("ERROR : Invalid inputs")
-                sys.exit(1)
-
-        anat_valid_outputs, msg = anat_pipeline.check_output()
-        anat_pipeline.check_stages_execution()
-        anat_pipeline.fill_stages_outputs()
-
-        project.freesurfer_subjects_dir = anat_pipeline.stages['Segmentation'].config.freesurfer_subjects_dir
-        project.freesurfer_subject_id = anat_pipeline.stages['Segmentation'].config.freesurfer_subject_id
-
-        if anat_valid_outputs:
-            fmri_valid_inputs, fmri_pipeline = init_fmri_project(project, bids_layout, False)
-            if fmri_pipeline is not None:
-                fmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
-                fmri_pipeline.atlas_info = anat_pipeline.atlas_info
-                # fmri_pipeline.subjects_dir = anat_pipeline.stages['Segmentation'].config.freesurfer_subjects_dir
-                # fmri_pipeline.subject_id = anat_pipeline.stages['Segmentation'].config.freesurfer_subject_id
-                # print('Freesurfer subjects dir: {}'.format(fmri_pipeline.subjects_dir))
-                # print('Freesurfer subject id: {}'.format(fmri_pipeline.subject_id))
-
-                # print sys.argv[offset+9]
-                if fmri_valid_inputs:
-                    print(">> Process fmri pipeline")
-                    fmri_pipeline.process()
-                else:
-                    print("   ... ERROR : Invalid inputs")
-                    sys.exit(1)
-                fmri_pipeline.check_stages_execution()
-                fmri_pipeline.fill_stages_outputs()
-            eeg_valid_inputs, eeg_pipeline = init_eeg_project(project, bids_layout, False)
-            if eeg_pipeline is not None:
-                eeg_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
-                eeg_pipeline.atlas_info = anat_pipeline.atlas_info
-                if eeg_valid_inputs:
-                    print(">> Process eeg pipeline")
-                    eeg_pipeline.process()
-                else:
-                    print("   ... ERROR : Invalid inputs")
-                    sys.exit(1)
-                eeg_pipeline.check_stages_execution()
-                eeg_pipeline.fill_stages_outputs()
-        else:
-            print(msg)
-            sys.exit(1)
-
-    # Perform all pipelines (anatomical/diffusion/fMRI/eeg)
-    elif dwi_pipeline_config is not None and func_pipeline_config is not None and eeg_pipeline_config is not None:
-        project.eeg_config_file = os.path.abspath(eeg_pipeline_config)
-        project.dmri_config_file = os.path.abspath(dwi_pipeline_config)
-        project.fmri_config_file = os.path.abspath(func_pipeline_config)
-
-        anat_pipeline = init_anat_project(project, False)
-        if anat_pipeline is not None:
-            anat_valid_inputs = anat_pipeline.check_input(bids_layout, gui=False)
-
-            print(f"--- Set Freesurfer and ANTs to use {number_of_threads} threads by the means of OpenMP")
-            anat_pipeline.stages[ "Segmentation"].config.number_of_threads = number_of_threads
-
-            if anat_valid_inputs:
-                print(">> Process anatomical pipeline")
-                anat_pipeline.process()
-            else:  # pragma: no cover
-                print("   ... ERROR : Invalid inputs")
-                sys.exit(1)
-
-        anat_valid_outputs, msg = anat_pipeline.check_output()
-        anat_pipeline.check_stages_execution()
-        anat_pipeline.fill_stages_outputs()
-
-        project.freesurfer_subjects_dir = anat_pipeline.stages["Segmentation"].config.freesurfer_subjects_dir
-        project.freesurfer_subject_id = anat_pipeline.stages["Segmentation"].config.freesurfer_subject_id
-
-        if anat_valid_outputs:
-            dmri_valid_inputs, dmri_pipeline = init_dmri_project(
-                project, bids_layout, False
-            )
-            if dmri_pipeline is not None:
-                dmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
-                dmri_pipeline.atlas_info = anat_pipeline.atlas_info
-                if anat_pipeline.parcellation_scheme == "Custom":
-                    dmri_pipeline.custom_atlas_name = anat_pipeline.stages["Parcellation"].config.custom_parcellation.atlas
-                    dmri_pipeline.custom_atlas_res = anat_pipeline.stages["Parcellation"].config.custom_parcellation.res
-                if dmri_valid_inputs:
-                    print(">> Process diffusion pipeline")
-                    dmri_pipeline.process()
-                else:  # pragma: no cover
-                    print("   ... ERROR : Invalid inputs")
-                    sys.exit(1)
-                dmri_pipeline.check_stages_execution()
-                dmri_pipeline.fill_stages_outputs()
-
-            fmri_valid_inputs, fmri_pipeline = init_fmri_project(
-                project, bids_layout, False
-            )
-            if fmri_pipeline is not None:
-                fmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
-                fmri_pipeline.atlas_info = anat_pipeline.atlas_info
-                fmri_pipeline.subjects_dir = anat_pipeline.stages["Segmentation"].config.freesurfer_subjects_dir
-                fmri_pipeline.subject_id = anat_pipeline.stages[ "Segmentation"].config.freesurfer_subject_id
-                if anat_pipeline.parcellation_scheme == "Custom":
-                    fmri_pipeline.custom_atlas_name = anat_pipeline.stages["Parcellation"].config.custom_parcellation.atlas
-                    fmri_pipeline.custom_atlas_res = anat_pipeline.stages["Parcellation"].config.custom_parcellation.res
-                print("Freesurfer subjects dir: {}".format(fmri_pipeline.subjects_dir))
-                print("Freesurfer subject id: {}".format(fmri_pipeline.subject_id))
-
-                # print sys.argv[offset+9]
-                if fmri_valid_inputs:
-                    print(">> Process fmri pipeline")
-                    fmri_pipeline.process()
-                else:  # pragma: no cover
-                    print("   ... ERROR : Invalid inputs")
-                    sys.exit(1)
-                fmri_pipeline.check_stages_execution()
-                fmri_pipeline.fill_stages_outputs()
-            eeg_valid_inputs, eeg_pipeline = init_eeg_project(project, bids_layout, False)
-            if eeg_pipeline is not None:
-                eeg_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
-                eeg_pipeline.atlas_info = anat_pipeline.atlas_info
-                if eeg_valid_inputs:
-                    print(">> Process eeg pipeline")
-                    eeg_pipeline.process()
-                else:
-                    print("   ... ERROR : Invalid inputs")
-                    sys.exit(1)
-                eeg_pipeline.check_stages_execution()
-                eeg_pipeline.fill_stages_outputs()
         else:
             print(msg)
             sys.exit(1)

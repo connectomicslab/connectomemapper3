@@ -114,25 +114,24 @@ class EEGPipeline(Pipeline):
     def check_input(self, layout, gui=True):
         """Check if input of the eeg pipeline are available.
 
-		Parameters
-		----------
-		layout : bids.BIDSLayout
-			Instance of BIDSLayout
+        Parameters
+        ----------
+        layout : bids.BIDSLayout
+            Instance of BIDSLayout
 
-		gui : traits.Bool
-			Boolean used to display different messages
-			but not really meaningful anymore since the GUI
-			components have been migrated to `cmp.bidsappmanager`
+        gui : traits.Bool
+            Boolean used to display different messages
+            but not really meaningful anymore since the GUI
+            components have been migrated to `cmp.bidsappmanager`
 
-		Returns
-		-------
-		valid_inputs : traits.Bool
-			True if inputs are available
-		"""
+        Returns
+        -------
+        valid_inputs : traits.Bool
+            True if inputs are available
+        """
         print('**** Check Inputs is still not implemented ****')
-        eeg_available = False
-        epochs_available = False
-        # valid_inputs = False
+        # eeg_available = False
+        # epochs_available = False
         valid_inputs = True
         return valid_inputs
 
