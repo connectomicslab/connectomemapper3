@@ -185,10 +185,14 @@ The parcellation derived from the Desikan-Killiany atlas [@Desikan2006AnInterest
   made symmetric by projecting the right hemisphere labels to the left hemisphere, matching the
   boundaries of the projected regions of the left hemisphere to the boundaries of the original regions
   of the left hemisphere, applying this transformation to the rest of the scales, and saving
-  each parcellation scale in a Freesurfer annotation file.
-After generating the volumetric parcellations from the annotation files, one can now decide whether
-  to perform brainstem parcellation [@Iglesias2015BayesianMRI], hippocampal subfields segmentation [@Iglesias2015AMRI],
-  and/or probabilistic atlas-based segmentation of the thalamic nuclei [@Najdenovska2018In-vivoImaging].
+  each parcellation scale of each hemisphere in a Freesurfer annotation file.
+
+After the resampling of the fsaverage cortical surface onto the individual cortical surface,
+  CMP3 maps the parcellation annotation files to the individual space and generate the volumetric
+  parcellation for each scale.
+Then, one can now decide whether to perform brainstem parcellation [@Iglesias2015BayesianMRI], hippocampal
+  subfields segmentation [@Iglesias2015AMRI], and/or probabilistic atlas-based segmentation of the thalamic
+  nuclei [@Najdenovska2018In-vivoImaging].
 All segmented structures are combined at the end of the process to create the final parcellation nifti image
   at each scale along with the corresponding label index color mapping file in accordance with the BIDS Derivatives
   specifications.
