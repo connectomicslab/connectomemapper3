@@ -162,7 +162,7 @@ Empowered by the Nipype workflow engine, the re-execution of the workflow will r
 
 To ensure reproducibility and maximize re-usability of the tool, the implemented pipelines are encapsulated
   in Docker [@merkeldocker:2014] and Singularity [@Kurtzer2017Singularity:Compute] software image
-  containers, in concordance to the BIDS App framework [@GorgolewskiBIDSMethods:2017].
+  containers, in concordance with the BIDS App framework [@GorgolewskiBIDSMethods:2017].
 This means that the BIDS App of CMP3 can be run on a large diversity of datasets, on Linux, MacOSX, and Windows computers,
   and on high performance computing systems (clusters) for large-scale analysis.
 
