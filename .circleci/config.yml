@@ -607,6 +607,10 @@ jobs:
     environment:
       - FS_LICENSE: /tmp/data/${CIRCLE_JOB}/ds-sample/code/license.txt
     steps:
+      - run:
+          name: Get precise CPU specifications
+          command: |
+            cat  /proc/cpuinfo
       - checkout:
           path: /home/circleci/src/connectomemapper3
       - run:
@@ -666,6 +670,10 @@ jobs:
     environment:
       - FS_LICENSE: /tmp/data/${CIRCLE_JOB}/ds-sample/code/license.txt
     steps:
+      - run:
+          name: Get precise CPU specifications
+          command: |
+            cat  /proc/cpuinfo
       - checkout:
           path: /home/circleci/src/connectomemapper3
       - run:
@@ -722,6 +730,10 @@ jobs:
     environment:
       - FS_LICENSE: /tmp/data/${CIRCLE_JOB}/ds-sample/code/license.txt
     steps:
+      - run:
+          name: Get precise CPU specifications
+          command: |
+            cat  /proc/cpuinfo
       - checkout:
           path: /home/circleci/src/connectomemapper3
       - run:
@@ -777,6 +789,10 @@ jobs:
     environment:
       - FS_LICENSE: /tmp/data/${CIRCLE_JOB}/ds-sample/code/license.txt
     steps:
+      - run:
+          name: Get precise CPU specifications
+          command: |
+            cat  /proc/cpuinfo
       - checkout:
           path: /home/circleci/src/connectomemapper3
       - run:
@@ -835,6 +851,10 @@ jobs:
     environment:
       - FS_LICENSE: /tmp/data/${CIRCLE_JOB}/ds-sample/code/license.txt
     steps:
+      - run:
+          name: Get precise CPU specifications
+          command: |
+            cat  /proc/cpuinfo
       - checkout:
           path: /home/circleci/src/connectomemapper3
       - run:
@@ -893,6 +913,10 @@ jobs:
     environment:
       - FS_LICENSE: /tmp/data/${CIRCLE_JOB}/ds-sample/code/license.txt
     steps:
+      - run:
+          name: Get precise CPU specifications
+          command: |
+            cat  /proc/cpuinfo
       - checkout:
           path: /home/circleci/src/connectomemapper3
       - run:
@@ -951,6 +975,10 @@ jobs:
     environment:
       - FS_LICENSE: /tmp/data/${CIRCLE_JOB}/ds-sample/code/license.txt
     steps:
+      - run:
+          name: Get precise CPU specifications
+          command: |
+            cat  /proc/cpuinfo
       - checkout:
           path: /home/circleci/src/connectomemapper3
       - run:
@@ -1009,6 +1037,10 @@ jobs:
     environment:
       - FS_LICENSE: /tmp/data/${CIRCLE_JOB}/ds-sample/code/license.txt
     steps:
+      - run:
+          name: Get precise CPU specifications
+          command: |
+            cat  /proc/cpuinfo
       - checkout:
           path: /home/circleci/src/connectomemapper3
       - run:
@@ -1067,6 +1099,10 @@ jobs:
     environment:
       - FS_LICENSE: /tmp/data/${CIRCLE_JOB}/ds-sample/code/license.txt
     steps:
+      - run:
+          name: Get precise CPU specifications
+          command: |
+            cat  /proc/cpuinfo
       - checkout:
           path: /home/circleci/src/connectomemapper3
       - run:
