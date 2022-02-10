@@ -995,7 +995,7 @@ def run_individual(
 
     func_pipeline_config : string
         Path to fMRI pipeline configuration file
-    
+
     number_of_threads : int
         Number of threads used by programs relying on the OpenMP library
     """
@@ -1029,13 +1029,13 @@ def run_individual(
         if anat_pipeline is not None:
             anat_valid_inputs = anat_pipeline.check_input(bids_layout, gui=False)
 
-            print('--- Set Freesurfer and ANTs to use {} threads by the means of OpenMP'.format(number_of_threads))
-            anat_pipeline.stages['Segmentation'].config.number_of_threads = number_of_threads
+            print(f"--- Set Freesurfer and ANTs to use {number_of_threads} threads by the means of OpenMP")
+            anat_pipeline.stages["Segmentation"].config.number_of_threads = number_of_threads
 
             if anat_valid_inputs:
                 print(">> Process anatomical pipeline")
                 anat_pipeline.process()
-            else:
+            else:  # pragma: no cover
                 print("ERROR : Invalid inputs")
                 sys.exit(1)
 
@@ -1051,13 +1051,13 @@ def run_individual(
         if anat_pipeline is not None:
             anat_valid_inputs = anat_pipeline.check_input(bids_layout, gui=False)
 
-            print('--- Set Freesurfer and ANTs to use {} threads by the means of OpenMP'.format(number_of_threads))
-            anat_pipeline.stages['Segmentation'].config.number_of_threads = number_of_threads
+            print(f"--- Set Freesurfer and ANTs to use {number_of_threads} threads by the means of OpenMP")
+            anat_pipeline.stages[ "Segmentation"].config.number_of_threads = number_of_threads
 
             if anat_valid_inputs:
                 print(">> Process anatomical pipeline")
                 anat_pipeline.process()
-            else:
+            else:  # pragma: no cover
                 print("ERROR : Invalid inputs")
                 sys.exit(1)
 
@@ -1065,17 +1065,22 @@ def run_individual(
         anat_pipeline.check_stages_execution()
         anat_pipeline.fill_stages_outputs()
 
-        project.freesurfer_subjects_dir = anat_pipeline.stages['Segmentation'].config.freesurfer_subjects_dir
-        project.freesurfer_subject_id = anat_pipeline.stages['Segmentation'].config.freesurfer_subject_id
+        project.freesurfer_subjects_dir = anat_pipeline.stages["Segmentation"].config.freesurfer_subjects_dir
+        project.freesurfer_subject_id = anat_pipeline.stages["Segmentation"].config.freesurfer_subject_id
 
         if anat_valid_outputs:
-            dmri_valid_inputs, dmri_pipeline = init_dmri_project(project, bids_layout, False)
+            dmri_valid_inputs, dmri_pipeline = init_dmri_project(
+                project, bids_layout, False
+            )
             if dmri_pipeline is not None:
                 dmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
                 dmri_pipeline.atlas_info = anat_pipeline.atlas_info
+                if anat_pipeline.parcellation_scheme == "Custom":
+                    dmri_pipeline.custom_atlas_name = anat_pipeline.stages["Parcellation"].config.custom_parcellation.atlas
+                    dmri_pipeline.custom_atlas_res = anat_pipeline.stages["Parcellation"].config.custom_parcellation.res
                 if dmri_valid_inputs:
                     dmri_pipeline.process()
-                else:
+                else:  # pragma: no cover
                     print("   ... ERROR : Invalid inputs")
                     sys.exit(1)
                 dmri_pipeline.check_stages_execution()
@@ -1093,13 +1098,13 @@ def run_individual(
         if anat_pipeline is not None:
             anat_valid_inputs = anat_pipeline.check_input(bids_layout, gui=False)
 
-            print('--- Set Freesurfer and ANTs to use {} threads by the means of OpenMP'.format(number_of_threads))
-            anat_pipeline.stages['Segmentation'].config.number_of_threads = number_of_threads
+            print(f"--- Set Freesurfer and ANTs to use {number_of_threads} threads by the means of OpenMP")
+            anat_pipeline.stages[ "Segmentation"].config.number_of_threads = number_of_threads
 
             if anat_valid_inputs:
                 print(">> Process anatomical pipeline")
                 anat_pipeline.process()
-            else:
+            else:  # pragma: no cover
                 print("ERROR : Invalid inputs")
                 sys.exit(1)
 
@@ -1107,19 +1112,23 @@ def run_individual(
         anat_pipeline.check_stages_execution()
         anat_pipeline.fill_stages_outputs()
 
-        project.freesurfer_subjects_dir = anat_pipeline.stages['Segmentation'].config.freesurfer_subjects_dir
-        project.freesurfer_subject_id = anat_pipeline.stages['Segmentation'].config.freesurfer_subject_id
+        project.freesurfer_subjects_dir = anat_pipeline.stages["Segmentation"].config.freesurfer_subjects_dir
+        project.freesurfer_subject_id = anat_pipeline.stages["Segmentation"].config.freesurfer_subject_id
 
         if anat_valid_outputs:
-            fmri_valid_inputs, fmri_pipeline = init_fmri_project(project, bids_layout, False)
+            fmri_valid_inputs, fmri_pipeline = init_fmri_project(
+                project, bids_layout, False
+            )
             if fmri_pipeline is not None:
                 fmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
                 fmri_pipeline.atlas_info = anat_pipeline.atlas_info
-
+                if anat_pipeline.parcellation_scheme == "Custom":
+                    fmri_pipeline.custom_atlas_name = anat_pipeline.stages["Parcellation"].config.custom_parcellation.atlas
+                    fmri_pipeline.custom_atlas_res = anat_pipeline.stages["Parcellation"].config.custom_parcellation.res
                 if fmri_valid_inputs:
                     print(">> Process fmri pipeline")
                     fmri_pipeline.process()
-                else:
+                else:  # pragma: no cover
                     print("   ... ERROR : Invalid inputs")
                     sys.exit(1)
                 fmri_pipeline.check_stages_execution()
@@ -1138,13 +1147,13 @@ def run_individual(
         if anat_pipeline is not None:
             anat_valid_inputs = anat_pipeline.check_input(bids_layout, gui=False)
 
-            print('--- Set Freesurfer and ANTs to use {} threads by the means of OpenMP'.format(number_of_threads))
-            anat_pipeline.stages['Segmentation'].config.number_of_threads = number_of_threads
+            print(f"--- Set Freesurfer and ANTs to use {number_of_threads} threads by the means of OpenMP")
+            anat_pipeline.stages[ "Segmentation"].config.number_of_threads = number_of_threads
 
             if anat_valid_inputs:
                 print(">> Process anatomical pipeline")
                 anat_pipeline.process()
-            else:
+            else:  # pragma: no cover
                 print("   ... ERROR : Invalid inputs")
                 sys.exit(1)
 
@@ -1152,33 +1161,47 @@ def run_individual(
         anat_pipeline.check_stages_execution()
         anat_pipeline.fill_stages_outputs()
 
-        project.freesurfer_subjects_dir = anat_pipeline.stages['Segmentation'].config.freesurfer_subjects_dir
-        project.freesurfer_subject_id = anat_pipeline.stages['Segmentation'].config.freesurfer_subject_id
+        project.freesurfer_subjects_dir = anat_pipeline.stages["Segmentation"].config.freesurfer_subjects_dir
+        project.freesurfer_subject_id = anat_pipeline.stages["Segmentation"].config.freesurfer_subject_id
 
         if anat_valid_outputs:
-            dmri_valid_inputs, dmri_pipeline = init_dmri_project(project, bids_layout, False)
+            dmri_valid_inputs, dmri_pipeline = init_dmri_project(
+                project, bids_layout, False
+            )
             if dmri_pipeline is not None:
                 dmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
                 dmri_pipeline.atlas_info = anat_pipeline.atlas_info
-
+                if anat_pipeline.parcellation_scheme == "Custom":
+                    dmri_pipeline.custom_atlas_name = anat_pipeline.stages["Parcellation"].config.custom_parcellation.atlas
+                    dmri_pipeline.custom_atlas_res = anat_pipeline.stages["Parcellation"].config.custom_parcellation.res
                 if dmri_valid_inputs:
                     print(">> Process diffusion pipeline")
                     dmri_pipeline.process()
-                else:
+                else:  # pragma: no cover
                     print("   ... ERROR : Invalid inputs")
                     sys.exit(1)
                 dmri_pipeline.check_stages_execution()
                 dmri_pipeline.fill_stages_outputs()
 
-            fmri_valid_inputs, fmri_pipeline = init_fmri_project(project, bids_layout, False)
+            fmri_valid_inputs, fmri_pipeline = init_fmri_project(
+                project, bids_layout, False
+            )
             if fmri_pipeline is not None:
                 fmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
                 fmri_pipeline.atlas_info = anat_pipeline.atlas_info
+                fmri_pipeline.subjects_dir = anat_pipeline.stages["Segmentation"].config.freesurfer_subjects_dir
+                fmri_pipeline.subject_id = anat_pipeline.stages[ "Segmentation"].config.freesurfer_subject_id
+                if anat_pipeline.parcellation_scheme == "Custom":
+                    fmri_pipeline.custom_atlas_name = anat_pipeline.stages["Parcellation"].config.custom_parcellation.atlas
+                    fmri_pipeline.custom_atlas_res = anat_pipeline.stages["Parcellation"].config.custom_parcellation.res
+                print("Freesurfer subjects dir: {}".format(fmri_pipeline.subjects_dir))
+                print("Freesurfer subject id: {}".format(fmri_pipeline.subject_id))
 
+                # print sys.argv[offset+9]
                 if fmri_valid_inputs:
                     print(">> Process fmri pipeline")
                     fmri_pipeline.process()
-                else:
+                else:  # pragma: no cover
                     print("   ... ERROR : Invalid inputs")
                     sys.exit(1)
                 fmri_pipeline.check_stages_execution()
