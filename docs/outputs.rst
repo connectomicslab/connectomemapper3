@@ -274,11 +274,11 @@ each subject's ``func/`` subfolder including:
 FreeSurfer Derivatives
 =======================
 
-A FreeSurfer subjects directory is created in ``<bids_dataset/derivatives>/freesurfer``.
+A FreeSurfer subjects directory is created in ``<bids_dataset/derivatives>/freesurfer-7.2.0``.
 
 ::
 
-    freesurfer/
+    freesurfer-7.2.0/
         fsaverage/
             mri/
             surf/

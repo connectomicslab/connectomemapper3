@@ -543,11 +543,11 @@ jobs:
     steps:
       - restore_cache:
           keys:
-            - data-v2-2-{{ .Branch }}-{{ .Revision }}
-            - data-v2-2--{{ .Revision }}
-            - data-v2-2-{{ .Branch }}-
-            - data-v2-2-master-
-            - data-v2-2-
+            - data-v2-3-{{ .Branch }}-{{ .Revision }}
+            - data-v2-3--{{ .Revision }}
+            - data-v2-3-{{ .Branch }}-
+            - data-v2-3-master-
+            - data-v2-3-
           paths:
             - /tmp/data
       - run:
@@ -565,14 +565,14 @@ jobs:
       - run:
           name: Get FreeSurfer derivatives for ds-sample
           command: |
-            if [[ ! -d /tmp/data/ds-sample/derivatives/freesurfer-6.0.1 ]]; then
+            if [[ ! -d /tmp/data/ds-sample/derivatives/freesurfer-7.2.0 ]]; then
               mkdir -p /tmp/data/ds-sample/derivatives
               wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -v \
                 -O freesurfer.tar.gz "https://zenodo.org/record/5790821/files/freesurfer.tar.gz?download=1"
               tar xvzf freesurfer.tar.gz -C /tmp/data/ds-sample/derivatives
-              mv /tmp/data/ds-sample/derivatives/freesurfer /tmp/data/ds-sample/derivatives/freesurfer-6.0.1
+              mv /tmp/data/ds-sample/derivatives/freesurfer /tmp/data/ds-sample/derivatives/freesurfer-7.2.0
               # Remove outdated *.lausanne2008.*.annot files
-              rm /tmp/data/ds-sample/derivatives/freesurfer-6.0.1/sub-01_ses-01/label/*.lausanne2008.scale*.annot
+              rm /tmp/data/ds-sample/derivatives/freesurfer-7.2.0/sub-01_ses-01/label/*.lausanne2008.scale*.annot
               echo "FreeSurfer derivatives of ds-sample have been successfully downloaded"
             else
               echo "FreeSurfer derivatives of ds-sample was cached"
@@ -594,7 +594,7 @@ jobs:
           paths:
             - data
       - save_cache:
-         key: data-v2-2-{{ .Branch }}-{{ .Revision }}
+         key: data-v2-3-{{ .Branch }}-{{ .Revision }}
          paths:
             - /tmp/data
 
