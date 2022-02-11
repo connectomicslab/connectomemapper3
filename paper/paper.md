@@ -300,6 +300,9 @@ CMP3 is also part of [`ReproNim/containers`](https://github.com/ReproNim/contain
 
 This work was supported by Swiss National Science Foundation Sinergia
   [grant no. 170873](https://p3.snf.ch/project-170873).
+M. Anıl Tuncel's involvement was supported by funding to the Blue Brain Project, a research center
+  of the École polytechnique fédérale de Lausanne (EPFL), from the Swiss government’s ETH Board of
+  the Swiss Federal Institutes of Technology.
 All the contributors listed in the project’s Zenodo and GitHub repository have contributed code and
   intellectual labor to further improve CMP3.
 
