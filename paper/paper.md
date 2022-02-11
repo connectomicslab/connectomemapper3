@@ -139,7 +139,7 @@ Connectome Mapper 3 (CMP3) implements a workflow that creates a hierarchical mul
 ![\textbf{Overview of the Connectome Mapper 3 BIDS App's workflow.}
 \label{fig:cmp3-diagram}](cmp3-diagram.png)
 
-It relies on Nipype [@GorgolewskiNipype:2011] and adopts a modular architecture, composed
+CMP3's workflow relies on Nipype [@GorgolewskiNipype:2011] and adopts a modular architecture, composed
   of three different pipelines (anatomical, diffusion, and fMRI) dedicated to the processing
   of each modality (sMRI, dMRI, rfMRI).
 Each pipeline is represented by a Nipype workflow that takes a BIDS formatted dataset as input, and
@@ -152,9 +152,9 @@ Each stage can consist of one or multiple tasks, where each task can either inte
 We refer to the [main documentation](https://connectome-mapper-3.readthedocs.io/en/latest/bidsappmanager.html#anatomical-pipeline-stages)
   for more details about the different processing steps and parameters involved in each pipeline.
 At the time EEG is being fully integrated in the workflow and in the GUI, CMP3 already provides a
-  pipeline and a collection of interfaces dedicated for this modality, that can allow anyone
-  to map the connectivity at the source level derived from EEG in the CMP3 framework,
-  as demonstrated by a tutorial notebook in the documentation.
+  pipeline and a collection of interfaces dedicated to this modality.
+A tutorial notebook in the documentation shows how one can now map the connectivity at the source
+  level derived from EEG in the CMP3 framework.
 
 To guarantee consistent processing in large neuroimaging cohorts,
   pipeline and stage parameters can be set by creating and loading pipeline
@@ -209,7 +209,7 @@ CMP3 takes advantage of the Traits/TraitsUI framework
   (\href{http://docs.enthought.com/traits/}{http://docs.enthought.com/traits/}) for building an
   interactive Graphical User Interface (GUI), to give to pipelines and stages a graphical representation
   which is easy to understand and extend.
-This has enabled the design of a GUI which we call the `cmpbidsappmanager` (\autoref{fig:gui}) that reflects
+This has enabled the design of a GUI, which we call the `cmpbidsappmanager` (\autoref{fig:gui}), that reflects
   the modular structure of the processing workflow.
 It has been designed to guide and support the user in all the steps required to
   perform an analysis (\autoref{fig:gui}).
