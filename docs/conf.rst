@@ -68,18 +68,18 @@ Running the Connectome Mapper opens the main window as well as a menu toolbar on
 		│   │       |    ├── sub-001_task-rest_bold.nii.gz
 		│   │       |    ├── sub-001_task-rest_bold.json
 		│   ├── derivatives
-		│   │   ├── cmp
+		│   │   ├── cmp-<version-tag>
 		│   │   |    ├── sub-001
 	  	|	│   │    |    ├── anat
 	  	|	│   │    |    ├── dwi
 	  	|	│   │    |    ├── func
 	  	|	│   │    |    ├── connectivity
-		│   │   ├── freesurfer
+		│   │   ├── freesurfer-<version-tag>
 		│   │   |    ├── sub-001
 	  	|	│   │    |    ├── mri
  	 	|	│   │    |    ├── surf
 	  	|	│   │    |    ├── ...
-		│   │   ├── nipype
+		│   │   ├── nipype-<version-tag>
 		│   │   |    ├── anatomical_pipeline
 		│   │   |    ├── diffusion_pipeline
 		│   │   |    ├── functional_pipeline

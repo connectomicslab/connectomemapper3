@@ -10,8 +10,9 @@ import numpy as np
 import nibabel as nib
 from traits.api import *
 
+from nipype.utils.filemanip import copyfile
 from nipype.interfaces.base import traits, TraitedSpec, File, BaseInterface, BaseInterfaceInputSpec
-
+from nipype.interfaces.utility.base import Rename
 
 class ExtractHeaderVoxel2WorldMatrixInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc='Input image file')
@@ -120,3 +121,59 @@ class ConcatOutputsAsTuple(BaseInterface):
         outputs = self._outputs().get()
         outputs["out_tuple"] = (self.inputs.input1, self.inputs.input2)
         return outputs
+
+
+class Rename001(Rename):
+    """Change the name of a file based on a mapped format string.
+
+    To use additional inputs that will be defined at run-time, the class
+    constructor must be called with the format template, and the fields
+    identified will become inputs to the interface.
+    Additionally, you may set the parse_string input, which will be run
+    over the input filename with a regular expressions search, and will
+    fill in additional input fields from matched groups. Fields set with
+    inputs have precedence over fields filled in with the regexp match.
+
+    It corresponds to the `nipype.interfaces.utility.base.Rename` interface
+    that has been modified to force hard link during copy
+
+    Examples
+    --------
+    >>> from nipype.interfaces.utility import Rename
+    >>> rename1 = Rename()
+    >>> rename1.inputs.in_file = os.path.join(datadir, "zstat1.nii.gz") # datadir is a directory with exemplary files, defined in conftest.py
+    >>> rename1.inputs.format_string = "Faces-Scenes.nii.gz"
+    >>> res = rename1.run()          # doctest: +SKIP
+    >>> res.outputs.out_file         # doctest: +SKIP
+    'Faces-Scenes.nii.gz"            # doctest: +SKIP
+
+    >>> rename2 = Rename(format_string="%(subject_id)s_func_run%(run)02d")
+    >>> rename2.inputs.in_file = os.path.join(datadir, "functional.nii")
+    >>> rename2.inputs.keep_ext = True
+    >>> rename2.inputs.subject_id = "subj_201"
+    >>> rename2.inputs.run = 2
+    >>> res = rename2.run()          # doctest: +SKIP
+    >>> res.outputs.out_file         # doctest: +SKIP
+    'subj_201_func_run02.nii'        # doctest: +SKIP
+
+    >>> rename3 = Rename(format_string="%(subject_id)s_%(seq)s_run%(run)02d.nii")
+    >>> rename3.inputs.in_file = os.path.join(datadir, "func_epi_1_1.nii")
+    >>> rename3.inputs.parse_string = r"func_(?P<seq>\w*)_.*"
+    >>> rename3.inputs.subject_id = "subj_201"
+    >>> rename3.inputs.run = 2
+    >>> res = rename3.run()          # doctest: +SKIP
+    >>> res.outputs.out_file         # doctest: +SKIP
+    'subj_201_epi_run02.nii'         # doctest: +SKIP
+
+    References
+    ----------
+    Adapted from https://github.com/nipy/nipype/blob/cd4c34d935a43812d1756482fdc4034844e485b8/nipype/interfaces/utility/base.py#L232-L272
+
+    """
+
+    def _run_interface(self, runtime):
+        runtime.returncode = 0
+        out_file = os.path.join(runtime.cwd, self._rename())
+        copyfile(self.inputs.in_file, out_file, use_hardlink=True)
+        self._results["out_file"] = out_file
+        return runtime

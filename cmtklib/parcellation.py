@@ -312,26 +312,22 @@ class ParcellateHippocampalSubfields(BaseInterface):
         iflogger.info(
             '- New FreeSurfer SUBJECTS_DIR:\n  {}\n'.format(self.inputs.subjects_dir))
 
-        reconall_cmd = fs_string + '; recon-all -no-isrunning -s "%s" -hippocampal-subfields-T1 ' % (
-            self.inputs.subject_id)
-        # reconall_cmd = [fs_string , ";" , "recon-all" , "-no-isrunning" , "-s" , "%s"% (self.inputs.subject_id) , "-hippocampal-subfields-T1" ]
+        # reconall_cmd = fs_string + '; recon-all -no-isrunning -s "%s" -hippocampal-subfields-T1 ' % (
+        #     self.inputs.subject_id)
+
+        reconall_cmd = f'{fs_string}; segmentHA_T1.sh {self.inputs.subject_id} {self.inputs.subjects_dir}'
 
         iflogger.info('Processing cmd: %s' % reconall_cmd)
 
         process = subprocess.Popen(
             reconall_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         proc_stdout = process.communicate()[0].strip()
-        # subprocess.check_call(reconall_cmd)
-
-        # cmd = ['recon-all', '-s', self.inputs.subject_id, '-hippocampal-subfields-T1']
-
-        # subprocess.check_call(cmd)
         iflogger.info(proc_stdout)
 
         mov = op.join(self.inputs.subjects_dir, self.inputs.subject_id,
-                      'mri', 'lh.hippoSfLabels-T1.v10.mgz')
+                      'mri', 'lh.hippoAmygLabels-T1.v21.mgz')
         targ = op.join(self.inputs.subjects_dir,
-                       self.inputs.subject_id, 'mri', 'orig/001.mgz')
+                       self.inputs.subject_id, 'mri', 'rawavg.mgz')
         out = op.abspath('lh_subFields.nii.gz')
         cmd = fs_string + '; mri_vol2vol --mov "%s" --targ "%s" --regheader --o "%s" --no-save-reg --interp nearest' % (
             mov, targ, out)
@@ -342,9 +338,9 @@ class ParcellateHippocampalSubfields(BaseInterface):
         iflogger.info(proc_stdout)
 
         mov = op.join(self.inputs.subjects_dir, self.inputs.subject_id,
-                      'mri', 'rh.hippoSfLabels-T1.v10.mgz')
+                      'mri', 'rh.hippoAmygLabels-T1.v21.mgz')
         targ = op.join(self.inputs.subjects_dir,
-                       self.inputs.subject_id, 'mri', 'orig/001.mgz')
+                       self.inputs.subject_id, 'mri', 'rawavg.mgz')
         out = op.abspath('rh_subFields.nii.gz')
         cmd = fs_string + '; mri_vol2vol --mov "%s" --targ "%s" --regheader --o "%s" --no-save-reg --interp nearest' % (
             mov, targ, out)
@@ -403,10 +399,11 @@ class ParcellateBrainstemStructures(BaseInterface):
         iflogger.info(
             '- New FreeSurfer SUBJECTS_DIR:\n  {}\n'.format(self.inputs.subjects_dir))
 
-        reconall_cmd = fs_string + \
-            '; recon-all -no-isrunning -s "%s" -brainstem-structures ' % (
-                self.inputs.subject_id)
-        # reconall_cmd = [fs_string , ";" , "recon-all" , "-no-isrunning" , "-s" , "%s"% (self.inputs.subject_id) , "-hippocampal-subfields-T1" ]
+        # reconall_cmd = fs_string + \
+        #             '; recon-all -no-isrunning -s "%s" -brainstem-structures ' % (
+        #         self.inputs.subject_id)
+
+        reconall_cmd = f'{fs_string}; segmentBS.sh {self.inputs.subject_id} {self.inputs.subjects_dir}'
 
         iflogger.info('Processing cmd: %s' % reconall_cmd)
 
@@ -416,9 +413,9 @@ class ParcellateBrainstemStructures(BaseInterface):
         iflogger.info(proc_stdout)
 
         mov = op.join(self.inputs.subjects_dir, self.inputs.subject_id,
-                      'mri', 'brainstemSsLabels.v10.mgz')
+                      'mri', 'brainstemSsLabels.v12.mgz')
         targ = op.join(self.inputs.subjects_dir,
-                       self.inputs.subject_id, 'mri', 'orig/001.mgz')
+                       self.inputs.subject_id, 'mri', 'rawavg.mgz')
         out = op.abspath('brainstem.nii.gz')
         cmd = fs_string + '; mri_vol2vol --mov "%s" --targ "%s" --regheader --o "%s" --no-save-reg --interp nearest' % (
             mov, targ, out)
@@ -1688,9 +1685,6 @@ class ParcellateThalamus(BaseInterface):
     def _run_interface(self, runtime):
         iflogger.info("Parcellation of Thalamic Nuclei")
         iflogger.info("=============================================")
-
-        # fs_string = 'export ANTSPATH=/usr/lib/ants/'
-        # fs_string = ''
         iflogger.info(
             '- Input T1w image:\n  {}\n'.format(self.inputs.T1w_image))
         iflogger.info(
@@ -1700,9 +1694,8 @@ class ParcellateThalamus(BaseInterface):
 
         # Moving aparc+aseg.mgz back to its original space for thalamic parcellation
         mov = op.join(self.inputs.subjects_dir, self.inputs.subject_id, 'mri', 'aparc+aseg.mgz')
-        targ = op.join(self.inputs.subjects_dir, self.inputs.subject_id, 'mri', 'orig/001.mgz')
+        targ = op.join(self.inputs.subjects_dir, self.inputs.subject_id, 'mri', 'rawavg.mgz')
         out = op.join(self.inputs.subjects_dir, self.inputs.subject_id, 'tmp', 'aparc+aseg.nii.gz')
-        # cmd = fs_string + '; mri_vol2vol --mov "%s" --targ "%s" --regheader --o "%s" --no-save-reg --interp nearest' % (mov,targ,out)
         cmd = 'mri_vol2vol --mov "%s" --targ "%s" --regheader --o "%s" --no-save-reg --interp nearest' % (mov, targ, out)
 
         process = subprocess.Popen(
@@ -1722,9 +1715,6 @@ class ParcellateThalamus(BaseInterface):
         outprefix_name = op.abspath('{}_Ind2temp'.format(outprefix_name))
 
         # Register the template image image to the subject T1w image
-        # cmd = fs_string +
-        #   '; antsRegistrationSyN.sh -d 3 -f "%s" -m "%s" -t s -n "%i" -o "%s"' % (self.inputs.T1w_image,self.inputs.template_image,12,outprefix_name)
-
         if self.inputs.ants_precision_type == 'float':
             precision_type = 'f'
         else:
@@ -1747,13 +1737,10 @@ class ParcellateThalamus(BaseInterface):
         transform_file = op.abspath(
             '{}_Ind2temp0GenericAffine.mat'.format(outprefix_name))
         warp_file = op.abspath('{}_Ind2temp1Warp.nii.gz'.format(outprefix_name))
-        # transform_file = '/home/localadmin/~/Desktop/parcellation_tests/sub-A006_ses-20160520161029_T1w_brain_Ind2temp0GenericAffine.mat'
-        # warp_file = '/home/localadmin/~/Desktop/parcellation_tests/sub-A006_ses-20160520161029_T1w_brain_Ind2temp1Warp.nii.gz'
         output_maps = op.abspath('{}_class-thalamus_probtissue.nii.gz'.format(outprefix_name))
         jacobian_file = op.abspath('{}_class-thalamus_probtissue_jacobian.nii.gz'.format(outprefix_name))
 
         # Compute and save jacobian
-        # cmd = fs_string + '; CreateJacobianDeterminantImage 3 "%s" "%s" ' % (warp_file,jacobian_file)
         cmd = 'CreateJacobianDeterminantImage 3 "%s" "%s" ' % (
             warp_file, jacobian_file)
 
@@ -1764,9 +1751,6 @@ class ParcellateThalamus(BaseInterface):
         iflogger.info(proc_stdout)
 
         # Propagate nuclei probability maps to subject T1w space using estimated transforms and deformation
-        # cmd = fs_string +
-        #   '; antsApplyTransforms --float -d 3 -e 3 -i "%s" -o "%s" -r "%s" -t "%s" -t "%s" -n BSpline[3]' %
-        #   (self.inputs.thalamic_nuclei_maps,output_maps,self.inputs.T1w_image,warp_file,transform_file)
         cmd = 'antsApplyTransforms --float -d 3 -e 3 -i "%s" -o "%s" -r "%s" -t "%s" -t "%s" -n BSpline[3]' % (
             self.inputs.thalamic_nuclei_maps, output_maps, self.inputs.T1w_image, warp_file, transform_file)
 
@@ -1786,14 +1770,14 @@ class ParcellateThalamus(BaseInterface):
         img_data_vspams[img_data_vspams < 0] = 0
         img_data_vspams[img_data_vspams > 1] = 1
 
-        thresh = 0.05
         # Creating max_prob
+        thresh = 0.05
         img_data_spams = img_data_vspams.copy()
         img_data_spams[img_data_spams < thresh] = 0
         ind = np.where(np.sum(img_data_spams, axis=3) == 0)
         max_prob = img_data_spams.argmax(axis=3) + 1
         max_prob[ind] = 0
-        # ?max_prob = imfill(max_prob,'holes');
+        # ? max_prob = imfill(max_prob,'holes');
 
         del img_data_spams
 
@@ -1816,7 +1800,7 @@ class ParcellateThalamus(BaseInterface):
         ind = np.where(np.sum(img_data_spams, axis=3) == 0)
         max_prob = img_data_spams.argmax(axis=3) + 1
         max_prob[ind] = 0
-        # ?max_prob = imfill(max_prob,'holes');
+        # ? max_prob = imfill(max_prob,'holes');
 
         debug_file = op.abspath('{}_class-thalamus_dtissue_after_jacobiancorr.nii.gz'.format(outprefix_name))
         print("Save output image to %s" % debug_file)
@@ -1825,8 +1809,6 @@ class ParcellateThalamus(BaseInterface):
         del img
 
         iflogger.info('Creating Thalamus mask from FreeSurfer aparc+aseg ')
-
-        # fs_string = 'export SUBJECTS_DIR=' + self.inputs.subjects_dir
         iflogger.info('- New FreeSurfer SUBJECTS_DIR:\n  {}\n'.format(self.inputs.subjects_dir))
 
         # Extract indices of left/right thalamus mask from aparc+aseg volume
@@ -1851,7 +1833,6 @@ class ParcellateThalamus(BaseInterface):
         remove_isolated_points = True
         if remove_isolated_points:
             struct = np.ones((3, 3, 3))
-
             # struct = np.zeros((3,3,3))
             # struct[1,1,1] = 1
 
@@ -1923,7 +1904,6 @@ class ParcellateThalamus(BaseInterface):
             temp_m = np.repeat(tmp_thal_lh, int(nb_spams / 2), axis=3)
             del tmp_thal_lh
             img_data_spam_lh = np.multiply(img_data_spams[:, :, :, 0:int(nb_spams / 2)], temp_m)
-            # print('img_data_spam_lh shape:', img_data_spam_lh.shape)
             del temp_m
 
             # Creating max_prob
@@ -1933,8 +1913,8 @@ class ParcellateThalamus(BaseInterface):
             max_prob_l = np.argmax(img_data_spam_lh, axis=3) + 1
             max_prob_l[ind] = 0
             # max_prob_l[ind] = 0
-            # ?max_prob_l = ndimage.binary_fill_holes(max_prob_l)
-            # ?max_prob_l = Atlas_Corr(img_data_thal_lh,max_prob_l)
+            # ? max_prob_l = ndimage.binary_fill_holes(max_prob_l)
+            # ? max_prob_l = Atlas_Corr(img_data_thal_lh,max_prob_l)
 
             # Mask probability maps using the right-hemisphere thalamus mask
             tmp_thal_rh = np.zeros(
@@ -1943,7 +1923,6 @@ class ParcellateThalamus(BaseInterface):
             temp_m = np.repeat(tmp_thal_rh, int(nb_spams / 2), axis=3)
             del tmp_thal_rh
             img_data_spam_rh = np.multiply(img_data_spams[:, :, :, int(nb_spams / 2):int(nb_spams)], temp_m)
-            # print('img_data_spam_rh shape:', img_data_spam_rh.shape)
             del temp_m
 
             # Creating max_prob
@@ -1991,16 +1970,6 @@ class ParcellateThalamus(BaseInterface):
 
         del img_data_spams
 
-        # debug_file = '/home/localadmin/~/Desktop/parcellation_tests/sub-A006_ses-20160520161029_T1w_brain_class-thalamus_maxprobL.nii.gz'
-        # print("Save output image to %s" % debug_file)
-        # img = ni.Nifti1Image(max_prob_l, img_atlas.get_affine(), hdr2)
-        # ni.save(img, debug_file)
-        #
-        # debug_file = '/home/localadmin/~/Desktop/parcellation_tests/sub-A006_ses-20160520161029_T1w_brain_class-thalamus_maxprobR.nii.gz'
-        # print("Save output image to %s" % debug_file)
-        # img = ni.Nifti1Image(max_prob_r, img_atlas.get_affine(), hdr2)
-        # ni.save(img, debug_file)
-
         print("Save output image to %s" % max_prob)
         img = ni.Nifti1Image(max_prob, img_atlas.get_affine(), hdr2)
         ni.save(img, max_prob_fn)
@@ -2026,8 +1995,6 @@ class ParcellateThalamus(BaseInterface):
         outputs['transform_file'] = op.abspath('{}0GenericAffine.mat'.format(outprefix_name))
         outputs['warp_file'] = op.abspath('{}1Warp.nii.gz'.format(outprefix_name))
 
-        # outputs['lh_hipposubfields'] = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'tmp','lh_subFields.nii.gz')
-        # outputs['rh_hipposubfields'] = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'tmp','rh_subFields.nii.gz')
         return outputs
 
 
@@ -2044,19 +2011,17 @@ class ParcellateInputSpec(BaseInterfaceInputSpec):
 
 
 class ParcellateOutputSpec(TraitedSpec):
-    # roi_files = OutputMultiPath(File(exists=True),desc='Region of Interest files for connectivity mapping')
     white_matter_mask_file = File(desc='White matter (WM) mask file')
 
     gray_matter_mask_file = File(desc='Cortical gray matter (GM) mask file')
 
     csf_mask_file = File(desc='Cerebrospinal fluid (CSF) mask file')
+
     # cc_unknown_file = File(desc='Image file with regions labelled as unknown cortical structures',
     #                exists=True)
 
     ribbon_file = File(desc='Image file detailing the cortical ribbon',
                        exists=True)
-    # aseg_file = File(desc='Automated segmentation file converted from Freesurfer "subjects" directory',
-    #                exists=True)
 
     wm_eroded = File(desc="Eroded wm file in original space")
 
@@ -2146,9 +2111,7 @@ class Parcellate(BaseInterface):
 
         # outputs['cc_unknown_file'] = op.abspath('cc_unknown.nii.gz')
         outputs['ribbon_file'] = op.abspath('ribbon.nii.gz')
-        # outputs['aseg_file'] = op.abspath('aseg.nii.gz')
 
-        # outputs['roi_files'] = self._gen_outfilenames('ROI_HR_th')
         if self.inputs.parcellation_scheme == "Lausanne2018":
             outputs['gray_matter_mask_file'] = op.abspath(
                 'T1w_class-GM.nii.gz')
@@ -2525,7 +2488,7 @@ def create_roi(subject_id, subjects_dir, v=True):
         # correct cortical surfaces using as reference the roisMax volume (for consistency between resolutions)
         else:
             print("     > adapt cortical surfaces")
-            # adaptstart = time()
+
             idxRois = np.where(vol > 0)
             xxRois = idxRois[0]
             yyRois = idxRois[1]
@@ -2549,7 +2512,7 @@ def create_roi(subject_id, subjects_dir, v=True):
                         counts = np.bincount(value)
                         value = np.argmax(counts)
                     newrois[xxMax[j], yyMax[j], zzMax[j]] = value
-            # print("Cortical ROIs adaptation took %s seconds to process." % (time()-adaptstart))
+
         if v:  # pragma: no cover
             print('     ... save output volumes')
         this_out = os.path.join(subject_dir, 'mri', rois_output[i])
@@ -2597,9 +2560,11 @@ def create_roi(subject_id, subjects_dir, v=True):
         if i == 0:
             print("     ... Creating gray matter mask from SCALE {}...".format(i + 1))
             gmMask = newrois.copy()
-            gmMask[newrois == newrois.max()] = 0
+            # Keep only GM labels (between 1000 and 3000)
+            gmMask[newrois < 1000] = 0
+            gmMask[newrois >= 3000] = 0
             gmMask[gmMask > 0] = 1
-            out_mask = op.join(subject_dir, 'label', 'T1w_class-GM.nii.gz')
+            out_mask = op.join(subject_dir, 'mri', 'gmmask.nii.gz')
             print("         Save gray matter mask to %s" % out_mask)
             img = ni.Nifti1Image(gmMask, this_nifti.affine, hdr2)
             ni.save(img, out_mask)
@@ -2845,18 +2810,15 @@ def crop_and_move_datasets(subject_id, subjects_dir):
         (op.join(fs_dir, 'mri', 'ribbon.nii.gz'), 'ribbon.nii.gz'),
         (op.join(fs_dir, 'mri', 'fsmask_1mm.nii.gz'), 'fsmask_1mm.nii.gz'),
         (op.join(fs_dir, 'mri', 'csf_mask.nii.gz'), 'csf_mask.nii.gz'),
-        # (op.join(fs_dir, 'mri', 'gmmask.nii.gz'), 'gmmask.nii.gz'),
+        (op.join(fs_dir, 'mri', 'gmmask.nii.gz'), 'T1w_class-GM.nii.gz'),
+        (op.join(fs_dir, 'mri', 'aparc+aseg.mgz'), 'aparc+aseg.native.nii.gz')
     ]
 
     for p in list(get_parcellation('Lausanne2018').keys()):
-        # ds.append( (op.join(fs_dir, 'label', 'ROI_%s.nii.gz' % p), 'ROI_HR_th_%s.nii.gz' % p) )
         ds.append((op.join(fs_dir, 'mri', 'ROI_%s_Lausanne2018.nii.gz' %
                            p), 'ROI_Lausanne2018_%s.nii.gz' % p))
         ds.append((op.join(fs_dir, 'mri', 'ROIv_%s_Lausanne2018.nii.gz' %
                            p), 'ROIv_Lausanne2018_%s.nii.gz' % p))
-    ds.append((op.join(fs_dir, 'mri', 'gmmask.nii.gz'), 'T1w_class-GM.nii.gz'))
-    ds.append((op.join(fs_dir, 'mri', 'aparc+aseg.mgz'),
-               'aparc+aseg.native.nii.gz'))
 
     orig = op.join(fs_dir, 'mri', 'rawavg.mgz')
 
@@ -3089,7 +3051,7 @@ def crop_and_move_WM_and_GM(subject_id, subjects_dir):
     """
     fs_dir = op.join(subjects_dir, subject_id)
 
-    #    print("Cropping and moving datasets to %s" % reg_path)
+    print("Cropping and moving datasets...")
 
     # datasets to crop and move: (from, to)
     ds = [
@@ -3118,8 +3080,6 @@ def crop_and_move_WM_and_GM(subject_id, subjects_dir):
             raise Exception('File %s does not exist.' % d[0])
         # reslice to original volume because the roi creation with freesurfer
         # changed to 256x256x256 resolution
-        #        mri_cmd = 'mri_convert -rl "%s" -rt nearest "%s" -nc "%s"' % (orig, d[0], d[1])
-        #        runCmd( mri_cmd,log )
         mri_cmd = ['mri_convert', '-rl', orig,
                    '-rt', 'nearest', d[0], '-nc', d[1]]
         subprocess.check_call(mri_cmd)
