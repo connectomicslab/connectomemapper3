@@ -80,7 +80,7 @@ def report_usage(event_category, event_action, event_label, verbose=False):
           BColors.ENDC)
 
 
-def create_cmp_command(project, run_anat, run_dmri, run_fmri, run_eeg=False, number_of_threads=1):
+def create_cmp_command(project, run_anat, run_dmri, run_fmri, number_of_threads=1):
     """Create the command to run the `connectomemapper3` python script.
 
     Parameters
@@ -96,9 +96,6 @@ def create_cmp_command(project, run_anat, run_dmri, run_fmri, run_eeg=False, num
 
     run_fmri : bool
         If True, append the fMRI configuration file to the command
-
-    run_eeg : bool
-        If True, append the EEG configuration file to the command
 
     number_of_threads : int
         Number of threads used OpenMP-parallelized tools
@@ -135,12 +132,6 @@ def create_cmp_command(project, run_anat, run_dmri, run_fmri, run_eeg=False, num
     if run_fmri:
         cmd.append("--func_pipeline_config")
         cmd.append(project.fmri_config_file)
-    else:
-        print("  .. INFO: functional pipeline not performed")
-
-    if run_eeg:
-        cmd.append("--eeg_pipeline_config")
-        cmd.append(project.eeg_config_file)
     else:
         print("  .. INFO: functional pipeline not performed")
 

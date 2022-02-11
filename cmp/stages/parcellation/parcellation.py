@@ -517,7 +517,7 @@ class ParcellationStage(Stage):
 
         """
         anat_sinker_dir = os.path.join(
-            os.path.dirname(self.stage_dir), "anatomical_sinker"
+            os.path.dirname(self.stage_dir), "anat_datasinker"
         )
         anat_sinker_report = os.path.join(anat_sinker_dir, "_report", "report.rst")
 
@@ -544,7 +544,7 @@ class ParcellationStage(Stage):
                     roi_v = anat_outputs["anat.@roivs"]
 
                     if os.path.exists(white_matter_file) and os.path.exists(roi_v):
-                        self.inspect_outputs_dict[os.path.basename(roi_v)] = [
+                        self.inspect_outputs_dict['Desikan-Killiany Parcellation'] = [
                             "freeview",
                             "-v",
                             white_matter_file + ":colormap=GEColor",
@@ -552,16 +552,16 @@ class ParcellationStage(Stage):
                         ]
                 elif isinstance(anat_outputs["anat.@roivs"], list):
                     if self.config.parcellation_scheme == "Lausanne2018":
+                        if os.path.exists(white_matter_file):
+                            cmd = [
+                                "freeview",
+                                "-v",
+                                white_matter_file + ":colormap=GEColor"
+                            ]
                         for roi_v, lut_file in zip(anat_outputs["anat.@roivs"], anat_outputs["anat.@luts"]):
-                            roi_basename = os.path.basename(roi_v)
-
-                            if os.path.exists(white_matter_file) and os.path.exists(roi_v):
-                                self.inspect_outputs_dict[roi_basename] = [
-                                    "freeview",
-                                    "-v",
-                                    white_matter_file + ":colormap=GEColor",
-                                    roi_v + ":colormap=lut:lut=" + lut_file,
-                                ]
+                            if os.path.exists(roi_v) and os.path.exists(lut_file):
+                                cmd.append(roi_v + ":colormap=lut:lut=" + lut_file)
+                        self.inspect_outputs_dict['Lausanne 2018 Parcellation'] = cmd
         else:
             roi_v = self.config.custom_parcellation.get_filename_path(
                 base_dir=os.path.join(self.output_dir, __cmp_directory__),
