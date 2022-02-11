@@ -158,6 +158,21 @@ Having the `py37cmp-gui` conda environment previously installed activated, the B
                             files.
 ```
 
+### Analysis Tutorial
+
+Connectome Mapper 3 is shipped with a little tutorial that shows how to load and analyze some of its outputs. You can find it under /notebooks/analysis_tutorial.ipynb. There is an environment file in this folder too, which you can use to install the tutorial environment like above:
+
+```bash
+$ conda create env -f /path/to/cmp3/notebooks/tutorial-env.yml
+```
+
+You can then activate it and open the tutorial with jupyter lab:
+
+```bash
+$ conda activate cmp3-tutorial
+$ jupyter lab
+```
+
 ## Contributors ✨
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):

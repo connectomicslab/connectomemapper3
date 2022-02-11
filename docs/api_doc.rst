@@ -107,10 +107,12 @@ Submodules
 ----------
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 4
 
+   api/generated/cmtklib.carbonfootprint
    api/generated/cmtklib.config
    api/generated/cmtklib.connectome
+   api/generated/cmtklib.data.parcellation.util
    api/generated/cmtklib.diffusion
    api/generated/cmtklib.functionalMRI
    api/generated/cmtklib.parcellation
