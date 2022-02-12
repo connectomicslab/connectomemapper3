@@ -190,6 +190,7 @@ Contents
 
    datalad
    runonhpc
+   notebooks
 
 .. _about-docs:
 
