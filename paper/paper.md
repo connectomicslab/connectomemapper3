@@ -136,9 +136,6 @@ Connectome Mapper 3 (CMP3) implements a workflow that creates a hierarchical mul
   sMRI / dMRI / rfMRI dataset structured according to the BIDS standard, as illustrated
   by \autoref{fig:cmp3-diagram}.
 
-![\textbf{Overview of the Connectome Mapper 3 BIDS App's workflow.}
-\label{fig:cmp3-diagram}](cmp3-diagram.png)
-
 CMP3's workflow relies on Nipype [@GorgolewskiNipype:2011] and adopts a modular architecture, composed
   of three different pipelines (anatomical, diffusion, and fMRI) dedicated to the processing
   of each modality (sMRI, dMRI, rfMRI).
@@ -172,6 +169,9 @@ To ensure reproducibility and maximize re-usability of the tool, the implemented
   containers, in concordance with the BIDS App framework [@GorgolewskiBIDSMethods:2017].
 This means that the BIDS App of CMP3 can be run on a large diversity of datasets, on Linux, MacOSX, and Windows computers,
   and on high performance computing systems (clusters) for large-scale analysis.
+
+![\textbf{Overview of the Connectome Mapper 3 BIDS App's workflow.}
+\label{fig:cmp3-diagram}](cmp3-diagram.png)
 
 All these design considerations make CMP3 not only easy to install and use (as it provides the user with a computing
   environment in which the pipelines are guaranteed to run, and where all dependencies
