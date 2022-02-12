@@ -4,6 +4,7 @@ sphinx-argparse==0.3.1
 sphinxcontrib-apidoc==0.3.0
 sphinxcontrib-napoleon==0.7
 nbsphinx==0.8.8
+sphinx-gallery==0.10.1
 recommonmark==0.7.1
 readthedocs-sphinx-ext==2.1.4
 sphinx-autodoc-typehints==1.12.0

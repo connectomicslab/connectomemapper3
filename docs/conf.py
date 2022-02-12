@@ -64,6 +64,7 @@ extensions = [
     'sphinxcontrib.apidoc',
     'matplotlib.sphinxext.plot_directive',
     'nbsphinx',
+    'sphinx_gallery.load_style',
     'nipype.sphinxext.plot_workflow',
     'nipype.sphinxext.apidoc',
     'nipype.sphinxext.documenter',
