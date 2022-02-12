@@ -1,8 +1,9 @@
-import pycartool as cart
-import nibabel
+
 import os
 import pickle
 import numpy as np
+import nibabel
+import pycartool as cart
 from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, traits, TraitedSpec
 
 
@@ -12,7 +13,10 @@ class CreateRoisInputSpec(BaseInterfaceInputSpec):
     subject = traits.Str(
         desc='subject', mandatory=True)
 
-    parcellation = traits.List(
+    bids_dir = traits.Str(
+        desc='base directory', mandatory=True)
+
+    parcellation = traits.Str(
         desc='parcellation scheme', mandatory=True)
 
     cartool_dir = traits.Str(
@@ -44,41 +48,40 @@ class CreateRois(BaseInterface):
 
     def _run_interface(self, runtime):
         subject = self.inputs.subject
-        parcellation_image_path = self.inputs.parcellation[0]
+        parcellation_image_path = self.inputs.parcellation
         parcellation_name = parcellation_image_path.split('/')[-1].split('.')[0]
-        cartool_dir = self.inputs.cartool_dir
-        cmp3_dir = self.inputs.cmp3_dir
+        cartool_dir = os.path.join(self.inputs.bids_dir,'derivatives',self.inputs.cartool_dir)
+        cmp3_dir = os.path.join(self.inputs.bids_dir,'derivatives',self.inputs.cmp3_dir)
         self.derivative_list = self.inputs.derivative_list
         self.output_query = self.inputs.output_query
 
         self._create_roi_files(subject, parcellation_image_path, parcellation_name, cartool_dir, cmp3_dir)
 
-        self.derivative_list.append('Cartool')
+        self.derivative_list.append('Cartool-v3.80')
 
         self.output_query['rois'] = {
-            'scope': 'Cartool',
-            'extensions': ['pickle.rois']
+            # 'scope': 'cartool-v3.80',
+            'extension': ['pickle.rois']
         }
         self.output_query['src'] = {
-            'scope': 'Cartool',
-            'extensions': ['spi']
+            # 'scope': 'cartool-v3.80',
+            'extension': ['spi']
         }
         self.output_query['invsol'] = {
-            'scope': 'Cartool',
-            'extensions': ['LAURA.is']
+            # 'scope': 'cartool-v3.80',
+            'extension': ['LAURA.is']
         }
 
         return runtime
 
     @staticmethod
     def _create_roi_files(subject, parcellation, parcellation_name, cartool_dir, cmp3_dir):
-        spipath = os.path.join(cartool_dir, subject, subject + '.spi')
+        spipath = os.path.join(cartool_dir, subject, 'eeg',subject + '_eeg.spi')
         source = cart.source_space.read_spi(spipath)
 
         impath = os.path.join(parcellation)
         im = nibabel.load(impath)
         imdata = im.get_fdata()
-
         x, y, z = np.where(imdata)
         center_brain = [np.mean(x), np.mean(y), np.mean(z)]
         source.coordinates[:, 0] = - source.coordinates[:, 0]
@@ -105,7 +108,10 @@ class CreateRois(BaseInterface):
                                                                    groups_of_indexes=groups_of_indexes,
                                                                    source_space=source)
 
-        filename_pkl = os.path.join(cartool_dir, subject, 'Rois', parcellation_name + '.pickle.rois')
+        rois_dir = os.path.join(cartool_dir, subject, 'eeg', 'Rois')
+        if not os.path.isdir(rois_dir):
+            os.mkdir(rois_dir)
+        filename_pkl = os.path.join(rois_dir, parcellation_name + '.pickle.rois')
         filehandler = open(filename_pkl, 'wb')
         pickle.dump(rois_file_new, filehandler)
         filehandler.close()

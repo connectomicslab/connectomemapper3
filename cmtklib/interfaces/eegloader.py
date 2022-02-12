@@ -4,13 +4,16 @@ import os
 
 
 class EEGLoaderInputSpec(BaseInterfaceInputSpec):
-    """Input specification for EEGLAB2fif. """
+    """Input specification for EEGLoader. """
 
     base_directory = traits.Directory(
         exists=True, desc='BIDS data directory', mandatory=True)
 
     subject = traits.Str(
         desc='subject', mandatory=True)
+
+    invsol_format = traits.Enum('Cartool-LAURA', 'Cartool-LORETA', 'mne-sLORETA',
+            desc='Cartool vs mne')
 
     output_query = traits.Dict(
         desc='output query for BIDSDataGrabber', mandatory=True)
@@ -25,11 +28,13 @@ class EEGLoaderOutputSpec(TraitedSpec):
     EEG = traits.List(
         exists=True, desc='eeg * epochs in .fif format', mandatory=True)
     src = traits.List(
-        exists=True, desc='src (spi loaded with pycartool)', mandatory=True)
+        exists=True, desc='src (spi loaded with pycartool or source space created with MNE)', mandatory=True)
     invsol = traits.List(
-        exists=True, desc='Inverse solution (.is file loaded with pycartool)', mandatory=True)
+        exists=True, desc='Inverse solution (.is file loaded with pycartool)', mandatory=False)
     rois = traits.List(
         exists=True, desc='parcellation scheme', mandatory=True)
+    bem = traits.List(
+        exists=True, desc='boundary surfaces for MNE head model', mandatory=False)
 
 
 class EEGLoader(BaseInterface):

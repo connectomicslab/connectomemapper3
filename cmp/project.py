@@ -696,7 +696,6 @@ def init_eeg_project(project_info, bids_layout, is_new_project, gui=False, debug
         `EEGPipeline` object instance
     """
     eeg_pipeline = EEG_pipeline.EEGPipeline(project_info)
-
     bids_directory = os.path.abspath(project_info.base_directory)
     derivatives_directory = os.path.abspath(project_info.output_directory)
 

@@ -516,7 +516,7 @@ def set_pipeline_attributes_from_config(pipeline, config, debug=False):
             if key in config["Global"].keys():
                 conf_value = config["Global"][key]
                 setattr(pipeline.global_conf, key, conf_value)
-
+                
     for stage in list(pipeline.stages.values()):
         stage_keys = [
             prop for prop in list(stage.config.traits().keys()) if "trait" not in prop

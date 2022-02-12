@@ -24,6 +24,8 @@ from cmp.pipelines.common import *
 from cmp.stages.eeg.eeg_loader import EEGLoaderStage
 from cmp.stages.eeg.eeg_preparer import EEGPreparerStage
 from cmp.stages.eeg.eeg_inverse_solution import EEGInverseSolutionStage
+from cmp.info import __version__
+from cmtklib.bids.io import __nipype_directory__
 
 
 class Global_Configuration(HasTraits):
@@ -39,7 +41,6 @@ class Check_Input_Notification(HasTraits):
     eeg_format = Str
     eeg_format_message = Str(
         '\nMultiple EEG formats available. Please select desired EEG format.')
-
 
 class EEGPipeline(Pipeline):
     now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
@@ -98,11 +99,12 @@ class EEGPipeline(Pipeline):
 
         cmp_common.Pipeline.__init__(self, project_info)
 
-        self.stages['EEGPreparer'].config.cmp3_dir = os.path.join(self.derivatives_directory, 'cmp')
-        self.stages['EEGPreparer'].config.cartool_dir = os.path.join(self.derivatives_directory, 'cartool')
-
-        self.stages['EEGLoader'].config.eeg_format = self.stages['EEGPreparer'].config.eeg_format
-        self.stages['EEGLoader'].config.invsol_format = self.stages['EEGPreparer'].config.invsol_format
+        cmp3_dir = os.path.join(self.derivatives_directory,f'cmp-{__version__}')
+        self.stages['EEGPreparer'].config.cmp3_dir = cmp3_dir
+        # removing the following three lines because these parameters are all set to default values at this point (the config file hasn't been read yet), so setting them with each other is pointless
+        self.stages['EEGPreparer'].config.cartool_dir = os.path.join(self.derivatives_directory, 'Cartool-v3.80')
+        # self.stages['EEGLoader'].config.eeg_format = self.stages['EEGPreparer'].config.eeg_format
+        # self.stages['EEGLoader'].config.invsol_format = self.stages['EEGPreparer'].config.invsol_format
 
     # self.stages['EEGPreparer'].config.on_trait_change(self.update_eeg_format, 'eeg_format')
     # self.stages['EEGLoader'].config.on_trait_change(self.update_eeg_format, 'eeg_format')
@@ -157,52 +159,76 @@ class EEGPipeline(Pipeline):
         datasource.inputs.cmp_deriv_subject_directory = cmp_deriv_subject_directory
         datasource.inputs.nipype_deriv_subject_directory = nipype_deriv_subject_directory
 
+
+        # Create common_flow
+        eeg_flow = pe.Workflow(
+            name='eeg_pipeline',
+            base_dir=os.path.abspath(nipype_deriv_subject_directory)
+        )
+
+        # set a couple of config parameters that were read from the config file
+        self.stages['EEGLoader'].config.eeg_format = self.stages['EEGPreparer'].config.eeg_format
+        self.stages['EEGLoader'].config.invsol_format = self.stages['EEGPreparer'].config.invsol_format
+        self.stages['EEGInverseSolution'].config.invsol_format = self.stages['EEGPreparer'].config.invsol_format
+
+        # create stages (parameters specified in config file are read and set)
+        preparer_flow = self.create_stage_flow("EEGPreparer")
+        loader_flow = self.create_stage_flow("EEGLoader")
+        invsol_flow = self.create_stage_flow("EEGInverseSolution")
+
+        # read name of eeg file and determine format and derivatives folder name
+        epochs_fname = self.stages['EEGPreparer'].config.epochs
+        file_extension_start = epochs_fname.find('.')
+        eeg_format = epochs_fname[file_extension_start:]
+        if eeg_format=='.set':
+            derivatives_folder = 'eeglab'
+        elif eeg_format=='.fif':
+            derivatives_folder = 'mne'
+        else:
+            pass # throw not implemented exception
+
+        self.stages['EEGPreparer'].config.eeg_format = eeg_format
+
+        datasource.inputs.epochs = [os.path.join(self.base_directory,'derivatives',derivatives_folder, self.subject,
+                                                 'eeg', epochs_fname)]
+
+        datasource.inputs.EEG_params = self.stages['EEGPreparer'].config.EEG_params
+
+        # read name of parcellation and determine file name
+        parcellation_label = self.stages['EEGPreparer'].config.parcellation['label']
+        parcellation_desc = self.stages['EEGPreparer'].config.parcellation['desc']
+        parcellation_suffix = self.stages['EEGPreparer'].config.parcellation['suffix']
+
         if self.stages['EEGPreparer'].config.eeg_format == '.set':
-            datasource.inputs.epochs = [
-                os.path.join(
-                    self.base_directory,
-                    'derivatives',
-                    'eeglab',
-                    self.subject,
-                    'eeg',
-                    self.subject + '_task-FACES_desc-preproc_eeg.set'
-                )
-            ]
+            # file with events/behavioral info
+            expe_name = datasource.inputs.EEG_params['expe_name']
             datasource.inputs.behav_file = [
                 os.path.join(
                     self.base_directory,
                     'derivatives',
                     'eeglab',
-                    self.subject, 'eeg', self.subject + '_task-FACES_events.txt'
+                    self.subject, 'eeg', self.subject + '_task-' + expe_name + '_desc-preproc_events.tsv'
                 )
             ]
+
+            # name of output file (EEG data source level)
             datasource.inputs.epochs_fif_fname = os.path.join(
                 self.base_directory,
                 'derivatives',
-                'cmp',
+                f'cmp-{__version__}',
                 self.subject, 'eeg', self.subject + '_epo.fif'
             )
 
+
+        # name of output file (ROI time courses)
         datasource.inputs.roi_ts_file = os.path.join(
             self.base_directory,
             'derivatives',
-            'cmp',
+            f'cmp-{__version__}',
             self.subject,
             'eeg',
             self.subject + '_rtc_epo.npy'
         )
-
-        if self.stages['EEGPreparer'].config.parcellation == 'Lausanne2008':
-            datasource.inputs.parcellation = [
-                os.path.join(
-                    self.base_directory,
-                    'derivatives',
-                    'cmp',
-                    self.subject,
-                    'anat',
-                    self.subject + '_label-L2008_desc-scale2_atlas.nii.gz'
-                )
-            ]
 
         datasource.inputs.output_query = dict()
 
@@ -213,38 +239,119 @@ class EEGPipeline(Pipeline):
         # Clear previous outputs
         self.clear_stages_outputs()
 
-        # Create common_flow
-        eeg_flow = pe.Workflow(
-            name='eeg_pipeline',
-            base_dir=os.path.abspath(nipype_deriv_subject_directory)
-        )
-
-        preparer_flow = self.create_stage_flow("EEGPreparer")
-        loader_flow = self.create_stage_flow("EEGLoader")
-        invsol_flow = self.create_stage_flow("EEGInverseSolution")
-
         # fmt: off
-        eeg_flow.connect(
-            [
-                (datasource, preparer_flow, [('epochs', 'inputnode.epochs'),
-                                             ('subject', 'inputnode.subject'),
-                                             ('behav_file', 'inputnode.behav_file'),
-                                             ('parcellation', 'inputnode.parcellation'),
-                                             ('epochs_fif_fname', 'inputnode.epochs_fif_fname'),
-                                             ('output_query', 'inputnode.output_query')]),
-                (datasource, loader_flow, [('base_directory', 'inputnode.base_directory'),
-                                           ('subject', 'inputnode.subject')]),
-                (preparer_flow, loader_flow, [('outputnode.output_query', 'inputnode.output_query'),
-                                              ('outputnode.derivative_list', 'inputnode.derivative_list')]),
-                (loader_flow, invsol_flow, [('outputnode.EEG', 'inputnode.eeg_ts_file'),
-                                            ('outputnode.rois', 'inputnode.rois_file'),
-                                            ('outputnode.src', 'inputnode.src_file'),
-                                            ('outputnode.invsol', 'inputnode.invsol_file')]),
-                (datasource, invsol_flow, [('roi_ts_file', 'inputnode.roi_ts_file')]),
-                (preparer_flow, invsol_flow, [('outputnode.invsol_params', 'inputnode.invsol_params')]),
-                (invsol_flow, sinker, [("outputnode.roi_ts_file", "eeg.@roi_ts_file")]),
-            ]
-        )
+        if self.stages['EEGPreparer'].config.invsol_format.split('-')[0] == "Cartool":
+            # atlas image is required
+            parcellation = self.subject + '_atlas-' +parcellation_label + '_res-' + parcellation_suffix + '_dseg.nii.gz'
+            datasource.inputs.parcellation = os.path.join(self.base_directory, 'derivatives', f'cmp-{__version__}', self.subject,
+                                                       'anat', parcellation)
+
+            eeg_flow.connect(
+                [
+                    (datasource, preparer_flow, [('epochs', 'inputnode.epochs'),
+                                                 ('subject', 'inputnode.subject'),
+                                                 ('behav_file', 'inputnode.behav_file'),
+                                                 ('parcellation', 'inputnode.parcellation'),
+                                                 ('epochs_fif_fname', 'inputnode.epochs_fif_fname'),
+                                                 ('EEG_params','inputnode.EEG_params'),
+                                                 ('output_query', 'inputnode.output_query'),
+                                                 ('base_directory','inputnode.bids_dir')]),
+                    (datasource, loader_flow, [('base_directory', 'inputnode.base_directory'),
+                                               ('subject', 'inputnode.subject')]),
+                    (preparer_flow, loader_flow, [('outputnode.output_query', 'inputnode.output_query'),
+                                                  ('outputnode.derivative_list', 'inputnode.derivative_list')]),
+                    (loader_flow, invsol_flow, [('outputnode.EEG', 'inputnode.eeg_ts_file'),
+                                                ('outputnode.rois', 'inputnode.rois_file'),
+                                                ('outputnode.src', 'inputnode.src_file'),
+                                                ('outputnode.invsol', 'inputnode.invsol_file')]),
+                    (datasource, invsol_flow, [('roi_ts_file', 'inputnode.roi_ts_file')]),
+                    (preparer_flow, invsol_flow, [('outputnode.invsol_params', 'inputnode.invsol_params')]),
+                    (invsol_flow, sinker, [("outputnode.roi_ts_file", "eeg.@roi_ts_file")]),
+                ]
+            )
+        elif self.stages['EEGPreparer'].config.invsol_format.split('-')[0] == 'mne':
+
+            # Freesurfer annot files are required
+            if parcellation_suffix=='':
+                parcellation = parcellation_label # aparc
+            else:
+                parcellation = parcellation_label + '.' + parcellation_suffix # lausanne2008.scalex where x=1...5
+
+            datasource.inputs.parcellation = parcellation
+
+            # define names for MNE outputs
+            datasource.inputs.noise_cov_fname = os.path.join(self.base_directory,
+                                                             'derivatives',f'cmp-{__version__}',
+                                                             self.subject,
+                                                             'eeg',
+                                                             self.subject + '_noisecov.fif')
+
+            datasource.inputs.trans_fname = os.path.join(self.base_directory,
+                                                         'derivatives',
+                                                         f'cmp-{__version__}',
+                                                         self.subject,
+                                                         'eeg',
+                                                         self.subject + '-trans.fif')
+
+            datasource.inputs.fwd_fname = os.path.join(self.base_directory,
+                                                         'derivatives',
+                                                         f'cmp-{__version__}',
+                                                         self.subject,
+                                                         'eeg',
+                                                         self.subject + '-fwd.fif')
+
+            datasource.inputs.inv_fname = os.path.join(self.base_directory,
+                                                        'derivatives',
+                                                        f'cmp-{__version__}',
+                                                         self.subject,
+                                                         'eeg',
+                                                         self.subject + '-inv.fif')
+
+            ######
+            # These two files come from cartool, which is non-standard, needs to be fixed!!
+            datasource.inputs.electrode_positions_file = os.path.join(self.base_directory,
+                                                                      'derivatives',
+                                                                      'eeglab',
+                                                                      self.subject,
+                                                                      'eeg',
+                                                                      self.subject + '.xyz')
+            #######
+
+            eeg_flow.connect(
+                [
+                    (datasource, preparer_flow, [('epochs', 'inputnode.epochs'),
+                                                  ('subject', 'inputnode.subject'),
+                                                  ('behav_file', 'inputnode.behav_file'),
+                                                  ('parcellation', 'inputnode.parcellation'),
+                                                  ('epochs_fif_fname', 'inputnode.epochs_fif_fname'),
+                                                  ('electrode_positions_file','inputnode.electrode_positions_file'),
+                                                  ('EEG_params','inputnode.EEG_params'),
+                                                  ('output_query', 'inputnode.output_query'),
+                                                  ('base_directory','inputnode.bids_dir')]),
+
+                    (datasource, loader_flow, [('base_directory', 'inputnode.base_directory'),
+                                                ('subject', 'inputnode.subject')]),
+
+                    (preparer_flow, loader_flow, [('outputnode.output_query', 'inputnode.output_query'),
+                                                  ('outputnode.derivative_list', 'inputnode.derivative_list')]),
+
+                    (datasource, invsol_flow, [('subject', 'inputnode.subject'),
+                                               ('base_directory','inputnode.bids_dir'),
+                                               ('noise_cov_fname','inputnode.noise_cov_fname'),
+                                               ('trans_fname','inputnode.trans_fname'),
+                                               ('fwd_fname','inputnode.fwd_fname'),
+                                               ('inv_fname','inputnode.inv_fname'),
+                                               ('parcellation', 'inputnode.parcellation'),
+                                               ('roi_ts_file', 'inputnode.roi_ts_file')]),
+
+                    (preparer_flow, invsol_flow, [('outputnode.epochs_fif_fname','inputnode.epochs_fif_fname')]),
+
+                    (loader_flow, invsol_flow, [('outputnode.src', 'inputnode.src_file'),
+                                                ('outputnode.bem', 'inputnode.bem_file')]),
+
+                    (invsol_flow, sinker, [("outputnode.roi_ts_file", "eeg.@roi_ts_file")]),
+                ]
+            )
         # fmt: on
 
         self.flow = eeg_flow
@@ -257,23 +364,22 @@ class EEGPipeline(Pipeline):
 
         # Process time
         self.now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
-
         if '_' in self.subject:
             self.subject = self.subject.split('_')[0]
 
         if self.global_conf.subject_session == '':
             cmp_deriv_subject_directory = os.path.join(
-                self.output_directory, "cmp", self.subject
+                self.output_directory, f'cmp-{__version__}', self.subject
             )
             nipype_deriv_subject_directory = os.path.join(
-                self.output_directory, "nipype", self.subject
+                self.output_directory, __nipype_directory__, self.subject
             )
         else:
             cmp_deriv_subject_directory = os.path.join(
-                self.output_directory, "cmp", self.subject, self.global_conf.subject_session
+                self.output_directory, f'cmp-{__version__}', self.subject, self.global_conf.subject_session
             )
             nipype_deriv_subject_directory = os.path.join(
-                self.output_directory, "nipype", self.subject, self.global_conf.subject_session
+                self.output_directory, __nipype_directory__, self.subject, self.global_conf.subject_session
             )
 
             self.subject = "_".join(
