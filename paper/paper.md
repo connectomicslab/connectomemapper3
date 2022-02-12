@@ -182,9 +182,6 @@ All these design considerations make CMP3 not only easy to install and use (as i
 CMP3 revisits the multiscale cortical parcellation proposed by [@Cammoun2012:MappingMRI] and extends it with new structures including a subdivision of the thalamus into 7 nuclei per hemisphere, of the hippocampus into 12 subfields, and of the brainstem into
   4 sub-structures (\autoref{fig:parc}).
 
-![\textbf{Creation of the new Lausanne2018 Connectome Parcellation.}
-\label{fig:parc}](Lausanne2018_parcellation_diagram.png)
-
 The parcellation derived from the Desikan-Killiany atlas [@Desikan2006AnInterest] has been
   made symmetric by projecting the right hemisphere labels to the left hemisphere, matching the
   boundaries of the projected regions of the left hemisphere to the boundaries of the original regions
@@ -200,6 +197,10 @@ Then, one can now decide whether to perform brainstem parcellation [@Iglesias201
 All segmented structures are combined at the end of the process to create the final parcellation nifti image
   at each scale along with the corresponding label index color mapping file in accordance with the BIDS Derivatives
   specifications.
+
+![\textbf{Creation of the new Lausanne2018 Connectome Parcellation.}
+\label{fig:parc}](Lausanne2018_parcellation_diagram.png)
+
 The different segmentation and parcellation outputs of the anatomical pipeline are then taken as inputs of
   the diffusion and fMRI pipelines that estimate the structural and functional connectomes from
   raw dMRI and rfMRI data and the pairs of sub-cortical and cortical areas previously segmented.
