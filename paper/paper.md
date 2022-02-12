@@ -198,7 +198,7 @@ All segmented structures are combined at the end of the process to create the fi
   at each scale along with the corresponding label index color mapping file in accordance with the BIDS Derivatives
   specifications.
 
-![\textbf{Creation of the new Lausanne2018 Connectome Parcellation.}
+![\textbf{Overview of the new multi-scale parcellation scheme.}
 \label{fig:parc}](Lausanne2018_parcellation_diagram.png)
 
 The different segmentation and parcellation outputs of the anatomical pipeline are then taken as inputs of
@@ -208,9 +208,9 @@ The different segmentation and parcellation outputs of the anatomical pipeline a
 \textbf{A graphical user interface reflecting the workflow structure.}
 CMP3 takes advantage of the Traits/TraitsUI framework
   (\href{http://docs.enthought.com/traits/}{http://docs.enthought.com/traits/}) for building an
-  interactive Graphical User Interface (GUI), to give to pipelines and stages a graphical representation
+  interactive GUI, to give to pipelines and stages a graphical representation
   which is easy to understand and extend.
-This has enabled the design of a GUI, which we call the `cmpbidsappmanager` (\autoref{fig:gui}), that reflects
+This has enabled the design of a GUI, which we call the `cmpbidsappmanager`, that reflects
   the modular structure of the processing workflow.
 It has been designed to guide and support the user in all the steps required to
   perform an analysis (\autoref{fig:gui}).
