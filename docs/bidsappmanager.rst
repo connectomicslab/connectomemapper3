@@ -518,37 +518,37 @@ Execute the BIDS App
         Start BIDS App
         > FreeSurfer license copy skipped as it already exists (BIDS App Manager)
         > Datalad available: True
-        ... BIDS App execution command: ['docker', 'run', '-it', '--rm', '-v', '/home/localadmin/Desktop/hcp-retest-d2:/bids_dir', '-v', '/home/localadmin/Desktop/hcp-retest-d2/derivatives:/output_dir', '-v', '/usr/local/freesurfer/license.txt:/bids_dir/code/license.txt', '-v', '/home/localadmin/Desktop/hcp-retest-d2/code/ref_anatomical_config.ini:/code/ref_anatomical_config.ini', '-v', '/home/localadmin/Desktop/hcp-retest-d2/code/ref_diffusion_config.ini:/code/ref_diffusion_config.ini', '-v', '/home/localadmin/Desktop/hcp-retest-d2/code/ref_fMRI_config.ini:/code/ref_fMRI_config.ini', '-u', '1000:1000', 'sebastientourbier/connectomemapper-bidsapp:v3.0.0-RC3', '/bids_dir', '/output_dir', 'participant', '--participant_label', '103818', '--anat_pipeline_config', '/code/ref_anatomical_config.ini', '--dwi_pipeline_config', '/code/ref_diffusion_config.ini', '--func_pipeline_config', '/code/ref_fMRI_config.ini', '--fs_license', '/bids_dir/code/license.txt', '--number_of_participants_processed_in_parallel', '1', '--number_of_threads', '10', '--ants_number_of_threads', '10']
+        ... BIDS App execution command: ['docker', 'run', '-it', '--rm', '-v', '/home/localadmin/Data/ds-demo:/bids_dir', '-v', '/home/localadmin/Data/ds-demo/derivatives:/output_dir', '-v', '/usr/local/freesurfer/license.txt:/bids_dir/code/license.txt', '-v', '/home/localadmin/Data/ds-demo/code/ref_anatomical_config.ini:/code/ref_anatomical_config.ini', '-v', '/home/localadmin/Data/ds-demo/code/ref_diffusion_config.ini:/code/ref_diffusion_config.ini', '-v', '/home/localadmin/Data/ds-demo/code/ref_fMRI_config.ini:/code/ref_fMRI_config.ini', '-u', '1000:1000', 'sebastientourbier/connectomemapper-bidsapp:v3.0.3', '/bids_dir', '/output_dir', 'participant', '--participant_label', '01', '--anat_pipeline_config', '/code/ref_anatomical_config.ini', '--dwi_pipeline_config', '/code/ref_diffusion_config.ini', '--func_pipeline_config', '/code/ref_fMRI_config.ini', '--fs_license', '/bids_dir/code/license.txt', '--number_of_participants_processed_in_parallel', '1', '--number_of_threads', '3', '--ants_number_of_threads', '3']
         > BIDS dataset: /bids_dir
-        > Subjects to analyze : ['103818']
+        > Subjects to analyze : ['01']
         > Set $FS_LICENSE which points to FreeSurfer license location (BIDS App)
           ... $FS_LICENSE : /bids_dir/code/license.txt
           * Number of subjects to be processed in parallel set to 1 (Total of cores available: 11)
           * Number of parallel threads set to 10 (total of cores: 11)
-          * OMP_NUM_THREADS set to 10 (total of cores: 11)
-          * ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS set to 10
+          * OMP_NUM_THREADS set to 3 (total of cores: 11)
+          * ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS set to 3
         Report execution to Google Analytics.
         Thanks to support us in the task of finding new funds for CMP3 development!
         > Sessions to analyze : ['ses-01']
         > Process subject sub-103818 session ses-01
-        WARNING: rewriting config file /output_dir/cmp/sub-103818/ses-01/sub-103818_ses-01_anatomical_config.ini
-        ... Anatomical config created : /output_dir/cmp/sub-103818/ses-01/sub-103818_ses-01_anatomical_config.ini
-        WARNING: rewriting config file /output_dir/cmp/sub-103818/ses-01/sub-103818_ses-01_diffusion_config.ini
-        ... Diffusion config created : /output_dir/cmp/sub-103818/ses-01/sub-103818_ses-01_diffusion_config.ini
-        WARNING: rewriting config file /output_dir/cmp/sub-103818/ses-01/sub-103818_ses-01_fMRI_config.ini
-        ... fMRI config created : /output_dir/cmp/sub-103818/ses-01/sub-103818_ses-01_fMRI_config.ini
+        WARNING: rewriting config file /output_dir/cmp-v3.0.3/sub-01/ses-01/sub-01_ses-01_anatomical_config.ini
+        ... Anatomical config created : /output_dir/cmp-v3.0.3/sub-01/ses-01/sub-01_ses-01_anatomical_config.ini
+        WARNING: rewriting config file /output_dir/cmp-v3.0.3/sub-01/ses-01/sub-01_ses-01_diffusion_config.ini
+        ... Diffusion config created : /output_dir/cmp-v3.0.3/sub-01/ses-01/sub-01_ses-01_diffusion_config.ini
+        WARNING: rewriting config file /output_dir/cmp-v3.0.3/sub-01/ses-01/sub-01_ses-01_fMRI_config.ini
+        ... fMRI config created : /output_dir/cmp-v3.0.3/sub-01/ses-01/sub-01_ses-01_fMRI_config.ini
         ... Running pipelines :
                 - Anatomical MRI (segmentation and parcellation)
                 - Diffusion MRI (structural connectivity matrices)
                 - fMRI (functional connectivity matrices)
-        ... cmd : connectomemapper3 --bids_dir /bids_dir --output_dir /output_dir --participant_label sub-103818 --session_label ses-01 --anat_pipeline_config /output_dir/cmp/sub-103818/ses-01/sub-103818_ses-01_anatomical_config.ini --dwi_pipeline_config /output_dir/cmp/sub-103818/ses-01/sub-103818_ses-01_diffusion_config.ini --func_pipeline_config /output_dir/cmp/sub-103818/ses-01/sub-103818_ses-01_fMRI_config.ini --number_of_threads 10
+        ... cmd : connectomemapper3 --bids_dir /bids_dir --output_dir /output_dir --participant_label sub-01 --session_label ses-01 --anat_pipeline_config /output_dir/cmp-v3.0.3/sub-01/ses-01/sub-01_ses-01_anatomical_config.ini --dwi_pipeline_config /output_dir/cmp-v3.0.3/sub-01/ses-01/sub-01_ses-01_diffusion_config.ini --func_pipeline_config /output_dir/cmp-v3.0.3/sub-01/ses-01/sub-01_ses-01_fMRI_config.ini --number_of_threads 3
 
     .. note:: Also, this can be helpful in you wish to design your own batch scripts to call the BIDS App with the correct syntax.
 
 Check progress
 ------------------
 
-For each subject, the execution output of the pipelines are redirected to a log file, written as ``<bids_dataset/derivatives>/cmp/sub-<subject_label>_log.txt``. Execution progress can be checked by the means of these log files.
+For each subject, the execution output of the pipelines are redirected to a log file, written as ``<bids_dataset/derivatives>/cmp-v3.X.Y/sub-<subject_label>_log.txt``. Execution progress can be checked by the means of these log files.
 
 Check stages outputs
 ******************************
