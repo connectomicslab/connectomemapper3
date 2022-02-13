@@ -1297,48 +1297,25 @@ class RegistrationStage(Stage):
 
                 if os.path.exists(ref) and os.path.exists(out):
                     self.inspect_outputs_dict["Linear T1-to-b0 (%s)" % tool] = [
-                        "fsleyes",
-                        "-sdefault",
-                        ref,
-                        out,
-                        "-cm",
-                        "copper",
-                        "-a",
-                        "50",
+                        "fsleyes", "-sdefault", ref, out, "-cm", "copper", "-a", "50",
                     ]
 
                 out = dwi_outputs["anat.@act_5tt_reg_crop"]
                 if os.path.exists(ref) and os.path.exists(out):
                     self.inspect_outputs_dict["Wrapped 5TT-to-b0 (%s)" % tool] = [
-                        "fsleyes",
-                        "-sdefault",
-                        ref,
-                        out,
-                        "-cm",
-                        "hot",
-                        "-a",
-                        "50",
+                        "fsleyes", "-sdefault", ref, out, "-cm", "hot", "-a", "50",
                     ]
 
                 out = dwi_outputs["anat.@gmwmi_reg_crop"]
                 if os.path.exists(ref) and os.path.exists(out):
                     self.inspect_outputs_dict["Wrapped GMWMi-to-b0 (%s)" % tool] = [
-                        "fsleyes",
-                        "-sdefault",
-                        ref,
-                        out,
-                        "-cm",
-                        "hot",
-                        "-a",
-                        "50",
+                        "fsleyes", "-sdefault", ref, out, "-cm", "hot", "-a", "50",
                     ]
 
                 field = dwi_outputs["xfm.@warp_field"]
                 if os.path.exists(field):
                     self.inspect_outputs_dict["Deformation field (%s)" % tool] = [
-                        "fsleyes",
-                        "-sdefault",
-                        field,
+                        "fsleyes", "-sdefault", field,
                     ]
 
                 if isinstance(
@@ -1346,70 +1323,34 @@ class RegistrationStage(Stage):
                 ) and os.path.exists(dwi_outputs["anat.@roivs_reg_crop"]):
                     roiv = dwi_outputs["anat.@roivs_reg_crop"]
                     if os.path.exists(roiv):
-                        self.inspect_outputs_dict[
-                            "%s-to-b0 (%s)" % (os.path.basename(roiv), tool)
-                        ] = [
-                            "fsleyes",
-                            "-sdefault",
-                            ref,
-                            roiv,
-                            "-cm",
-                            "random",
-                            "-a",
-                            "50",
+                        self.inspect_outputs_dict["%s-to-b0 (%s)" % (os.path.basename(roiv), tool)] = [
+                            "fsleyes", "-sdefault", ref, roiv, "-cm", "random", "-a", "50",
                         ]
                 else:
                     for roi_output in dwi_outputs["anat.@roivs_reg_crop"]:
                         roiv = roi_output
                         if os.path.exists(roiv):
-                            self.inspect_outputs_dict[
-                                "%s-to-b0 (%s)" % (os.path.basename(roiv), tool)
-                            ] = [
-                                "fsleyes",
-                                "-sdefault",
-                                ref,
-                                roiv,
-                                "-cm",
-                                "random",
-                                "-a",
-                                "50",
+                            self.inspect_outputs_dict["%s-to-b0 (%s)" % (os.path.basename(roiv), tool)] = [
+                                "fsleyes", "-sdefault", ref, roiv, "-cm", "random", "-a", "50",
                             ]
 
                 if isinstance(dwi_outputs["anat.@pves_reg_crop"], str):
                     pves = dwi_outputs["anat.@pves_reg_crop"]
                     if os.path.exists(pves):
-                        self.inspect_outputs_dict[
-                            "%s-to-b0 (%s)" % (os.path.basename(pves), tool)
-                        ] = [
-                            "fsleyes",
-                            "-sdefault",
-                            ref,
-                            pves,
-                            "-cm",
-                            "hot",
-                            "-a",
-                            "50",
+                        self.inspect_outputs_dict["%s-to-b0 (%s)" % (os.path.basename(pves), tool)] = [
+                            "fsleyes", "-sdefault", ref, pves, "-cm", "hot", "-a", "50",
                         ]
                 else:
                     for pve_output in dwi_outputs["anat.@pves_reg_crop"]:
                         pves = pve_output
                         if os.path.exists(pves):
-                            self.inspect_outputs_dict[
-                                "%s-to-b0 (%s)" % (os.path.basename(pves), tool)
-                            ] = [
-                                "fsleyes",
-                                "-sdefault",
-                                ref,
-                                pves,
-                                "-cm",
-                                "hot",
-                                "-a",
-                                "50",
+                            self.inspect_outputs_dict["%s-to-b0 (%s)" % (os.path.basename(pves), tool)] = [
+                                "fsleyes", "-sdefault", ref, pves, "-cm", "hot", "-a", "50",
                             ]
 
         else:
             func_sinker_dir = os.path.join(
-                os.path.dirname(self.stage_dir), "bold_sinker"
+                os.path.dirname(self.stage_dir), "func_datasinker"
             )
             func_sinker_report = os.path.join(func_sinker_dir, "_report", "report.rst")
 
@@ -1425,34 +1366,16 @@ class RegistrationStage(Stage):
                     ref = func_outputs["func.@mean_vol"]
                     out = func_outputs["anat.@registered_roi_volumes"]
                     if os.path.exists(ref) and os.path.exists(out):
-                        self.inspect_outputs_dict[
-                            "Mean-fMRI/%s (%s)" % (os.path.basename(out), tool)
-                        ] = [
-                            "fsleyes",
-                            "-sdefault",
-                            ref,
-                            out,
-                            "-cm",
-                            "random",
-                            "-a",
-                            "50",
+                        self.inspect_outputs_dict["Mean-fMRI/%s (%s)" % (os.path.basename(out), tool)] = [
+                            "fsleyes", "-sdefault", ref, out, "-cm", "random", "-a", "50",
                         ]
                 else:
                     for roi_output in func_outputs["anat.@registered_roi_volumes"]:
                         ref = func_outputs["func.@mean_vol"]
                         out = roi_output
                         if os.path.exists(ref) and os.path.exists(out):
-                            self.inspect_outputs_dict[
-                                "Mean-fMRI/%s (%s)" % (os.path.basename(out), tool)
-                            ] = [
-                                "fsleyes",
-                                "-sdefault",
-                                ref,
-                                out,
-                                "-cm",
-                                "random",
-                                "-a",
-                                "50",
+                            self.inspect_outputs_dict["Mean-fMRI/%s (%s)" % (os.path.basename(out), tool)] = [
+                                "fsleyes", "-sdefault", ref, out, "-cm", "random", "-a", "50",
                             ]
 
         self.inspect_outputs = sorted(

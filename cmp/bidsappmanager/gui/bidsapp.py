@@ -449,7 +449,7 @@ class BIDSAppInterfaceWindow(HasTraits):
         width=0.6,
         height=0.8,
         scrollable=True,  # , resizable=True
-        icon=get_icon("bidsapp.png"),
+        # icon=get_icon("bidsapp.png")
     )
 
     log_view = QtView(
@@ -461,7 +461,7 @@ class BIDSAppInterfaceWindow(HasTraits):
         width=0.5,
         height=0.8,
         resizable=True,  # , scrollable=True, resizable=True
-        icon=get_icon("bidsapp.png"),
+        # icon=get_icon("bidsapp.png")
     )
 
     carbon_footprint_view = View(
