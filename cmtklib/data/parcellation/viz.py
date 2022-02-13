@@ -15,39 +15,42 @@ from cmtklib.data.parcellation.util import (
     get_lausanne2018_parcellation_annot
 )
 
-def plot_surface_ctx(
-    roi_values, scale='scale1', cmap="Spectral", save_fig=False,
-    output_dir="./", filename=None, fmt="png"):
+
+def plot_lausanne2018_surface_ctx(
+    roi_values, scale='scale1',
+    cmap="Spectral",
+    save_fig=False, output_dir="./", filename=None, fmt="png"
+):
     """
-    Plots a set of values on a cortex surface on a given scale of the Lausanne 2018 parcellation.
+    Plots a set of values on the cortical surface of a given Lausanne 2018 parcellation scale.
     
     Parameters
     ----------
-    roi_values: numpy array
+    roi_values : numpy array
         The values to be plotted on the surface. The array should
         have as many values as regions of interest
 
-    scale: {'scale1', 'scale2', 'scale3', 'scale4', 'scale5'}
+    scale : {'scale1', 'scale2', 'scale3', 'scale4', 'scale5'}
         Scale of the Lausanne 2018 atlas to be used
 
-    cmap: string
+    cmap : string
         Colormap to use for plotting, default "Spectral"
 
-    save_fig: bool
+    save_fig : bool
         Whether to save the generated figures, default: `False`
 
-    output_dir: string
+    output_dir : string
         Directory to save the figure, only used when
         `save_fig == True`
 
-    filename: string
+    filename : string
         Filename of the saved figure (without the extension),
         only used when `save_fig == True`
 
-    fmt: string
-        Format to save the figures in
-        Default: "png", also
-        accepted are "pdf", and "svg" (and others, depending
+    fmt : string
+        Format the figure is saved
+        (Default: "png", also
+        accepted are "pdf", "svg", and others, depending
         on the backend used)
 
     """
@@ -104,7 +107,7 @@ def plot_surface_ctx(
     # Initial a figure with [2 x 4] subplots
     fig, axs = plt.subplots(nrows=2, ncols=4,
                             subplot_kw={'projection': '3d'},
-                            figsize=(20,10))
+                            figsize=(20, 10))
     axs = axs.flatten()
 
     # Iterate over the list of views to render
