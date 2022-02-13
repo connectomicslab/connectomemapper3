@@ -81,8 +81,10 @@ Segmentation
 """"""""""""""
 
 Prior to Lausanne parcellation, CMP3 relies on **Freesurfer** for the segmentation of the different brain tissues and the reconstruction of the cortical surfaces.
-If you plan to use a custom parcellation, you will have to specify the pattern of the different existing segmentation files
+If you plan to use a custom parcellation, you will be required here to specify the pattern of the different existing segmentation files
 that follows BIDS derivatives (See *Custom segmentation*).
+
+.. _freesurfer_opt:
 
 *Freesurfer*
 
@@ -113,29 +115,40 @@ that follows BIDS derivatives (See *Custom segmentation*).
 *Custom segmentation*
 
     .. image:: images/custom_segmentation.png
-            :align: center
+        :align: center
 
-    The given configuration, for instance, would allows us to re-use the outputs of the anatomical pipeline obtained with the previous ``v3.0.2`` version of CMP3::
+    You can use any parcellation scheme of your choice as long as you provide a list of segmentation files organized following the `BIDS derivatives specifications <https://bids-specification.readthedocs.io/en/stable/05-derivatives/03-imaging.html#segmentations>`_ for segmentation files, provide appropriate ``.tsv`` sidecar files that describes the index/label/color mapping of the parcellation, and adopt the ``atlas-<label>`` entity to encode the name of the atlas, i.e::
+
+        <derivatives_directory>/
+          sub-<participant_label>/
+            anat/
+              <source_entities>_desc-brain_mask.nii.gz
+              <source_entities>_label-GM[_desc-<label>]_dseg.nii.gz
+              <source_entities>_label-WM[_desc-<label>]_dseg.nii.gz
+              <source_entities>_label-CSF[_desc-<label>]_dseg.nii.gz
+              <source_entities>_desc-aparcaseg_dseg.nii.gz
+
+    The ``desc`` BIDS entity can be used to target specific mask and segmentation files.
+
+    For instance, the configuration above would allows us to re-use the outputs of the anatomical pipeline obtained with the previous ``v3.0.2`` version of CMP3::
 
             your_bids_dataset
-              |____ derivatives/
-              |         |____ cmp-v3.0.2/
-              |                   |____ sub-01/
-              |                   |           |____ anat/
-              |                   |           |         |____ sub-01_desc-brain_mask.nii.gz
-              |                   |           |         |____ sub-01_label-GM_dseg.nii.gz
-              |                   |           |         |____ sub-01_label-WM_dseg.nii.gz
-              |                   |           |         |____ sub-01_label-CSF_dseg.nii.gz
-              |                   |           |         |____ sub-01_desc-aparcaseg_mask.nii.gz
-              |                   |           |         |____ sub-01_desc-brain_mask.nii.gz
-              |                   |           |         |____ ...
-              |                   |           |____ ...
-              |                   |____ ...
-              |______ sub-01/
-              |______ ...
+              |__ derivatives/
+              |     |__ cmp-v3.0.2/
+              |           |__ sub-01/
+              |           |     |__ anat/
+              |           |           |__ sub-01_desc-brain_mask.nii.gz
+              |           |           |__ sub-01_label-GM_dseg.nii.gz
+              |           |           |__ sub-01_label-WM_dseg.nii.gz
+              |           |           |__ sub-01_label-CSF_dseg.nii.gz
+              |           |           |__ sub-01_desc-aparcaseg_dseg.nii.gz
+              |           |           |__ ...
+              |           |__ ...
+              |__ sub-01/
+              |__ ...
 
-    .. note::
-        If you plan to use either Anatomically Constrained or Particle Filtering tractography, you will still require to have Freesurfer 7 output data available in your output / derivatives directory, as described the above note in *Freesurfer*.
+    .. important::
+        If you plan to use either Anatomically Constrained or Particle Filtering tractography, you will still require to have Freesurfer 7 output data available in your output / derivatives directory, as described the above note in `*Freesurfer* <freesurfer_opt>`_.
 
 Parcellation
 """"""""""""""
@@ -167,25 +180,31 @@ Generates the Native Freesurfer or Lausanne2018 parcellation from Freesurfer dat
 
     * *Custom:*
 
-        You can use any parcellation scheme of your choice as long as they follow the `BIDS derivatives specifications <https://bids-specification.readthedocs.io/en/stable/05-derivatives/03-imaging.html#segmentations>`_ for segmentation files, provide appropriate ``.tsv`` sidecar files that describes the index/label/color mapping of the parcellation, and adopt the ``atlas-<label>`` entity to encode the name of the atlas.
-
         .. image:: images/custom_parcellation.png
             :align: center
 
-        The given configuration, for instance, would allows us to re-use the scale 1 of the Lausanne parcellation generated by the anatomical pipeline obtained of the previous ``v3.0.2`` version of CMP3::
+        You can use any parcellation scheme of your choice as long as they follow the `BIDS derivatives specifications <https://bids-specification.readthedocs.io/en/stable/05-derivatives/03-imaging.html#segmentations>`_ for segmentation files, provide appropriate ``.tsv`` sidecar files that describes the index/label/color mapping of the parcellation, and adopt the ``atlas-<label>`` entity to encode the name of the atlas, i.e::
+
+            <derivatives_directory>/
+              sub-<participant_label>/
+                anat/
+                  <source_entities>[_space-<space>]_atlas-<label>[_res-<label>]_dseg.nii.gz
+
+        The ``res`` BIDS entity allows the differentiation between multiple scales of the same atlas.
+
+        For instance, the above configuration would allows us to re-use the scale 1 of the Lausanne parcellation generated by the anatomical pipeline obtained of the previous ``v3.0.2`` version of CMP3::
 
             your_bids_dataset
-                  |____ derivatives/
-                  |         |____ cmp-v3.0.2/
-                  |                   |____ sub-01/
-                  |                   |           |____ anat/
-                  |                   |           |         |____ sub-01_atlas-L2018_res-scale1_dseg.nii.gz
-                  |                   |           |         |____ sub-01_atlas-L2018_res-scale1_dseg.tsv
-                  |                   |           |         |____ ...
-                  |                   |           |____ ...
-                  |                   |____ ...
-                  |______ sub-01/
-                  |______ ...
+              |__ derivatives/
+              |     |__ cmp-v3.0.2/
+              |           |__ sub-01/
+              |           |     |__ anat/
+              |           |           |__ sub-01_atlas-L2018_res-scale1_dseg.nii.gz
+              |           |           |__ sub-01_atlas-L2018_res-scale1_dseg.tsv
+              |           |           |__ ...
+              |           |__ ...
+              |__ sub-01/
+              |__ ...
 
 Diffusion pipeline stages
 ---------------------------
