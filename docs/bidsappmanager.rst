@@ -189,6 +189,7 @@ Generates the Native Freesurfer or Lausanne2018 parcellation from Freesurfer dat
               sub-<participant_label>/
                 anat/
                   <source_entities>[_space-<space>]_atlas-<label>[_res-<label>]_dseg.nii.gz
+                  <source_entities>[_space-<space>]_atlas-<label>[_res-<label>]_dseg.tsv
 
         The ``res`` BIDS entity allows the differentiation between multiple scales of the same atlas.
 
