@@ -501,10 +501,13 @@ class EEGPipeline(Pipeline):
         )
         eeg_flow.write_graph(graph2use="colored", format="svg", simple_form=True)
 
-        if self.number_of_cores != 1:
-            eeg_flow.run(plugin="MultiProc", plugin_args={"n_procs": self.number_of_cores})
-        else:
-            eeg_flow.run()
+        # Create dictionary of arguments passed to plugin_args
+        plugin_args = {
+            'maxtasksperchild': 1,
+            'n_procs': self.number_of_cores,
+            'raise_insufficient': False,
+        }
+        eeg_flow.run(plugin="MultiProc", plugin_args=plugin_args)
 
         iflogger.info("**** Processing finished ****")
 
