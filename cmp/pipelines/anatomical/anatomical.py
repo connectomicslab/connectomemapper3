@@ -28,7 +28,7 @@ from cmp.stages.segmentation.segmentation import SegmentationStage
 from cmp.stages.parcellation.parcellation import ParcellationStage
 
 
-class GlobalConfiguration(HasTraits):
+class GlobalConfig(HasTraits):
     """Global pipeline configurations.
 
     Attributes
@@ -75,7 +75,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
     derivatives_directory = Directory
     ordered_stage_list = ["Segmentation", "Parcellation"]
     custom_last_stage = Enum("Parcellation", ["Segmentation", "Parcellation"])
-    global_conf = GlobalConfiguration()
+    global_conf = GlobalConfig()
     config_file = Str
     flow = Instance(pe.Workflow)
 

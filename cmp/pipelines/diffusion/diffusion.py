@@ -24,7 +24,7 @@ from cmp.stages.preprocessing.preprocessing import PreprocessingStage
 from cmp.stages.registration.registration import RegistrationStage
 
 
-class GlobalConfiguration(HasTraits):
+class GlobalConfig(HasTraits):
     """Global pipeline configurations.
 
     Attributes
@@ -90,7 +90,7 @@ class DiffusionPipeline(Pipeline):
     custom_atlas_name = Str
     custom_atlas_res = Str
     atlas_info = Dict()
-    global_conf = GlobalConfiguration()
+    global_conf = GlobalConfig()
     config_file = Str
 
     def __init__(self, project_info):

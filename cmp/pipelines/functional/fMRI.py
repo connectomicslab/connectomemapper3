@@ -21,7 +21,7 @@ from cmp.stages.preprocessing.fmri_preprocessing import PreprocessingStage
 from cmp.stages.registration.registration import RegistrationStage
 
 
-class GlobalConfiguration(HasTraits):
+class GlobalConfig(HasTraits):
     """Global pipeline configurations.
 
     Attributes
@@ -74,7 +74,7 @@ class fMRIPipeline(Pipeline):
         "FunctionalMRI",
         "Connectome",
     ]
-    global_conf = GlobalConfiguration()
+    global_conf = GlobalConfig()
     config_file = Str
     parcellation_scheme = Str
     atlas_info = Dict()
