@@ -22,9 +22,37 @@ from cmtklib.interfaces.mne import CreateCov, CreateFwd, MNEInverseSolution
 class EEGInverseSolutionConfig(HasTraits):
     invsol_format = Enum('Cartool-LAURA', 'Cartool-LORETA', 'mne-sLORETA',
                          desc='Cartool vs mne')
+    """Class used to store configuration parameters of a :class:`~cmp.stages.eeg.inverse_solution.EEGInverseSolutionStage` instance.
+
+    Attributes
+    ----------
+    invsol_format : ['Cartool-LAURA', 'Cartool-LORETA', 'mne-sLORETA']
+        Specify the inverse solution algorithm
+        (Default: Cartool-LAURA)
+
+    See Also
+    --------
+    cmp.stages.eeg.inverse_solution.EEGInverseSolutionStage
+    """
+
+    invsol_format = Enum(
+        "Cartool-LAURA", "Cartool-LORETA", "mne-sLORETA", desc="Specify the inverse solution algorithm"
+    )
 
 
 class EEGInverseSolutionStage(Stage):
+    """Class that represents the reconstruction of the inverse solutions stage of a :class:`~cmp.pipelines.functional.eeg.EEGPipeline`.
+
+    Methods
+    -------
+    create_workflow()
+        Create the workflow of the `EEGInverseSolutionStage`
+
+    See Also
+    --------
+    cmp.pipelines.functional.eeg.EEGPipeline
+    cmp.stages.eeg.inverse_solution.EEGInverseSolutionConfig
+    """
     def __init__(self, bids_dir, output_dir):
         """Constructor of a :class:`~cmp.stages.parcellation.parcellation.ParcellationStage` instance."""
         self.name = 'eeg_inverse_solution_stage'
@@ -37,8 +65,19 @@ class EEGInverseSolutionStage(Stage):
         self.outputs = ["roi_ts_file", "fwd_fname"]
 
     def create_workflow(self, flow, inputnode, outputnode):
+        """Create the stage workflow.
 
-        if self.config.invsol_format.split('-')[0] == "Cartool":
+        Parameters
+        ----------
+        flow : nipype.pipeline.engine.Workflow
+            The nipype.pipeline.engine.Workflow instance of the Diffusion pipeline
+
+        inputnode : nipype.interfaces.utility.IdentityInterface
+            Identity interface describing the inputs of the stage
+
+        outputnode : nipype.interfaces.utility.IdentityInterface
+            Identity interface describing the outputs of the stage
+        """
             invsol_node = pe.Node(CartoolInverseSolutionROIExtraction(), name="invsol")
             flow.connect([(inputnode, invsol_node,
                            [('eeg_ts_file', 'eeg_ts_file'),
