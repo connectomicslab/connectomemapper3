@@ -10,9 +10,11 @@ import pickle
 
 import nibabel
 import numpy as np
-from nipype import BaseInterface
 from nipype.interfaces import io as nio
-from nipype.interfaces.base import BaseInterfaceInputSpec, TraitedSpec, traits
+from nipype.interfaces.base import (
+    BaseInterface, BaseInterfaceInputSpec,
+    TraitedSpec, traits
+)
 
 from cmtklib.interfaces import pycartool as cart
 

@@ -11,8 +11,10 @@ import pickle
 import mne
 import numpy as np
 import pandas as pd
-from nipype import BaseInterface
-from nipype.interfaces.base import BaseInterfaceInputSpec, TraitedSpec, traits
+from nipype.interfaces.base import (
+    BaseInterface, BaseInterfaceInputSpec,
+    TraitedSpec, traits
+)
 
 from cmp import __version__
 from cmtklib.bids.io import __cmp_directory__, __freesurfer_directory__
