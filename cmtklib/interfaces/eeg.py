@@ -1,10 +1,20 @@
+# Copyright (C) 2009-2022, Ecole Polytechnique Federale de Lausanne (EPFL) and
+# Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland, and CMP3 contributors
+# All rights reserved.
+#
+#  This software is distributed under the open-source license Modified BSD.
 
+"""Module that defines CMTK utility functions and Nipype interfaces for EEG."""
 import os
 import pickle
-import numpy as np
+
 import nibabel
-import pycartool as cart
-from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, traits, TraitedSpec
+import numpy as np
+from nipype import BaseInterface
+from nipype.interfaces import io as nio
+from nipype.interfaces.base import BaseInterfaceInputSpec, TraitedSpec, traits
+
+from cmtklib.interfaces import pycartool as cart
 
 
 class CreateRoisInputSpec(BaseInterfaceInputSpec):
@@ -57,7 +67,7 @@ class CreateRois(BaseInterface):
 
         self._create_roi_files(subject, parcellation_image_path, parcellation_name, cartool_dir, cmp3_dir)
 
-        self.derivative_list.append('Cartool-v3.80')
+        self.derivative_list.append(self.inputs.cartool_dir)
 
         self.output_query['rois'] = {
             # 'scope': 'cartool-v3.80',
@@ -120,4 +130,70 @@ class CreateRois(BaseInterface):
         outputs = self._outputs().get()
         outputs['output_query'] = self.output_query
         outputs['derivative_list'] = self.derivative_list
+        return outputs
+
+
+class EEGLoaderInputSpec(BaseInterfaceInputSpec):
+    """Input specification for EEGLoader. """
+
+    base_directory = traits.Directory(
+        exists=True, desc='BIDS data directory', mandatory=True)
+
+    subject = traits.Str(
+        desc='subject', mandatory=True)
+
+    invsol_format = traits.Enum('Cartool-LAURA', 'Cartool-LORETA', 'mne-sLORETA',
+            desc='Cartool vs mne')
+
+    output_query = traits.Dict(
+        desc='output query for BIDSDataGrabber', mandatory=True)
+
+    derivative_list = traits.List(
+        exists=True, desc='List of derivatives to add to the datagrabber', mandatory=True)
+
+
+class EEGLoaderOutputSpec(TraitedSpec):
+    """Input specification for EEGLAB2fif. """
+
+    EEG = traits.List(
+        exists=True, desc='eeg * epochs in .fif format', mandatory=True)
+    src = traits.List(
+        exists=True, desc='src (spi loaded with pycartool or source space created with MNE)', mandatory=True)
+    invsol = traits.List(
+        exists=True, desc='Inverse solution (.is file loaded with pycartool)', mandatory=False)
+    rois = traits.List(
+        exists=True, desc='parcellation scheme', mandatory=True)
+    bem = traits.List(
+        exists=True, desc='boundary surfaces for MNE head model', mandatory=False)
+
+
+class EEGLoader(BaseInterface):
+    input_spec = EEGLoaderInputSpec
+    output_spec = EEGLoaderOutputSpec
+
+    def _run_interface(self, runtime):
+        self.base_directory = self.inputs.base_directory
+        self.subject = self.inputs.subject
+        self.derivative_list = self.inputs.derivative_list
+        self._run_datagrabber()
+        return runtime
+
+    def _run_datagrabber(self):
+        bidsdatagrabber = nio.BIDSDataGrabber(index_derivatives=False,
+                                              extra_derivatives=[os.path.join(self.base_directory, 'derivatives', elem)
+                                                                 for elem in self.derivative_list])
+        bidsdatagrabber.inputs.base_dir = self.base_directory
+        bidsdatagrabber.inputs.subject = self.subject.split('-')[1]
+        bidsdatagrabber.inputs.output_query = self.inputs.output_query
+        print(bidsdatagrabber.inputs.output_query)
+        print(bidsdatagrabber.inputs.base_dir)
+        print(bidsdatagrabber.inputs.subject)
+        self.results = bidsdatagrabber.run()
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+
+        for key, value in self.results.outputs.get().items():
+            outputs[key] = value
+
         return outputs

@@ -15,10 +15,8 @@ import nipype.pipeline.engine as pe
 
 # Own imports
 from cmp.stages.common import Stage
-from cmtklib.interfaces.invsol import CartoolInverseSolutionROIExtraction
-from cmtklib.interfaces.createcov import CreateCov
-from cmtklib.interfaces.createfwd import CreateFwd
-from cmtklib.interfaces.invsol_MNE import MNEInverseSolution
+from cmtklib.interfaces.pycartool import CartoolInverseSolutionROIExtraction
+from cmtklib.interfaces.mne import CreateCov, CreateFwd, MNEInverseSolution
 
 
 class EEGInverseSolutionConfig(HasTraits):

@@ -16,10 +16,8 @@ import nipype.interfaces.utility as util
 
 # Own imports
 from cmp.stages.common import Stage
-from cmtklib.interfaces.eeglab2fif import EEGLAB2fif
-from cmtklib.interfaces.createrois import CreateRois
-from cmtklib.interfaces.createsrc import CreateSrc
-from cmtklib.interfaces.mne import CreateBEM
+from cmtklib.interfaces.eeg import CreateRois
+from cmtklib.interfaces.mne import CreateBEM, CreateSrc, EEGLAB2fif
 
 
 class EEGPreparerConfig(HasTraits):

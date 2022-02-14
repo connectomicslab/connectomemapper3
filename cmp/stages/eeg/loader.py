@@ -15,7 +15,7 @@ import nipype.pipeline.engine as pe
 
 # Own imports
 from cmp.stages.common import Stage
-from cmtklib.interfaces.eegloader import EEGLoader
+from cmtklib.interfaces.eeg import EEGLoader
 
 
 class EEGLoaderConfig(HasTraits):
