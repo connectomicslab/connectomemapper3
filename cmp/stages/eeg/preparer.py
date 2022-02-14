@@ -124,7 +124,7 @@ class EEGPreparerStage(Stage):
         inputnode.inputs.derivative_list = []
         inputnode.inputs.output_query = {}
 
-        if self.config.invsol_format.split('-')[0] == "Cartool":
+        if "Cartool" in self.config.invsol_format:
 
             createrois_node = pe.Node(CreateRois(), name="createrois")
             inputnode.inputs.parcellation = self.config.parcellation
@@ -193,7 +193,7 @@ class EEGPreparerStage(Stage):
             )
             # fmt: on
 
-        elif self.config.invsol_format.split('-')[0] == "mne":
+        elif "mne" in self.config.invsol_format:
 
             createsrc_node = pe.Node(CreateSrc(), name="createsrc")
             createbem_node = pe.Node(CreateBEM(), name="createbem")

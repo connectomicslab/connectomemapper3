@@ -94,7 +94,7 @@ class EEGInverseSolutionStage(Stage):
         outputnode : nipype.interfaces.utility.IdentityInterface
             Identity interface describing the outputs of the stage
         """
-        if self.config.invsol_format.split("-")[0] == "Cartool":
+        if "Cartool" in self.config.invsol_format.split("-")[0]:
             invsol_node = pe.Node(CartoolInverseSolutionROIExtraction(), name="invsol")
             # fmt: off
             flow.connect(
@@ -109,7 +109,7 @@ class EEGInverseSolutionStage(Stage):
             )
             # fmt: on
 
-        elif self.config.invsol_format.split("-")[0] == "mne":
+        elif "mne" in self.config.invsol_format:
 
             covmat_node = pe.Node(CreateCov(), name="createcov")  # compute the noise covariance
             fwd_node = pe.Node(CreateFwd(), name="createfwd")  # compute the forward solution
