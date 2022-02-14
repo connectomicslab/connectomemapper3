@@ -19,21 +19,62 @@ from cmtklib.interfaces.eeg import EEGLoader
 
 
 class EEGLoaderConfig(HasTraits):
-    invsol_format = Enum('Cartool-LAURA', 'Cartool-LORETA', 'mne-sLORETA',
-                         desc='Cartool vs mne')
+    """Class used to store configuration parameters of a :class:`~cmp.stages.eeg.loader.EEGLoaderStage` instance.
+
+    Attributes
+    ----------
+    invsol_format : ['Cartool-LAURA', 'Cartool-LORETA', 'mne-sLORETA']
+        Specify the inverse solution algorithm
+        (Default: Cartool-LAURA)
+
+    See Also
+    --------
+    cmp.stages.eeg.loader.EEGLoaderStage
+    """
+
+    invsol_format = Enum(
+        "Cartool-LAURA", "Cartool-LORETA", "mne-sLORETA",
+        desc="Specify the inverse solution algorithm"
+    )
 
 
 class EEGLoaderStage(Stage):
+    """Class that represents .... stage of a :class:`~cmp.pipelines.functional.eeg.EEGPipeline`.
+
+    Methods
+    -------
+    create_workflow()
+        Create the workflow of the `EEGLoaderStage`
+
+    See Also
+    --------
+    cmp.pipelines.functional.eeg.EEGPipeline
+    cmp.stages.eeg.loader.EEGLoaderConfig
+    """
+
     def __init__(self, bids_dir, output_dir):
-        """Constructor of a :class:`~cmp.stages.parcellation.parcellation.ParcellationStage` instance."""
-        self.name = 'eeg_loader_stage'
+        """Constructor of a :class:`~cmp.stages.eeg.loader.EEGLoaderStage` instance."""
+        self.name = "eeg_loader_stage"
         self.bids_dir = bids_dir
         self.output_dir = output_dir
         self.config = EEGLoaderConfig()
-        self.inputs = ["subject", "base_directory","output_query", "derivative_list"]
+        self.inputs = ["subject", "base_directory", "output_query", "derivative_list"]
         self.outputs = ["EEG", "src", "invsol", "rois", "bem"]
 
     def create_workflow(self, flow, inputnode, outputnode):
+        """Create the stage workflow.
+
+        Parameters
+        ----------
+        flow : nipype.pipeline.engine.Workflow
+            The nipype.pipeline.engine.Workflow instance of the Diffusion pipeline
+
+        inputnode : nipype.interfaces.utility.IdentityInterface
+            Identity interface describing the inputs of the stage
+
+        outputnode : nipype.interfaces.utility.IdentityInterface
+            Identity interface describing the outputs of the stage
+        """
         eegloader_node = pe.Node(interface=EEGLoader(), name="eegloader")
 
         flow.connect([(inputnode, eegloader_node,

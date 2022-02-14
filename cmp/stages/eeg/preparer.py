@@ -21,6 +21,39 @@ from cmtklib.interfaces.mne import CreateBEM, CreateSrc, EEGLAB2fif
 
 
 class EEGPreparerConfig(HasTraits):
+    """Class used to store configuration parameters of a :class:`~cmp.stages.eeg.preparer.EEGPreparerStage` instance.
+
+    Attributes
+    ----------
+    eeg_format : Enum(['.set', '.fif'])
+        Specify the format in which EGG data is stored
+        (Default: `.set`)
+
+    epochs : File
+        Name of file containing EEG epochs
+
+    invsol_format : Enum(['Cartool-LAURA', 'Cartool-LORETA', 'mne-sLORETA'])
+        Specify the inverse solution algorithm
+        (Default: Cartool-LAURA)
+
+    parcellation = Dict({'label':'aparc', 'desc':'', 'suffix':''})
+        Dictionary used to differentiate parcellation files
+
+    cartool_dir = Str
+        Name of cartool derivatives directory
+        (Default: `'cartool-v3.80'`)
+
+    cmp3_dir = Str
+        Name of cartool derivatives directory
+        (Default: `'cmp'`)
+
+    EEG_params = Dict()
+        Dictionary storing extra EEG parameters
+
+    See Also
+    --------
+    cmp.stages.eeg.preparer.EEGPreparerStage
+    """
     eeg_format = Enum('.set', '.fif',
                       desc='<.set|.fif> (default is .set)')
     epochs = File(desc='name of file containing EEG epochs')
@@ -34,8 +67,20 @@ class EEGPreparerConfig(HasTraits):
 
 
 class EEGPreparerStage(Stage):
+    """Class that represents .... stage of a :class:`~cmp.pipelines.functional.eeg.EEGPipeline`.
+
+    Methods
+    -------
+    create_workflow()
+        Create the workflow of the `EEGPreparerStage`
+
+    See Also
+    --------
+    cmp.pipelines.functional.eeg.EEGPipeline
+    cmp.stages.eeg.preparer.EEGPreparerConfig
+    """
     def __init__(self, bids_dir, output_dir):
-        """Constructor of a :class:`~cmp.stages.parcellation.parcellation.ParcellationStage` instance."""
+        """Constructor of a :class:`~cmp.stages.eeg.preparer.EEGPreparer` instance."""
         self.name = 'eeg_preparing_stage'
         self.bids_dir = bids_dir
         self.output_dir = output_dir
@@ -63,6 +108,19 @@ class EEGPreparerStage(Stage):
         ]
 
     def create_workflow(self, flow, inputnode, outputnode):
+        """Create the stage workflow.
+
+        Parameters
+        ----------
+        flow : nipype.pipeline.engine.Workflow
+            The nipype.pipeline.engine.Workflow instance of the Diffusion pipeline
+
+        inputnode : nipype.interfaces.utility.IdentityInterface
+            Identity interface describing the inputs of the stage
+
+        outputnode : nipype.interfaces.utility.IdentityInterface
+            Identity interface describing the outputs of the stage
+        """
         inputnode.inputs.derivative_list = []
         inputnode.inputs.output_query = {}
 
