@@ -19,7 +19,7 @@ from cmp.stages.common import Stage
 from cmtklib.interfaces.eeglab2fif import EEGLAB2fif
 from cmtklib.interfaces.createrois import CreateRois
 from cmtklib.interfaces.createsrc import CreateSrc
-from cmtklib.interfaces.createbem import CreateBEM
+from cmtklib.interfaces.mne import CreateBEM
 
 
 class EEGPreparerConfig(HasTraits):
