@@ -17,3 +17,9 @@ omit =
     */bids/network*
     # omit cmtklib/carbonfootprint.py which is called outside coverage
     cmtklib/carbonfootprint.py
+    # omit all code related to EEG pipeline
+    cmp/pipelines/functional/eeg.py
+    cmp/stages/eeg/*
+    cmtklib/interfaces/eeg.py
+    cmtklib/interfaces/mne.py
+    cmtklib/interfaces/pycartool.py

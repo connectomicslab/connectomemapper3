@@ -19,6 +19,7 @@ from nipype import __version__ as nipype_version
 __cmp_directory__ = f'cmp-{__version__}'
 __nipype_directory__ = f'nipype-{nipype_version}'
 __freesurfer_directory__ = f'freesurfer-7.1.1'
+__cartool_directory__ = f'Cartool-v3.80'
 
 
 class CustomBIDSFile(HasTraits):

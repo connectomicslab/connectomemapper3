@@ -1,13 +1,21 @@
-import pycartool as cart
+# Copyright (C) 2009-2022, Ecole Polytechnique Federale de Lausanne (EPFL) and
+# Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland, and CMP3 contributors
+# All rights reserved.
+#
+#  This software is distributed under the open-source license Modified BSD.
+"""The PyCartool module provides Nipype interfaces with Cartool using pycartool."""
+
 import pickle
-import numpy as  np
+import numpy as np
+
 import mne
-from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, traits, TraitedSpec
+import pycartool as cart
+
+from nipype import BaseInterface
+from nipype.interfaces.base import BaseInterfaceInputSpec, TraitedSpec, traits
 
 
 class CartoolInverseSolutionROIExtractionInputSpec(BaseInterfaceInputSpec):
-    """Input specification for InverseSolution."""
-
     eeg_ts_file = traits.List(
         exists=True, desc='eeg * epochs in .set format', mandatory=True)
 
@@ -15,29 +23,39 @@ class CartoolInverseSolutionROIExtractionInputSpec(BaseInterfaceInputSpec):
         exists=True, desc='Inverse solution (.is file loaded with pycartool)', mandatory=True)
 
     rois_file = traits.List(
-        exists=True, desc='rois file, loaded with pickle', mandatory=True)
+        exists=True, desc='Rois file, loaded with pickle', mandatory=True)
 
     invsol_params = traits.Dict(
-        desc='Parameters for inverse soltion and roi tc extraction', mandatory=True)
+        desc='Parameters for inverse solution and roi tc extraction', mandatory=True)
 
     roi_ts_file = traits.File(
         exists=False, desc="rois * time series in .npy format")
 
 
 class CartoolInverseSolutionROIExtractionOutputSpec(TraitedSpec):
-    """Output specification for InverseSolution."""
-
     roi_ts_file = traits.File(
         exists=True, desc="rois * time series in .npy format")
 
 
 class CartoolInverseSolutionROIExtraction(BaseInterface):
-    """Interface for roitimecourses.svd.
-	Inputs
-	------
-	Outputs
-	-------
-	"""
+    """Use Pycartool to load inverse solutions estimated by Cartool.
+
+    Examples
+    --------
+    >>> from cmtklib.interfaces.pycartool import CartoolInverseSolutionROIExtraction
+    >>> cartool_inv_sol = CartoolInverseSolutionROIExtraction()
+    >>> cartool_inv_sol.inputs.eeg_ts_file = 'TBC'
+    >>> cartool_inv_sol.inputs.invsol_file = 'TBC'
+    >>> cartool_inv_sol.inputs.rois_file = 'TBC'
+    >>> cartool_inv_sol.inputs.invsol_params = {'TBC'}
+    >>> cartool_inv_sol.inputs.roi_ts_file = 'TBC'
+    >>> cartool_inv_sol.run()  # doctest: +SKIP
+
+    References
+    ----------
+    - https://pycartool.readthedocs.io/en/latest/pycartool.io.html#module-pycartool.io.inverse_solution
+
+    """
 
     input_spec = CartoolInverseSolutionROIExtractionInputSpec
     output_spec = CartoolInverseSolutionROIExtractionOutputSpec
