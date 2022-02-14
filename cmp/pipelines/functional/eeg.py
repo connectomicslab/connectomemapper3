@@ -4,31 +4,23 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-""" EEG pipeline Class definition
-"""
+"""EEG pipeline Class definition."""
 
 import datetime
-import os
-import glob
-import shutil
 
-import nipype.pipeline.engine as pe
-import nipype.interfaces.utility as util
 import nipype.interfaces.io as nio
 from nipype import config, logging
 
-from traits.api import *
-
 import cmp.pipelines.common as cmp_common
+from cmp.info import __version__
 from cmp.pipelines.common import *
+from cmp.stages.eeg.inverse_solution import EEGInverseSolutionStage
 from cmp.stages.eeg.loader import EEGLoaderStage
 from cmp.stages.eeg.preparer import EEGPreparerStage
-from cmp.stages.eeg.inverse_solution import EEGInverseSolutionStage
-from cmp.info import __version__
 from cmtklib.bids.io import __nipype_directory__, __cartool_directory__
 
 
-class Global_Configuration(HasTraits):
+class GlobalConfig(HasTraits):
     """Global EEG pipeline configurations.
 
     Attributes
@@ -77,7 +69,7 @@ class EEGPipeline(Pipeline):
     derivatives_directory = Directory
     ordered_stage_list = ["EEGPreparer", "EEGLoader", "InverseSolution"]
 
-    global_conf = Global_Configuration()
+    global_conf = GlobalConfig()
     config_file = Str
     parcellation_scheme = Str
     atlas_info = Dict()
