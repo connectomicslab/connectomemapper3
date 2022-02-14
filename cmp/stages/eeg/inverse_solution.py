@@ -34,7 +34,8 @@ class EEGInverseSolutionConfig(HasTraits):
     """
 
     invsol_format = Enum(
-        "Cartool-LAURA", "Cartool-LORETA", "mne-sLORETA", desc="Specify the inverse solution algorithm"
+        "Cartool-LAURA", "Cartool-LORETA", "mne-sLORETA",
+        desc="Specify the inverse solution algorithm"
     )
 
 
@@ -53,7 +54,7 @@ class EEGInverseSolutionStage(Stage):
     """
 
     def __init__(self, bids_dir, output_dir):
-        """Constructor of a :class:`~cmp.stages.parcellation.parcellation.ParcellationStage` instance."""
+        """Constructor of a :class:`~cmp.stages.eeg.inverse_solution.EEGInverseSolutionStage` instance."""
         self.name = "eeg_inverse_solution_stage"
         self.bids_dir = bids_dir
         self.output_dir = output_dir

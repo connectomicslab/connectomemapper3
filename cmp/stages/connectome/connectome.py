@@ -121,7 +121,7 @@ class ConnectomeStage(Stage):
         ]
 
     def create_workflow(self, flow, inputnode, outputnode):
-        """Create the stage worflow.
+        """Create the stage workflow.
 
         Parameters
         ----------
