@@ -60,7 +60,7 @@ class EEGPreparerConfig(HasTraits):
     invsol_format = Enum('Cartool-LAURA', 'Cartool-LORETA', 'mne-sLORETA',
                          desc='Cartool vs mne')
 
-    parcellation = Dict({'label':'aparc', 'desc':'', 'suffix':''})
+    parcellation = Dict({'label': 'aparc', 'desc': '', 'suffix': ''})
     cartool_dir = Str('cartool-v3.80')
     cmp3_dir = Str('cmp')
     EEG_params = Dict()
@@ -134,53 +134,64 @@ class EEGPreparerStage(Stage):
             if self.config.eeg_format == ".set":
 
                 eeglab2fif_node = pe.Node(EEGLAB2fif(), name="eeglab2fif")
-                flow.connect([(inputnode, eeglab2fif_node,
-                           [('epochs', 'eeg_ts_file'),
-                            ('behav_file', 'behav_file'),
-                            ('epochs_fif_fname', 'epochs_fif_fname'),
-                            ('EEG_params','EEG_params'),
-                            ('output_query', 'output_query'),
-                            ('derivative_list', 'derivative_list'),
-                            ]
-                           )])
-
-                flow.connect([(eeglab2fif_node, createrois_node,
-                               [('output_query', 'output_query'),
-                                ('derivative_list', 'derivative_list')]
-                               )])
+                # fmt: off
+                flow.connect(
+                    [
+                        (inputnode, eeglab2fif_node, [('epochs', 'eeg_ts_file'),
+                                                      ('behav_file', 'behav_file'),
+                                                      ('epochs_fif_fname', 'epochs_fif_fname'),
+                                                      ('EEG_params', 'EEG_params'),
+                                                      ('output_query', 'output_query'),
+                                                      ('derivative_list', 'derivative_list')]),
+                        (eeglab2fif_node, createrois_node, [('output_query', 'output_query'),
+                                                            ('derivative_list', 'derivative_list')])
+                    ]
+                )
+                # fmt: on
 
             else:
-                flow.connect([(inputnode, createrois_node,
-                               [('output_query', 'output_query'),
-                                ('derivative_list', 'derivative_list')]
-                               )])
+                # fmt: off
+                flow.connect(
+                    [
+                        (inputnode, createrois_node, [('output_query', 'output_query'),
+                                                      ('derivative_list', 'derivative_list')])
+                    ]
+                )
+                # fmt: on
 
-            flow.connect([(inputnode, createrois_node,
-                           [('subject', 'subject'),
-                            ('bids_dir', 'bids_dir'),
-                            ('parcellation', 'parcellation'),
-                            ('cartool_dir', 'cartool_dir'),
-                            ('cmp3_dir', 'cmp3_dir'),
-                            ]
-                           )])
-
-            flow.connect([(createrois_node, outputnode,
-                           [('output_query', 'output_query'),
-                            ('derivative_list', 'derivative_list')]
-                           )])
+            # fmt: off
+            flow.connect(
+                [
+                    (inputnode, createrois_node, [('subject', 'subject'),
+                                                  ('bids_dir', 'bids_dir'),
+                                                  ('parcellation', 'parcellation'),
+                                                  ('cartool_dir', 'cartool_dir'),
+                                                  ('cmp3_dir', 'cmp3_dir')]),
+                    (createrois_node, outputnode, [('output_query', 'output_query'),
+                                                   ('derivative_list', 'derivative_list')])
+                ]
+            )
+            # fmt: on
 
             ii = pe.Node(interface=util.IdentityInterface(
                 fields=['invsol_params', 'roi_ts_file'],
                 mandatory_inputs=True), name="identityinterface")
 
             ii.inputs.roi_ts_file = ''
-            ii.inputs.invsol_params = {'lamda': 6,
-                                       'svd_params': {'toi_begin': 120,
-                                                      'toi_end': 500}
-                                       }
-            flow.connect([(ii, outputnode,
-                           [('invsol_params', 'invsol_params')]
-                           )])
+            ii.inputs.invsol_params = {
+                'lamda': 6,
+                'svd_params': {
+                    'toi_begin': 120,
+                    'toi_end': 500
+                }
+            }
+            # fmt: off
+            flow.connect(
+                [
+                    (ii, outputnode,[('invsol_params', 'invsol_params')])
+                ]
+            )
+            # fmt: on
 
         elif self.config.invsol_format.split('-')[0] == "mne":
 
@@ -188,63 +199,54 @@ class EEGPreparerStage(Stage):
             createbem_node = pe.Node(CreateBEM(), name="createbem")
             inputnode.inputs.base_dir = self.bids_dir
 
+            # Create source space
             if self.config.eeg_format == ".set":
 
                 eeglab2fif_node = pe.Node(EEGLAB2fif(), name="eeglab2fif")
-                
-                flow.connect([(inputnode, eeglab2fif_node,
-                           [('epochs', 'eeg_ts_file'),
-                            ('behav_file', 'behav_file'),
-                            ('epochs_fif_fname', 'epochs_fif_fname'),
-                            ('electrode_positions_file','electrode_positions_file'),
-                            ('EEG_params','EEG_params'),
-                            ('output_query', 'output_query'),
-                            ('derivative_list', 'derivative_list'),
-                            ]
-                           )])
 
-                flow.connect([(eeglab2fif_node, createsrc_node,
-                           [('output_query', 'output_query'),
-                            ('derivative_list', 'derivative_list')]                           
-                           )])  
-
-                # create source space
-                flow.connect([(inputnode, createsrc_node,
-                           [('subject', 'subject'),
-                            ('bids_dir', 'bids_dir'),
-                            ]
-                           )])
+                # fmt: off
+                flow.connect(
+                    [
+                        (inputnode, eeglab2fif_node, [('epochs', 'eeg_ts_file'),
+                                                      ('behav_file', 'behav_file'),
+                                                      ('epochs_fif_fname', 'epochs_fif_fname'),
+                                                      ('electrode_positions_file','electrode_positions_file'),
+                                                      ('EEG_params','EEG_params'),
+                                                      ('output_query', 'output_query'),
+                                                      ('derivative_list', 'derivative_list')]),
+                        (eeglab2fif_node, createsrc_node, [('output_query', 'output_query'),
+                                                           ('derivative_list', 'derivative_list')]),
+                        (inputnode, createsrc_node, [('subject', 'subject'), ('bids_dir', 'bids_dir')])
+                    ]
+                )
+                # fmt: on
 
             else:
-                # create source space
-                flow.connect([(inputnode, createsrc_node,
-                               [('output_query', 'output_query'),
-                                ('derivative_list', 'derivative_list'),
-                                ('subject', 'subject'),
-                                ('bids_dir', 'bids_dir')]
-                               )])
+                # fmt: off
+                flow.connect(
+                    [
+                        (inputnode, createsrc_node, [('output_query', 'output_query'),
+                                                     ('derivative_list', 'derivative_list'),
+                                                     ('subject', 'subject'),
+                                                     ('bids_dir', 'bids_dir')])
+                    ]
+                )
+                # fmt: on
 
-            # create boundary element model (BEM)
-            flow.connect([(inputnode, createbem_node,
-                           [('subject', 'subject'),
-                            ('bids_dir', 'bids_dir'),
-                            ]
-                           )])
-
-            flow.connect([(createsrc_node, createbem_node,
-                           [('output_query', 'output_query'),
-                            ('derivative_list', 'derivative_list')]
-                           )])
-
-            # outputnode
-            flow.connect([(createbem_node, outputnode,
-                           [('output_query', 'output_query'),
-                            ('derivative_list', 'derivative_list')]
-                           )])
-
-            flow.connect([(eeglab2fif_node, outputnode,
-                           [('epochs_fif_fname','epochs_fif_fname')]
-                           )])
+            # create boundary element model (BEM) and link the output node
+            # fmt: off
+            flow.connect(
+                [
+                    (inputnode, createbem_node, [('subject', 'subject'),
+                                                 ('bids_dir', 'bids_dir')]),
+                    (createsrc_node, createbem_node, [('output_query', 'output_query'),
+                                                      ('derivative_list', 'derivative_list')]),
+                    (createbem_node, outputnode,  [('output_query', 'output_query'),
+                                                   ('derivative_list', 'derivative_list')]),
+                    (eeglab2fif_node, outputnode, [('epochs_fif_fname', 'epochs_fif_fname')])
+                ]
+            )
+            # fmt: on
 
     def define_inspect_outputs(self):
         raise NotImplementedError

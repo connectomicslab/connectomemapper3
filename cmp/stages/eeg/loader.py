@@ -77,23 +77,21 @@ class EEGLoaderStage(Stage):
         """
         eegloader_node = pe.Node(interface=EEGLoader(), name="eegloader")
 
-        flow.connect([(inputnode, eegloader_node,
-                       [('subject', 'subject'),
-                        ('base_directory', 'base_directory'),
-                        ('output_query', 'output_query'),
-                        ('derivative_list', 'derivative_list')
-                        ]
-                       )])
-
-        flow.connect([(eegloader_node, outputnode,
-                       [
-                           ('EEG', 'EEG'),
-                           ('src', 'src'),
-                           ('invsol', 'invsol'),
-                           ('rois', 'rois'),
-                           ('bem', 'bem')
-                       ]
-                       )])
+        # fmt: off
+        flow.connect(
+            [
+                (inputnode, eegloader_node, [('subject', 'subject'),
+                                             ('base_directory', 'base_directory'),
+                                             ('output_query', 'output_query'),
+                                             ('derivative_list', 'derivative_list')]),
+                (eegloader_node, outputnode, [('EEG', 'EEG'),
+                                              ('src', 'src'),
+                                              ('invsol', 'invsol'),
+                                              ('rois', 'rois'),
+                                              ('bem', 'bem')])
+            ]
+        )
+        # fmt: on
 
     def define_inspect_outputs(self):
         raise NotImplementedError
@@ -106,5 +104,5 @@ class EEGLoaderStage(Stage):
         `True` if the stage has been run successfully
         """
         if self.config.eeg_format == ".set":
-            if self.config.inverse_solution.split('-')[0] == "Cartool":
+            if "Cartool" in self.config.inverse_solution:
                 return os.path.exists(self.config.epochs_fif)
