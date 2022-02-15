@@ -7,6 +7,7 @@
 
 import os
 import pickle
+import warnings
 
 import mne
 import numpy as np
@@ -397,9 +398,11 @@ class EEGLAB2fif(BaseInterface):
     def _convert_eeglab2fif(epochs_file, behav_file, epochs_fif_fname, montage_fname, EEG_params):
         behav = pd.read_csv(behav_file, sep="\t")
         behav = behav[behav.bad_trials == 0]
-        epochs = mne.read_epochs_eeglab(
-            epochs_file, events=None, event_id=None, eog=(), verbose=None, uint16_codec=None
-        )
+        with warnings.catch_warnings(): # suppress some irrelevant warnings coming from mne.read_epochs_eeglab()
+            warnings.simplefilter("ignore")
+            epochs = mne.read_epochs_eeglab(
+                epochs_file, events=None, event_id=None, eog=(), verbose=None, uint16_codec=None
+            )
         epochs.events[:, 2] = list(behav.iloc[:, 0])
         epochs.event_id = EEG_params["EEG_event_IDs"]
 
