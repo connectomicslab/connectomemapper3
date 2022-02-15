@@ -88,6 +88,10 @@ autodoc_mock_imports = ['graphviz',
 # Allow errors in notebooks for doc
 nbsphinx_allow_errors = True
 
+# Explicitly disabling notebook execution
+# Output should always be provided
+nbsphinx_execute = 'never'
+
 # Suppress label warnings
 suppress_warnings = ['autosectionlabel.*']
 
