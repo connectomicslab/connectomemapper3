@@ -1,4 +1,4 @@
-name: py37cmp-gui-eeg
+name: py37cmp-eeg
 
 channels:
   - conda-forge
