@@ -42,6 +42,13 @@ class EEGInverseSolutionConfig(HasTraits):
 class EEGInverseSolutionStage(Stage):
     """Class that represents the reconstruction of the inverse solutions stage of a :class:`~cmp.pipelines.functional.eeg.EEGPipeline`.
 
+    This stage consists of three processing interfaces:
+
+        - :class:`~cmtklib.interfaces.mne.CreateFwd`: Create the forward solution (leadfield) from the BEM and the source space.
+        - :class:`~cmtklib.interfaces.mne.CreateCov`: Create the noise covariance matrix from the data.
+        - :class:`~cmtklib.interfaces.mne.MNEInverseSolution`: Create and apply the actual inverse operator to generate
+          the ROI time courses.
+
     Methods
     -------
     create_workflow()

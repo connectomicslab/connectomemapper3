@@ -67,7 +67,14 @@ class EEGPreparerConfig(HasTraits):
 
 
 class EEGPreparerStage(Stage):
-    """Class that represents .... stage of a :class:`~cmp.pipelines.functional.eeg.EEGPipeline`.
+    """Class that represents the preparing stage of a :class:`~cmp.pipelines.functional.eeg.EEGPipeline`.
+
+    This stage consists of three processing interfaces:
+
+        - :class:`~cmtklib.interfaces.mne.EEGLAB2fif`: Reads eeglab data and converts them to MNE format (`.fif` file extension).
+        - :class:`~cmtklib.interfaces.mne.CreateSrc`: Creates the dipole locations along the surface of the brain.
+        - :class:`~cmtklib.interfaces.mne.CreateBEM`: Creates the boundary element method.
+
 
     Methods
     -------
@@ -81,7 +88,7 @@ class EEGPreparerStage(Stage):
     """
     def __init__(self, bids_dir, output_dir):
         """Constructor of a :class:`~cmp.stages.eeg.preparer.EEGPreparer` instance."""
-        self.name = 'eeg_preparing_stage'
+        self.name = 'eeg_preparer_stage'
         self.bids_dir = bids_dir
         self.output_dir = output_dir
         self.config = EEGPreparerConfig()

@@ -39,7 +39,13 @@ class EEGLoaderConfig(HasTraits):
 
 
 class EEGLoaderStage(Stage):
-    """Class that represents .... stage of a :class:`~cmp.pipelines.functional.eeg.EEGPipeline`.
+    """Class that represents inverse solution input loader stage of a :class:`~cmp.pipelines.functional.eeg.EEGPipeline`.
+
+    This stage consists of one processing interface:
+
+        - :class:`~cmtklib.interfaces.eeg.EEGLoader`: Use `nipype.interfaces.io.BIDSDataGrabber`
+          to query all the necessary files to be passed as inputs to the inverse solution stage of
+          the EEG pipeline.
 
     Methods
     -------
