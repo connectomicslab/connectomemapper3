@@ -150,8 +150,9 @@ We refer to the [main documentation](https://connectome-mapper-3.readthedocs.io/
   for more details about the different processing steps and parameters involved in each pipeline.
 At the time EEG is being fully integrated in the workflow and in the GUI, CMP3 already provides a
   pipeline and a collection of interfaces dedicated to this modality.
-A tutorial notebook in the documentation shows how one can now map the connectivity at the source
-  level derived from EEG in the CMP3 framework.
+A [tutorial notebook](https://connectome-mapper-3.readthedocs.io/en/latest/notebooks/EEG_pipeline_tutorial.html)
+  in the documentation shows how one can now map the connectivity at the source level derived from
+  EEG in the CMP3 framework.
 
 To guarantee consistent processing in large neuroimaging cohorts,
   pipeline and stage parameters can be set by creating and loading pipeline
@@ -170,8 +171,10 @@ To ensure reproducibility and maximize re-usability of the tool, the implemented
 This means that the BIDS App of CMP3 can be run on a large diversity of datasets, on Linux, MacOSX, and Windows computers,
   and on high performance computing systems (clusters) for large-scale analysis.
 
+<!---
 ![\textbf{Overview of the Connectome Mapper 3 BIDS App's workflow.}
 \label{fig:cmp3-diagram}](cmp3-diagram.png)
+-->
 
 All these design considerations make CMP3 not only easy to install and use (as it provides the user with a computing
   environment in which the pipelines are guaranteed to run, and where all dependencies
@@ -198,12 +201,14 @@ All segmented structures are combined at the end of the process to create the fi
   at each scale along with the corresponding label index color mapping file in accordance with the BIDS Derivatives
   specifications.
 
+<!---
 ![\textbf{Overview of the new multi-scale parcellation scheme.}
 \label{fig:parc}](Lausanne2018_parcellation_diagram.png)
+-->
 
 The different segmentation and parcellation outputs of the anatomical pipeline are then taken as inputs of
-  the diffusion and fMRI pipelines that estimate the structural and functional connectomes from
-  raw dMRI and rfMRI data and the pairs of sub-cortical and cortical areas previously segmented.
+  the diffusion, fMRI, and EEG pipelines that estimate the structural and functional connectomes from
+  raw dMRI, raw rfMRI, and preprocessed EEG data and the pairs of sub-cortical and cortical areas previously segmented.
 
 \textbf{A graphical user interface reflecting the workflow structure.}
 CMP3 takes advantage of the Traits/TraitsUI framework
@@ -215,6 +220,7 @@ This has enabled the design of a GUI, which we call the `cmpbidsappmanager`, tha
 It has been designed to guide and support the user in all the steps required to
   perform an analysis (\autoref{fig:gui}).
 
+<!---
 ![\textbf{Graphical User Interface of the Connectome Mapper 3.}
 A typical procedure to perform an analysis would consists of
   (a)   the selection of the root directory of the BIDS dataset to be analyzed,
@@ -223,6 +229,7 @@ A typical procedure to perform an analysis would consists of
   (d)   the inspection of stage outputs with fsleyes, freeview, mrview, or TrackVis
         depending on the tool involved in the stage.
 \label{fig:gui}](cmp3-gui-paper.png)
+-->
 
 Each pipeline can be individually configured and executed with the aid of the user-friendly
   GUI and the output of each stage can be visually reviewed, enabling the user to keep
@@ -242,7 +249,8 @@ CMP3 outputs follow the BIDS Derivatives specifications wherever possible,
 It introduces a new BIDS entity ``atlas-<atlas_label>`` (See [proposal](https://github.com/bids-standard/bids-specification/pull/997))
   that is used in combination with the ``res-<atlas_scale>`` entity to distinguish imaging and network data derived
   from different parcellation atlases and scales.
-While the BIDS-Derivatives extension to organize network data is being developed, in which we
+While the BIDS-Derivatives extension to organize network data
+  (See [BEP017](https://docs.google.com/document/d/1ugBdUF6dhElXdj3u9vw0iWjE6f_Bibsro3ah7sRV0GA/edit#heading=h.mqkmyp254xh6)) is being developed, in which we
   are actively participating, both structural and functional connectomes generated with CMP3 are
   saved by default as graph edge lists in ``.tsv`` files, that can be directly analyzed using
   \href{https://networkx.org/documentation/stable/tutorial.html}{NetworkX} [@Hagberg:2008], a Python library which
@@ -255,9 +263,10 @@ Finally, connectomes can be saved in GraphML format to interface with a lot of g
   software packages for graph analysis such as \href{www.cytoscape.org}{Cytoscape} [@Shannon:2003] [@Gustavsen:2019]
   or \href{www.gephi.org}{Gephi} [@Bastian:2009].
 Structuring outputs as BIDS Derivatives and saving them in a range of file formats
-  thus has a lot of advantages. Not only does it ensure that the connectome files can 
-  be opened by the most popular software packages used in this field to perform complex 
-  network analyses, but it also eases the reuse of all outputs in the BIDS ecosystem.
+  thus has a lot of advantages.
+Not only does it ensure that the connectome files can be opened by the most popular
+  software packages used in this field to perform complex network analyses, but it
+  also eases the reuse of all outputs in the BIDS ecosystem.
 
 \textbf{Developed with openness, transparency, and good practices in mind.}
 CMP3 is published under the terms of the open source 3-Clause Berkeley Software
