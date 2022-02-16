@@ -226,15 +226,6 @@ Nevertheless, it still fulfils the needs of advanced users in charge of analyzin
   offering them the possibility to tune and save all the parameters in configuration files and create a batch
   job to automatically process all data with the BIDS App.
 
-![\textbf{Graphical User Interface of the Connectome Mapper 3.}
-A typical procedure to perform an analysis would consists of
-  (a)   the selection of the root directory of the BIDS dataset to be analyzed,
-  (b)   the creation/edition of the different pipeline configuration files,
-  (c)   the configuration of the BIDS App run and its execution, and
-  (d)   the inspection of stage outputs with fsleyes, freeview, mrview, or TrackVis
-        depending on the tool involved in the stage.
-\label{fig:gui}](cmp3-gui-paper.png)
-
 \textbf{Outputs ready to be reused in the BIDS ecosystem.}
 CMP3 outputs follow the BIDS Derivatives specifications wherever possible,
   which facilitates the sharing of the derivatives in the BIDS App ecosystem,
@@ -261,6 +252,15 @@ Structuring outputs as BIDS Derivatives and saving them in a range of file forma
 Not only does it ensure that the connectome files can be opened by the most popular
   software packages used in this field to perform complex network analyses, but it
   also eases the reuse of all outputs in the BIDS ecosystem.
+
+![\textbf{Graphical User Interface of the Connectome Mapper 3.}
+A typical procedure to perform an analysis would consists of
+  (a)   the selection of the root directory of the BIDS dataset to be analyzed,
+  (b)   the creation/edition of the different pipeline configuration files,
+  (c)   the configuration of the BIDS App run and its execution, and
+  (d)   the inspection of stage outputs with fsleyes, freeview, mrview, or TrackVis
+        depending on the tool involved in the stage.
+\label{fig:gui}](cmp3-gui-paper.png)
 
 \textbf{Developed with openness, transparency, and good practices in mind.}
 CMP3 is published under the terms of the open source 3-Clause Berkeley Software
