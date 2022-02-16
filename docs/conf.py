@@ -253,6 +253,9 @@ html_use_index = True
 # This is the file name suffix for HTML files (e.g. ".xhtml").
 # html_file_suffix = None
 
+# Avoid the additional .txt suffix for ipython notebooks
+html_sourcelink_suffix = ''
+
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'CMP3doc'
 
