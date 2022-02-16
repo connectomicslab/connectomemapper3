@@ -44,7 +44,7 @@ authors:
     orcid: 0000-0002-3312-3918
     affiliation: 6
   - name: Meritxell Bach Cuadra
-    affiliation: 1,7
+    affiliation: 7,1
     orcid: 0000-0003-2730-4285
   - name: Patric Hagmann
     orcid: 0000-0002-2854-6561
@@ -62,7 +62,7 @@ affiliations:
    index: 5
  - name: Foxight, Geneva, Switzerland
    index: 6
- - name: CIBM Center for Biomedical Imaging, Geneva, Switzerland
+ - name: CIBM Center for Biomedical Imaging, Lausanne, Switzerland
    index: 7
  - name: Berlin Institute of Health at Charité; Department of Neurology with Experimental Neurology, Brain Simulation Section, Charité Universitätsmedizin Berlin, corporate member of Freie Universität Berlin and Humboldt-Universität zu Berlin, Berlin, Germany
    index: 8
@@ -79,7 +79,7 @@ bibliography: paper.bib
 
 The field of Magnetic Resonance Imaging (MRI) Connectomics has rapidly expanded since its advent 
   in the 2000s [@SpornsTheBrain:2005], [@HagmannFromConnectomics:2005], [@SpornsEditorialConnectomics:2018].
-It has revolutionized the way to investigate *in-vivo*, *non-invasively* and 
+It has revolutionized the way to investigate *in vivo*, *non-invasively* and 
   *safely* at different macroscopic scales the structural and functional systems of the 
   brain by modeling connections between brain areas as a graph or network, known as
   `connectome`, and has become a widely used set of methods in Neuroscience [@Bassett2017]. 
@@ -89,8 +89,9 @@ While brain areas are usually derived from high resolution structural T1 weighte
 Connectome Mapper (CMP), an open-source pipeline software with a graphical user interface (GUI),
   was created to simplify the organization, processing, and analysis of
   sMRI, dMRI, and rfMRI from raw data to multi-scale structural weighted and functional
-  connectomes [@Daducci:2012], using in a common framework the Desikan-Killiany parcellation [@Desikan2006AnInterest]
-  and a multi-scale extension with hierarchical region grouping [@Cammoun2012:MappingMRI].
+  connectomes [@Daducci:2012], using in a common framework a multi-scale extension with
+  hierarchical region grouping [@Cammoun2012:MappingMRI] of the Desikan-Killiany
+  parcellation [@Desikan2006AnInterest].
 
 As MRI is being increasingly more accessible and used in both clinical and research settings,
   such multi-modal MRI datasets are being gathered at an unprecedented rate.
@@ -98,21 +99,20 @@ The size and organization of these datasets as well as the increasing complexity
   pipelines to analyze them present important challenges for scalable computing, data sharing,
   reproducibility and transparency of the analysis.
 The last ten years have indeed witnessed a number of technical advances and a trend towards the adoption
-  of open research practices such as *open data* and *open methodology*
+  of open research practices such as *open data* and *open methods*
   [@Nichols:2017] [@EglenTowardNeuroscience:2017] [@Kennedy2019].
-This has led in particular to the creation of a community standard for dataset organization, known as the Brain Imaging Data Structure (BIDS),
-  initially designed to ease the practice of sharing raw MRI data [@GorgolewskiTheExperiments:2016]. 
+This has led in particular to the creation of a community standard for dataset organization, known as the
+  Brain Imaging Data Structure (BIDS), designed to ease the practice of sharing raw neuroimaging data [@GorgolewskiTheExperiments:2016]. 
 Combined with advances in software virtualization, BIDS has enabled the creation of the BIDS Apps
   framework which uses software container technology to encapsulate neuroimaging processing pipelines
   and ensures portability and reproducibility [@GorgolewskiBIDSMethods:2017].
-A large ecosystem of processing pipelines supporting the mapping of connectomes has evolved around this framework,
-  including C-PAC [@cpac:2013], NIAK [@BellecNeuroimagingNIAK:2016], fMRIPrep [@Ghosh:2018], dMRIPrep [@dmriprep:2019],
+A large ecosystem of processing pipelines supporting the mapping of connectomes has evolved around this framework.
+To the best of our knowledge, it includes  C-PAC [@cpac:2013], NIAK [@BellecNeuroimagingNIAK:2016], fMRIPrep [@Ghosh:2018], dMRIPrep [@dmriprep:2019],
   QSIPREP [@CieslakQSIPrep:2020], MRtrix3_connectome [@Smith2019:BIDSApp], NDMG [@KiarAVariability:2018]
-  PyNets [@PisnerPyNets:2020], and Micapipe [@Rodriguez:2022] which have all demonstrated their capability in
-  addressing the previously-mentioned challenges.
-However, none of the existing solutions provide a direct alternative to CMP
-  when dealing with multimodal datasets with the goal to create connectomes at multiple
-  hierarchical scales.
+  PyNets [@PisnerPyNets:2020], and Micapipe [@Rodriguez:2022].
+All the existing solutions have demonstrated their capability in addressing the previously-mentioned challenges.
+However, none of them provide a direct alternative to CMP when dealing with multimodal datasets
+  with the goal to create connectomes at multiple hierarchical scales.
 
 Connectome Mapper 3 (CMP3) builds up on the two preceding versions of CMP and keeps the same philosophy. 
 It introduces massive improvements in terms of the underlying codebase, the tools used, and the scope of the functionality
@@ -171,10 +171,8 @@ To ensure reproducibility and maximize re-usability of the tool, the implemented
 This means that the BIDS App of CMP3 can be run on a large diversity of datasets, on Linux, MacOSX, and Windows computers,
   and on high performance computing systems (clusters) for large-scale analysis.
 
-<!---
 ![\textbf{Overview of the Connectome Mapper 3 BIDS App's workflow.}
 \label{fig:cmp3-diagram}](cmp3-diagram.png)
--->
 
 All these design considerations make CMP3 not only easy to install and use (as it provides the user with a computing
   environment in which the pipelines are guaranteed to run, and where all dependencies
@@ -201,10 +199,8 @@ All segmented structures are combined at the end of the process to create the fi
   at each scale along with the corresponding label index color mapping file in accordance with the BIDS Derivatives
   specifications.
 
-<!---
 ![\textbf{Overview of the new multi-scale parcellation scheme.}
 \label{fig:parc}](Lausanne2018_parcellation_diagram.png)
--->
 
 The different segmentation and parcellation outputs of the anatomical pipeline are then taken as inputs of
   the diffusion, fMRI, and EEG pipelines that estimate the structural and functional connectomes from
@@ -220,17 +216,6 @@ This has enabled the design of a GUI, which we call the `cmpbidsappmanager`, tha
 It has been designed to guide and support the user in all the steps required to
   perform an analysis (\autoref{fig:gui}).
 
-<!---
-![\textbf{Graphical User Interface of the Connectome Mapper 3.}
-A typical procedure to perform an analysis would consists of
-  (a)   the selection of the root directory of the BIDS dataset to be analyzed,
-  (b)   the creation/edition of the different pipeline configuration files,
-  (c)   the configuration of the BIDS App run and its execution, and
-  (d)   the inspection of stage outputs with fsleyes, freeview, mrview, or TrackVis
-        depending on the tool involved in the stage.
-\label{fig:gui}](cmp3-gui-paper.png)
--->
-
 Each pipeline can be individually configured and executed with the aid of the user-friendly
   GUI and the output of each stage can be visually reviewed, enabling the user to keep
   an eye on the data being processed and easily identify the cause of any problems, change the
@@ -240,6 +225,15 @@ In this way, CMP3 simplifies the creation of connectomes and makes it a straight
 Nevertheless, it still fulfils the needs of advanced users in charge of analyzing a huge amount of data,
   offering them the possibility to tune and save all the parameters in configuration files and create a batch
   job to automatically process all data with the BIDS App.
+
+![\textbf{Graphical User Interface of the Connectome Mapper 3.}
+A typical procedure to perform an analysis would consists of
+  (a)   the selection of the root directory of the BIDS dataset to be analyzed,
+  (b)   the creation/edition of the different pipeline configuration files,
+  (c)   the configuration of the BIDS App run and its execution, and
+  (d)   the inspection of stage outputs with fsleyes, freeview, mrview, or TrackVis
+        depending on the tool involved in the stage.
+\label{fig:gui}](cmp3-gui-paper.png)
 
 \textbf{Outputs ready to be reused in the BIDS ecosystem.}
 CMP3 outputs follow the BIDS Derivatives specifications wherever possible,
