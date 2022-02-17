@@ -254,6 +254,15 @@ This has enabled the design of a GUI, which we call the `cmpbidsappmanager`, tha
 It has been designed to guide and support the user in all the steps required to
   perform an analysis (\autoref{fig:gui}).
 
+![\textbf{Graphical User Interface of the Connectome Mapper 3.}
+A typical procedure to perform an analysis would consists of
+  (a)   the selection of the root directory of the BIDS dataset to be analyzed,
+  (b)   the creation/edition of the different pipeline configuration files,
+  (c)   the configuration of the BIDS App run and its execution, and
+  (d)   the inspection of stage outputs with fsleyes, freeview, mrview, or TrackVis
+        depending on the tool involved in the stage.
+\label{fig:gui}](cmp3-gui-paper.png)
+
 Each pipeline can be individually configured and executed with the aid of the user-friendly
   GUI and the output of each stage can be visually reviewed, enabling the user to keep
   an eye on the data being processed, change the parameters and re-execute the pipeline
@@ -264,15 +273,6 @@ Nevertheless, it still fulfils the needs of advanced users in charge of analyzin
 It offers them the possibility to tune and save all the parameters in configuration files, which
   can then be employed for running the BIDS App either with the Docker or Singularity software container engine directly,
   or with the two [lightweight Docker and Singularity wrappers](https://connectome-mapper-3.readthedocs.io/en/latest/usage.html#with-the-wrappers).
-
-![\textbf{Graphical User Interface of the Connectome Mapper 3.}
-A typical procedure to perform an analysis would consists of
-  (a)   the selection of the root directory of the BIDS dataset to be analyzed,
-  (b)   the creation/edition of the different pipeline configuration files,
-  (c)   the configuration of the BIDS App run and its execution, and
-  (d)   the inspection of stage outputs with fsleyes, freeview, mrview, or TrackVis
-        depending on the tool involved in the stage.
-\label{fig:gui}](cmp3-gui-paper.png)
 
 ## Developed with open science in mind.
 
