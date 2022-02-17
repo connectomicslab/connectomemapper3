@@ -66,7 +66,7 @@ affiliations:
    index: 7
  - name: Berlin Institute of Health at Charité; Department of Neurology with Experimental Neurology, Brain Simulation Section, Charité Universitätsmedizin Berlin, corporate member of Freie Universität Berlin and Humboldt-Universität zu Berlin, Berlin, Germany
    index: 8
-date: 16 February 2021
+date: 18 February 2021
 bibliography: paper.bib
 
 # Optional fields if submitting to a AAS journal too, see this blog post:
@@ -150,7 +150,8 @@ Each stage can consist of one or multiple tasks, where each task can either inte
 We refer to the [main documentation](https://connectome-mapper-3.readthedocs.io/en/latest/bidsappmanager.html#anatomical-pipeline-stages)
   for more details about the different processing steps and parameters involved in each pipeline.
 At the time EEG is being fully integrated in the workflow and in the GUI, CMP3 already provides a
-  pipeline and a collection of interfaces dedicated to this modality.
+  pipeline dedicated to this modality with a collection of interfaces based on MNE-Python [@GramfortEtAl2013a],
+  MNE-Connectivity [@mne-connectivity:2022], and PyCartool [@PyCartool:2019].
 A [tutorial notebook](https://connectome-mapper-3.readthedocs.io/en/latest/notebooks/EEG_pipeline_tutorial.html)
   in the documentation shows how one can now map the connectivity at the source level derived from
   EEG in the CMP3 framework.
