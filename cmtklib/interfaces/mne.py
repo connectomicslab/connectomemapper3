@@ -399,13 +399,13 @@ class EEGLAB2fif(BaseInterface):
     @staticmethod
     def _convert_eeglab2fif(epochs_file, behav_file, epochs_fif_fname, montage_fname, EEG_params):
         behav = pd.read_csv(behav_file, sep="\t")
-        behav = behav[behav.bad_trials == 0]
+        behav = behav[behav.bad_epoch == 0]
         with warnings.catch_warnings(): # suppress some irrelevant warnings coming from mne.read_epochs_eeglab()
             warnings.simplefilter("ignore")
             epochs = mne.read_epochs_eeglab(
                 epochs_file, events=None, event_id=None, eog=(), verbose=None, uint16_codec=None
             )
-        epochs.events[:, 2] = list(behav.iloc[:, 0])
+        epochs.events[:, 2] = list(behav.iloc[:, 3])
         epochs.event_id = EEG_params["EEG_event_IDs"]
 
         # apply user-defined EEG parameters

@@ -20,7 +20,8 @@ from cmp.stages.eeg.preparer import EEGPreparerStage
 from cmtklib.bids.io import (
     __cmp_directory__,
     __nipype_directory__,
-    __cartool_directory__
+    __cartool_directory__,
+    __eeglab_directory__
 )
 
 
@@ -291,7 +292,7 @@ class EEGPipeline(Pipeline):
         file_extension_start = epochs_fname.find(".")
         eeg_format = epochs_fname[file_extension_start:]
         if eeg_format == ".set":
-            derivatives_folder = "eeglab"
+            derivatives_folder = __eeglab_directory__
         elif eeg_format == ".fif":
             derivatives_folder = "mne"
         else:
@@ -302,7 +303,7 @@ class EEGPipeline(Pipeline):
             self.base_directory, 'derivatives', f'cmp-{__version__}', self.subject, 'eeg'
         )
         eeglab_path_prefix_file = os.path.join(
-            self.base_directory, 'derivatives', 'eeglab', self.subject, 'eeg'
+            self.base_directory, 'derivatives', __eeglab_directory__, self.subject, 'eeg'
         )
         derivatives_path_prefix_file = os.path.join(
             os.path.join(self.base_directory, "derivatives", derivatives_folder, self.subject, "eeg")
@@ -328,11 +329,9 @@ class EEGPipeline(Pipeline):
             datasource.inputs.behav_file = [
                 os.path.join(
                     self.base_directory,
-                    "derivatives",
-                    "eeglab",
                     self.subject,
                     "eeg",
-                    self.subject + "_task-" + expe_name + "_desc-preproc_events.tsv",
+                    self.subject + "_task-" + expe_name + "_events.tsv",
                 )
             ]
 
@@ -415,7 +414,7 @@ class EEGPipeline(Pipeline):
 
             # These two files come from cartool, which is non-standard, needs to be fixed!!
             datasource.inputs.electrode_positions_file = os.path.join(
-                eeglab_path_prefix_file, f'{self.subject}.xyz'
+                eeglab_path_prefix_file, f'{self.subject}_eeg.xyz'
             )
 
             # fmt: off
