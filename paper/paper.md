@@ -130,7 +130,7 @@ This manuscript summarizes CMP3 along with different design characteristics and 
 
 # Summary
 
-## A flexible and interoperable workflow for multi-modal human connectome mapping.
+## A flexible and interoperable workflow for multi-modal human connectome mapping
 
 Connectome Mapper 3 (CMP3) implements a workflow that creates a hierarchical multi-scale
   connectome representation of the structural and functional brain systems, from any
@@ -182,7 +182,7 @@ All these design considerations make CMP3 easy to install and use (as it provide
 They also make CMP3 efficient in managing and scaling the pipeline execution while recording provenance,
   and easy to customize and extend it for specific needs.
 
-## A revisited and extended multi-scale cortical parcellation scheme.
+## A revisited and extended multi-scale cortical parcellation scheme
 
 CMP3 revisits the multiscale cortical parcellation proposed by [@Cammoun2012:MappingMRI].
 The parcellation derived from the Desikan-Killiany atlas [@Desikan2006AnInterest] has been
@@ -210,7 +210,7 @@ The different segmentation and parcellation outputs of the anatomical pipeline a
   raw dMRI, raw rfMRI, and preprocessed EEG data and the pairs of sub-cortical and cortical areas previously segmented.
 \label{fig:parc}](Lausanne2018_parcellation_diagram.png)
 
-## Outputs ready to be reused in the BIDS ecosystem.
+## Outputs ready to be reused in the BIDS ecosystem
 
 CMP3 outputs follow the BIDS Derivatives specifications wherever possible,
   which facilitates the sharing of the derivatives in the BIDS App ecosystem,
@@ -243,7 +243,7 @@ Not only does it ensure that the connectome files can be opened by the most popu
   software packages used in this field to perform complex network analyses, but it
   also eases the reuse of all outputs in the BIDS ecosystem.
 
-## A focus on accessibility and versatility.
+## A focus on accessibility and versatility
 
 CMP3 takes advantage of the Traits/TraitsUI framework
   (\href{http://docs.enthought.com/traits/}{http://docs.enthought.com/traits/}) for building an
@@ -274,7 +274,7 @@ It offers them the possibility to tune and save all the parameters in configurat
   can then be employed for running the BIDS App either with the Docker or Singularity software container engine directly,
   or with the two [lightweight Docker and Singularity wrappers](https://connectome-mapper-3.readthedocs.io/en/latest/usage.html#with-the-wrappers).
 
-## Developed with open science in mind.
+## Developed with open science in mind
 
 CMP3 is published under the terms of the open source 3-Clause Berkeley Software
   Distribution (3-Clause BSD) license, which allows unlimited modification, redistribution
