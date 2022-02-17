@@ -184,33 +184,34 @@ They also make CMP3 efficient in managing and scaling the pipeline execution whi
 
 ## A revisited and extended multi-scale cortical parcellation scheme.
 
-CMP3 revisits the multiscale cortical parcellation proposed by [@Cammoun2012:MappingMRI] and extends it with new structures including a subdivision of the thalamus into 7 nuclei per hemisphere, of the hippocampus into 12 subfields, and of the brainstem into
-  4 sub-structures (\autoref{fig:parc}).
-
+CMP3 revisits the multiscale cortical parcellation proposed by [@Cammoun2012:MappingMRI].
 The parcellation derived from the Desikan-Killiany atlas [@Desikan2006AnInterest] has been
   made symmetric by projecting the right hemisphere labels to the left hemisphere, matching the
   boundaries of the projected regions of the left hemisphere to the boundaries of the original regions
   of the left hemisphere, applying this transformation to the rest of the scales, and saving
   each parcellation scale of each hemisphere in a Freesurfer annotation file.
+It also extends the parcellations with new structures including a subdivision of the thalamus into
+  7 nuclei per hemisphere, of the hippocampus into 12 subfields, and of the brainstem into 4 sub-structures.
+An overview and brief description of the new scheme and its integration with all the implemented pipelines
+  are provided in \autoref{fig:parc}.
 
-After the resampling of the fsaverage cortical surface onto the individual cortical surface,
-  CMP3 maps the parcellation annotation files to the individual space and generate the volumetric
-  parcellation for each scale.
+![\textbf{Overview of the new multi-scale parcellation scheme.}
+After performing Desikan-Killiany brain parcellation [@Desikan2006AnInterest] with Freesurfer, CMP3 resamples
+  the fsaverage cortical surface onto the individual cortical surface and maps the parcellation
+  annotation files to the individual space, to generate the volumetric parcellation for each scale.
 Then, one can now decide whether to perform brainstem parcellation [@Iglesias2015BayesianMRI], hippocampal
   subfields segmentation [@Iglesias2015AMRI], and/or probabilistic atlas-based segmentation of the thalamic
   nuclei [@Najdenovska2018In-vivoImaging].
 All segmented structures are then combined to create the final parcellation nifti image at each scale
   along with the corresponding label index color mapping file in accordance with the BIDS Derivatives
   specifications.
-
-![\textbf{Overview of the new multi-scale parcellation scheme.}
-\label{fig:parc}](Lausanne2018_parcellation_diagram.png)
-
 The different segmentation and parcellation outputs of the anatomical pipeline are then taken as inputs of
   the diffusion, fMRI, and EEG pipelines that estimate the structural and functional connectomes from
   raw dMRI, raw rfMRI, and preprocessed EEG data and the pairs of sub-cortical and cortical areas previously segmented.
+\label{fig:parc}](Lausanne2018_parcellation_diagram.png)
 
-\textbf{A graphical user interface reflecting the workflow structure.}
+## A focus on accessibility and versatility.
+
 CMP3 takes advantage of the Traits/TraitsUI framework
   (\href{http://docs.enthought.com/traits/}{http://docs.enthought.com/traits/}) for building an
   interactive GUI, to give to pipelines and stages a graphical representation
@@ -223,27 +224,30 @@ It has been designed to guide and support the user in all the steps required to
 Each pipeline can be individually configured and executed with the aid of the user-friendly
   GUI and the output of each stage can be visually reviewed, enabling the user to keep
   an eye on the data being processed, change the parameters and re-execute the pipeline
-  when results at a given stage are found not to be satisfactory.
+  when it is found not to be satisfactory.
 In this way, CMP3 simplifies the creation of connectomes and makes it a straightforward process
   even for users not familiar with Nipype and software container technology.
-Nevertheless, it still fulfils the needs of advanced users in charge of analyzing a huge amount of data,
-  offering them the possibility to tune and save all the parameters in configuration files and create a batch
-  job to automatically process all data with the BIDS App.
+Nevertheless, it still fulfils the needs of advanced users in charge of analyzing large datasets.
+It offers them the possibility to tune and save all the parameters in configuration files, which
+  can then be employed for running the BIDS App either with the Docker or Singularity software container engine directly,
+  or with the two [lightweight Docker and Singularity wrappers](https://connectome-mapper-3.readthedocs.io/en/latest/usage.html#with-the-wrappers).
 
 ## Outputs ready to be reused in the BIDS ecosystem.
+
 CMP3 outputs follow the BIDS Derivatives specifications wherever possible,
   which facilitates the sharing of the derivatives in the BIDS App ecosystem,
   and allows the user to easily retrieve any of the files generated by CMP3
   with tools of the BIDS ecosystem such as pybids [@Yarkoni:2019].
 It introduces a new BIDS entity ``atlas-<atlas_label>`` (See [proposal](https://github.com/bids-standard/bids-specification/pull/997))
   that is used in combination with the ``res-<atlas_scale>`` entity to distinguish imaging and network data derived
-  from different parcellation atlases and scales.
+  from different parcellation atlases and scales (\autoref{fig:parc}).
 While the BIDS-Derivatives extension to organize network data
-  (See [BEP017](https://docs.google.com/document/d/1ugBdUF6dhElXdj3u9vw0iWjE6f_Bibsro3ah7sRV0GA/edit#heading=h.mqkmyp254xh6)) is being developed, in which we
-  are actively participating, both structural and functional connectomes generated with CMP3 are
-  saved by default as graph edge lists in ``.tsv`` files, that can be directly analyzed using
-  \href{https://networkx.org/documentation/stable/tutorial.html}{NetworkX} [@Hagberg:2008], a Python library which
-  offers many algorithms and tools to explore graphs and compute local and global network properties.
+  (See [BEP017](https://docs.google.com/document/d/1ugBdUF6dhElXdj3u9vw0iWjE6f_Bibsro3ah7sRV0GA/edit#heading=h.mqkmyp254xh6))
+  is being developed, in which we are actively participating, structural and functional connectome files
+  are saved in multiple formats following the convention shown in \autoref{fig:parc}.
+DMRI- and rfMRI- derived connectomes can both saved by default as graph edge lists in ``.tsv`` files, that can
+  be directly analyzed using \href{https://networkx.org/documentation/stable/tutorial.html}{NetworkX} [@Hagberg:2008],
+  a Python library which offers many algorithms and tools to explore graphs and compute local and global network properties.
 Connectivity matrices can be exported to Matlab as MAT-files can be fed to the
   \href{www.brain-connectivity-toolbox.net}{Brain Connectivity Toolbox} [@Rubinov:2010], which is a powerful
   toolbox containing a large selection of network measures for the characterization of brain
@@ -251,6 +255,10 @@ Connectivity matrices can be exported to Matlab as MAT-files can be fed to the
 Finally, connectomes can be saved in GraphML format to interface with a lot of general purpose
   software packages for graph analysis such as \href{www.cytoscape.org}{Cytoscape} [@Shannon:2003] [@Gustavsen:2019]
   or \href{www.gephi.org}{Gephi} [@Bastian:2009].
+While it is planned to also be able to generate EEG-derived connectome files in similar formats,
+  they can now be generated and saved in the form of netCDF files (`.nc` extension) using
+  MNE-Connectivity [@mne-connectivity:2022], and can be reloaded using the netCDF4 python
+  library (https://pypi.org/project/netCDF4/). 
 Structuring outputs as BIDS Derivatives and saving them in a range of file formats
   thus has a lot of advantages.
 Not only does it ensure that the connectome files can be opened by the most popular
@@ -267,6 +275,7 @@ A typical procedure to perform an analysis would consists of
 \label{fig:gui}](cmp3-gui-paper.png)
 
 ## Developed with open science in mind.
+
 CMP3 is published under the terms of the open source 3-Clause Berkeley Software
   Distribution (3-Clause BSD) license, which allows unlimited modification, redistribution
   and commercial use in source and binary forms, as long as the copyright notice is retained and the
