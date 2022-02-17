@@ -2,6 +2,58 @@
 Changes
 ========
 
+****************************
+Version 3.0.3
+****************************
+
+Date: Feb 18, 2022
+
+This version mostly introduces a new pipeline dedicated to EEG modality, adds new tutorial notebooks, and updates Freesurfer.
+It incorporates in particular the following changes.
+
+*New features*
+
+*   CMP3 provides a new pipeline :py:class:`cmp.pipelines.functional.eeg.EEGPipeline` dedicated to EEG modality
+    with a collection of interfaces implemented by the following modules: :py:mod:`cmtklib.interfaces.eeg`,
+    :py:mod:`cmtklib.interfaces.mne`, and :py:mod:`cmtklib.interfaces.pycartool`.
+    See `PR #82 <https://github.com/connectomicslab/connectomemapper3/pull/82>`_ for more details.
+
+*Updates*
+
+*   Freesurfer has been updated from ``6.1.0`` to ``7.1.1``.
+    See `PR #147 <https://github.com/connectomicslab/connectomemapper3/pull/147>`_ for more details.
+
+*Bug fix*
+
+*   FIX: List of outputs are empty in inspector window of the parcellation and fmri_connectome stages.
+    See `PR #145 <https://github.com/connectomicslab/connectomemapper3/pull/145>`_ for more details.
+
+*   Correct way GM mask is generated and clean code in cmtklib/parcellation.py.
+
+*   Add interface to copy 001.mgz using hardlink.
+
+*Documentation*
+
+*   Add documentation of new classes and functions introduced by the EEG pipeline.
+
+*   Add two ipython notebooks in ``docs/notebooks`` that are integrated directly in the docs with `nbsphinx`:
+
+    *   ``analysis_tutorial.ipynb``: Show how to interact, analyze, and visualize CMP3 outputs.
+
+    *   ``EEG_pipeline_tutorial.ipynb``: Show how to use the new API dedicated to the EEG pipeline.
+
+*Contributors*
+
+*   `Sebastien Tourbier <https://github.com/connectomicslab/connectomemapper3/issues?q=is%3Apr+author%3Asebastientourbier>`_
+
+*   `Joan Rue Queralt <https://github.com/connectomicslab/connectomemapper3/issues?q=is%3Apr+author%3Ajoanrue>`_
+
+*   `Katharina Glomb <https://github.com/connectomicslab/connectomemapper3/issues?q=is%3Apr+author%3AKatharinski>`_
+
+*More...*
+
+Please check the main `PR #146 <https://github.com/connectomicslab/connectomemapper3/pull/146>`_ page for more details.
+
 
 ****************************
 Version 3.0.2
@@ -10,7 +62,7 @@ Version 3.0.2
 Date: Jan 31, 2021
 
 This version mostly introduces the capability to estimate carbon footprint of CMP3 execution and fix problem of conflicts during the creation of the conda environment.
-It incorporates includes in particular the following changes.
+It incorporates in particular the following changes.
 
 *New features*
 
