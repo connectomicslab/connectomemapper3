@@ -221,8 +221,8 @@ It has been designed to guide and support the user in all the steps required to
 
 Each pipeline can be individually configured and executed with the aid of the user-friendly
   GUI and the output of each stage can be visually reviewed, enabling the user to keep
-  an eye on the data being processed and easily identify the cause of any problems, change the
-  parameters and re-execute when results at a given stage are found not to be satisfactory.
+  an eye on the data being processed, change the parameters and re-execute the pipeline
+  when results at a given stage are found not to be satisfactory.
 In this way, CMP3 simplifies the creation of connectomes and makes it a straightforward process
   even for users not familiar with Nipype and software container technology.
 Nevertheless, it still fulfils the needs of advanced users in charge of analyzing a huge amount of data,
