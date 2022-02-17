@@ -210,28 +210,6 @@ The different segmentation and parcellation outputs of the anatomical pipeline a
   raw dMRI, raw rfMRI, and preprocessed EEG data and the pairs of sub-cortical and cortical areas previously segmented.
 \label{fig:parc}](Lausanne2018_parcellation_diagram.png)
 
-## A focus on accessibility and versatility.
-
-CMP3 takes advantage of the Traits/TraitsUI framework
-  (\href{http://docs.enthought.com/traits/}{http://docs.enthought.com/traits/}) for building an
-  interactive GUI, to give to pipelines and stages a graphical representation
-  which is easy to understand and extend.
-This has enabled the design of a GUI, which we call the `cmpbidsappmanager`, that reflects
-  the modular structure of the processing workflow.
-It has been designed to guide and support the user in all the steps required to
-  perform an analysis (\autoref{fig:gui}).
-
-Each pipeline can be individually configured and executed with the aid of the user-friendly
-  GUI and the output of each stage can be visually reviewed, enabling the user to keep
-  an eye on the data being processed, change the parameters and re-execute the pipeline
-  when it is found not to be satisfactory.
-In this way, CMP3 simplifies the creation of connectomes and makes it a straightforward process
-  even for users not familiar with Nipype and software container technology.
-Nevertheless, it still fulfils the needs of advanced users in charge of analyzing large datasets.
-It offers them the possibility to tune and save all the parameters in configuration files, which
-  can then be employed for running the BIDS App either with the Docker or Singularity software container engine directly,
-  or with the two [lightweight Docker and Singularity wrappers](https://connectome-mapper-3.readthedocs.io/en/latest/usage.html#with-the-wrappers).
-
 ## Outputs ready to be reused in the BIDS ecosystem.
 
 CMP3 outputs follow the BIDS Derivatives specifications wherever possible,
@@ -264,6 +242,28 @@ Structuring outputs as BIDS Derivatives and saving them in a range of file forma
 Not only does it ensure that the connectome files can be opened by the most popular
   software packages used in this field to perform complex network analyses, but it
   also eases the reuse of all outputs in the BIDS ecosystem.
+
+## A focus on accessibility and versatility.
+
+CMP3 takes advantage of the Traits/TraitsUI framework
+  (\href{http://docs.enthought.com/traits/}{http://docs.enthought.com/traits/}) for building an
+  interactive GUI, to give to pipelines and stages a graphical representation
+  which is easy to understand and extend.
+This has enabled the design of a GUI, which we call the `cmpbidsappmanager`, that reflects
+  the modular structure of the processing workflow.
+It has been designed to guide and support the user in all the steps required to
+  perform an analysis (\autoref{fig:gui}).
+
+Each pipeline can be individually configured and executed with the aid of the user-friendly
+  GUI and the output of each stage can be visually reviewed, enabling the user to keep
+  an eye on the data being processed, change the parameters and re-execute the pipeline
+  when it is found not to be satisfactory.
+In this way, CMP3 simplifies the creation of connectomes and makes it a straightforward process
+  even for users not familiar with Nipype and software container technology.
+Nevertheless, it still fulfils the needs of advanced users in charge of analyzing large datasets.
+It offers them the possibility to tune and save all the parameters in configuration files, which
+  can then be employed for running the BIDS App either with the Docker or Singularity software container engine directly,
+  or with the two [lightweight Docker and Singularity wrappers](https://connectome-mapper-3.readthedocs.io/en/latest/usage.html#with-the-wrappers).
 
 ![\textbf{Graphical User Interface of the Connectome Mapper 3.}
 A typical procedure to perform an analysis would consists of
