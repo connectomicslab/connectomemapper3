@@ -46,11 +46,11 @@ class CartoolInverseSolutionROIExtraction(BaseInterface):
     --------
     >>> from cmtklib.interfaces.pycartool import CartoolInverseSolutionROIExtraction
     >>> cartool_inv_sol = CartoolInverseSolutionROIExtraction()
-    >>> cartool_inv_sol.inputs.eeg_ts_file = 'TBC'
-    >>> cartool_inv_sol.inputs.invsol_file = 'TBC'
-    >>> cartool_inv_sol.inputs.rois_file = 'TBC'
-    >>> cartool_inv_sol.inputs.invsol_params = {'TBC'}
-    >>> cartool_inv_sol.inputs.roi_ts_file = 'TBC'
+    >>> cartool_inv_sol.inputs.eeg_ts_file = 'sub-01_task-faces_desc-preproc_eeg.set'
+    >>> cartool_inv_sol.inputs.invsol_file = 'sub-01_eeg.LORETA.is'
+    >>> cartool_inv_sol.inputs.rois_file = 'sub-01_label-L2008_desc-scale1.rois'
+    >>> cartool_inv_sol.inputs.invsol_params = {'lamda': 6, 'svd_params': {'toi_begin': 0, 'toi_end': 0.25}}
+    >>> cartool_inv_sol.inputs.roi_ts_file = 'sub-01_task-faces_label-L2008_desc-scale1_LORETA.npy'
     >>> cartool_inv_sol.run()  # doctest: +SKIP
 
     References
