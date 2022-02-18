@@ -31,7 +31,6 @@
         "eeg_format": ".set",
         "number_of_threads": 1
     },
-​
     "Multi-processing": {
         "number_of_cores": 1
     }
