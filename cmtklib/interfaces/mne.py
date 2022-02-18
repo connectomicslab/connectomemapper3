@@ -46,8 +46,8 @@ class CreateBEM(BaseInterface):
     >>> create_bem = CreateBEM()
     >>> create_bem.inputs.subject = 'sub-01'
     >>> create_bem.inputs.bids_dir = '/path/to/bids_dataset'
-    >>> create_bem.inputs.output_query = {'TBC'}
-    >>> create_bem.inputs.derivative_list = ['TBC']
+    >>> create_bem.inputs.output_query = {"src": {"suffix": "src", "extension": ["fif"]}}
+    >>> create_bem.inputs.derivative_list = ['cmp-v3.0.3']
     >>> create_bem.run()  # doctest: +SKIP
 
     References
@@ -206,10 +206,10 @@ class CreateFwd(BaseInterface):
     >>> from cmtklib.interfaces.mne import CreateFwd
     >>> create_fwd = CreateFwd()
     >>> create_fwd.inputs.epochs_fif_fname = 'sub-01_epo.fif'
-    >>> create_fwd.inputs.fwd_fname = 'TBC'
-    >>> create_fwd.inputs.src = 'TBC'
-    >>> create_fwd.inputs.bem = 'TBC'
-    >>> create_fwd.inputs.trans_fname = 'TBC'
+    >>> create_fwd.inputs.fwd_fname = 'sub-01-fwd.fif'
+    >>> create_fwd.inputs.src = 'sub-01_src.fif'
+    >>> create_fwd.inputs.bem = 'sub-01_bem.fif'
+    >>> create_fwd.inputs.trans_fname = 'sub-01-trans.fif'
     >>> create_fwd.run()  # doctest: +SKIP
 
     References
@@ -279,8 +279,8 @@ class CreateSrc(BaseInterface):
     >>> create_src = CreateSrc()
     >>> create_src.inputs.subject = 'sub-01'
     >>> create_src.inputs.bids_dir = '/path/to/bids_dataset'
-    >>> create_src.inputs.output_query = {'TBC'}
-    >>> create_src.inputs.derivative_list = ['TBC']
+    >>> create_src.inputs.output_query = {"src": {"suffix": "src", "extension": ["fif"]}}
+    >>> create_src.inputs.derivative_list = ['cmp-v3.0.3']
     >>> create_src.run()  # doctest: +SKIP
 
     References
@@ -358,13 +358,15 @@ class EEGLAB2fif(BaseInterface):
     --------
     >>> from cmtklib.interfaces.mne import EEGLAB2fif
     >>> eeglab2fif = EEGLAB2fif()
-    >>> eeglab2fif.inputs.eeg_ts_file = ['TBC']
-    >>> eeglab2fif.inputs.behav_file = ['TBC']
-    >>> eeglab2fif.inputs.epochs_fif_fname = 'TBC'
-    >>> eeglab2fif.inputs.electrode_positions_file = 'TBC'
-    >>> eeglab2fif.inputs.EEG_params = {'TBC'}
-    >>> eeglab2fif.inputs.output_query = {'TBC'}
-    >>> eeglab2fif.inputs.derivative_list = ['TBC']
+    >>> eeglab2fif.inputs.eeg_ts_file = ['sub-01_task-faces_desc-preproc_eeg.set']
+    >>> eeglab2fif.inputs.behav_file = ['sub-01_task-faces_events.tsv']
+    >>> eeglab2fif.inputs.epochs_fif_fname = 'sub-01_epo.fif'
+    >>> eeglab2fif.inputs.electrode_positions_file = 'sub-01_eeg.xyz'
+    >>> eeglab2fif.inputs.EEG_params = {"expe_name":"faces",
+                                        EEG_event_IDs": {"SCRAMBLED":0, "FACES":1},
+                                        "start_t":-0.2, "end_t":0.6}
+    >>> eeglab2fif.inputs.output_query = {"src": {"suffix": "src", "extension": ["fif"]}}
+    >>> eeglab2fif.inputs.derivative_list = ['cmp-v3.0.3']
     >>> eeglab2fif.run()  # doctest: +SKIP
 
     References
@@ -486,16 +488,16 @@ class MNEInverseSolution(BaseInterface):
     >>> inv_sol = MNEInverseSolution()
     >>> inv_sol.inputs.subject = 'sub-01'
     >>> inv_sol.inputs.bids_dir = '/path/to/bids_dataset'
-    >>> inv_sol.inputs.epochs_fif_fname = 'TBC'
-    >>> inv_sol.inputs.src_file = ['TBC']
-    >>> inv_sol.inputs.bem_file = ['TBC']
+    >>> inv_sol.inputs.epochs_fif_fname = 'sub-01_epo.fif'
+    >>> inv_sol.inputs.src_file = ['sub-01_src.fif']
+    >>> inv_sol.inputs.bem_file = ['sub-01_bem.fif']
     >>> inv_sol.inputs.cov_has_run = 'True'
-    >>> inv_sol.inputs.noise_cov_fname = 'TBC'
+    >>> inv_sol.inputs.noise_cov_fname = 'sub-01_noisecov.fif'
     >>> inv_sol.inputs.fwd_has_run = 'True'
-    >>> inv_sol.inputs.fwd_fname = 'TBC'
-    >>> inv_sol.inputs.inv_fname = 'TBC'
-    >>> inv_sol.inputs.parcellation = 'TBC'
-    >>> inv_sol.inputs.roi_ts_file = 'TBC'
+    >>> inv_sol.inputs.fwd_fname = 'sub-01-fwd.fif'
+    >>> inv_sol.inputs.inv_fname = 'sub-01-inv.fif'
+    >>> inv_sol.inputs.parcellation = 'lausanne2018.scale1'
+    >>> inv_sol.inputs.roi_ts_file = 'sub-01_rtc_epo.pkl'
     >>> inv_sol.run()  # doctest: +SKIP
 
     References
