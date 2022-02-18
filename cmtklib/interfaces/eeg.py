@@ -50,11 +50,11 @@ class CreateRois(BaseInterface):
     >>> createrois = CreateRois()
     >>> createrois.inputs.subject = 'sub-01'
     >>> createrois.inputs.bids_dir = '/path/to/bids_dataset'
-    >>> createrois.inputs.parcellation = 'TBC'
+    >>> createrois.inputs.parcellation = {'label':'L2008', 'desc':'scale1'}'
     >>> createrois.inputs.cartool_dir = 'Cartool-v3.80'
     >>> createrois.inputs.cmp3_dir = 'cmp-v3.0.3'
-    >>> createrois.inputs.output_query = {'TBC'}
-    >>> createrois.inputs.derivative_list = ['TBC']
+    >>> createrois.inputs.output_query = {}
+    >>> createrois.inputs.derivative_list = []
     >>> createrois.run()  # doctest: +SKIP
 
     """
@@ -173,8 +173,12 @@ class EEGLoader(BaseInterface):
     >>> eeg_loader.inputs.base_directory = '/path/to/bids_dataset'
     >>> eeg_loader.inputs.subject = 'sub-01'
     >>> eeg_loader.inputs.invsol_format = 'Cartool-LAURA'
-    >>> eeg_loader.inputs.output_query = {'TBC'}
-    >>> eeg_loader.inputs.derivative_list = ['TBC']
+    >>> eeg_loader.inputs.output_query = {
+    ...                 "rois" : {"extension": ["pickle.rois"]}, 
+    ...                 "src" : {"extension": ["spi"]},
+    ...                 "invsol" = {"extension": ["LAURA.is"]}
+    ... }
+    >>> eeg_loader.inputs.derivative_list = ['/path/to/cartool/derivatives']
     >>> eeg_loader.run()  # doctest: +SKIP
 
     """
