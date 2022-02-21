@@ -206,10 +206,10 @@ class CreateFwd(BaseInterface):
     >>> from cmtklib.interfaces.mne import CreateFwd
     >>> create_fwd = CreateFwd()
     >>> create_fwd.inputs.epochs_fif_fname = 'sub-01_epo.fif'
-    >>> create_fwd.inputs.fwd_fname = 'sub-01-fwd.fif'
+    >>> create_fwd.inputs.fwd_fname = 'sub-01_fwd.fif'
     >>> create_fwd.inputs.src = 'sub-01_src.fif'
     >>> create_fwd.inputs.bem = 'sub-01_bem.fif'
-    >>> create_fwd.inputs.trans_fname = 'sub-01-trans.fif'
+    >>> create_fwd.inputs.trans_fname = 'sub-01_trans.fif'
     >>> create_fwd.run()  # doctest: +SKIP
 
     References
@@ -494,10 +494,10 @@ class MNEInverseSolution(BaseInterface):
     >>> inv_sol.inputs.cov_has_run = 'True'
     >>> inv_sol.inputs.noise_cov_fname = 'sub-01_noisecov.fif'
     >>> inv_sol.inputs.fwd_has_run = 'True'
-    >>> inv_sol.inputs.fwd_fname = 'sub-01-fwd.fif'
-    >>> inv_sol.inputs.inv_fname = 'sub-01-inv.fif'
+    >>> inv_sol.inputs.fwd_fname = 'sub-01_fwd.fif'
+    >>> inv_sol.inputs.inv_fname = 'sub-01_inv.fif'
     >>> inv_sol.inputs.parcellation = 'lausanne2018.scale1'
-    >>> inv_sol.inputs.roi_ts_file = 'sub-01_rtc_epo.pkl'
+    >>> inv_sol.inputs.roi_ts_file = 'sub-01_atlas-L2018_res-scale1_desc-epo_timeseries.npy'
     >>> inv_sol.run()  # doctest: +SKIP
 
     References

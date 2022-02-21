@@ -12,9 +12,8 @@
         "epochs": "sub-01_task-faces_desc-preproc_eeg.set",
         "invsol_format": "mne-sLORETA",
         "parcellation": {
-            "label": "lausanne2018",
-            "desc": "",
-            "suffix": "scale1"
+            "atlas": "lausanne2018",
+            "res": "scale1"
         },
         "number_of_threads": 1,
         "EEG_params": {

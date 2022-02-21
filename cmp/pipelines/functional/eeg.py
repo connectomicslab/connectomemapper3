@@ -318,10 +318,14 @@ class EEGPipeline(Pipeline):
         datasource.inputs.EEG_params = self.stages["EEGPreparer"].config.EEG_params
 
         # Read name of parcellation and determine file name
-        parcellation_label = self.stages["EEGPreparer"].config.parcellation["label"]
-        # Not used / Remove?
-        # parcellation_desc = self.stages["EEGPreparer"].config.parcellation["desc"]
-        parcellation_suffix = self.stages["EEGPreparer"].config.parcellation["suffix"]
+        parcellation_atlas = self.stages["EEGPreparer"].config.parcellation["atlas"]
+        parcellation_resolution = self.stages["EEGPreparer"].config.parcellation["res"]
+        
+        print('Parcellation atlas: ', parcellation_atlas)
+        print('Parcellation resolution: ', parcellation_resolution)
+        
+        if parcellation_atlas == 'lausanne2018':
+            parcellation_atlas = 'L2018'
 
         if self.stages["EEGPreparer"].config.eeg_format == ".set":
             # File with events/behavioral info
@@ -341,9 +345,16 @@ class EEGPipeline(Pipeline):
             )
 
         # Name of output file (ROI time courses)
-        datasource.inputs.roi_ts_file = os.path.join(
-            cmp_path_prefix_file, f"{self.subject}_rtc_epo.npy"
-        )
+        if parcellation_resolution is not None and parcellation_resolution != "":
+            datasource.inputs.roi_ts_file = os.path.join(
+                cmp_path_prefix_file,
+                f"{self.subject}_atlas-{parcellation_atlas}_res-{parcellation_resolution}_desc-epo_timeseries.npy"
+            )
+        else:
+            datasource.inputs.roi_ts_file = os.path.join(
+                cmp_path_prefix_file,
+                f"{self.subject}_atlas-{parcellation_atlas}_desc-epo_timeseries.npy"
+            )
 
         datasource.inputs.output_query = dict()
 
@@ -356,7 +367,7 @@ class EEGPipeline(Pipeline):
 
         if "Cartool" in self.stages['EEGPreparer'].config.invsol_format:
             # atlas image is required
-            parcellation = f'{self.subject}_atlas-{parcellation_label}_res-{parcellation_suffix}_dseg.nii.gz'
+            parcellation = f'{self.subject}_atlas-{parcellation_atlas}_res-{parcellation_resolution}_dseg.nii.gz'
             datasource.inputs.parcellation = os.path.join(
                 self.base_directory, 'derivatives', f'cmp-{__version__}',
                 self.subject, 'anat', parcellation
@@ -389,10 +400,10 @@ class EEGPipeline(Pipeline):
         elif 'mne' in self.stages['EEGPreparer'].config.invsol_format:
 
             # Freesurfer annot files are required
-            if parcellation_suffix == '':
-                parcellation = parcellation_label # aparc
+            if parcellation_resolution == '':
+                parcellation = parcellation_atlas  # aparc
             else:
-                parcellation = parcellation_label + '.' + parcellation_suffix  # lausanne2008.scalex where x=1...5
+                parcellation = 'lausanne2018.' + parcellation_resolution
 
             datasource.inputs.parcellation = parcellation
 
@@ -402,14 +413,14 @@ class EEGPipeline(Pipeline):
             )
 
             datasource.inputs.trans_fname = os.path.join(
-                cmp_path_prefix_file, f'{self.subject}-trans.fif')
+                cmp_path_prefix_file, f'{self.subject}_trans.fif')
 
             datasource.inputs.fwd_fname = os.path.join(
-                cmp_path_prefix_file, f'{self.subject}-fwd.fif'
+                cmp_path_prefix_file, f'{self.subject}_fwd.fif'
             )
 
             datasource.inputs.inv_fname = os.path.join(
-                cmp_path_prefix_file, f'{self.subject}-inv.fif'
+                cmp_path_prefix_file, f'{self.subject}_inv.fif'
             )
 
             # These two files come from cartool, which is non-standard, needs to be fixed!!
