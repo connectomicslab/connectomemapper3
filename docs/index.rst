@@ -87,7 +87,7 @@ dedicated to EEG modality with a collection of interfaces based on
 `MNE <https://mne.tools/>`_, `MNE-Connectivity <https://mne.tools/mne-connectivity>`_, and
 `PyCartool <https://github.com/Functional-Brain-Mapping-Laboratory/PyCartool>`_.
 Please check `this notebook <docs/notebooks/EEG_pipeline_tutorial.ipynb>`_ for a demonstration
-using the public `VEPCON dataset <https://openneuro.org/datasets/ds003505/versions/1.1.1`_.
+using the public `VEPCON dataset <https://openneuro.org/datasets/ds003505/versions/1.1.1>`_.
 
 
 .. role:: raw-html(raw)
