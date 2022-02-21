@@ -8,14 +8,15 @@ Version 3.0.3
 
 Date: Feb 18, 2022
 
-This version mostly introduces a new pipeline dedicated to EEG modality, adds new tutorial notebooks, and updates Freesurfer.
-It incorporates in particular the following changes.
+This version introduces the new pipeline dedicated to EEG modality with a tutorial, updates Freesurfer to 7.1.1, and adds a new tutorial that shows how to analyze the CMP3 connectomes.
+
+**What's Changed**
 
 *New features*
 
 *   CMP3 provides a new pipeline :py:class:`cmp.pipelines.functional.eeg.EEGPipeline` dedicated to EEG modality
-    with a collection of interfaces implemented by the following modules: :py:mod:`cmtklib.interfaces.eeg`,
-    :py:mod:`cmtklib.interfaces.mne`, and :py:mod:`cmtklib.interfaces.pycartool`.
+    with a collection of interfaces implemented by the following modules: :py:mod:`cmtklib.eeg`,
+    :py:mod:`cmtklib.interfaces.eeg`, :py:mod:`cmtklib.interfaces.mne`, and :py:mod:`cmtklib.interfaces.pycartool`.
     See `PR #82 <https://github.com/connectomicslab/connectomemapper3/pull/82>`_ for more details.
 
 *Updates*
@@ -49,6 +50,8 @@ It incorporates in particular the following changes.
 *   `Joan Rue Queralt <https://github.com/connectomicslab/connectomemapper3/issues?q=is%3Apr+author%3Ajoanrue>`_
 
 *   `Katharina Glomb <https://github.com/connectomicslab/connectomemapper3/issues?q=is%3Apr+author%3AKatharinski>`_
+
+*   `Mikkel Schoettner <https://github.com/connectomicslab/connectomemapper3/issues?q=is%3Apr+author%3Amschoettner>`_
 
 *More...*
 
