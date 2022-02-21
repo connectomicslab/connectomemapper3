@@ -43,6 +43,7 @@ packages = [
     "cmp.stages.diffusion",
     "cmp.stages.functional",
     "cmp.stages.connectome",
+    "cmp.stages.eeg",
     "cmp.pipelines",
     "cmp.pipelines.anatomical",
     "cmp.pipelines.diffusion",
@@ -126,7 +127,6 @@ install_requires.append('codecarbon==1.2.0')
 install_requires.append('dash-bootstrap-components==0.13.1')
 print(f'Install requires: {install_requires}')
 print(f'Dependency links: {dependency_links}')
-
 
 # Read the contents of your README file
 with open(os.path.join(directory, "README.md"), encoding="utf-8") as f:

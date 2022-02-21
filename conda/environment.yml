@@ -36,3 +36,4 @@ dependencies:
           - statsmodels==0.13.1
           - networkx==2.6.3
           - pydicom==2.2.2
+          - pycartool==0.1.1

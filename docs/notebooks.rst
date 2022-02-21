@@ -9,3 +9,4 @@ Tutorial notebooks
     :reversed:
 
     notebooks/*_tutorial
+    notebooks/*_demo

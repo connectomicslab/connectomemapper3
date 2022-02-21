@@ -266,7 +266,6 @@ class SegmentationStage(Stage):
             Identity interface describing the outputs of the segmentation stage
         """
         if self.config.seg_tool == "Freesurfer":
-
             def correct_freesurfer_subjectid_path(path):
                 if os.path.exists('/output_dir') and '/output_dir' not in path:
                     subject_id = path.split(f"{__freesurfer_directory__}/")[-1]

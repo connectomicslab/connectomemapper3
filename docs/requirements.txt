@@ -16,3 +16,4 @@ nipype==1.7.0
 matplotlib
 dipy==1.3.0
 pyface[pyside2]==7.3.0
+pycartool==0.1.1
