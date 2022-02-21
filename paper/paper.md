@@ -222,8 +222,8 @@ It introduces a new BIDS entity ``atlas-<atlas_label>`` (See [proposal](https://
 While the BIDS-Derivatives extension to organize network data
   (See [BEP017](https://docs.google.com/document/d/1ugBdUF6dhElXdj3u9vw0iWjE6f_Bibsro3ah7sRV0GA/edit#heading=h.mqkmyp254xh6))
   is being developed, in which we are actively participating, structural and functional connectome files
-  are saved in multiple formats following the convention shown in \autoref{fig:parc}.
-DMRI- and rfMRI- derived connectomes can both saved by default as graph edge lists in ``.tsv`` files, that can
+  derived from the different imaging modalities are saved in multiple formats following the convention shown in \autoref{fig:parc}.
+All connectomes are saved by default as graph edge lists in ``.tsv`` files, that can
   be directly analyzed using \href{https://networkx.org/documentation/stable/tutorial.html}{NetworkX} [@Hagberg:2008],
   a Python library which offers many algorithms and tools to explore graphs and compute local and global network properties.
 Connectivity matrices can be exported to Matlab as MAT-files can be fed to the
@@ -233,10 +233,6 @@ Connectivity matrices can be exported to Matlab as MAT-files can be fed to the
 Finally, connectomes can be saved in GraphML format to interface with a lot of general purpose
   software packages for graph analysis such as \href{www.cytoscape.org}{Cytoscape} [@Shannon:2003] [@Gustavsen:2019]
   or \href{www.gephi.org}{Gephi} [@Bastian:2009].
-While it is planned to also be able to generate EEG-derived connectome files in similar formats,
-  they can now be generated and saved in the form of netCDF files (`.nc` extension) using
-  MNE-Connectivity [@mne-connectivity:2022], and can be reloaded using the netCDF4 python
-  library (https://pypi.org/project/netCDF4/). 
 Structuring outputs as BIDS Derivatives and saving them in a range of file formats
   thus has a lot of advantages.
 Not only does it ensure that the connectome files can be opened by the most popular
