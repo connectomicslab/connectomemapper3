@@ -11,7 +11,7 @@ import shutil
 import nibabel
 import mne
 import numpy as np
-from cmtklib.bids.io import (__cmp_directory__,__freesurfer_directory__)
+from cmtklib.bids.io import __cmp_directory__, __freesurfer_directory__
 
 
 def create_trans_files(data_dir,sub):
