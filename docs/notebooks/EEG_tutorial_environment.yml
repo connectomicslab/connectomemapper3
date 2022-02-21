@@ -29,4 +29,4 @@ dependencies:
       - networkx==2.6.3
       - pycartool==0.1.1
       - mne-connectivity==0.2
-      - connectomemapper
+      - connectomemapper==3.0.3
