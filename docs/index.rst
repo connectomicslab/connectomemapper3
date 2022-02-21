@@ -54,7 +54,7 @@ About
 
 Connectome Mapper 3 is an open-source Python3 image processing pipeline software,
 with a Graphical User Interface (GUI), that implements full anatomical, diffusion and
-resting-state MRI processing pipelines, from raw Diffusion / T1 / T2 / BOLD data
+resting-state MRI processing pipelines, from raw T1 / Diffusion / BOLD data
 to multi-resolution connection matrices based on a new version of the Lausanne
 parcellation atlas, aka `Lausanne2018`.
 
@@ -68,8 +68,8 @@ easily updated as newer and better neuroimaging software become available.
 To enhance reproducibility and replicatibility, the processing pipelines
 with all dependencies are encapsulated in a Docker image container, which handles datasets
 organized following the BIDS standard and is distributed as a `BIDS App`_ @
-`Docker Hub <https://hub.docker.com/r/sebastientourbier/connectomemapper-bidsapp>`_. For execution on high-performance computing cluster, a
-Singularity image is also made freely available @
+`Docker Hub <https://hub.docker.com/r/sebastientourbier/connectomemapper-bidsapp>`_.
+For execution on high-performance computing cluster, a Singularity image is also made freely available @
 `Sylabs Cloud <https://cloud.sylabs.io/library/_container/5fe4e971bccfe9cf45792495>`_.
 
 To enhanced accessibility and reduce the risk of misconfiguration,
@@ -82,13 +82,21 @@ Connectome Mapper 3 provides two Python commandline wrappers
 (`connectomemapper3_docker` and `connectomemapper3_singularity`) that will
 generate and run the appropriate command.
 
+Since ``v3.0.3``, CMP3 provides a new pipeline ``cmp.pipelines.functional.eeg.EEGPipeline``
+dedicated to EEG modality with a collection of interfaces based on
+[MNE](https://mne.tools/), [MNE-Connectivity](https://mne.tools/mne-connectivity), and
+[PyCartool](https://github.com/Functional-Brain-Mapping-Laboratory/PyCartool).
+Please check [this notebook](docs/notebooks/EEG_pipeline_tutorial.ipynb) for a demonstration
+using the public [VEPCON dataset](https://openneuro.org/datasets/ds003505/versions/1.1.1).
+
+
 .. role:: raw-html(raw)
     :format: html
 
-.. admonition:: New in v3.0.2 🌍🌳✨
+.. admonition:: Carbon footprint estimation of BIDS App run 🌍🌳✨
 
     In support to the Organisation for Human Brain Mapping (OHBM) Sustainability and Environmental
-    Action (OHBM-SEA) group, CMP3 enables you now to be aware about the adverse impact
+    Action (OHBM-SEA) group, CMP3 enables you since `v3.0.3` to be more aware about the adverse impact
     of your processing on the environment!
 
     With the new `--track_carbon_footprint` option of the `connectomemapper3_docker` and `connectomemapper3_singularity` BIDS App python wrappers, and

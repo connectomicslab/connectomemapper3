@@ -6,7 +6,7 @@ This neuroimaging processing pipeline software is developed by the Connectomics 
 
 ### Description
 
-Connectome Mapper 3 is an open-source Python3 image processing pipeline software, with a Graphical User Interface, that implements full anatomical, diffusion and resting-state MRI processing pipelines, from raw Diffusion / T1 / T2 / BOLD data to multi-resolution connection matrices, based on a new version of the Lausanne parcellation atlas, aka `Lausanne2018`.
+Connectome Mapper 3 is an open-source Python3 image processing pipeline software, with a Graphical User Interface, that implements full anatomical, diffusion and resting-state MRI processing pipelines, from raw Diffusion / T1 / BOLD to multi-resolution connection matrices, based on a new version of the Lausanne parcellation atlas, aka `Lausanne2018`.
 
 ![Image not found](https://github.com/connectomicslab/connectomemapper3/raw/master/docs/images/flowchart_bidsapp.png)
 
@@ -16,6 +16,8 @@ To enhance reproducibility and replicatibility, the processing pipelines with al
 
 To reduce the risk of misconfiguration and improve accessibility, Connectome Mapper 3 comes with an interactive GUI, aka `cmpbidsappmanager`, which supports the user in all the steps involved in the configuration of the pipelines, the configuration and execution of the BIDS App, and the control of the output quality. In addition, to facilitate the use by users not familiar with Docker and Singularity containers, Connectome Mapper 3 provides two Python commandline wrappers (`connectomemapper3_docker` and `connectomemapper3_singularity`) that will generate and run the appropriate command.
 
+Since ``v3.0.3``, CMP3 provides a new pipeline py:class:`~cmp.pipelines.functional.eeg.EEGPipeline` dedicated to EEG modality with a collection of interfaces based on [MNE](https://mne.tools/), [MNE-Connectivity](https://mne.tools/mne-connectivity), and [PyCartool](https://github.com/Functional-Brain-Mapping-Laboratory/PyCartool). Please check [this notebook](docs/notebooks/EEG_pipeline_tutorial.ipynb) for a demonstration of the newly implemented pipeline, using the “VEPCON” dataset, available at https://openneuro.org/datasets/ds003505/versions/1.1.1.
+
 ### How to install the python wrappers and the GUI?
 
 You need to have first either Docker or Singularity engine and miniconda installed. We refer to the [dedicated documentation page](https://connectome-mapper-3.readthedocs.io/en/latest/installation.html) for more instruction details.
@@ -23,7 +25,7 @@ You need to have first either Docker or Singularity engine and miniconda install
 Then, download the appropriate [environment.yml](https://github.com/connectomicslab/connectomemapper3/raw/master/conda/environment.yml) / [environment_macosx.yml](https://github.com/connectomicslab/connectomemapper3/raw/master/conda/environment_macosx.yml) and create a conda environment `py37cmp-gui` with the following command:
 
 ```bash
-conda create env -f /path/to/environment[_macosx].yml
+$ conda create env -f /path/to/environment[_macosx].yml
 ```
 
 Once the environment is created, activate it and install Connectome Mapper 3 with `PyPI` as follows:
@@ -42,11 +44,12 @@ You are ready to use Connectome Mapper 3!
   *   **Source:** [https://github.com/connectomicslab/connectomemapper3](https://github.com/connectomicslab/connectomemapper3)
   *   **Bug reports:** [https://github.com/connectomicslab/connectomemapper3/issues](https://github.com/connectomicslab/connectomemapper3/issues)
 
-### New in ``v3.0.2`` 🌍🌳✨
+### Carbon footprint estimation of BIDS App run 🌍🌳✨
 
 In support to the Organisation for Human Brain Mapping (OHBM) 
-Sustainability and Environmental Action (OHBM-SEA) group, CMP3 enables you now to be aware about the adverse impact
-of your processing on the environment!
+Sustainability and Environmental Action (OHBM-SEA) group, CMP3 enables you
+since `v3.0.3`  to be more aware about the adverse impact of your processing
+on the environment!
 
 With the new `--track_carbon_footprint` option of the `connectomemapper3_docker` and `connectomemapper3_singularity`
 BIDS App python wrappers, and the new `"Track carbon footprint"` option of the `cmpbidsappmanager` BIDS Interface Window,
@@ -85,7 +88,7 @@ Having the `py37cmp-gui` conda environment previously installed activated, the B
                             [--config_dir CONFIG_DIR]
                             bids_dir output_dir {participant,group}
 
-    Entrypoint script of the Connectome Mapper BIDS-App version v3.0.2 via Docker.
+    Entrypoint script of the Connectome Mapper BIDS-App version v3.0.3 via Docker.
     
     positional arguments:
       bids_dir              The directory with the input dataset formatted
@@ -156,21 +159,6 @@ Having the `py37cmp-gui` conda environment previously installed activated, the B
       --config_dir CONFIG_DIR
                             The path to the directory containing the configuration
                             files.
-```
-
-### Analysis Tutorial
-
-Connectome Mapper 3 is shipped with a little tutorial that shows how to load and analyze some of its outputs. You can find it under /notebooks/analysis_tutorial.ipynb. There is an environment file in this folder too, which you can use to install the tutorial environment like above:
-
-```bash
-$ conda create env -f /path/to/cmp3/notebooks/tutorial-env.yml
-```
-
-You can then activate it and open the tutorial with jupyter lab:
-
-```bash
-$ conda activate cmp3-tutorial
-$ jupyter lab
 ```
 
 ## Contributors ✨
