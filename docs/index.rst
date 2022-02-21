@@ -82,12 +82,12 @@ Connectome Mapper 3 provides two Python commandline wrappers
 (`connectomemapper3_docker` and `connectomemapper3_singularity`) that will
 generate and run the appropriate command.
 
-Since ``v3.0.3``, CMP3 provides a new pipeline ``cmp.pipelines.functional.eeg.EEGPipeline``
+Since ``v3.0.3``, CMP3 provides a new pipeline py:class:`~cmp.pipelines.functional.eeg.EEGPipeline`
 dedicated to EEG modality with a collection of interfaces based on
-[MNE](https://mne.tools/), [MNE-Connectivity](https://mne.tools/mne-connectivity), and
-[PyCartool](https://github.com/Functional-Brain-Mapping-Laboratory/PyCartool).
-Please check [this notebook](docs/notebooks/EEG_pipeline_tutorial.ipynb) for a demonstration
-using the public [VEPCON dataset](https://openneuro.org/datasets/ds003505/versions/1.1.1).
+`MNE <https://mne.tools/>`_, `MNE-Connectivity <https://mne.tools/mne-connectivity>`_, and
+`PyCartool <https://github.com/Functional-Brain-Mapping-Laboratory/PyCartool>`_.
+Please check `this notebook <docs/notebooks/EEG_pipeline_tutorial.ipynb>`_ for a demonstration
+using the public `VEPCON dataset <https://openneuro.org/datasets/ds003505/versions/1.1.1`_.
 
 
 .. role:: raw-html(raw)
