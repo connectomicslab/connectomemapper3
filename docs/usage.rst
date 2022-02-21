@@ -137,12 +137,12 @@ Already have Freesurfer outputs?
 ================================
 
 If you have already Freesurfer v5 / v6 output data available, CMP3 can use them if there are properly placed in your output / derivatives directory.
-Since ``v3.0.0``, CMP3 expects to find a ``freesurfer-6.0.1``, so make sure that your derivatives are organized as
+Since ``v3.0.0``, CMP3 expects to find a ``freesurfer-7.2.0``, so make sure that your derivatives are organized as
 follows::
 
     your_bids_dataset
       |______ derivatives/
-      |         |______ freesurfer-6.0.1/
+      |         |______ freesurfer-7.2.0/
       |                   |______ sub-01[_ses-01]/
       |                   |           |______ label/
       |                   |           |______ mri/

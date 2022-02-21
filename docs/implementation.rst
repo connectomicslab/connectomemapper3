@@ -164,18 +164,18 @@ Taking the sample dataset as example, running the Connectome Mapper will result 
         │   │       |    ├── sub-001_task-rest_bold.nii.gz
         │   │       |    ├── sub-001_task-rest_bold.json
         │   ├── derivatives
-        │   │   ├── cmp
+        │   │   ├── cmp-<version-tag>
         │   │   |    ├── sub-001
         |   │   │    |    ├── anat
         |   │   │    |    ├── dwi
         |   │   │    |    ├── func
         |   │   │    |    ├── connectivity
-        │   │   ├── freesurfer
+        │   │   ├── freesurfer-<version-tag>
         │   │   |    ├── sub-001
         |   │   │    |    ├── mri
         |   │   │    |    ├── surf
         |   │   │    |    ├── ...
-        │   │   ├── nipype
+        │   │   ├── nipype-<version-tag>
         │   │   |    ├── anatomical_pipeline
         │   │   |    ├── diffusion_pipeline
         │   │   |    ├── functional_pipeline
@@ -236,11 +236,11 @@ A Nipype subjects directory is created in ``<bids_dataset/derivatives>/nipype``,
 FreeSurfer Derivatives
 ++++++++++++++++++++++++
 
-A FreeSurfer subjects directory is created in ``<bids_dataset/derivatives>/freesurfer``.
+A FreeSurfer subjects directory is created in ``<bids_dataset/derivatives>/freesurfer-7.2.0``.
 
 ::
 
-    freesurfer/
+    freesurfer-7.2.0/
         fsaverage/
             mri/
             surf/

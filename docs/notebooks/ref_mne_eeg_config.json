@@ -1,0 +1,36 @@
+{
+    "Global": {
+        "process_type": "eeg",
+        "subjects": [
+            "sub-01"
+        ],
+        "subject": "sub-01",
+        "version": "v3.0.3"
+    },
+    "eeg_preparer_stage": {
+        "eeg_format": ".set",
+        "epochs": "sub-01_task-faces_desc-preproc_eeg.set",
+        "invsol_format": "mne-sLORETA",
+        "parcellation": {
+            "atlas": "lausanne2018",
+            "res": "scale1"
+        },
+        "number_of_threads": 1,
+        "EEG_params": {
+            "expe_name": "faces",
+            "EEG_event_IDs": {
+            "SCRAMBLED" : 0,
+            "FACES" : 1
+            },
+            "start_t": -0.2,
+            "end_t" : 0.6
+        }
+    },
+    "eeg_inverse_solution_stage": {
+        "eeg_format": ".set",
+        "number_of_threads": 1
+    },
+    "Multi-processing": {
+        "number_of_cores": 1
+    }
+}

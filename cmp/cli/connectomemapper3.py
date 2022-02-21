@@ -36,7 +36,7 @@ def info():
 
 
 # Checks the needed dependencies. We call directly the functions instead
-# of just checking existence in $PATH in order to handl missing libraries.
+# of just checking existence in $PATH in order to handle missing libraries.
 # Note that not all the commands give the awaited 1 exit code...
 def dep_check():
     """Check if dependencies are installed.
@@ -134,6 +134,12 @@ def create_parser():
         "the fMRI processing pipeline",
     )
 
+    # p.add_argument(
+    #     "--eeg_pipeline_config",
+    #     help="Configuration .txt file for processing stages of "
+    #     "the EEG source reconstruction pipeline"
+    # )
+
     p.add_argument(
         "--session_label",
         help="The label of the participant session "
@@ -156,6 +162,7 @@ def create_parser():
         action="version",
         version=f"Connectome Mapper version {__version__}",
     )
+
     return p
 
 

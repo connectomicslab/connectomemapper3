@@ -398,7 +398,6 @@ def plot_connectivity_circle(
             fig=fig,
             axes=axes,
             indices=indices,
-            n_nodes=n_nodes,
             node_angles=node_angles,
         )
 

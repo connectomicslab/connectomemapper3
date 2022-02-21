@@ -18,13 +18,13 @@ import nipype.interfaces.freesurfer as fs
 import nipype.interfaces.fsl as fsl
 import nipype.interfaces.ants as ants
 from nipype.interfaces.io import FreeSurferSource
-import nipype.interfaces.utility as util
 from nipype.interfaces.io import BIDSDataGrabber
 
 # Own imports
 from cmtklib.bids.io import __cmp_directory__, __freesurfer_directory__
 from cmp.stages.common import Stage
 from cmtklib.interfaces.freesurfer import copyBrainMaskToFreesurfer
+from cmtklib.interfaces.misc import Rename001
 from cmtklib.util import (
     isavailable,
     extract_freesurfer_subject_dir,
@@ -266,7 +266,6 @@ class SegmentationStage(Stage):
             Identity interface describing the outputs of the segmentation stage
         """
         if self.config.seg_tool == "Freesurfer":
-
             def correct_freesurfer_subjectid_path(path):
                 if os.path.exists('/output_dir') and '/output_dir' not in path:
                     subject_id = path.split(f"{__freesurfer_directory__}/")[-1]
@@ -303,7 +302,7 @@ class SegmentationStage(Stage):
                         self.config.isotropic_interpolation
                     )
 
-                rename = pe.Node(util.Rename(), name="copyOrig")
+                rename = pe.Node(Rename001(), name="copyOrig")
 
                 if not os.path.exists(orig_dir):
                     print(f'INFO : Create folder: {orig_dir}')

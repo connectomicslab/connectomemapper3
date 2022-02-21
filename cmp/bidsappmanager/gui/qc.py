@@ -143,7 +143,7 @@ class QualityInspectorWindow(HasTraits):
         width=0.5,
         height=0.8,
         resizable=True,  # scrollable=True,
-        icon=get_icon("qualitycontrol.png"),
+        # icon=get_icon("qualitycontrol.png")
     )
 
     error_msg = Str("")

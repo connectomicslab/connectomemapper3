@@ -1,18 +1,18 @@
 ##################################################################
 # Use Ubuntu 16.04 LTS as base image
 ##################################################################
-FROM ubuntu:xenial-20210114 AS main
+FROM ubuntu:xenial-20210804 AS main
+
+##################################################################
+# Pre-cache neurodebian key
+##################################################################
+COPY docker/files/neurodebian.gpg /root/.neurodebian.gpg
 
 ##################################################################
 # Install system library dependencies including
 # exfat libraries for exfat-formatted hard-drives (only MAC?) :
 # exfat-fuse exfat-utils Neurodebian
 ##################################################################
-
-# Pre-cache neurodebian key
-COPY docker/files/neurodebian.gpg /root/.neurodebian.gpg
-
-# Install system library dependencies
 RUN apt-get update && \
     apt-get install software-properties-common -y && \
     apt-get install -qq -y --no-install-recommends bc \
@@ -27,7 +27,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 ##################################################################
-## Install freesurfer 6.0.1, FSL and AFNI
+## Install freesurfer 7.1.1, FSL and AFNI
 ##################################################################
 FROM main AS neurobuntu
 
@@ -37,7 +37,7 @@ WORKDIR /opt/freesurfer
 # Download and install
 RUN apt-get update && \
     apt-get install -qq -y --no-install-recommends curl && \
-    curl -sSL https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/6.0.1/freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.1.tar.gz | tar zxv --no-same-owner -C /opt \
+    curl -sSL https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/7.1.1/freesurfer-linux-centos6_x86_64-7.1.1.tar.gz | tar zxv --no-same-owner -C /opt \
     --exclude='freesurfer/diffusion' \
     --exclude='freesurfer/docs' \
     --exclude='freesurfer/fsfast' \
@@ -59,8 +59,8 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Installing the Matlab R2012b (v8.0) runtime // http://ssd.mathworks.com/supportfiles/MCR_Runtime/R2012b/MCR_R2012b_glnxa64_installer.zip
-# Required by the brainstem and hippocampal subfield modules in FreeSurfer 6.0.1
+# Installing the Matlab R2014b
+# Required by the brainstem and hippocampal subfield modules in FreeSurfer 7.1.1
 WORKDIR /opt/freesurfer/bin
 
 ENV OS="Linux" FREESURFER_HOME="/opt/freesurfer"
@@ -69,8 +69,8 @@ RUN apt-get update && \
     curl "https://raw.githubusercontent.com/freesurfer/freesurfer/dev/scripts/fs_install_mcr" -o fs_install_mcr && \
     ls -al . && \
     chmod +x ./fs_install_mcr && \
-    ./fs_install_mcr R2012b && \
-    rm -rf ./fs_install_mcr ./R2012b && \
+    ./fs_install_mcr R2014b && \
+    rm -rf ./fs_install_mcr ./R2014b && \
     apt-get remove -y curl && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*

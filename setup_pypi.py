@@ -63,6 +63,7 @@ packages = [
     "cmp.bidsappmanager.pipelines.functional",
     "cmtklib",
     "cmtklib.bids",
+    "cmtklib.data.parcellation",
     "cmtklib.interfaces",
     "resources",
 ]
@@ -78,6 +79,7 @@ package_data = {
     ],
     "resources": ["buttons/*.png", "icons/*png"],
     "cmtklib": [
+        "data/parcellation/lausanne2018/mni-space/*.*",
         "data/report/carbonfootprint/css/*.*",
         "data/report/carbonfootprint/js/*.*",
     ],

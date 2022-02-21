@@ -298,7 +298,7 @@ def create_subject_configuration_from_ref(
     ref_conf_file : string
         Reference configuration file
 
-    pipeline_type : 'anatomical', 'diffusion', 'fMRI'
+    pipeline_type : 'anatomical', 'diffusion', 'fMRI', 'EEG'
         Type of pipeline
 
     multiproc_number_of_cores : int
@@ -463,6 +463,29 @@ def get_fmri_process_detail_json(project_info, section, detail):
     return config[section][detail]
 
 
+def get_eeg_process_detail_json(project_info, section, detail):
+    """Get the value for a parameter key (detail) in the stage section of the EEG JSON config file.
+
+    Parameters
+    ----------
+    project_info : Instance(cmp.project.CMP_Project_Info)
+        Instance of :class:`cmp.project.CMP_Project_Info` class
+
+    section : string
+        Stage section name
+
+    detail : string
+        Parameter key
+
+    Returns
+    -------
+    The parameter value
+    """
+    with open(project_info.eeg_config_file, 'r') as f:
+        config = json.load(f)
+    return config[section][detail]
+
+
 def set_pipeline_attributes_from_config(pipeline, config, debug=False):
     """Set the pipeline stage attributes given a configuration.
 
@@ -493,7 +516,7 @@ def set_pipeline_attributes_from_config(pipeline, config, debug=False):
             if key in config["Global"].keys():
                 conf_value = config["Global"][key]
                 setattr(pipeline.global_conf, key, conf_value)
-
+                
     for stage in list(pipeline.stages.values()):
         stage_keys = [
             prop for prop in list(stage.config.traits().keys()) if "trait" not in prop
@@ -748,6 +771,44 @@ def fmri_load_config_json(pipeline, config_path):
     print_blue("  .. LOAD: Load fMRI config file : {}".format(config_path))
     # datalad_is_available = is_tool('datalad')
     with open(config_path, "r") as f:
+        config = json.load(f)
+
+    check_configuration_version(config)
+    set_pipeline_attributes_from_config(pipeline, config)
+
+    return True
+
+
+def eeg_save_config(pipeline, config_path):
+    """Save the INI configuration file of a eeg pipeline.
+
+    Parameters
+    ----------
+    pipeline : Instance(cmp.pipelines.functional.eeg.EEGPipeline)
+        Instance of EEGPipeline
+
+    config_path : string
+        Path of the JSON configuration file
+    """
+    config = create_configparser_from_pipeline(pipeline)
+    save_configparser_as_json(config, config_path)
+    print_blue('  .. SAVE: Config json file (EEG) saved as {}'.format(config_path))
+
+
+def eeg_load_config_json(pipeline, config_path):
+    """Load the JSON configuration file of a eeg pipeline.
+
+    Parameters
+    ----------
+    pipeline : Instance(cmp.pipelines.functional.eeg.EEGPipeline)
+        Instance of EEGPipeline
+
+    config_path : string
+        Path of the JSON configuration file
+    """
+    print_blue('  .. LOAD: Load eeg config file : {}'.format(config_path))
+    # datalad_is_available = is_tool('datalad')
+    with open(config_path, 'r') as f:
         config = json.load(f)
 
     check_configuration_version(config)

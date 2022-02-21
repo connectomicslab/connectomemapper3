@@ -22,6 +22,7 @@ from bids import BIDSLayout
 from cmp.pipelines.anatomical import anatomical as Anatomical_pipeline
 from cmp.pipelines.diffusion import diffusion as Diffusion_pipeline
 from cmp.pipelines.functional import fMRI as FMRI_pipeline
+from cmp.pipelines.functional import eeg as EEG_pipeline
 
 from cmtklib.config import (
     anat_load_config_json,
@@ -30,6 +31,8 @@ from cmtklib.config import (
     dmri_save_config,
     fmri_load_config_json,
     fmri_save_config,
+    eeg_load_config_json,
+    eeg_save_config
 )
 from cmtklib.bids.io import (
     __cmp_directory__,
@@ -129,6 +132,10 @@ class ProjectInfo(HasTraits):
         True if fMRI scans were found
         (Default: False)
 
+    eeg_available : Bool
+        True if EEG recordings were found
+        (Default: False)
+
     anat_config_error_msg : traits.Str
         Error message for the anatomical pipeline configuration file
 
@@ -174,6 +181,22 @@ class ProjectInfo(HasTraits):
     fmri_custom_last_stage : traits.Str
         Custom last fMRI pipeline stage to be processed
 
+    eeg_config_error_msg : traits.Str
+        Error message for the EEG pipeline configuration file
+
+    eeg_config_to_load : traits.Str
+        Path to a configuration file for the EEG pipeline
+
+    eeg_available_config : traits.List
+        List of configuration files for the EEG pipeline
+
+    eeg_stage_names : traits.List
+        List of EEG pipeline stage names
+
+    eeg_custom_last_stage : traits.Str
+        Custom last EEG pipeline stage to be processed
+
+
     number_of_cores : int
         Number of cores used by Nipype workflow execution engine
         to distribute independent processing nodes
@@ -217,6 +240,7 @@ class ProjectInfo(HasTraits):
     t1_available = Bool(False)
     dmri_available = Bool(False)
     fmri_available = Bool(False)
+    eeg_available = Bool(False)
 
     anat_config_error_msg = Str("")
     anat_config_to_load = Str()
@@ -253,6 +277,17 @@ class ProjectInfo(HasTraits):
 
     fmri_stage_names = List
     fmri_custom_last_stage = Str
+
+    eeg_config_error_msg = Str('')
+    eeg_config_to_load = Str()
+    eeg_available_config = List()
+    eeg_config_to_load_msg = Str(
+        'Several configuration files available. Select which one to load:\n')
+    eeg_last_date_processed = Str('Not yet processed')
+    eeg_last_stage_processed = Str('Not yet processed')
+
+    eeg_stage_names = List
+    eeg_custom_last_stage = Str
 
     number_of_cores = Enum(1, list(range(1, multiprocessing.cpu_count() + 1)))
 
@@ -585,7 +620,7 @@ def init_anat_project(project_info, is_new_project, debug=False):
             anat_pipeline.input_folders,
         )
 
-    if is_new_project and anat_pipeline is not None:  # and dmri_pipelineis not None:
+    if is_new_project and anat_pipeline is not None:
         print("> Initialize anatomical project")
         if not os.path.exists(derivatives_directory):
             try:
@@ -634,6 +669,99 @@ def init_anat_project(project_info, is_new_project, debug=False):
     return anat_pipeline
 
 
+def init_eeg_project(project_info, bids_layout, is_new_project, gui=False, debug=False):  # pragma: no cover
+    """Initialize the eeg processing pipeline.
+
+    Parameters
+    ----------
+    project_info : cmp.project.CMP_Project_Info
+        Instance of ``cmp.project.CMP_Project_Info`` object
+
+    bids_layout : bids.BIDSLayout
+        Instance of ``BIDSLayout`` object
+
+    is_new_project : bool
+        Specify if it corresponds or not to a new project.
+        If `True`, it will create initial pipeline configuration files.
+
+    gui : bool
+        Might be obsolete and removed in future versions
+
+    debug : bool
+        If `True`, display extra prints to support debugging
+
+    Returns
+    -------
+    eeg_pipeline : Instance(cmp.pipelines.functional.eeg.EEGPipeline)
+        `EEGPipeline` object instance
+    """
+    eeg_pipeline = EEG_pipeline.EEGPipeline(project_info)
+    bids_directory = os.path.abspath(project_info.base_directory)
+    derivatives_directory = os.path.abspath(project_info.output_directory)
+
+    if (project_info.subject_session != '') and (project_info.subject_session is not None):
+        if debug:  # pragma: no cover
+            print('Refresh folder WITH session')
+        refresh_folder(
+            bids_directory,
+            derivatives_directory,
+            project_info.subject,
+            eeg_pipeline.input_folders,
+            session=project_info.subject_session
+        )
+    else:
+        if debug:  # pragma: no cover
+            print('Refresh folder WITHOUT session')
+        refresh_folder(bids_directory, derivatives_directory,
+                       project_info.subject, eeg_pipeline.input_folders)
+
+    eeg_inputs_checked = eeg_pipeline.check_input(layout=bids_layout, gui=gui)
+    if eeg_inputs_checked:
+        if is_new_project and eeg_pipeline is not None:
+            print("> Initialize eeg project")
+            if not os.path.exists(derivatives_directory):
+                try:
+                    os.makedirs(derivatives_directory)
+                except os.error:  # pragma: no cover
+                    print("... Info: %s was already existing" %
+                          derivatives_directory)
+                finally:
+                    print("... Info : Created directory %s" %
+                          derivatives_directory)
+
+            if (project_info.subject_session != '') and (project_info.subject_session is not None):
+                project_info.eeg_config_file = os.path.join(
+                    derivatives_directory, '%s_%s_eeg_config.ini' % (project_info.subject,
+                                                                     project_info.subject_session))
+            else:
+                project_info.eeg_config_file = os.path.join(
+                    derivatives_directory, '%s_eeg_config.ini' % project_info.subject)
+
+            if os.path.exists(project_info.eeg_config_file):
+                warn_res = project_info.configure_traits(view='eeg_warning_view')
+                if warn_res:
+                    eeg_save_config(eeg_pipeline, project_info.eeg_config_file)
+                else:
+                    return None
+            else:
+                eeg_save_config(eeg_pipeline, project_info.eeg_config_file)
+
+        else:
+            if debug:  # pragma: no cover
+                print("int_project eeg_pipeline.global_config.subjects : ")
+                print(eeg_pipeline.global_conf.subjects)
+
+            eeg_conf_loaded = eeg_load_config_json(
+                eeg_pipeline, project_info.eeg_config_file)
+
+            if not eeg_conf_loaded:
+                return None
+
+    eeg_pipeline.config_file = project_info.eeg_config_file
+
+    return eeg_inputs_checked, eeg_pipeline
+
+
 def update_anat_last_processed(project_info, pipeline):  # pragma: no cover
     """Update last processing information of a :class:`~cmp.pipelines.anatomical.anatomical.AnatomicalPipeline`.
 
@@ -649,14 +777,6 @@ def update_anat_last_processed(project_info, pipeline):  # pragma: no cover
     if os.path.exists(
         os.path.join(project_info.output_directory, __nipype_directory__, project_info.subject)
     ):
-        # out_dirs = os.listdir(os.path.join(
-        #     project_info.output_directory, 'nipype', project_info.subject))
-        # for out in out_dirs:
-        #     if (project_info.last_date_processed == "Not yet processed" or
-        #         out > project_info.last_date_processed):
-        #         pipeline.last_date_processed = out
-        #         project_info.last_date_processed = out
-
         if (
             project_info.anat_last_date_processed == "Not yet processed"
             or pipeline.now > project_info.anat_last_date_processed
@@ -709,14 +829,6 @@ def update_dmri_last_processed(project_info, pipeline):  # pragma: no cover
     if os.path.exists(
         os.path.join(project_info.output_directory, __nipype_directory__, project_info.subject)
     ):
-        # out_dirs = os.listdir(os.path.join(
-        #     project_info.output_directory, 'nipype', project_info.subject))
-        # for out in out_dirs:
-        #     if (project_info.last_date_processed == "Not yet processed" or
-        #         out > project_info.last_date_processed):
-        #         pipeline.last_date_processed = out
-        #         project_info.last_date_processed = out
-
         if (
             project_info.dmri_last_date_processed == "Not yet processed"
             or pipeline.now > project_info.dmri_last_date_processed
@@ -765,14 +877,6 @@ def update_fmri_last_processed(project_info, pipeline):  # pragma: no cover
     if os.path.exists(
         os.path.join(project_info.output_directory, __nipype_directory__, project_info.subject)
     ):
-        # out_dirs = os.listdir(os.path.join(
-        #     project_info.output_directory, 'nipype', project_info.subject))
-        # for out in out_dirs:
-        #     if (project_info.last_date_processed == "Not yet processed" or
-        #         out > project_info.last_date_processed):
-        #         pipeline.last_date_processed = out
-        #         project_info.last_date_processed = out
-
         if (
             project_info.fmri_last_date_processed == "Not yet processed"
             or pipeline.now > project_info.fmri_last_date_processed
@@ -786,8 +890,7 @@ def update_fmri_last_processed(project_info, pipeline):  # pragma: no cover
             project_info.output_directory,
             __nipype_directory__,
             project_info.subject,
-            "fMRI_pipeline",
-        )
+            "fMRI_pipeline")
     ):
         stage_dirs = []
         for _, dirnames, _ in os.walk(
@@ -804,6 +907,57 @@ def update_fmri_last_processed(project_info, pipeline):  # pragma: no cover
             if stage.lower() + "_stage" in stage_dirs:
                 pipeline.last_stage_processed = stage
                 project_info.dmri_last_stage_processed = stage
+
+
+def update_eeg_last_processed(project_info, pipeline):  # pragma: no cover
+    """Update last processing information of a :py:class:`~cmp.pipelines.functional.eeg.EEGPipeline`.
+
+    Parameters
+    ----------
+    project_info : cmp.project.CMP_Project_Info
+        Instance of `CMP_Project_Info` object
+
+    pipeline : cmp.pipelines.functional.eeg.EEGPipeline
+        Instance of `EEGPipeline` object
+    """
+    # last date
+    if os.path.exists(
+        os.path.join(project_info.output_directory, __nipype_directory__, project_info.subject)
+    ):
+        if (
+            project_info.eeg_last_date_processed == "Not yet processed"
+            or pipeline.now > project_info.anat_last_date_processed
+        ):
+            pipeline.eeg_last_date_processed = pipeline.now
+            project_info.eeg_last_date_processed = pipeline.now
+
+    # last stage
+    if os.path.exists(
+        os.path.join(
+            project_info.output_directory,
+            __nipype_directory__,
+            project_info.subject,
+            'eeg_pipeline')
+    ):
+        stage_dirs = []
+        for _, dirnames, _ in os.walk(
+            os.path.join(
+                project_info.output_directory,
+                __nipype_directory__,
+                project_info.subject,
+                'eeg_pipeline'
+            )
+        ):
+            for dirname in fnmatch.filter(dirnames, '*_stage'):
+                stage_dirs.append(dirname)
+        for stage in pipeline.ordered_stage_list:
+            if stage.lower() + '_stage' in stage_dirs:
+                pipeline.last_stage_processed = stage
+                project_info.eeg_last_stage_processed = stage
+
+    # last parcellation scheme
+    project_info.parcellation_scheme = pipeline.parcellation_scheme
+    project_info.atlas_info = pipeline.atlas_info
 
 
 def run_individual(

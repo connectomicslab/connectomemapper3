@@ -18,7 +18,9 @@ from nipype import __version__ as nipype_version
 # Need to be declared before import the pipeline modules
 __cmp_directory__ = f'cmp-{__version__}'
 __nipype_directory__ = f'nipype-{nipype_version}'
-__freesurfer_directory__ = f'freesurfer-6.0.1'
+__freesurfer_directory__ = f'freesurfer-7.1.1'
+__cartool_directory__ = f'cartool-v3.80'
+__eeglab_directory__ = f'eeglab-v14.1.1'
 
 
 class CustomBIDSFile(HasTraits):

@@ -200,7 +200,7 @@ class MainWindow(HasTraits):
         width=0.5,
         height=0.8,
         resizable=True,  # , scrollable=True , resizable=True
-        icon=get_icon("cmp.png"),
+        # icon=get_icon("cmp.png")
     )
 
     def _bidsapp_fired(self):

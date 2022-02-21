@@ -64,6 +64,7 @@ extensions = [
     'sphinxcontrib.apidoc',
     'matplotlib.sphinxext.plot_directive',
     'nbsphinx',
+    'sphinx_gallery.load_style',
     'nipype.sphinxext.plot_workflow',
     'nipype.sphinxext.apidoc',
     'nipype.sphinxext.documenter',
@@ -86,6 +87,10 @@ autodoc_mock_imports = ['graphviz',
 
 # Allow errors in notebooks for doc
 nbsphinx_allow_errors = True
+
+# Explicitly disabling notebook execution
+# Output should always be provided
+nbsphinx_execute = 'never'
 
 # Suppress label warnings
 suppress_warnings = ['autosectionlabel.*']
@@ -247,6 +252,9 @@ html_use_index = True
 
 # This is the file name suffix for HTML files (e.g. ".xhtml").
 # html_file_suffix = None
+
+# Avoid the additional .txt suffix for ipython notebooks
+html_sourcelink_suffix = ''
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'CMP3doc'

@@ -30,6 +30,7 @@ from cmtklib.config import (
     check_configuration_format,
     convert_config_ini_2_json
 )
+
 from cmp import parser
 from cmp.info import __version__
 from cmtklib.bids.io import (

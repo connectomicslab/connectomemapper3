@@ -80,7 +80,11 @@ Anatomical pipeline stages
 Segmentation
 """"""""""""""
 
-Performs tissue segmentation using Freesurfer.
+Prior to Lausanne parcellation, CMP3 relies on **Freesurfer** for the segmentation of the different brain tissues and the reconstruction of the cortical surfaces.
+If you plan to use a custom parcellation, you will be required here to specify the pattern of the different existing segmentation files
+that follows BIDS derivatives (See *Custom segmentation*).
+
+.. _freesurfer_opt:
 
 *Freesurfer*
 
@@ -92,26 +96,64 @@ Performs tissue segmentation using Freesurfer.
     * *Freesurfer args:* used to specify extra Freesurfer processing options
 
     .. note::
-        If you have already Freesurfer v5 / v6 output data available, CMP3 can use them if there are placed in your output / derivatives directory.
-        Note however that since ``v3.0.0``, CMP3 expects to find a ``freesurfer-6.0.1``, so make sure that your derivatives are organized as
+        If you have already Freesurfer v5 / v6 / v7 output data available, CMP3 can use them if there are placed in your output / derivatives directory.
+        Note however that since ``v3.0.0``, CMP3 expects to find a ``freesurfer-7.2.0``, so make sure that your derivatives are organized as
         follows::
 
-        your_bids_dataset
-          |______ derivatives/
-          |         |______ freesurfer-6.0.1/
-          |                   |______ sub-01[_ses-01]/
-          |                   |           |______ label/
-          |                   |           |______ mri/
-          |                   |           |______ surf/
-          |                   |           |______ ...
-          |                   |______ ...
-          |______ sub-01/
-          |______ ...
+            your_bids_dataset
+              derivatives/
+                freesurfer-7.2.0/
+                  sub-01[_ses-01]/
+                    label/
+                    mri/
+                    surf/
+                    ...
+                  ...
+              sub-01/
+              ...
+
+*Custom segmentation*
+
+    .. image:: images/custom_segmentation.png
+        :align: center
+
+    You can use any parcellation scheme of your choice as long as you provide a list of segmentation files organized following the `BIDS derivatives specifications <https://bids-specification.readthedocs.io/en/stable/05-derivatives/03-imaging.html#segmentations>`_ for segmentation files, provide appropriate ``.tsv`` sidecar files that describes the index/label/color mapping of the parcellation, and adopt the ``atlas-<label>`` entity to encode the name of the atlas, i.e::
+
+        <derivatives_directory>/
+          sub-<participant_label>/
+            anat/
+              <source_entities>_desc-brain_mask.nii.gz
+              <source_entities>_label-GM[_desc-<label>]_dseg.nii.gz
+              <source_entities>_label-WM[_desc-<label>]_dseg.nii.gz
+              <source_entities>_label-CSF[_desc-<label>]_dseg.nii.gz
+              <source_entities>_desc-aparcaseg_dseg.nii.gz
+
+    The ``desc`` BIDS entity can be used to target specific mask and segmentation files.
+
+    For instance, the configuration above would allows us to re-use the outputs of the anatomical pipeline obtained with the previous ``v3.0.2`` version of CMP3::
+
+            your_bids_dataset
+              derivatives/
+                cmp-v3.0.2/
+                  sub-01/
+                    anat/
+                      sub-01_desc-brain_mask.nii.gz
+                      sub-01_label-GM_dseg.nii.gz
+                      sub-01_label-WM_dseg.nii.gz
+                      sub-01_label-CSF_dseg.nii.gz
+                      sub-01_desc-aparcaseg_dseg.nii.gz
+                      ...
+                  ...
+              sub-01/
+              ...
+
+    .. important::
+        If you plan to use either Anatomically Constrained or Particle Filtering tractography, you will still require to have Freesurfer 7 output data available in your output / derivatives directory, as described the above note in `*Freesurfer* <freesurfer_opt>`_.
 
 Parcellation
 """"""""""""""
 
-Generates the Native Freesurfer or Lausanne2008/Lausanne2018 parcellation from Freesurfer data.
+Generates the Native Freesurfer or Lausanne2018 parcellation from Freesurfer data. Alternatively, since ``v3.0.3`` you can use your own custom parcellation files.
 
 **Parcellation scheme**
 
@@ -129,12 +171,41 @@ Generates the Native Freesurfer or Lausanne2008/Lausanne2018 parcellation from F
 
         New version of Lausanne parcellation atlas, corrected, and extended with 7 thalamic nuclei, 12 hippocampal subfields, and 4 brainstem sub-structure per hemisphere
 
-        .. admonition:: Since ``v3.0.0``, Lausanne2018 parcellation has completely replaced the old Lausanne2008 parcellation.
+        .. admonition:: Since v3.0.0, Lausanne2018 parcellation has completely replaced the old Lausanne2008 parcellation.
 
             As it provides improvements in the way Lausanne parcellation label are generated,
             any code and data related to Lausanne2008 has been removed. If you still wish to
             use this old parcellation scheme, please use `v3.0.0-RC4` which is the last version
             that supports it.
+
+    * *Custom:*
+
+        .. image:: images/custom_parcellation.png
+            :align: center
+
+        You can use any parcellation scheme of your choice as long as they follow the `BIDS derivatives specifications <https://bids-specification.readthedocs.io/en/stable/05-derivatives/03-imaging.html#segmentations>`_ for segmentation files, provide appropriate ``.tsv`` sidecar files that describes the index/label/color mapping of the parcellation, and adopt the ``atlas-<label>`` entity to encode the name of the atlas, i.e::
+
+            <derivatives_directory>/
+              sub-<participant_label>/
+                anat/
+                  <source_entities>[_space-<space>]_atlas-<label>[_res-<label>]_dseg.nii.gz
+                  <source_entities>[_space-<space>]_atlas-<label>[_res-<label>]_dseg.tsv
+
+        The ``res`` BIDS entity allows the differentiation between multiple scales of the same atlas.
+
+        For instance, the above configuration would allows us to re-use the scale 1 of the Lausanne parcellation generated by the anatomical pipeline obtained of the previous ``v3.0.2`` version of CMP3::
+
+            your_bids_dataset
+              derivatives/
+                cmp-v3.0.2/
+                  sub-01/
+                    anat/
+                      sub-01_atlas-L2018_res-scale1_dseg.nii.gz
+                      sub-01_atlas-L2018_res-scale1_dseg.tsv
+                      ...
+                  ...
+              sub-01/
+              ...
 
 Diffusion pipeline stages
 ---------------------------
@@ -518,37 +589,37 @@ Execute the BIDS App
         Start BIDS App
         > FreeSurfer license copy skipped as it already exists (BIDS App Manager)
         > Datalad available: True
-        ... BIDS App execution command: ['docker', 'run', '-it', '--rm', '-v', '/home/localadmin/Desktop/hcp-retest-d2:/bids_dir', '-v', '/home/localadmin/Desktop/hcp-retest-d2/derivatives:/output_dir', '-v', '/usr/local/freesurfer/license.txt:/bids_dir/code/license.txt', '-v', '/home/localadmin/Desktop/hcp-retest-d2/code/ref_anatomical_config.ini:/code/ref_anatomical_config.ini', '-v', '/home/localadmin/Desktop/hcp-retest-d2/code/ref_diffusion_config.ini:/code/ref_diffusion_config.ini', '-v', '/home/localadmin/Desktop/hcp-retest-d2/code/ref_fMRI_config.ini:/code/ref_fMRI_config.ini', '-u', '1000:1000', 'sebastientourbier/connectomemapper-bidsapp:v3.0.0-RC3', '/bids_dir', '/output_dir', 'participant', '--participant_label', '103818', '--anat_pipeline_config', '/code/ref_anatomical_config.ini', '--dwi_pipeline_config', '/code/ref_diffusion_config.ini', '--func_pipeline_config', '/code/ref_fMRI_config.ini', '--fs_license', '/bids_dir/code/license.txt', '--number_of_participants_processed_in_parallel', '1', '--number_of_threads', '10', '--ants_number_of_threads', '10']
+        ... BIDS App execution command: ['docker', 'run', '-it', '--rm', '-v', '/home/localadmin/Data/ds-demo:/bids_dir', '-v', '/home/localadmin/Data/ds-demo/derivatives:/output_dir', '-v', '/usr/local/freesurfer/license.txt:/bids_dir/code/license.txt', '-v', '/home/localadmin/Data/ds-demo/code/ref_anatomical_config.ini:/code/ref_anatomical_config.ini', '-v', '/home/localadmin/Data/ds-demo/code/ref_diffusion_config.ini:/code/ref_diffusion_config.ini', '-v', '/home/localadmin/Data/ds-demo/code/ref_fMRI_config.ini:/code/ref_fMRI_config.ini', '-u', '1000:1000', 'sebastientourbier/connectomemapper-bidsapp:v3.0.3', '/bids_dir', '/output_dir', 'participant', '--participant_label', '01', '--anat_pipeline_config', '/code/ref_anatomical_config.ini', '--dwi_pipeline_config', '/code/ref_diffusion_config.ini', '--func_pipeline_config', '/code/ref_fMRI_config.ini', '--fs_license', '/bids_dir/code/license.txt', '--number_of_participants_processed_in_parallel', '1', '--number_of_threads', '3', '--ants_number_of_threads', '3']
         > BIDS dataset: /bids_dir
-        > Subjects to analyze : ['103818']
+        > Subjects to analyze : ['01']
         > Set $FS_LICENSE which points to FreeSurfer license location (BIDS App)
           ... $FS_LICENSE : /bids_dir/code/license.txt
           * Number of subjects to be processed in parallel set to 1 (Total of cores available: 11)
           * Number of parallel threads set to 10 (total of cores: 11)
-          * OMP_NUM_THREADS set to 10 (total of cores: 11)
-          * ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS set to 10
+          * OMP_NUM_THREADS set to 3 (total of cores: 11)
+          * ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS set to 3
         Report execution to Google Analytics.
         Thanks to support us in the task of finding new funds for CMP3 development!
         > Sessions to analyze : ['ses-01']
         > Process subject sub-103818 session ses-01
-        WARNING: rewriting config file /output_dir/cmp/sub-103818/ses-01/sub-103818_ses-01_anatomical_config.ini
-        ... Anatomical config created : /output_dir/cmp/sub-103818/ses-01/sub-103818_ses-01_anatomical_config.ini
-        WARNING: rewriting config file /output_dir/cmp/sub-103818/ses-01/sub-103818_ses-01_diffusion_config.ini
-        ... Diffusion config created : /output_dir/cmp/sub-103818/ses-01/sub-103818_ses-01_diffusion_config.ini
-        WARNING: rewriting config file /output_dir/cmp/sub-103818/ses-01/sub-103818_ses-01_fMRI_config.ini
-        ... fMRI config created : /output_dir/cmp/sub-103818/ses-01/sub-103818_ses-01_fMRI_config.ini
+        WARNING: rewriting config file /output_dir/cmp-v3.0.3/sub-01/ses-01/sub-01_ses-01_anatomical_config.ini
+        ... Anatomical config created : /output_dir/cmp-v3.0.3/sub-01/ses-01/sub-01_ses-01_anatomical_config.ini
+        WARNING: rewriting config file /output_dir/cmp-v3.0.3/sub-01/ses-01/sub-01_ses-01_diffusion_config.ini
+        ... Diffusion config created : /output_dir/cmp-v3.0.3/sub-01/ses-01/sub-01_ses-01_diffusion_config.ini
+        WARNING: rewriting config file /output_dir/cmp-v3.0.3/sub-01/ses-01/sub-01_ses-01_fMRI_config.ini
+        ... fMRI config created : /output_dir/cmp-v3.0.3/sub-01/ses-01/sub-01_ses-01_fMRI_config.ini
         ... Running pipelines :
                 - Anatomical MRI (segmentation and parcellation)
                 - Diffusion MRI (structural connectivity matrices)
                 - fMRI (functional connectivity matrices)
-        ... cmd : connectomemapper3 --bids_dir /bids_dir --output_dir /output_dir --participant_label sub-103818 --session_label ses-01 --anat_pipeline_config /output_dir/cmp/sub-103818/ses-01/sub-103818_ses-01_anatomical_config.ini --dwi_pipeline_config /output_dir/cmp/sub-103818/ses-01/sub-103818_ses-01_diffusion_config.ini --func_pipeline_config /output_dir/cmp/sub-103818/ses-01/sub-103818_ses-01_fMRI_config.ini --number_of_threads 10
+        ... cmd : connectomemapper3 --bids_dir /bids_dir --output_dir /output_dir --participant_label sub-01 --session_label ses-01 --anat_pipeline_config /output_dir/cmp-v3.0.3/sub-01/ses-01/sub-01_ses-01_anatomical_config.ini --dwi_pipeline_config /output_dir/cmp-v3.0.3/sub-01/ses-01/sub-01_ses-01_diffusion_config.ini --func_pipeline_config /output_dir/cmp-v3.0.3/sub-01/ses-01/sub-01_ses-01_fMRI_config.ini --number_of_threads 3
 
     .. note:: Also, this can be helpful in you wish to design your own batch scripts to call the BIDS App with the correct syntax.
 
 Check progress
 ------------------
 
-For each subject, the execution output of the pipelines are redirected to a log file, written as ``<bids_dataset/derivatives>/cmp/sub-<subject_label>_log.txt``. Execution progress can be checked by the means of these log files.
+For each subject, the execution output of the pipelines are redirected to a log file, written as ``<bids_dataset/derivatives>/cmp-v3.X.Y/sub-<subject_label>_log.txt``. Execution progress can be checked by the means of these log files.
 
 Check stages outputs
 ******************************

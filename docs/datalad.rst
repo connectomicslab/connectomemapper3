@@ -352,12 +352,12 @@ Uninstall all files accessible from the remote
 Again, with DataLad we don’t have to keep those inputs around so you can safely uninstall them
 without losing the ability to reproduce an analysis::
 
-    datalad uninstall derivatives/cmp/*
-    datalad uninstall derivatives/freesurfer/*
-    datalad uninstall derivatives/nipype/*
+    datalad uninstall derivatives/cmp-*/*
+    datalad uninstall derivatives/freesurfer-*/*
+    datalad uninstall derivatives/nipype-*/*
 
 
 ------------
 
 :Authors: Sebastien Tourbier
-:Version: Revision: 2 (Last modification: 2021 Feb 23)
+:Version: Revision: 2.1 (Last modification: 2022 Feb 09)
