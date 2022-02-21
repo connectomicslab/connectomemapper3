@@ -6,10 +6,10 @@
 """This file contains cmp package information."""
 
 _version_major = 3
-_version_minor = 0
-_version_micro = 3
+_version_minor = 1
+_version_micro = 0
 _version_extra = ""
-__release_date__ = "16.02.2022"
+__release_date__ = "DD.MM.2022"
 
 __minor_version__ = "%s.%s" % (_version_major, _version_minor)
 
