@@ -208,6 +208,11 @@ All segmented structures are then combined to create the final parcellation nift
 The different segmentation and parcellation outputs of the anatomical pipeline are then taken as inputs of
   the diffusion, fMRI, and EEG pipelines that estimate the structural and functional connectomes from
   raw dMRI, raw rfMRI, and preprocessed EEG data and the pairs of sub-cortical and cortical areas previously segmented.
+All connectome files employ a common naming convention, based on the current
+  [BIDS extension proposal (BEP) 17](https://docs.google.com/document/d/1ugBdUF6dhElXdj3u9vw0iWjE6f_Bibsro3ah7sRV0GA/edit#heading=h.mqkmyp254xh6)
+  for generic BIDS connectivity data schema, and can saved in a diversity of formats (`tsv`, `gpickle`, `mat`, `graphml`) compatible with the most popular
+  software packages used in this field to perform complex network analyses
+  (See ["Outputs ready to be reused in the BIDS ecosystem"](#outputs-ready-to-be-reused-in-the-bids-ecosystem)).
 \label{fig:parc}](Lausanne2018_parcellation_diagram.png)
 
 ## Outputs ready to be reused in the BIDS ecosystem
@@ -279,16 +284,18 @@ CMP3 is published under the terms of the open source 3-Clause Berkeley Software
 The source code for CMP3 is hosted at
   [https://github.com/connectomicslab/connectomemapper3](https://github.com/connectomicslab/connectomemapper3),
   where all bugs and contributions are transparently discussed and managed through issues, and each release is
-  archived to Zenodo [@ZenodoCMP:2021].
+  published to the [Python Package Index (PyPI)](https://pypi.org/project/connectomemapper/) and archived to Zenodo [@ZenodoCMP:2021].
 In case of problems, CMP3 has a dedicated forum at
   [groups.google.com/group/cmtk-users](groups.google.com/group/cmtk-users) where a
   community of users is active to support each other and have scientific discussions.
 To be robust to adverse code changes, versions are released through continuous integration building
   and testing.
 Specifically, this involves testing the installation of the python package, the build of
-  the Docker and Singularity container images, and the execution of the BIDS App via the different container
+  the Docker and Singularity container images, the execution of the BIDS App via the different container
   images adopting multiple pipeline configurations, using a sample multi-modal MRI dataset [@Tourbier2020SampleDataset]
-  that has been created for this purpose.
+  that has been created for this purpose, the publication of the new version of the Python package to PyPI, and
+  the deployment of the container images to [DockerHub](https://hub.docker.com/r/sebastientourbier/connectomemapper-bidsapp) and
+  [Sylabs Cloud](https://cloud.sylabs.io/library/connectomicslab/default/connectomemapper-bidsapp).
 Doing so, we can guarantee the full functionality of each newly released version of CMP3
   for a range of different use cases.
 More details about CMP3, the different processing steps and generated outputs together with
