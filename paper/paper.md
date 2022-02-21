@@ -209,7 +209,7 @@ The different segmentation and parcellation outputs of the anatomical pipeline a
   the diffusion, fMRI, and EEG pipelines that estimate the structural and functional connectomes from
   raw dMRI, raw rfMRI, and preprocessed EEG data and the pairs of sub-cortical and cortical areas previously segmented.
 All connectome files employ a common naming convention, based on the current
-  [BIDS extension proposal (BEP) 17](https://docs.google.com/document/d/1ugBdUF6dhElXdj3u9vw0iWjE6f_Bibsro3ah7sRV0GA/edit#heading=h.mqkmyp254xh6)
+  ["BIDS extension proposal (BEP) 17"](https://docs.google.com/document/d/1ugBdUF6dhElXdj3u9vw0iWjE6f_Bibsro3ah7sRV0GA/edit#heading=h.mqkmyp254xh6)
   for generic BIDS connectivity data schema, and can saved in a diversity of formats (`tsv`, `gpickle`, `mat`, `graphml`) compatible with the most popular
   software packages used in this field to perform complex network analyses
   (See ["Outputs ready to be reused in the BIDS ecosystem"](#outputs-ready-to-be-reused-in-the-bids-ecosystem)).
