@@ -17,7 +17,7 @@ authors:
     orcid: 0000-0002-4441-899X
     affiliation: 1
   - name: Joan Rue-Queralt
-    orcid: 0000-0001-5680-4540
+    orcid: 0000-0002-9595-4557
     affiliation: 1
   - name: Katharina Glomb
     orcid: 0000-0002-4596-4386
