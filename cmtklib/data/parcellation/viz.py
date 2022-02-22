@@ -23,7 +23,7 @@ def plot_lausanne2018_surface_ctx(
 ):
     """
     Plots a set of values on the cortical surface of a given Lausanne 2018 parcellation scale.
-    
+
     Parameters
     ----------
     roi_values : numpy array
@@ -89,7 +89,7 @@ def plot_lausanne2018_surface_ctx(
     max_val = max([abs(vmin), vmax])
     vmax = max_val
     vmin = -max_val
-    
+
     # Creation of list to allow iteration
     # and reduce duplication of plotting.plot_surf_roi()
     hemis = [
@@ -111,7 +111,7 @@ def plot_lausanne2018_surface_ctx(
     axs = axs.flatten()
 
     # Iterate over the list of views to render
-    for i, (hemi, surf, bg_map, view, vector, ax) in enumerate(
+    for hemi, surf, bg_map, view, vector, ax in enumerate(
         zip(hemis, surfaces, bg_maps, views, roi_vectors, axs)
     ):
         plotting.plot_surf_roi(fsaverage[f'{surf}'], roi_map=vector,
@@ -119,7 +119,7 @@ def plot_lausanne2018_surface_ctx(
                                bg_map=fsaverage[f'{bg_map}'], bg_on_data=True,
                                darkness=.5,
                                cmap=cmap, vmin=vmin, vmax=vmax,
-                               axes=axs[i])
+                               axes=ax)
 
     # Save the figure in the desired format if enabled
     if save_fig:
