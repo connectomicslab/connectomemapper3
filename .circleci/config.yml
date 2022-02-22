@@ -1411,6 +1411,10 @@ workflows:
       - test-python-install:
           version: "3.7"
           filters:
+            branches:
+              ignore:
+                - paper-joss
+                - pull/142
             tags:
               only: /.*/
 
@@ -1418,6 +1422,10 @@ workflows:
           requires:
             - test-python-install
           filters:
+            branches:
+              ignore:
+                - paper-joss
+                - pull/142
             tags:
               only: /.*/
 
@@ -1425,6 +1433,10 @@ workflows:
           requires:
             - build_docker
           filters:
+            branches:
+              ignore:
+                - paper-joss
+                - pull/142
             tags:
               only: /.*/
 
@@ -1433,6 +1445,8 @@ workflows:
             branches:
               ignore:
                 - /docs?\/.*/
+                - paper-joss
+                - pull/142
             tags:
               only: /.*/
 
@@ -1444,6 +1458,8 @@ workflows:
             branches:
               ignore:
                 - /docs?\/.*/
+                - paper-joss
+                - pull/142
             tags:
               only: /.*/
 
@@ -1455,6 +1471,8 @@ workflows:
             branches:
               ignore:
                 - /docs?\/.*/
+                - paper-joss
+                - pull/142
             tags:
               only: /.*/
 
@@ -1465,6 +1483,8 @@ workflows:
             branches:
               ignore:
                 - /docs?\/.*/
+                - paper-joss
+                - pull/142
             tags:
               only: /.*/
 
@@ -1475,6 +1495,8 @@ workflows:
             branches:
               ignore:
                 - /docs?\/.*/
+                - paper-joss
+                - pull/142
             tags:
               only: /.*/
 
@@ -1485,6 +1507,8 @@ workflows:
             branches:
               ignore:
                 - /docs?\/.*/
+                - paper-joss
+                - pull/142
             tags:
               only: /.*/
 
@@ -1495,6 +1519,8 @@ workflows:
             branches:
               ignore:
                 - /docs?\/.*/
+                - paper-joss
+                - pull/142
             tags:
               only: /.*/
 
@@ -1505,6 +1531,8 @@ workflows:
             branches:
               ignore:
                 - /docs?\/.*/
+                - paper-joss
+                - pull/142
             tags:
               only: /.*/
 
@@ -1515,6 +1543,8 @@ workflows:
             branches:
               ignore:
                 - /docs?\/.*/
+                - paper-joss
+                - pull/142
             tags:
               only: /.*/
 
@@ -1526,6 +1556,8 @@ workflows:
             branches:
               ignore:
                 - /docs?\/.*/
+                - paper-joss
+                - pull/142
             tags:
               only: /.*/
 
@@ -1544,6 +1576,8 @@ workflows:
               branches:
                 ignore:
                   - /docs?\/.*/
+                  - paper-joss
+                  - pull/142
               tags:
                 only: /.*/
 
@@ -1562,6 +1596,8 @@ workflows:
             branches:
               ignore:
                 - /docs?\/.*/
+                - paper-joss
+                - pull/142
             tags:
               only: /.*/
 
