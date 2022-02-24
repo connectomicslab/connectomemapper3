@@ -30,7 +30,7 @@ authors:
     affiliation: 1
   - name: Alessandra Griffa
     orcid: 0000-0003-1923-1653
-    affiliation: 2,3
+    affiliation: "2,3"
   - name: Mikkel Schöttner
     orcid: 0000-0002-4521-9837 
     affiliation: 1
@@ -44,7 +44,7 @@ authors:
     orcid: 0000-0002-3312-3918
     affiliation: 6
   - name: Meritxell Bach Cuadra
-    affiliation: 7,1
+    affiliation: "7,1"
     orcid: 0000-0003-2730-4285
   - name: Patric Hagmann
     orcid: 0000-0002-2854-6561
