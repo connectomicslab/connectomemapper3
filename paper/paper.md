@@ -100,7 +100,7 @@ The size and organization of these datasets as well as the increasing complexity
   reproducibility and transparency of the analysis.
 The last ten years have indeed witnessed a number of technical advances and a trend towards the adoption
   of open research practices such as *open data* and *open methods*
-  [@Nichols:2017] [@EglenTowardNeuroscience:2017] [@Kennedy2019].
+  [@Nichols:2017] [@EglenTowardNeuroscience:2017] [@Kennedy2019] [@Poldrack2019ComputationalNeuroimaging].
 This has led in particular to the creation of a community standard for dataset organization, known as the
   Brain Imaging Data Structure (BIDS), designed to ease the practice of sharing raw neuroimaging data [@GorgolewskiTheExperiments:2016]. 
 Combined with advances in software virtualization, BIDS has enabled the creation of the BIDS Apps
@@ -108,7 +108,7 @@ Combined with advances in software virtualization, BIDS has enabled the creation
   and ensures portability and reproducibility [@GorgolewskiBIDSMethods:2017].
 A large ecosystem of processing pipelines supporting the mapping of connectomes has evolved around this framework.
 To the best of our knowledge, it includes  C-PAC [@cpac:2013], NIAK [@BellecNeuroimagingNIAK:2016], fMRIPrep [@Ghosh:2018], dMRIPrep [@dmriprep:2019],
-  QSIPREP [@CieslakQSIPrep:2020], MRtrix3_connectome [@Smith2019:BIDSApp], NDMG [@KiarAVariability:2018]
+  QSIPREP [@Cieslak:2021], MRtrix3_connectome [@Smith2019:BIDSApp], NDMG [@KiarAVariability:2018]
   PyNets [@PisnerPyNets:2020], and Micapipe [@Rodriguez:2022].
 All the existing solutions have demonstrated their capability in addressing the previously-mentioned challenges.
 However, none of them provide a direct alternative to CMP when dealing with multimodal datasets
@@ -145,7 +145,7 @@ Each pipeline is represented by a Nipype workflow that takes a BIDS formatted da
 Each stage can consist of one or multiple tasks, where each task can either interface with 
   a specific tool of FSL [@Jenkinson2012FSL], FreeSurfer [@Fischl2012FreeSurfer],
   ANTs [@AVANTS2008SymmetricBrain], dipy [@Garyfallidis2014DipyData],
-  mrtrix3 [@Tournier2019MRtrix3:Visualisation], AFNI [@Cox2012], or be fully
+  mrtrix3 [@mrtrix3:2019], AFNI [@Cox2012], or be fully
   implemented by CMP3 (\autoref{fig:cmp3-diagram}).
 We refer to the [main documentation](https://connectome-mapper-3.readthedocs.io/en/latest/bidsappmanager.html#anatomical-pipeline-stages)
   for more details about the different processing steps and parameters involved in each pipeline.
@@ -284,7 +284,7 @@ CMP3 is published under the terms of the open source 3-Clause Berkeley Software
 The source code for CMP3 is hosted at
   [https://github.com/connectomicslab/connectomemapper3](https://github.com/connectomicslab/connectomemapper3),
   where all bugs and contributions are transparently discussed and managed through issues, and each release is
-  published to the [Python Package Index (PyPI)](https://pypi.org/project/connectomemapper/) and archived to Zenodo [@ZenodoCMP:2021].
+  published to the [Python Package Index (PyPI)](https://pypi.org/project/connectomemapper/) and archived to Zenodo [@ZenodoCMP:2022].
 In case of problems, CMP3 has a dedicated forum at
   [groups.google.com/group/cmtk-users](groups.google.com/group/cmtk-users) where a
   community of users is active to support each other and have scientific discussions.
