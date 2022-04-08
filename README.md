@@ -25,7 +25,7 @@ You need to have first either Docker or Singularity engine and miniconda install
 Then, download the appropriate [environment.yml](https://github.com/connectomicslab/connectomemapper3/raw/master/conda/environment.yml) / [environment_macosx.yml](https://github.com/connectomicslab/connectomemapper3/raw/master/conda/environment_macosx.yml) and create a conda environment `py37cmp-gui` with the following command:
 
 ```bash
-$ conda create env -f /path/to/environment[_macosx].yml
+$ conda env create -f /path/to/environment[_macosx].yml
 ```
 
 Once the environment is created, activate it and install Connectome Mapper 3 with `PyPI` as follows:
