@@ -169,7 +169,7 @@ COPY --from=neurobuntu /usr/share/octave /usr/share/octave
 WORKDIR /app/connectomemapper3
 
 # Copy Python contents of this repository.
-COPY COPYRIGHT ./COPYRIGHT
+COPY LICENSE ./LICENSE
 COPY setup.py ./setup.py
 COPY README.md ./README.md
 COPY cmp ./cmp
