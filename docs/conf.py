@@ -62,6 +62,7 @@ extensions = [
     'sphinxarg.ext',
     'sphinx.ext.inheritance_diagram',
     'sphinxcontrib.apidoc',
+    'sphinx_copybutton',
     'matplotlib.sphinxext.plot_directive',
     'nbsphinx',
     'sphinx_gallery.load_style',
@@ -365,3 +366,17 @@ apidoc_extra_args = ["--module-first",
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {"http://docs.python.org/3": None}
+
+
+# -- sphinx-copybutton extension configuration -------------------------------
+
+copybutton_prompt_text = r">>> |\.\.\. |\$ | |\(py37cmp-gui\)\$ "
+copybutton_prompt_is_regexp = True
+# copybutton_only_copy_prompt_lines = False
+copybutton_remove_prompts = True
+# copybutton_copy_empty_lines = False
+# copybutton_line_continuation_character = "\\"
+# copybutton_here_doc_delimiter = "EOT"
+
+# See https://sphinx-copybutton.readthedocs.io/en/latest/use.html#keep-empty-lines
+# for more details
