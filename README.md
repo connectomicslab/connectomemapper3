@@ -222,7 +222,7 @@ Work supported by the [Sinergia SNFNS-170873 Grant](http://p3.snf.ch/Project-170
 
 ### License
 
-This software is distributed under the open-source license Modified BSD. See [license](docs/LICENSE) for more details.
+This software is distributed under the open-source 3-Clause BSD License. See [license](docs/LICENSE) for more details.
 
 All trademarks referenced herein are property of their respective holders.
 
