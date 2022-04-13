@@ -62,6 +62,7 @@ extensions = [
     'sphinxarg.ext',
     'sphinx.ext.inheritance_diagram',
     'sphinxcontrib.apidoc',
+    'sphinx_copybutton',
     'matplotlib.sphinxext.plot_directive',
     'nbsphinx',
     'sphinx_gallery.load_style',
