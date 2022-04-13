@@ -43,6 +43,7 @@ packages = [
     "cmp.stages.diffusion",
     "cmp.stages.functional",
     "cmp.stages.connectome",
+    "cmp.stages.eeg",
     "cmp.pipelines",
     "cmp.pipelines.anatomical",
     "cmp.pipelines.diffusion",
