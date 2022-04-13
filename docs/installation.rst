@@ -86,7 +86,7 @@ Installation of the Connectome Mapper 3 has been facilitated through the distrib
     $ docker pull sebastientourbier/connectomemapper-bidsapp:|release|
     
 .. note:: This can take a little bit of time depending on your connection speed and your machine.
-          The docker image of the BIDSApp has a compressed size of 6.28 GB on `DockerHub <https://hub.docker.com/r/sebastientourbier/connectomemapper-bidsapp/tags>`_ and should take 17.6 GB of space on your machine after extraction.
+          The docker image of the BIDSApp has a compressed size of 6.28 GB on `DockerHub <https://hub.docker.com/r/sebastientourbier/connectomemapper-bidsapp/tags>`_ and should take 17.6 GB of space on your machine after download and extraction.
 
 *   To display all docker images available::
 
