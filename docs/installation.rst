@@ -79,11 +79,14 @@ Installation of the Connectome Mapper 3 has been facilitated through the distrib
 
 *   Open a terminal
 
-*   Get the latest release (|release|) of the BIDS App:
+*   Download and extract the latest release (|release|) of the BIDS App:
 
 .. parsed-literal::
 
     $ docker pull sebastientourbier/connectomemapper-bidsapp:|release|
+    
+.. note:: This can take a little bit of time depending on your connection speed and your machine.
+          The docker image of the BIDSApp has a compressed size of 6.28 GB on `DockerHub <https://hub.docker.com/r/sebastientourbier/connectomemapper-bidsapp/tags>`_ and should take 17.6 GB of space on your machine after extraction.
 
 *   To display all docker images available::
 
@@ -124,6 +127,9 @@ The installation of the Connectome Mapper 3, including `cmpbidsappmanager`, cons
 *   Create a miniconda3 environment where all python dependencies will be installed::
 
         $ conda env create -f /path/to/downloaded/conda/environment[_macosx].yml
+
+    .. note:: This can take a little bit of time depending on your connection speed and your machine.
+              You should also expect that it would take a space of around 2.8GB on your machine.
 
 *   Activate the conda environment::
 
