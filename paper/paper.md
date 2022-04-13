@@ -93,8 +93,8 @@ Connectome Mapper (CMP), an open-source pipeline software with a graphical user 
   hierarchical region grouping [@Cammoun2012:MappingMRI] of the Desikan-Killiany
   parcellation [@Desikan2006AnInterest].
 
-As MRI is being increasingly more accessible and used in both clinical and research settings,
-  such multi-modal MRI datasets are being gathered at an unprecedented rate.
+As MRI is increasingly accessible and used in both clinical and research settings,
+  multi-modal MRI datasets are being gathered at an unprecedented rate.
 The size and organization of these datasets as well as the increasing complexity of the processing
   pipelines to analyze them present important challenges for scalable computing, data sharing,
   reproducibility and transparency of the analysis.
@@ -117,7 +117,7 @@ However, none of them provide a direct alternative to CMP when dealing with mult
 Connectome Mapper 3 (CMP3) builds up on the two preceding versions of CMP and keeps the same philosophy. 
 It introduces massive improvements in terms of the underlying codebase, the tools used, and the scope of the functionality
   provided.
-This includes the migration to Python 3, a revisited and extended multi-scale parcellation scheme, the adoption
+This includes migration to Python 3, a revisited and extended multi-scale parcellation scheme, adoption
   of the BIDS standard for data organization, the encapsulation of the processing pipelines in software
   container images, continuous testing in concordance to the BIDS Apps standard, and major upgrades of the diffusion
   and fMRI pipelines.
@@ -147,7 +147,7 @@ Each stage can consist of one or multiple tasks, where each task can either inte
   ANTs [@AVANTS2008SymmetricBrain], dipy [@Garyfallidis2014DipyData],
   mrtrix3 [@mrtrix3:2019], AFNI [@Cox2012], or be fully
   implemented by CMP3 (\autoref{fig:cmp3-diagram}).
-We refer to the [main documentation](https://connectome-mapper-3.readthedocs.io/en/latest/bidsappmanager.html#anatomical-pipeline-stages)
+We refer the reader to the [main documentation](https://connectome-mapper-3.readthedocs.io/en/latest/bidsappmanager.html#anatomical-pipeline-stages)
   for more details about the different processing steps and parameters involved in each pipeline.
 At the time EEG is being fully integrated in the workflow and in the GUI, CMP3 already provides a
   pipeline dedicated to this modality with a collection of interfaces based on MNE-Python [@GramfortEtAl2013a],
@@ -165,7 +165,7 @@ Depending on the input data, the processing pipelines and stages are then dynami
   based on the parameters set in the different configuration files.
 Empowered by the Nipype workflow engine, the re-execution of the workflow will resume the
   processing at the stage where a change of parameter occurred, thus not needing to recompute
-  outputs not affected by the change.
+  outputs unaffected by the change.
 
 To ensure reproducibility and maximize re-usability of the tool, the implemented pipelines are encapsulated
   in Docker [@merkeldocker:2014] and Singularity [@Kurtzer2017Singularity:Compute] software image
@@ -180,7 +180,7 @@ All these design considerations make CMP3 easy to install and use (as it provide
   environment in which the pipelines are guaranteed to run, and where all dependencies
   are already installed), and this on a diversity of multi-modal BIDS datasets.
 They also make CMP3 efficient in managing and scaling the pipeline execution while recording provenance,
-  and easy to customize and extend it for specific needs.
+  and easy to customize and extend for specific needs.
 
 ## A revisited and extended multi-scale cortical parcellation scheme
 
@@ -231,7 +231,7 @@ While the BIDS-Derivatives extension to organize network data
 All connectomes are saved by default as graph edge lists in ``.tsv`` files, that can
   be directly analyzed using \href{https://networkx.org/documentation/stable/tutorial.html}{NetworkX} [@Hagberg:2008],
   a Python library which offers many algorithms and tools to explore graphs and compute local and global network properties.
-Connectivity matrices can be exported to Matlab as MAT-files can be fed to the
+Connectivity matrices can be exported to MATLAB as MAT-files can be fed to the
   \href{www.brain-connectivity-toolbox.net}{Brain Connectivity Toolbox} [@Rubinov:2010], which is a powerful
   toolbox containing a large selection of network measures for the characterization of brain
   connectivity datasets.
@@ -252,7 +252,7 @@ CMP3 takes advantage of the Traits/TraitsUI framework
   which is easy to understand and extend.
 This has enabled the design of a GUI, which we call the `cmpbidsappmanager`, that reflects
   the modular structure of the processing workflow.
-It has been designed to guide and support the user in all the steps required to
+It is designed to guide and support the user in all the steps required to
   perform an analysis (\autoref{fig:gui}).
 
 ![\textbf{Graphical User Interface of the Connectome Mapper 3.}
@@ -312,9 +312,9 @@ CMP3 has been successfully employed in a number of methodological
   [@Vorderwulbecke2020High-densityPoint] [@CarboniNeuro:2020] [@Carboni:2022], and data [@Pascucci2022]
   [@ds003505:1.1.1] research articles.
 CMP3 is part of the [BIDS Apps](https://bids-apps.neuroimaging.io/apps/), and also part of [`ReproNim/containers`](https://github.com/ReproNim/containers),
-  a Datalad dataset with a collection of 40 popular containerized neuroimaging research pipelines,
-  which allows one to easily include it as a subdataset within Datalad-controlled BIDS datasets,
-  and achieve fully reproducible analysis by running CMP3 directly with Datalad.
+  a DataLad dataset with a collection of 40 popular containerized neuroimaging research pipelines,
+  which allows one to easily include it as a subdataset within DataLad-controlled BIDS datasets,
+  and achieve fully reproducible analysis by running CMP3 directly with DataLad.
 
 # Acknowledgements
 
