@@ -129,7 +129,7 @@ The installation of the Connectome Mapper 3, including `cmpbidsappmanager`, cons
         $ conda env create -f /path/to/downloaded/conda/environment[_macosx].yml
 
     .. note:: This can take some time depending on your connection speed and your machine.
-              it should take around 2.8GB of space on your machine.
+              It should take around 2.8GB of space on your machine.
 
 *   Activate the conda environment::
 
