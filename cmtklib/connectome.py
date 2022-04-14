@@ -359,7 +359,7 @@ def cmat(
                 endROI = int(roiData[endvox[0], endvox[1], endvox[2]])
 
             except IndexError:
-                print(" .. ERROR: An index error occured for fiber %s. " % i)
+                print(" .. ERROR: An index error occurred for fiber %s. " % i)
                 print("           This means that the fiber start or endpoint is outside the volume. Continue.")
                 print("           Continue.")
                 continue
@@ -518,7 +518,7 @@ def cmat(
                             val.append(vv[0][idx2[:, 0], idx2[:, 1], idx2[:, 2]])
                         except IndexError as e:
                             print(
-                                "  ... ERROR - Index error occured when trying extract scalar values for measure",
+                                "  ... ERROR - Index error occurred when trying extract scalar values for measure",
                                 k,
                             )
                             print(
