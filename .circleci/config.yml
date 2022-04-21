@@ -385,7 +385,10 @@ jobs:
       TZ: "/usr/share/zoneinfo/Europe/Zurich"
       SCRATCH: "/scratch"
     machine:
-      image: ubuntu-1604:201903-01
+      # NEW: Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
+      image: ubuntu-2004:202201-02
+      # OLD: Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
+      # image: ubuntu-1604:201903-01
       docker_layer_caching: false
     resource_class: medium
     working_directory: /home/circleci/src/connectomemapper3
@@ -474,8 +477,8 @@ jobs:
 
   build_singularity:
     machine:
-      # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
-      image: ubuntu-1604:201903-01
+      # Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
+      image: ubuntu-2004:202201-02
     resource_class: large
     working_directory: /home/circleci/src/connectomemapper3
     steps:
@@ -537,8 +540,8 @@ jobs:
 
   get_data:
     machine:
-      # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
-      image: ubuntu-1604:201903-01
+      # Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
+      image: ubuntu-2004:202201-02
     working_directory: /home/circleci/data
     steps:
       - restore_cache:
@@ -600,8 +603,8 @@ jobs:
 
   test1_docker_parcellation:
     machine:
-      # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
-      image: ubuntu-1604:201903-01
+      # Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
+      image: ubuntu-2004:202201-02
     resource_class: large
     working_directory: /tmp/data
     environment:
@@ -663,8 +666,8 @@ jobs:
 
   test2_docker_parcellation:
     machine:
-      # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
-      image: ubuntu-1604:201903-01
+      # Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
+      image: ubuntu-2004:202201-02
     resource_class: medium
     working_directory: /tmp/data
     environment:
@@ -723,8 +726,8 @@ jobs:
 
   test3_docker_dsi_mrtrix:
     machine:
-      # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
-      image: ubuntu-1604:201903-01
+      # Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
+      image: ubuntu-2004:202201-02
     resource_class: large
     working_directory: /tmp/data
     environment:
@@ -782,8 +785,8 @@ jobs:
 
   test4_docker_dsi_mrtrix:
     machine:
-      # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
-      image: ubuntu-1604:201903-01
+      # Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
+      image: ubuntu-2004:202201-02
     resource_class: large
     working_directory: /tmp/data
     environment:
@@ -844,8 +847,8 @@ jobs:
 
   test5_docker_dsi_dipy:
     machine:
-      # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
-      image: ubuntu-1604:201903-01
+      # Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
+      image: ubuntu-2004:202201-02
     resource_class: large
     working_directory: /tmp/data
     environment:
@@ -906,8 +909,8 @@ jobs:
 
   test6_docker_dsi_dipy:
     machine:
-      # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
-      image: ubuntu-1604:201903-01
+      # Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
+      image: ubuntu-2004:202201-02
     resource_class: large
     working_directory: /tmp/data
     environment:
@@ -968,8 +971,8 @@ jobs:
 
   test7_docker_fmri:
     machine:
-      # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
-      image: ubuntu-1604:201903-01
+      # Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
+      image: ubuntu-2004:202201-02
     resource_class: large
     working_directory: /tmp/data
     environment:
@@ -1030,8 +1033,8 @@ jobs:
 
   test8_docker_fmri:
     machine:
-      # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
-      image: ubuntu-1604:201903-01
+      # Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
+      image: ubuntu-2004:202201-02
     resource_class: large
     working_directory: /tmp/data
     environment:
@@ -1092,8 +1095,8 @@ jobs:
 
   test9_singularity_parcellation:
     machine:
-      # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
-      image: ubuntu-1604:201903-01
+      # Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
+      image: ubuntu-2004:202201-02
     resource_class: large
     working_directory: /tmp/data
     environment:
@@ -1229,8 +1232,8 @@ jobs:
 
   build_docs:
     machine:
-      # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
-      image: ubuntu-1604:201903-01
+      # Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
+      image: ubuntu-2004:202201-02
     working_directory: /home/circleci/out/docs
     steps:
       - checkout:
@@ -1264,8 +1267,8 @@ jobs:
 
   deploy_docker_latest:
     machine:
-      # Ubuntu 14.04 with Docker 17.10.0-ce
-      image: ubuntu-1604:201903-01
+      # Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
+      image: ubuntu-2004:202201-02
     resource_class: medium
     working_directory: /home/circleci/src/connectomemapper3
     steps:
@@ -1292,8 +1295,8 @@ jobs:
 
   deploy_singularity_latest:
     machine:
-      # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
-      image: ubuntu-1604:201903-01
+      # Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
+      image: ubuntu-2004:202201-02
     resource_class: medium
     working_directory: /home/circleci/src/connectomemapper3
     steps:
@@ -1331,8 +1334,8 @@ jobs:
 
   deploy_docker_release:
     machine:
-      # Ubuntu 14.04 with Docker 17.10.0-ce
-      image: ubuntu-1604:201903-01
+      # Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
+      image: ubuntu-2004:202201-02
     resource_class: medium
     working_directory: /home/circleci/src/connectomemapper3
     steps:
@@ -1361,8 +1364,8 @@ jobs:
 
   deploy_singularity_release:
     machine:
-      # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
-      image: ubuntu-1604:201903-01
+      # Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
+      image: ubuntu-2004:202201-02
     resource_class: medium
     working_directory: /home/circleci/src/connectomemapper3
     steps:
