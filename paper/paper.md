@@ -79,16 +79,18 @@ bibliography: paper.bib
 
 Connectome Mapper 3 (CMP3) is a processing pipeline software for multi-scale multi-modal connectome mapping
   of the human brain.
-It provides to researchers an unique workflow, implemented in accordance to the BIDS App framework,
-  that leverages a number of widely adopted software tools to map a connectome representation of the
-  structural and functional brain systems at multiple scales.
+It provides to researchers an unique workflow, implemented in accordance to the BIDS App framework
+  [@GorgolewskiBIDSMethods:2017], that leverages a number of widely adopted software tools to map a connectome
+  representation of the structural and functional brain systems at multiple scales.
 The workflow can take any structural / diffusion / resting-state functional MRI dataset structured accordingly
-  To the BIDS standard, and is intended to be run via its Docker and Singularity containerized versions.
+  to the BIDS standard [@GorgolewskiTheExperiments:2016], and is intended to be run via its Docker and
+  Singularity containerized versions.
 To improve accessibility, Connectome Mapper 3 comes with an interactive graphical user interface, which supports
   the user in all the steps involved in the configuration of the pipelines, the configuration and execution of
   the BIDS App, and the control of the output quality.
-The tool is written in Python, available from the Python Package Index (PyPI), and the container images
-  are available from DockerHub and SylabsIO.
+The tool is written in Python, available from the [Python Package Index (PyPI)](https://pypi.org/project/connectomemapper/),
+  and the container images are available from [DockerHub](https://hub.docker.com/r/sebastientourbier/connectomemapper-bidsapp)
+  and [Sylabs Cloud](https://cloud.sylabs.io/library/connectomicslab/default/connectomemapper-bidsapp).
 Having been successfully employed in a number of research papers, and being currently extended to
   electroencephalography, we believe that CMP3 can offer a solid multi-modal tool for the investigation of
   brain network function and organization at specific scales, as well as a map that links different spatial
@@ -145,7 +147,6 @@ Despite the recent emergence of electroencephalography (EEG) connectomics and th
   exists to date.
 Initiated during OHBM BrainHack 2020 ([https://github.com/ohbm/hackathon2020/issues/214](https://github.com/ohbm/hackathon2020/issues/214)),
   CMP3 is being extended to EEG.
-This manuscript summarizes CMP3 along with different design characteristics and principles.
 
 # Design and functionality overview
 
@@ -323,7 +324,7 @@ More details about CMP3, the different processing steps and generated outputs to
   the documentation ([connectome-mapper-3.readthedocs.io](connectome-mapper-3.readthedocs.io))
   that is kept up to date with the current release and can be retrieved for older versions.
 
-# Mention
+# Community impact
 
 CMP3 has been successfully employed in a number of methodological
   [@Zheng2020GeometricConnectomeb] [@GlombNeuro:2020] [@GlombNet:2020] [@AkselrodHBM:2021]
