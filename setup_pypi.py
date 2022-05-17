@@ -80,6 +80,9 @@ package_data = {
     ],
     "resources": ["buttons/*.png", "icons/*png"],
     "cmtklib": [
+        "data/parcellation/lausanne2018/*.*",
+        "data/parcellation/lausanne2018/*/*.*",
+        "data/parcellation/nativefreesurfer/*/*.*",
         "data/parcellation/lausanne2018/mni-space/*.*",
         "data/report/carbonfootprint/css/*.*",
         "data/report/carbonfootprint/js/*.*",
