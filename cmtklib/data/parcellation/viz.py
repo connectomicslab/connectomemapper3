@@ -111,7 +111,7 @@ def plot_lausanne2018_surface_ctx(
     axs = axs.flatten()
 
     # Iterate over the list of views to render
-    for hemi, surf, bg_map, view, vector, ax in enumerate(
+    for i, (hemi, surf, bg_map, view, vector, ax) in enumerate(
         zip(hemis, surfaces, bg_maps, views, roi_vectors, axs)
     ):
         plotting.plot_surf_roi(fsaverage[f'{surf}'], roi_map=vector,
