@@ -3,6 +3,64 @@ Changes
 ========
 
 ****************************
+Version 3.0.4
+****************************
+
+Date: May 21, 2022
+
+This version mainly integrates changes and fix bugs discovered from the JOSS review (https://github.com/openjournals/joss-reviews/issues/4248).
+
+**What's Changed**
+
+*Updates*
+
+*   Nipype has been updated from ``1.7.0`` to ``1.8.0``. (`PR #184 <https://github.com/connectomicslab/connectomemapper3/pull/184>`_)
+    See `Nipype changelog <https://nipype.readthedocs.io/en/latest/changes.html#may-10-2022>`_) for more details.
+
+*Bug fix*
+
+*   Add missing `cmp.stages.eeg` to `setup_pypi.py`. (`PR #166 <https://github.com/connectomicslab/connectomemapper3/pull/166>`_)
+
+*   Add missing package data for parcellation in `setup_pypi.py`. (`PR #182 <https://github.com/connectomicslab/connectomemapper3/pull/182>`_)
+
+*   Use HTTPS instead of SSH for datalad clone in notebooks . (`PR #181 <https://github.com/connectomicslab/connectomemapper3/pull/181>`_)
+
+*   Add missing condition to handle custom BIDS files with session. (`PR #183 <https://github.com/connectomicslab/connectomemapper3/pull/183>`_)
+
+*   Integrate fix from Napari project for issues with menubar on Mac. (`PR #174 <https://github.com/connectomicslab/connectomemapper3/pull/174>`_)
+
+*Documentation*
+
+*   Correct `conda env create` instruction in the README. (`PR #164 <https://github.com/connectomicslab/connectomemapper3/pull/164>`_)
+
+*   Refer to contributing guidelines in the README. (`PR #167 <https://github.com/connectomicslab/connectomemapper3/pull/167>`_)
+
+*   Use `sphinx-copybutton` extension in the docs. (`PR #168 <https://github.com/connectomicslab/connectomemapper3/pull/168>`_)
+
+*   Add notes about docker image and conda environment size and time to download. (`PR #169 <https://github.com/connectomicslab/connectomemapper3/pull/169>`_)
+
+*JOSS paper*
+
+*   Integrate minor wording tweaks by @jsheunis. (`PR #162 <https://github.com/connectomicslab/connectomemapper3/pull/162`_)
+
+*   Add higher level summary and rename the old summary to "Overview of Functionalities". (`PR #175 <https://github.com/connectomicslab/connectomemapper3/pull/175`_)
+
+*License*
+
+*   The license has been updated to a pure 3-clause BSD license to comply with JOSS. (`PR #163 <https://github.com/connectomicslab/connectomemapper3/pull/163`_)
+
+*Software development life cycle*
+
+*   Migrate ubuntu 16.04 (now deprecated) to 20.04 on CircleCI. (`PR #172 <https://github.com/connectomicslab/connectomemapper3/pull/172`_)
+
+*Contributors*
+
+*   `Sebastien Tourbier <https://github.com/connectomicslab/connectomemapper3/issues?q=is%3Apr+author%3Asebastientourbier>`_
+
+*   `J.S. (Stephan) Heunis <https://github.com/connectomicslab/connectomemapper3/issues?q=is%3Apr+author%3Ajsheunis>`_
+
+
+****************************
 Version 3.0.3
 ****************************
 
