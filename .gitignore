@@ -38,3 +38,4 @@ dev/notebooks/*
 **/*.idea/*
 .vscode
 *.egg-info
+docs/notebooks/ds003505_demo/
