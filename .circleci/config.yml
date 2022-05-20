@@ -401,10 +401,14 @@ jobs:
       - run:
           name: Enable "--squash" feature of docker build and change docker daemon tmp directory
           command: |
-            mkdir -p /tmp
-            export DOCKER_TMPDIR=/tmp
+            # Enable the --squash feature
             sudo touch /etc/docker/daemon.json
             echo "{\"experimental\": true}" | sudo tee -a /etc/docker/daemon.json
+            # Change docker tmp directory as /var/lib/docker runs out of space while saving
+            mkdir -p /tmp
+            mkdir -p /etc/systemd/system/docker.service.d
+            touch /etc/systemd/system/docker.service.d/tmpdir.conf
+            echo "[Service]\nEnvironment=\"DOCKER_TMPDIR=/tmp\"" | sudo tee /etc/systemd/system/docker.service.d/tmpdir.conf
             sudo service docker restart
       #- restore_cache:
       #    keys:
