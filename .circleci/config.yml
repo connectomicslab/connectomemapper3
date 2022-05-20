@@ -466,6 +466,7 @@ jobs:
           name: Save Docker Image
           no_output_timeout: 40m
           command: |
+            export DOCKER_TMP="/tmp"
             # Get version, update files.
             THISVERSION=$( python /home/circleci/src/connectomemapper3/get_version.py )
             mkdir -p /tmp/cache/docker
