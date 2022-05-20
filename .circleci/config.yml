@@ -399,8 +399,10 @@ jobs:
             sudo apt-get update
             sudo apt-get install zstd
       - run:
-          name: Enable "--squash" feature of docker build
+          name: Enable "--squash" feature of docker build and change docker daemon tmp directory
           command: |
+            mkdir -p /tmp
+            export DOCKER_TMPDIR=/tmp
             sudo touch /etc/docker/daemon.json
             echo "{\"experimental\": true}" | sudo tee -a /etc/docker/daemon.json
             sudo service docker restart
@@ -466,7 +468,6 @@ jobs:
           name: Save Docker Image
           no_output_timeout: 40m
           command: |
-            export DOCKER_TMP="/tmp"
             # Get version, update files.
             THISVERSION=$( python /home/circleci/src/connectomemapper3/get_version.py )
             mkdir -p /tmp/cache/docker
