@@ -389,7 +389,7 @@ jobs:
       image: ubuntu-2004:202201-02
       # OLD: Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
       # image: ubuntu-1604:201903-01
-      docker_layer_caching: true
+      docker_layer_caching: false
     resource_class: medium
     working_directory: /home/circleci/src/connectomemapper3
     steps:
@@ -404,12 +404,6 @@ jobs:
             # Enable the --squash feature
             sudo touch /etc/docker/daemon.json
             echo "{\"experimental\": true}" | sudo tee -a /etc/docker/daemon.json
-            # Change docker tmp directory as /var/lib/docker runs out of space while saving
-            sudo mkdir -p /tmp
-            sudo mkdir -p /etc/systemd/system/docker.service.d
-            sudo touch /etc/systemd/system/docker.service.d/tmpdir.conf
-            echo "[Service]\nEnvironment=\"DOCKER_TMPDIR=/tmp\"" | sudo tee /etc/systemd/system/docker.service.d/tmpdir.conf
-            sudo service docker restart
       #- restore_cache:
       #    keys:
       #      - docker-v1-{{ .Branch }}-{{ .Revision }}
