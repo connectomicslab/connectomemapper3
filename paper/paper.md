@@ -88,12 +88,12 @@ The workflow can take any structural / diffusion / resting-state functional MRI 
 To improve its accessibility, CMP3 comes with a graphical user interface, which supports
   the user in all the steps involved in the configuration of the pipelines, the configuration and execution of
   the BIDS App, and the control of the output quality.
-CMP3 has been successfully employed in a number of research papers, and is now being currently extended to
+CMP3 has been successfully employed in a number of research papers, and is currently being extended to
   electroencephalography, to offer a solid multi-modal framework to the community for the investigation of
   brain network function and organization at specific scales, as well as a map that links different spatial
   and temporal scales.
 CMP3 is available from the [Python Package Index (PyPI)](https://pypi.org/project/connectomemapper/),
-  and the container images available from [DockerHub](https://hub.docker.com/r/sebastientourbier/connectomemapper-bidsapp)
+  and the container images are available from [DockerHub](https://hub.docker.com/r/sebastientourbier/connectomemapper-bidsapp)
   and [Sylabs Cloud](https://cloud.sylabs.io/library/connectomicslab/default/connectomemapper-bidsapp).
 
 # Statement of Need
