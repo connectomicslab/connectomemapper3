@@ -77,11 +77,12 @@ bibliography: paper.bib
 
 # Summary
 
-Connectome Mapper 3 (CMP3) is an open-source processing pipeline software, written in Python 3, for multi-scale multi-modal connectome mapping
-  of the human brain.
+Connectome Mapper 3 (CMP3) is an open-source processing pipeline software, written in Python 3,
+  for multi-scale multi-modal connectome mapping of the human brain.
 It provides researchers with a unique workflow, implemented in accordance with the BIDS App framework
-  [@GorgolewskiBIDSMethods:2017], that leverages a number of widely adopted software tools to map a connectome
-  representation of the structural and functional brain systems at multiple scales.
+  [@GorgolewskiBIDSMethods:2017], that leverages a number of widely adopted software tools to map a graph
+  representation of the structural and functional connections between brain regions, the connectome,
+  at multiple scales.
 The workflow can take any structural / diffusion / resting-state functional MRI dataset structured accordingly
   to the BIDS standard [@GorgolewskiTheExperiments:2016], and is intended to be run via its Docker and
   Singularity/Apptainer containerized versions.
