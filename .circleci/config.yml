@@ -399,7 +399,7 @@ jobs:
             sudo apt-get update
             sudo apt-get install zstd
       - run:
-          name: Enable "--squash" feature of docker build and change docker daemon tmp directory
+          name: Enable "--squash" feature of docker build
           command: |
             # Enable the --squash feature
             sudo touch /etc/docker/daemon.json
