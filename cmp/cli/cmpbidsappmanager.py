@@ -13,12 +13,16 @@ from distutils.version import StrictVersion
 from pathlib import Path
 import subprocess
 
-# Setup Qt5/Pyside2 backend for traitsui
+# Setup Qt5 backend for traitsui
 from traits.etsconfig.api import ETSConfig
 ETSConfig.toolkit = "qt"  # pylint: disable=E402 # noqa
 os.environ["ETS_TOOLKIT"] = "qt"  # pylint: disable=E402 # noqa
-# os.environ['QT_API'] = 'pyqt5'
-os.environ["QT_API"] = "pyside2"  # pylint: disable=E402 # noqa
+os.environ['QT_API'] = 'pyqt5'  # pylint: disable=E402 # noqa
+
+from PyQt5.QtCore import (
+    QT_VERSION_STR,
+    PYQT_VERSION_STR
+)
 
 # CMP imports
 from cmp.info import __version__, __copyright__
@@ -33,7 +37,8 @@ def _info():
     print_warning("""{}""".format(__copyright__))
     print_warning("------------------------------------------------------")
     print("------------------------------------------------------")
-    print("  .. INFO: Use {} for graphical backend".format(ETSConfig.toolkit))
+    print(f"  .. INFO: Use {ETSConfig.toolkit} ({PYQT_VERSION_STR}) / "
+          f"{os.environ['QT_API']} ({QT_VERSION_STR}) for graphical backend")
     print("------------------------------------------------------\n")
 
 
@@ -124,6 +129,8 @@ def main():
         python_path = Path(sys.exec_prefix) / 'bin' / 'pythonw'
 
         if python_path.exists():
+            # Required for macOS Big Sur: https://stackoverflow.com/a/64878899
+            os.environ["QT_MAC_WANTS_LAYER"] = "1"
             # Running again with pythonw will exit this script
             # and use the framework build of python.
             _run_pythonw(python_path)
