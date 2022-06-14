@@ -139,8 +139,11 @@ class CustomBIDSFile(HasTraits):
             base_dir,
             subject
         )
-        fname = f'{subject}' if session is None else f'{subject}_{session}'
-        filepath = os.path.join(filepath, session)
+
+        fname = f'{subject}'
+        if session is not None and session != "":
+            fname += f'_{session}'
+            filepath = os.path.join(filepath, session)
         if self.label is not None and self.label != "":
             fname += f'_label-{self.label}'
         if self.atlas is not None and self.atlas != "":
