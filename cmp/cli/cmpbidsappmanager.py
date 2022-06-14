@@ -37,8 +37,8 @@ def _info():
     print_warning("""{}""".format(__copyright__))
     print_warning("------------------------------------------------------")
     print("------------------------------------------------------")
-    print(f"  .. INFO: Use {ETSConfig.toolkit} ({PYQT_VERSION_STR}) / "
-          f"{os.environ['QT_API']} ({QT_VERSION_STR}) for graphical backend")
+    print(f"  .. INFO: Use {ETSConfig.toolkit} ({QT_VERSION_STR}) / "
+          f"{os.environ['QT_API']} ({PYQT_VERSION_STR}) for graphical backend")
     print("------------------------------------------------------\n")
 
 
