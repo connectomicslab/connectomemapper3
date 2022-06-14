@@ -404,6 +404,7 @@ jobs:
             # Enable the --squash feature
             sudo touch /etc/docker/daemon.json
             echo "{\"experimental\": true}" | sudo tee -a /etc/docker/daemon.json
+            sudo service docker restart
       #- restore_cache:
       #    keys:
       #      - docker-v1-{{ .Branch }}-{{ .Revision }}
