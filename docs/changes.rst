@@ -6,9 +6,9 @@ Changes
 Version 3.0.4
 ****************************
 
-Date: May 21, 2022
+Date: June 15, 2022
 
-This version mainly integrates changes and fix bugs discovered from the JOSS review (https://github.com/openjournals/joss-reviews/issues/4248).
+This version incorporates the JOSS paper of CMP3 and mainly addresses all points raised by the JOSS review (https://github.com/openjournals/joss-reviews/issues/4248).
 
 **What's Changed**
 
