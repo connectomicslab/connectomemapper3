@@ -32,8 +32,12 @@ After activation of the conda environment, start the graphical user interface ca
     $ cmpbidsappmanager
 
 
+.. note:: Before you select a BIDS dataset, the main window is blank. Note also that on Mac, Qt turns the menu bar into the Mac native menu bar.
+
 Load a BIDS dataset
 ***********************
+
+* From the main window, click on `File -> Load BIDS dataset...`.
 
 The ``Connectome Mapper 3`` BIDS App Manager allows you to:
 
