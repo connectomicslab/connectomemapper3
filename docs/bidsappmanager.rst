@@ -37,19 +37,13 @@ After activation of the conda environment, start the graphical user interface ca
 Load a BIDS dataset
 ***********************
 
-* From the main window, click on `File -> Load BIDS dataset...`.
+*   From the main window, click on `File -> Load BIDS dataset...`. The ``Connectome Mapper 3`` BIDS App Manager gives you two different options:
 
-The ``Connectome Mapper 3`` BIDS App Manager allows you to:
+    *   `Load BIDS dataset`: load a BIDS dataset stored locally.
+        You only have to select the root directory of your valid BIDS dataset (see note below)
 
-* load a BIDS dataset stored locally.
-
-You only have to select the root directory of your valid BIDS dataset (see note below)
-
-* create a new datalad/BIDS dataset locally from an existing local or remote datalad/BIDS dataset (This is a feature under development)
-
-Select the mode "Install a Datalad/BIDS dataset".
-
-If ssh connection is used, make sure to enable the  "install via ssh" and to provide all connection details (IP address / Remote host name, remote user, remote password)
+    *   `Install Datalad BIDS dataset`: create a new datalad/BIDS dataset locally from an existing local or remote datalad/BIDS dataset (This is a feature under development)
+        If ssh connection is used, make sure to enable the  "install via ssh" and to provide all connection details (IP address / Remote host name, remote user, remote password)
 
 .. note:: The input dataset MUST be a valid :abbr:`BIDS (Brain Imaging Data Structure)` structured dataset and must include at least one T1w or MPRAGE structural image. We highly recommend that you validate your dataset with the free, online `BIDS Validator <http://bids-standard.github.io/bids-validator/>`_.
 
