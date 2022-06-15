@@ -8,7 +8,7 @@ Version 3.0.4
 
 Date: June 15, 2022
 
-This version incorporates the JOSS paper of CMP3 and mainly addresses all points raised by the JOSS review (https://github.com/openjournals/joss-reviews/issues/4248).
+This version mainly addresses all points raised by the JOSS review (https://github.com/openjournals/joss-reviews/issues/4248).
 
 **What's Changed**
 
@@ -43,17 +43,17 @@ This version incorporates the JOSS paper of CMP3 and mainly addresses all points
 
 *JOSS paper*
 
-*   Integrate minor wording tweaks by @jsheunis. (`PR #162 <https://github.com/connectomicslab/connectomemapper3/pull/162`_)
+*   Integrate minor wording tweaks by @jsheunis. (`PR #162 <https://github.com/connectomicslab/connectomemapper3/pull/162>`_)
 
-*   Add higher level summary and rename the old summary to "Overview of Functionalities". (`PR #175 <https://github.com/connectomicslab/connectomemapper3/pull/175`_)
+*   Add higher level summary and rename the old summary to "Overview of Functionalities". (`PR #175 <https://github.com/connectomicslab/connectomemapper3/pull/175>`_)
 
 *License*
 
-*   The license has been updated to a pure 3-clause BSD license to comply with JOSS. (`PR #163 <https://github.com/connectomicslab/connectomemapper3/pull/163`_)
+*   The license has been updated to a pure 3-clause BSD license to comply with JOSS. (`PR #163 <https://github.com/connectomicslab/connectomemapper3/pull/163>`_)
 
 *Software development life cycle*
 
-*   Migrate ubuntu 16.04 (now deprecated) to 20.04 on CircleCI. (`PR #172 <https://github.com/connectomicslab/connectomemapper3/pull/172`_)
+*   Migrate ubuntu 16.04 (now deprecated) to 20.04 on CircleCI. (`PR #172 <https://github.com/connectomicslab/connectomemapper3/pull/172>`_)
 
 *Contributors*
 
