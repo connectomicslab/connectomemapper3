@@ -29,6 +29,8 @@ This version mainly integrates changes and fix bugs discovered from the JOSS rev
 
 *   Integrate fix from Napari project for issues with menubar on Mac. (`PR #174 <https://github.com/connectomicslab/connectomemapper3/pull/174>`_)
 
+*   Use the most recent PyQt5 instead of PySide2 (older) for graphical backend of `cmpbidsappmanager`, which provides a fix to run Qt-based GUI on MacOSX Big Sur. (`PR #188 <https://github.com/connectomicslab/connectomemapper3/pull/188>`_)
+
 *Documentation*
 
 *   Correct `conda env create` instruction in the README. (`PR #164 <https://github.com/connectomicslab/connectomemapper3/pull/164>`_)
