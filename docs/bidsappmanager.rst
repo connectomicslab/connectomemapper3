@@ -37,7 +37,9 @@ After activation of the conda environment, start the graphical user interface ca
 Load a BIDS dataset
 ***********************
 
-*   From the main window, click on `File -> Load BIDS dataset...`. The ``Connectome Mapper 3`` BIDS App Manager gives you two different options:
+*   From the main window, click on `File -> Load BIDS dataset...`.
+
+    The ``Connectome Mapper 3`` BIDS App Manager gives you two different options:
 
     *   `Load BIDS dataset`: load a BIDS dataset stored locally.
         You only have to select the root directory of your valid BIDS dataset (see note below)
