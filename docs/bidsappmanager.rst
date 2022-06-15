@@ -32,7 +32,7 @@ After activation of the conda environment, start the graphical user interface ca
     $ cmpbidsappmanager
 
 
-.. note:: Before you select a BIDS dataset, the main window is blank. Note also that on Mac, Qt turns the menu bar into the Mac native menu bar.
+.. note:: The main window would be blank until you select the BIDS dataset. Note also that on Mac, Qt turns the menu bar of `cmpbidsappmanager` into the native menu bar (top of the screen).
 
 Load a BIDS dataset
 ***********************
