@@ -100,7 +100,7 @@ CMP3 is available from the [Python Package Index (PyPI)](https://pypi.org/projec
 # Statement of Need
 
 The field of Magnetic Resonance Imaging (MRI) Connectomics has rapidly expanded since its advent 
-  in the 2000s [@SpornsTheBrain:2005], [@HagmannFromConnectomics:2005], [@SpornsEditorialConnectomics:2018].
+  in the 2000s [@HagmannFromConnectomics:2005;@SpornsEditorialConnectomics:2018;@SpornsTheBrain:2005].
 It has revolutionized the way to investigate *in vivo*, *non-invasively* and 
   *safely* at different macroscopic scales the structural and functional systems of the 
   brain by modeling connections between brain areas as a graph or network, known as
