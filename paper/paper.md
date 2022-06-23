@@ -322,7 +322,7 @@ Doing so, we can guarantee the full functionality of each newly released version
 More details about CMP3, the different processing steps and generated outputs together with
   installation and usage instructions, different tutorials supporting the analysis,
   and the interpretation of the generated outputs with popular tools, can be found in
-  the documentation ([connectome-mapper-3.readthedocs.io](connectome-mapper-3.readthedocs.io))
+  the documentation ([connectome-mapper-3.readthedocs.io](https://connectome-mapper-3.readthedocs.io))
   that is kept up to date with the current release and can be retrieved for older versions.
 
 # Community impact
