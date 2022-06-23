@@ -144,7 +144,7 @@ This includes migration to Python 3, a revisited and extended multi-scale parcel
   container images, continuous testing in concordance to the BIDS Apps standard, and major upgrades of the diffusion
   and fMRI pipelines.
 Despite the recent emergence of electroencephalography (EEG) connectomics and the combination with the structural
-  and functional connectome [@GlombNet:2020] [@Sadaghiani:2020], no EEG pipeline
+  and functional connectome [@GlombNet:2020;@Sadaghiani:2020], no EEG pipeline
   exists to date.
 Initiated during OHBM BrainHack 2020 ([https://github.com/ohbm/hackathon2020/issues/214](https://github.com/ohbm/hackathon2020/issues/214)),
   CMP3 is being extended to EEG.
