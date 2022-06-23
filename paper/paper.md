@@ -311,7 +311,7 @@ In case of problems, CMP3 has a dedicated forum at
   community of users is active to support each other and have scientific discussions.
 To be robust to adverse code changes, versions are released through continuous integration building
   and testing.
-Specifically, this involves testing the installation of the python package, the build of
+Specifically, this involves testing the installation of the Python package, the build of
   the Docker and Singularity container images, the execution of the BIDS App via the different container
   images adopting multiple pipeline configurations, using a sample multi-modal MRI dataset [@Tourbier2020SampleDataset]
   that has been created for this purpose, the publication of the new version of the Python package to PyPI, and
