@@ -83,7 +83,7 @@ It provides researchers with a unique workflow, implemented in accordance with t
   [@GorgolewskiBIDSMethods:2017], that leverages a number of widely adopted software tools to map a graph
   representation of the structural and functional connections between brain regions, the connectome,
   at multiple scales.
-The workflow can take any structural / diffusion / resting-state functional MRI dataset structured accordingly
+The workflow can take any structural / diffusion / resting-state functional MRI dataset structured according
   to the BIDS standard [@GorgolewskiTheExperiments:2016], and is intended to be run via its Docker and
   Singularity/Apptainer containerized versions.
 To improve its accessibility, CMP3 comes with a graphical user interface, which supports
