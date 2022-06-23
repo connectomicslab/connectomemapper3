@@ -328,10 +328,7 @@ More details about CMP3, the different processing steps and generated outputs to
 # Community impact
 
 CMP3 has been successfully employed in a number of methodological
-  [@Zheng2020GeometricConnectomeb] [@GlombNeuro:2020] [@GlombNet:2020] [@AkselrodHBM:2021]
-  [@RueQueraltNeuro:2021] [@PascucciNet:2021], clinical [@Carboni:2019] 
-  [@Vorderwulbecke2020High-densityPoint] [@CarboniNeuro:2020] [@Carboni:2022], and data [@Pascucci2022]
-  [@ds003505:1.1.1] research articles.
+  [@AkselrodHBM:2021;@GlombNet:2020;@GlombNeuro:2020;@PascucciNet:2021;@RueQueraltNeuro:2021;@Zheng2020GeometricConnectomeb], clinical [@Carboni:2019;@CarboniNeuro:2020;@Carboni:2022;@Vorderwulbecke2020High-densityPoint], and data [@Pascucci2022;@ds003505:1.1.1] research articles.
 CMP3 is part of the [BIDS Apps](https://bids-apps.neuroimaging.io/apps/), and also part of [`ReproNim/containers`](https://github.com/ReproNim/containers),
   a DataLad dataset with a collection of 40 popular containerized neuroimaging research pipelines,
   which allows one to easily include it as a subdataset within DataLad-controlled BIDS datasets,
