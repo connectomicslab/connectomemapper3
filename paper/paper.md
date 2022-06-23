@@ -307,7 +307,7 @@ The source code for CMP3 is hosted at
   where all bugs and contributions are transparently discussed and managed through issues, and each release is
   published to the [Python Package Index (PyPI)](https://pypi.org/project/connectomemapper/) and archived to Zenodo [@ZenodoCMP:2022].
 In case of problems, CMP3 has a dedicated forum at
-  [groups.google.com/group/cmtk-users](groups.google.com/group/cmtk-users) where a
+  [groups.google.com/group/cmtk-users](https://groups.google.com/group/cmtk-users) where a
   community of users is active to support each other and have scientific discussions.
 To be robust to adverse code changes, versions are released through continuous integration building
   and testing.
