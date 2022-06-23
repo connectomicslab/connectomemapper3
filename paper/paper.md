@@ -223,7 +223,7 @@ After performing Desikan-Killiany brain parcellation [@Desikan2006AnInterest] wi
 Then, one can now decide whether to perform brainstem parcellation [@Iglesias2015BayesianMRI], hippocampal
   subfields segmentation [@Iglesias2015AMRI], and/or probabilistic atlas-based segmentation of the thalamic
   nuclei [@Najdenovska2018In-vivoImaging].
-All segmented structures are then combined to create the final parcellation nifti image at each scale
+All segmented structures are then combined to create the final parcellation NIfTI image at each scale
   along with the corresponding label index color mapping file in accordance with the BIDS Derivatives
   specifications.
 The different segmentation and parcellation outputs of the anatomical pipeline are then taken as inputs of
