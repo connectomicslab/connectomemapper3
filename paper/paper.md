@@ -210,14 +210,14 @@ The parcellation derived from the Desikan-Killiany atlas [@Desikan2006AnInterest
   made symmetric by projecting the right hemisphere labels to the left hemisphere, matching the
   boundaries of the projected regions of the left hemisphere to the boundaries of the original regions
   of the left hemisphere, applying this transformation to the rest of the scales, and saving
-  each parcellation scale of each hemisphere in a Freesurfer annotation file.
+  each parcellation scale of each hemisphere in a FreeSurfer annotation file.
 It also extends the parcellations with new structures including a subdivision of the thalamus into
   7 nuclei per hemisphere, of the hippocampus into 12 subfields, and of the brainstem into 4 sub-structures.
 An overview and brief description of the new scheme and its integration with all the implemented pipelines
   are provided in \autoref{fig:parc}.
 
 ![\textbf{Overview of the new multi-scale parcellation scheme.}
-After performing Desikan-Killiany brain parcellation [@Desikan2006AnInterest] with Freesurfer, CMP3 resamples
+After performing Desikan-Killiany brain parcellation [@Desikan2006AnInterest] with FreeSurfer, CMP3 resamples
   the fsaverage cortical surface onto the individual cortical surface and maps the parcellation
   annotation files to the individual space, to generate the volumetric parcellation for each scale.
 Then, one can now decide whether to perform brainstem parcellation [@Iglesias2015BayesianMRI], hippocampal
