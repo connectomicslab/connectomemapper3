@@ -130,7 +130,7 @@ Combined with advances in software virtualization, BIDS has enabled the creation
   and ensures portability and reproducibility [@GorgolewskiBIDSMethods:2017].
 A large ecosystem of processing pipelines supporting the mapping of connectomes has evolved around this framework.
 To the best of our knowledge, it includes  C-PAC [@cpac:2013], NIAK [@BellecNeuroimagingNIAK:2016], fMRIPrep [@Ghosh:2018], dMRIPrep [@dmriprep:2019],
-  QSIPREP [@Cieslak:2021], MRtrix3_connectome [@Smith2019:BIDSApp], NDMG [@KiarAVariability:2018]
+  QSIPREP [@Cieslak:2021], MRtrix3_connectome [@Smith2019:BIDSApp], NDMG [@KiarAVariability:2018],
   PyNets [@PisnerPyNets:2020], and Micapipe [@Rodriguez:2022].
 All the existing solutions have demonstrated their capability in addressing the previously-mentioned challenges.
 However, none of them provide a direct alternative to CMP when dealing with multimodal datasets
