@@ -166,7 +166,7 @@ Each pipeline is represented by a Nipype workflow that takes a BIDS formatted da
 Each stage can consist of one or multiple tasks, where each task can either interface with 
   a specific tool of FSL [@Jenkinson2012FSL], FreeSurfer [@Fischl2012FreeSurfer],
   ANTs [@AVANTS2008SymmetricBrain], dipy [@Garyfallidis2014DipyData],
-  mrtrix3 [@mrtrix3:2019], AFNI [@Cox2012], or be fully
+  MRtrix3 [@mrtrix3:2019], AFNI [@Cox2012], or be fully
   implemented by CMP3 (\autoref{fig:cmp3-diagram}).
 We refer the reader to the [main documentation](https://connectome-mapper-3.readthedocs.io/en/latest/bidsappmanager.html#anatomical-pipeline-stages)
   for more details about the different processing steps and parameters involved in each pipeline.
