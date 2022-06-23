@@ -288,8 +288,8 @@ Connectivity matrices can be exported to MATLAB as MAT-files can be fed to the
   toolbox containing a large selection of network measures for the characterization of brain
   connectivity datasets.
 Finally, connectomes can be saved in GraphML format to interface with a lot of general purpose
-  software packages for graph analysis such as \href{www.cytoscape.org}{Cytoscape} [@Gustavsen:2019;@Shannon:2003]
-  or \href{www.gephi.org}{Gephi} [@Bastian:2009].
+  software packages for graph analysis such as \href{https://www.cytoscape.org}{Cytoscape} [@Gustavsen:2019;@Shannon:2003]
+  or \href{https://www.gephi.org}{Gephi} [@Bastian:2009].
 Structuring outputs as BIDS Derivatives and saving them in a range of file formats
   thus has a lot of advantages.
 Not only does it ensure that the connectome files can be opened by the most popular
