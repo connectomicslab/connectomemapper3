@@ -38,7 +38,7 @@ authors:
   given-names: "Patric"
   orcid: "0000-0002-2854-6561"
 title: "Connectome Mapper 3: A Flexible and Open-Source Pipeline Software for Multiscale Multimodal Human Connectome Mapping"
-version: 3.0.2
+version: 3.0.4
 doi: 10.5281/zenodo.347596
 date-released: 2022-01-31
 url: "https://github.com/connectomicslab/connectomemapper3"
