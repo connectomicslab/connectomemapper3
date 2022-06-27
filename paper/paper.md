@@ -123,8 +123,8 @@ The size and organization of these datasets as well as the increasing complexity
 The last ten years have indeed witnessed a number of technical advances and a trend towards the adoption
   of open research practices such as *open data* and *open methods*
   [@EglenTowardNeuroscience:2017;@Kennedy2019;@Nichols:2017;@Poldrack2019ComputationalNeuroimaging].
-This has led in particular to the creation of a community standard for dataset organization, known as the
-  Brain Imaging Data Structure (BIDS), designed to ease the practice of sharing raw neuroimaging data [@GorgolewskiTheExperiments:2016]. 
+This has led in particular to the creation of a community standard for dataset organization, known as
+  BIDS, designed to ease the practice of sharing raw neuroimaging data [@GorgolewskiTheExperiments:2016]. 
 Combined with advances in software virtualization, BIDS has enabled the creation of the BIDS Apps
   framework which uses software container technology to encapsulate neuroimaging processing pipelines
   and ensures portability and reproducibility [@GorgolewskiBIDSMethods:2017].
