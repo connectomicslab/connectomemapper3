@@ -39,6 +39,7 @@ You are ready to use Connectome Mapper 3!
 
 ### Resources
 
+  *   **JOSS paper:** [https://joss.theoj.org/papers/10.21105/joss.04248](https://joss.theoj.org/papers/10.21105/joss.04248)
   *   **Documentation:** [https://connectome-mapper-3.readthedocs.io](https://connectome-mapper-3.readthedocs.io)
   *   **Mailing list:** [https://groups.google.com/forum/#!forum/cmtk-users](https://groups.google.com/forum/#!forum/cmtk-users)
   *   **Source:** [https://github.com/connectomicslab/connectomemapper3](https://github.com/connectomicslab/connectomemapper3)
