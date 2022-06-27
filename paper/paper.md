@@ -79,13 +79,13 @@ bibliography: paper.bib
 
 Connectome Mapper 3 (CMP3) is an open-source processing pipeline software, written in Python 3,
   for multi-scale multi-modal connectome mapping of the human brain.
-It provides researchers with a unique workflow, implemented in accordance with the BIDS App framework
-  [@GorgolewskiBIDSMethods:2017], that leverages a number of widely adopted software tools to map a graph
+It provides researchers with a unique workflow, implemented in accordance with the Brain Imaging Data Structure (BIDS)
+  App framework [@GorgolewskiBIDSMethods:2017], that leverages a number of widely adopted software tools to map a graph
   representation of the structural and functional connections between brain regions, the connectome,
   at multiple scales.
-The workflow can take any structural / diffusion / resting-state functional MRI dataset structured according
-  to the BIDS standard [@GorgolewskiTheExperiments:2016], and is intended to be run via its Docker and
-  Singularity/Apptainer containerized versions.
+The workflow can take any structural / diffusion / resting-state functional Magnetic Resonance Imaging (MRI)
+  dataset structured according to the BIDS standard [@GorgolewskiTheExperiments:2016],
+  and is intended to be run via its Docker and Singularity/Apptainer containerized versions.
 To improve its accessibility, CMP3 comes with a graphical user interface, which supports
   the user in all the steps involved in the configuration of the pipelines, the configuration and execution of
   the BIDS App, and the control of the output quality.
@@ -99,7 +99,7 @@ CMP3 is available from the [Python Package Index (PyPI)](https://pypi.org/projec
 
 # Statement of Need
 
-The field of Magnetic Resonance Imaging (MRI) Connectomics has rapidly expanded since its advent 
+The field of MRI Connectomics has rapidly expanded since its advent 
   in the 2000s [@HagmannFromConnectomics:2005;@SpornsEditorialConnectomics:2018;@SpornsTheBrain:2005].
 It has revolutionized the way to investigate *in vivo*, *non-invasively* and 
   *safely* at different macroscopic scales the structural and functional systems of the 
@@ -123,8 +123,8 @@ The size and organization of these datasets as well as the increasing complexity
 The last ten years have indeed witnessed a number of technical advances and a trend towards the adoption
   of open research practices such as *open data* and *open methods*
   [@EglenTowardNeuroscience:2017;@Kennedy2019;@Nichols:2017;@Poldrack2019ComputationalNeuroimaging].
-This has led in particular to the creation of a community standard for dataset organization, known as the
-  Brain Imaging Data Structure (BIDS), designed to ease the practice of sharing raw neuroimaging data [@GorgolewskiTheExperiments:2016]. 
+This has led in particular to the creation of a community standard for dataset organization, known as
+  BIDS, designed to ease the practice of sharing raw neuroimaging data [@GorgolewskiTheExperiments:2016]. 
 Combined with advances in software virtualization, BIDS has enabled the creation of the BIDS Apps
   framework which uses software container technology to encapsulate neuroimaging processing pipelines
   and ensures portability and reproducibility [@GorgolewskiBIDSMethods:2017].
@@ -136,7 +136,7 @@ All the existing solutions have demonstrated their capability in addressing the 
 However, none of them provide a direct alternative to CMP when dealing with multimodal datasets
   with the goal to create connectomes at multiple hierarchical scales.
 
-Connectome Mapper 3 (CMP3) builds up on the two preceding versions of CMP and keeps the same philosophy. 
+CMP3 builds up on the two preceding versions of CMP and keeps the same philosophy. 
 It introduces massive improvements in terms of the underlying codebase, the tools used, and the scope of the functionality
   provided.
 This includes migration to Python 3, a revisited and extended multi-scale parcellation scheme, adoption
@@ -153,7 +153,7 @@ Initiated during OHBM BrainHack 2020 ([https://github.com/ohbm/hackathon2020/iss
 
 ## A flexible and interoperable workflow for multi-modal human connectome mapping
 
-Connectome Mapper 3 (CMP3) implements a workflow that creates a hierarchical multi-scale
+CMP3 implements a workflow that creates a hierarchical multi-scale
   connectome representation of the structural and functional brain systems, from any
   sMRI / dMRI / rfMRI dataset structured according to the BIDS standard, as illustrated
   by \autoref{fig:cmp3-diagram}.
