@@ -14,7 +14,10 @@ This neuroimaging processing pipeline software is developed by the Connectomics 
   :alt: GitHub Release Date
 .. image:: https://zenodo.org/badge/183162514.svg
   :target: https://zenodo.org/badge/latestdoi/183162514
-  :alt: Digital Object Identifier
+  :alt: Zenodo Digital Object Identifier
+.. image:: https://joss.theoj.org/papers/10.21105/joss.04248/status.svg
+  :target: https://doi.org/10.21105/joss.04248
+  :alt: Joss Paper Digital Object Identifier
 .. image:: https://img.shields.io/pypi/v/connectomemapper?color=orange
   :target: https://pypi.org/project/connectomemapper/
   :alt: PyPI
