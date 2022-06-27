@@ -83,9 +83,9 @@ It provides researchers with a unique workflow, implemented in accordance with t
   [@GorgolewskiBIDSMethods:2017], that leverages a number of widely adopted software tools to map a graph
   representation of the structural and functional connections between brain regions, the connectome,
   at multiple scales.
-The workflow can take any structural / diffusion / resting-state functional MRI dataset structured according
-  to the BIDS standard [@GorgolewskiTheExperiments:2016], and is intended to be run via its Docker and
-  Singularity/Apptainer containerized versions.
+The workflow can take any structural / diffusion / resting-state functional Magnetic Resonance Imaging (MRI)
+  dataset structured according to the Brain Imaging Data Structure (BIDS) standard [@GorgolewskiTheExperiments:2016],
+  and is intended to be run via its Docker and Singularity/Apptainer containerized versions.
 To improve its accessibility, CMP3 comes with a graphical user interface, which supports
   the user in all the steps involved in the configuration of the pipelines, the configuration and execution of
   the BIDS App, and the control of the output quality.
@@ -99,7 +99,7 @@ CMP3 is available from the [Python Package Index (PyPI)](https://pypi.org/projec
 
 # Statement of Need
 
-The field of Magnetic Resonance Imaging (MRI) Connectomics has rapidly expanded since its advent 
+The field of MRI Connectomics has rapidly expanded since its advent 
   in the 2000s [@HagmannFromConnectomics:2005;@SpornsEditorialConnectomics:2018;@SpornsTheBrain:2005].
 It has revolutionized the way to investigate *in vivo*, *non-invasively* and 
   *safely* at different macroscopic scales the structural and functional systems of the 
