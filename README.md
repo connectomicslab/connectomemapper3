@@ -216,6 +216,10 @@ Thanks also goes to all these wonderful people that contributed to Connectome Ma
 
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
 
+### How to cite?
+
+Please consult our [Citing](https://connectome-mapper-3.readthedocs.io/en/latest/citing.html#) documentation page.
+
 ### How to contribute?
 
 Please consult our [Contributing to Connectome Mapper 3](https://connectome-mapper-3.readthedocs.io/en/latest/contributing.html#) guidelines.
