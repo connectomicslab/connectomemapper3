@@ -136,7 +136,7 @@ All the existing solutions have demonstrated their capability in addressing the 
 However, none of them provide a direct alternative to CMP when dealing with multimodal datasets
   with the goal to create connectomes at multiple hierarchical scales.
 
-Connectome Mapper 3 (CMP3) builds up on the two preceding versions of CMP and keeps the same philosophy. 
+CMP3 builds up on the two preceding versions of CMP and keeps the same philosophy. 
 It introduces massive improvements in terms of the underlying codebase, the tools used, and the scope of the functionality
   provided.
 This includes migration to Python 3, a revisited and extended multi-scale parcellation scheme, adoption
@@ -153,7 +153,7 @@ Initiated during OHBM BrainHack 2020 ([https://github.com/ohbm/hackathon2020/iss
 
 ## A flexible and interoperable workflow for multi-modal human connectome mapping
 
-Connectome Mapper 3 (CMP3) implements a workflow that creates a hierarchical multi-scale
+CMP3 implements a workflow that creates a hierarchical multi-scale
   connectome representation of the structural and functional brain systems, from any
   sMRI / dMRI / rfMRI dataset structured according to the BIDS standard, as illustrated
   by \autoref{fig:cmp3-diagram}.
