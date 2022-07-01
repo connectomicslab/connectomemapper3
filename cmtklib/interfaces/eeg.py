@@ -50,7 +50,7 @@ class CreateRois(BaseInterface):
     >>> createrois = CreateRois()
     >>> createrois.inputs.subject = 'sub-01'
     >>> createrois.inputs.bids_dir = '/path/to/bids_dataset'
-    >>> createrois.inputs.parcellation = {'label':'L2008', 'desc':'scale1'}'
+    >>> createrois.inputs.parcellation = {'label':'L2008', 'desc':'scale1'}
     >>> createrois.inputs.cartool_dir = 'Cartool-v3.80'
     >>> createrois.inputs.cmp3_dir = 'cmp-v3.0.3'
     >>> createrois.inputs.output_query = {}
@@ -174,7 +174,7 @@ class EEGLoader(BaseInterface):
     >>> eeg_loader.inputs.subject = 'sub-01'
     >>> eeg_loader.inputs.invsol_format = 'Cartool-LAURA'
     >>> eeg_loader.inputs.output_query = {
-    ...                 "rois" : {"extension": ["pickle.rois"]}, 
+    ...                 "rois" : {"extension": ["pickle.rois"]},
     ...                 "src" : {"extension": ["spi"]},
     ...                 "invsol" = {"extension": ["LAURA.is"]}
     ... }

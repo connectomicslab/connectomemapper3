@@ -385,8 +385,11 @@ jobs:
       TZ: "/usr/share/zoneinfo/Europe/Zurich"
       SCRATCH: "/scratch"
     machine:
-      image: ubuntu-1604:201903-01
-      docker_layer_caching: true
+      # NEW: Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
+      image: ubuntu-2004:202201-02
+      # OLD: Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
+      # image: ubuntu-1604:201903-01
+      docker_layer_caching: false
     resource_class: medium
     working_directory: /home/circleci/src/connectomemapper3
     steps:
@@ -398,6 +401,7 @@ jobs:
       - run:
           name: Enable "--squash" feature of docker build
           command: |
+            # Enable the --squash feature
             sudo touch /etc/docker/daemon.json
             echo "{\"experimental\": true}" | sudo tee -a /etc/docker/daemon.json
             sudo service docker restart
@@ -439,8 +443,13 @@ jobs:
             fi
             # Build CMP BIDS App docker image
             cd /home/circleci/src/connectomemapper3
-            ls -la .
-            DOCKER_BUILDKIT=1 docker build --progress=plain --squash --rm=true --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` --build-arg VCS_REF=`git rev-parse --short HEAD` --build-arg VERSION="${CIRCLE_TAG:-$THISVERSION}" -t sebastientourbier/connectomemapper3 /home/circleci/src/connectomemapper3 \
+            export DOCKER_BUILDKIT=1
+            docker build --progress=plain \
+              --squash --rm=true \
+              --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
+              --build-arg VCS_REF=`git rev-parse --short HEAD` \
+              --build-arg VERSION="${CIRCLE_TAG:-$THISVERSION}" \
+              -t sebastientourbier/connectomemapper3 /home/circleci/src/connectomemapper3
       #- run:
       #    name: Prune Docker cache (temporary)
       #    command: docker system prune -f
@@ -474,8 +483,8 @@ jobs:
 
   build_singularity:
     machine:
-      # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
-      image: ubuntu-1604:201903-01
+      # Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
+      image: ubuntu-2004:202201-02
     resource_class: large
     working_directory: /home/circleci/src/connectomemapper3
     steps:
@@ -537,8 +546,8 @@ jobs:
 
   get_data:
     machine:
-      # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
-      image: ubuntu-1604:201903-01
+      # Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
+      image: ubuntu-2004:202201-02
     working_directory: /home/circleci/data
     steps:
       - restore_cache:
@@ -600,8 +609,8 @@ jobs:
 
   test1_docker_parcellation:
     machine:
-      # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
-      image: ubuntu-1604:201903-01
+      # Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
+      image: ubuntu-2004:202201-02
     resource_class: large
     working_directory: /tmp/data
     environment:
@@ -663,8 +672,8 @@ jobs:
 
   test2_docker_parcellation:
     machine:
-      # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
-      image: ubuntu-1604:201903-01
+      # Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
+      image: ubuntu-2004:202201-02
     resource_class: medium
     working_directory: /tmp/data
     environment:
@@ -723,8 +732,8 @@ jobs:
 
   test3_docker_dsi_mrtrix:
     machine:
-      # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
-      image: ubuntu-1604:201903-01
+      # Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
+      image: ubuntu-2004:202201-02
     resource_class: large
     working_directory: /tmp/data
     environment:
@@ -782,8 +791,8 @@ jobs:
 
   test4_docker_dsi_mrtrix:
     machine:
-      # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
-      image: ubuntu-1604:201903-01
+      # Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
+      image: ubuntu-2004:202201-02
     resource_class: large
     working_directory: /tmp/data
     environment:
@@ -844,8 +853,8 @@ jobs:
 
   test5_docker_dsi_dipy:
     machine:
-      # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
-      image: ubuntu-1604:201903-01
+      # Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
+      image: ubuntu-2004:202201-02
     resource_class: large
     working_directory: /tmp/data
     environment:
@@ -906,8 +915,8 @@ jobs:
 
   test6_docker_dsi_dipy:
     machine:
-      # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
-      image: ubuntu-1604:201903-01
+      # Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
+      image: ubuntu-2004:202201-02
     resource_class: large
     working_directory: /tmp/data
     environment:
@@ -968,8 +977,8 @@ jobs:
 
   test7_docker_fmri:
     machine:
-      # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
-      image: ubuntu-1604:201903-01
+      # Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
+      image: ubuntu-2004:202201-02
     resource_class: large
     working_directory: /tmp/data
     environment:
@@ -1030,8 +1039,8 @@ jobs:
 
   test8_docker_fmri:
     machine:
-      # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
-      image: ubuntu-1604:201903-01
+      # Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
+      image: ubuntu-2004:202201-02
     resource_class: large
     working_directory: /tmp/data
     environment:
@@ -1092,8 +1101,8 @@ jobs:
 
   test9_singularity_parcellation:
     machine:
-      # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
-      image: ubuntu-1604:201903-01
+      # Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
+      image: ubuntu-2004:202201-02
     resource_class: large
     working_directory: /tmp/data
     environment:
@@ -1229,8 +1238,8 @@ jobs:
 
   build_docs:
     machine:
-      # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
-      image: ubuntu-1604:201903-01
+      # Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
+      image: ubuntu-2004:202201-02
     working_directory: /home/circleci/out/docs
     steps:
       - checkout:
@@ -1264,8 +1273,8 @@ jobs:
 
   deploy_docker_latest:
     machine:
-      # Ubuntu 14.04 with Docker 17.10.0-ce
-      image: ubuntu-1604:201903-01
+      # Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
+      image: ubuntu-2004:202201-02
     resource_class: medium
     working_directory: /home/circleci/src/connectomemapper3
     steps:
@@ -1292,8 +1301,8 @@ jobs:
 
   deploy_singularity_latest:
     machine:
-      # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
-      image: ubuntu-1604:201903-01
+      # Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
+      image: ubuntu-2004:202201-02
     resource_class: medium
     working_directory: /home/circleci/src/connectomemapper3
     steps:
@@ -1331,8 +1340,8 @@ jobs:
 
   deploy_docker_release:
     machine:
-      # Ubuntu 14.04 with Docker 17.10.0-ce
-      image: ubuntu-1604:201903-01
+      # Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
+      image: ubuntu-2004:202201-02
     resource_class: medium
     working_directory: /home/circleci/src/connectomemapper3
     steps:
@@ -1361,8 +1370,8 @@ jobs:
 
   deploy_singularity_release:
     machine:
-      # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
-      image: ubuntu-1604:201903-01
+      # Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
+      image: ubuntu-2004:202201-02
     resource_class: medium
     working_directory: /home/circleci/src/connectomemapper3
     steps:
@@ -1411,6 +1420,10 @@ workflows:
       - test-python-install:
           version: "3.7"
           filters:
+            branches:
+              ignore:
+                - paper-joss
+                - pull/142
             tags:
               only: /.*/
 
@@ -1418,6 +1431,10 @@ workflows:
           requires:
             - test-python-install
           filters:
+            branches:
+              ignore:
+                - paper-joss
+                - pull/142
             tags:
               only: /.*/
 
@@ -1425,6 +1442,10 @@ workflows:
           requires:
             - build_docker
           filters:
+            branches:
+              ignore:
+                - paper-joss
+                - pull/142
             tags:
               only: /.*/
 
@@ -1433,6 +1454,8 @@ workflows:
             branches:
               ignore:
                 - /docs?\/.*/
+                - paper-joss
+                - pull/142
             tags:
               only: /.*/
 
@@ -1444,6 +1467,8 @@ workflows:
             branches:
               ignore:
                 - /docs?\/.*/
+                - paper-joss
+                - pull/142
             tags:
               only: /.*/
 
@@ -1455,6 +1480,8 @@ workflows:
             branches:
               ignore:
                 - /docs?\/.*/
+                - paper-joss
+                - pull/142
             tags:
               only: /.*/
 
@@ -1465,6 +1492,8 @@ workflows:
             branches:
               ignore:
                 - /docs?\/.*/
+                - paper-joss
+                - pull/142
             tags:
               only: /.*/
 
@@ -1475,6 +1504,8 @@ workflows:
             branches:
               ignore:
                 - /docs?\/.*/
+                - paper-joss
+                - pull/142
             tags:
               only: /.*/
 
@@ -1485,6 +1516,8 @@ workflows:
             branches:
               ignore:
                 - /docs?\/.*/
+                - paper-joss
+                - pull/142
             tags:
               only: /.*/
 
@@ -1495,6 +1528,8 @@ workflows:
             branches:
               ignore:
                 - /docs?\/.*/
+                - paper-joss
+                - pull/142
             tags:
               only: /.*/
 
@@ -1505,6 +1540,8 @@ workflows:
             branches:
               ignore:
                 - /docs?\/.*/
+                - paper-joss
+                - pull/142
             tags:
               only: /.*/
 
@@ -1515,6 +1552,8 @@ workflows:
             branches:
               ignore:
                 - /docs?\/.*/
+                - paper-joss
+                - pull/142
             tags:
               only: /.*/
 
@@ -1526,6 +1565,8 @@ workflows:
             branches:
               ignore:
                 - /docs?\/.*/
+                - paper-joss
+                - pull/142
             tags:
               only: /.*/
 
@@ -1544,6 +1585,8 @@ workflows:
               branches:
                 ignore:
                   - /docs?\/.*/
+                  - paper-joss
+                  - pull/142
               tags:
                 only: /.*/
 
@@ -1562,6 +1605,8 @@ workflows:
             branches:
               ignore:
                 - /docs?\/.*/
+                - paper-joss
+                - pull/142
             tags:
               only: /.*/
 

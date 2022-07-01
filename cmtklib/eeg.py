@@ -16,7 +16,7 @@ import scipy.io as sio
 
 def save_eeg_connectome_file(output_dir, output_basename, con_res, roi_labels, output_types=None):
     """Save a dictionary of connectivity matrices with corresponding keys to the metrics in the multiple formats of CMP3.
-    
+
     Parameters
     ----------
     output_dir : str

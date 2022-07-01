@@ -2,7 +2,7 @@
 
 This neuroimaging processing pipeline software is developed by the Connectomics Lab at the University Hospital of Lausanne (CHUV) for use within the [SNF Sinergia Project 170873](http://p3.snf.ch/project-170873), as well as for open-source software distribution.
 
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/connectomicslab/connectomemapper3) ![GitHub Release Date](https://img.shields.io/github/release-date/connectomicslab/connectomemapper3?color=orange) [![DOI](https://zenodo.org/badge/183162514.svg)](https://zenodo.org/badge/latestdoi/183162514) [![PyPI](https://img.shields.io/pypi/v/connectomemapper?color=orange)](https://pypi.org/project/connectomemapper/) ![Docker Image Version (latest semver)](https://img.shields.io/docker/v/sebastientourbier/connectomemapper-bidsapp?color=blue&label=docker%20version) [![Docker Pulls](https://img.shields.io/docker/pulls/sebastientourbier/connectomemapper-bidsapp?color=orange)](https://hub.docker.com/r/sebastientourbier/connectomemapper-bidsapp) [![CircleCI](https://circleci.com/gh/connectomicslab/connectomemapper3.svg?style=shield)](https://circleci.com/gh/connectomicslab/connectomemapper3) [![Code Coverage](https://app.codacy.com/project/badge/Coverage/658266303c3046e8896769670e6988eb)](https://www.codacy.com/gh/connectomicslab/connectomemapper3?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=connectomicslab/connectomemapper3&amp;utm_campaign=Badge_Coverage) [![Documentation Status](https://readthedocs.org/projects/connectome-mapper-3/badge/?version=latest)](https://connectome-mapper-3.readthedocs.io/en/latest/?badge=latest) [![Code Quality Review](https://app.codacy.com/project/badge/Grade/658266303c3046e8896769670e6988eb)](https://www.codacy.com/gh/connectomicslab/connectomemapper3?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=connectomicslab/connectomemapper3&amp;utm_campaign=Badge_Grade) [![All Contributors](https://img.shields.io/badge/all_contributors-12-orange.svg?style=flat-square)](#contributors-)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/connectomicslab/connectomemapper3) ![GitHub Release Date](https://img.shields.io/github/release-date/connectomicslab/connectomemapper3?color=orange) [![Zenodo DOI](https://zenodo.org/badge/183162514.svg)](https://zenodo.org/badge/latestdoi/183162514) [![JOSS paper DOI](https://joss.theoj.org/papers/10.21105/joss.04248/status.svg)](https://doi.org/10.21105/joss.04248) [![PyPI](https://img.shields.io/pypi/v/connectomemapper?color=orange)](https://pypi.org/project/connectomemapper/) ![Docker Image Version (latest semver)](https://img.shields.io/docker/v/sebastientourbier/connectomemapper-bidsapp?color=blue&label=docker%20version) [![Docker Pulls](https://img.shields.io/docker/pulls/sebastientourbier/connectomemapper-bidsapp?color=orange)](https://hub.docker.com/r/sebastientourbier/connectomemapper-bidsapp) [![CircleCI](https://circleci.com/gh/connectomicslab/connectomemapper3.svg?style=shield)](https://circleci.com/gh/connectomicslab/connectomemapper3) [![Code Coverage](https://app.codacy.com/project/badge/Coverage/658266303c3046e8896769670e6988eb)](https://www.codacy.com/gh/connectomicslab/connectomemapper3?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=connectomicslab/connectomemapper3&amp;utm_campaign=Badge_Coverage) [![Documentation Status](https://readthedocs.org/projects/connectome-mapper-3/badge/?version=latest)](https://connectome-mapper-3.readthedocs.io/en/latest/?badge=latest) [![Code Quality Review](https://app.codacy.com/project/badge/Grade/658266303c3046e8896769670e6988eb)](https://www.codacy.com/gh/connectomicslab/connectomemapper3?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=connectomicslab/connectomemapper3&amp;utm_campaign=Badge_Grade) [![All Contributors](https://img.shields.io/badge/all_contributors-12-orange.svg?style=flat-square)](#contributors-)
 
 ### Description
 
@@ -25,7 +25,7 @@ You need to have first either Docker or Singularity engine and miniconda install
 Then, download the appropriate [environment.yml](https://github.com/connectomicslab/connectomemapper3/raw/master/conda/environment.yml) / [environment_macosx.yml](https://github.com/connectomicslab/connectomemapper3/raw/master/conda/environment_macosx.yml) and create a conda environment `py37cmp-gui` with the following command:
 
 ```bash
-$ conda create env -f /path/to/environment[_macosx].yml
+$ conda env create -f /path/to/environment[_macosx].yml
 ```
 
 Once the environment is created, activate it and install Connectome Mapper 3 with `PyPI` as follows:
@@ -39,6 +39,7 @@ You are ready to use Connectome Mapper 3!
 
 ### Resources
 
+  *   **JOSS paper:** [https://joss.theoj.org/papers/10.21105/joss.04248](https://joss.theoj.org/papers/10.21105/joss.04248)
   *   **Documentation:** [https://connectome-mapper-3.readthedocs.io](https://connectome-mapper-3.readthedocs.io)
   *   **Mailing list:** [https://groups.google.com/forum/#!forum/cmtk-users](https://groups.google.com/forum/#!forum/cmtk-users)
   *   **Source:** [https://github.com/connectomicslab/connectomemapper3](https://github.com/connectomicslab/connectomemapper3)
@@ -216,13 +217,21 @@ Thanks also goes to all these wonderful people that contributed to Connectome Ma
 
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
 
+### How to cite?
+
+Please consult our [Citing](https://connectome-mapper-3.readthedocs.io/en/latest/citing.html#) documentation page.
+
+### How to contribute?
+
+Please consult our [Contributing to Connectome Mapper 3](https://connectome-mapper-3.readthedocs.io/en/latest/contributing.html#) guidelines.
+
 ### Funding
 
 Work supported by the [Sinergia SNFNS-170873 Grant](http://p3.snf.ch/Project-170873).
 
 ### License
 
-This software is distributed under the open-source license Modified BSD. See [license](docs/LICENSE) for more details.
+This software is distributed under the open-source 3-Clause BSD License. See [license](docs/LICENSE) for more details.
 
 All trademarks referenced herein are property of their respective holders.
 

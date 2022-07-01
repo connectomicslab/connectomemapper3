@@ -5,12 +5,65 @@ Citing
 *********
 
 .. important::
-  * If your are using the Connectome Mapper 3 in your work, a manuscript is in preparation, but for now, please acknowledge this software with the following two entries:
+  * If your are using the Connectome Mapper 3 in your work, please acknowledge this software with the following two entries:
 
-  1. Tourbier S, Aleman-Gomez Y, Mullier E, Griffa A, Wirsich J, Tuncel A, Bach Cuadra M, Hagmann P. (2022). connectomicslab/connectomemapper3: Connectome Mapper |release| (Version  |release|). Zenodo. http://doi.org/10.5281/zenodo.3475969.
+    1. Tourbier S, Aleman-Gomez Y, Mullier E, Griffa A, Wirsich J, Tuncel MA, Jancovic J, Bach Cuadra M, Hagmann P, (2022). Connectome Mapper 3: A Flexible and Open-Source Pipeline Software for Multiscale Multimodal Human Connectome Mapping. Journal of Open Source Software, 7(74), 4248, https://doi.org/10.21105/joss.04248
 
-  2. Tourbier S, Aleman-Gomez Y, Mullier E, Griffa A, Bach Cuadra M, Hagmann P (2020, June). Connectome Mapper 3: a software pipeline for multi-scale connectome mapping of multimodal MR data. 26th Annual Meeting of the Organization for Human Brain Mapping (OHBM), abstract #1174, poster #1892.
+        .. code-block:: bibtex
 
+            @article{TourbierJOSS2022,
+                doi = {10.21105/joss.04248},
+                url = {https://doi.org/10.21105/joss.04248},
+                year = {2022},
+                publisher = {{The Open Journal}},
+                volume = {7},
+                number = {74},
+                pages = {4248},
+                author = {Tourbier, Sebastien and
+                          Rue Queralt, Joan and
+                          Glomb, Katharina and
+                          Aleman-Gomez, Yasser and
+                          Mullier, Emeline and
+                          Griffa, Alessandra and
+                          Schöttner, Mikkel and
+                          Wirsich, Jonathan and
+                          Tuncel, Anil and
+                          Jancovic, Jakub and
+                          Bach Cuadra, Meritxell and
+                          Hagmann, Patric},
+                title = {{Connectome Mapper 3: A Flexible and Open-Source
+                          Pipeline Software for Multiscale Multimodal Human
+                          Connectome Mapping},
+                journal = {{Journal of Open Source Software}}
+            }
+
+    2. Tourbier S, Aleman-Gomez Y, Mullier E, Griffa A, Wirsich J, Tuncel MA, Jancovic J, Bach Cuadra M, Hagmann P. (2022). Connectome Mapper 3: A Flexible and Open-Source Pipeline Software for Multiscale Multimodal Human Connectome Mapping (|release|). Zenodo. http://doi.org/10.5281/zenodo.6645256.
+
+        .. code-block:: bibtex
+
+            @software{TourbierZenodo6645256,
+                author = {Tourbier, Sebastien and
+                          Rue Queralt, Joan and
+                          Glomb, Katharina and
+                          Aleman-Gomez, Yasser and
+                          Mullier, Emeline and
+                          Griffa, Alessandra and
+                          Schöttner, Mikkel and
+                          Wirsich, Jonathan and
+                          Tuncel, Anil and
+                          Jancovic, Jakub and
+                          Bach Cuadra, Meritxell and
+                          Hagmann, Patric},
+                title = {{Connectome Mapper 3: A Flexible and Open-Source
+                          Pipeline Software for Multiscale Multimodal Human
+                          Connectome Mapping}},
+                month = jun,
+                year = 2022,
+                publisher = {Zenodo},
+                version = {v3.0.4},
+                doi = {10.5281/zenodo.6645256},
+                url = {https://doi.org/10.5281/zenodo.6645256}
+            }
 
 -------
 Poster

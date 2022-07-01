@@ -8,6 +8,7 @@
 import os
 import pickle
 import warnings
+import subprocess
 
 import mne
 import numpy as np
@@ -94,13 +95,12 @@ class CreateBEM(BaseInterface):
                 if (elem2 not in os.listdir(os.path.join(subjects_dir, subject, "bem"))) and (
                     "watershed" in os.listdir(os.path.join(subjects_dir, subject, "bem"))
                 ):
-                    cmd = (
-                        "cp "
-                        + os.path.join(subjects_dir, subject, "bem", "watershed", elem1)
-                        + " "
-                        + os.path.join(subjects_dir, subject, "bem", elem2)
-                    )
-                    os.system(cmd)
+                    cmd = [
+                        "cp",
+                        os.path.join(subjects_dir, subject, "bem", "watershed", elem1),
+                        os.path.join(subjects_dir, subject, "bem", elem2)
+                    ]
+                    subprocess.run(cmd, capture_output=True)
 
         if not os.path.exists(bemfilename):
             # Create the conductor model
@@ -423,7 +423,6 @@ class EEGLAB2fif(BaseInterface):
             n = int(open(montage_fname).readline().lstrip().split(" ")[0])
         except Exception as e:
             print(e)
-            pass
         else:
             all_coord = np.loadtxt(montage_fname, skiprows=1, usecols=(0, 1, 2), max_rows=n)
             all_names = np.loadtxt(montage_fname, skiprows=1, usecols=3, max_rows=n, dtype=np.dtype(str)).tolist()
@@ -544,8 +543,9 @@ class MNEInverseSolution(BaseInterface):
 
         return runtime
 
+    @staticmethod
     def _createInv_MNE(
-        self, bids_dir, subject, epochs_file, fwd_fname, noise_cov_fname, src_file, parcellation, inv_fname
+        bids_dir, subject, epochs_file, fwd_fname, noise_cov_fname, src_file, parcellation, inv_fname
     ):
         epochs = mne.read_epochs(epochs_file)
         fwd = mne.read_forward_solution(fwd_fname)
