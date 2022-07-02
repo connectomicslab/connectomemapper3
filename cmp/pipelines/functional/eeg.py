@@ -330,7 +330,7 @@ class EEGPipeline(Pipeline):
         if self.stages["EEGPreparer"].config.eeg_format == ".set":
             # File with events/behavioral info
             expe_name = datasource.inputs.EEG_params["expe_name"]
-            datasource.inputs.behav_file = [
+            datasource.inputs.events_file = [
                 os.path.join(
                     self.base_directory,
                     self.subject,
@@ -377,7 +377,7 @@ class EEGPipeline(Pipeline):
                 [
                     (datasource, preparer_flow, [('epochs', 'inputnode.epochs'),
                                                  ('subject', 'inputnode.subject'),
-                                                 ('behav_file', 'inputnode.behav_file'),
+                                                 ('events_file', 'inputnode.events_file'),
                                                  ('parcellation', 'inputnode.parcellation'),
                                                  ('epochs_fif_fname', 'inputnode.epochs_fif_fname'),
                                                  ('EEG_params','inputnode.EEG_params'),
@@ -433,7 +433,7 @@ class EEGPipeline(Pipeline):
                 [
                     (datasource, preparer_flow, [('epochs', 'inputnode.epochs'),
                                                   ('subject', 'inputnode.subject'),
-                                                  ('behav_file', 'inputnode.behav_file'),
+                                                  ('events_file', 'inputnode.events_file'),
                                                   ('parcellation', 'inputnode.parcellation'),
                                                   ('epochs_fif_fname', 'inputnode.epochs_fif_fname'),
                                                   ('electrode_positions_file', 'inputnode.electrode_positions_file'),

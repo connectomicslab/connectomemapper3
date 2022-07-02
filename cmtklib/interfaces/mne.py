@@ -328,9 +328,9 @@ class CreateSrc(BaseInterface):
 
 
 class EEGLAB2fifInputSpec(BaseInterfaceInputSpec):
-    eeg_ts_file = traits.List(exists=True, desc="eeg * epochs in .set format", mandatory=True)
+    eeg_ts_file = traits.File(exists=True, desc="eeg * epochs in .set format", mandatory=True)
 
-    behav_file = traits.List(exists=True, desc="epochs metadata in _behav.txt", mandatory=True)
+    events_file = traits.File(exists=True, desc="epochs metadata in _behav.txt", mandatory=True)
 
     epochs_fif_fname = traits.File(desc="eeg * epochs in .fif format", mandatory=True)
 
@@ -359,7 +359,7 @@ class EEGLAB2fif(BaseInterface):
     >>> from cmtklib.interfaces.mne import EEGLAB2fif
     >>> eeglab2fif = EEGLAB2fif()
     >>> eeglab2fif.inputs.eeg_ts_file = ['sub-01_task-faces_desc-preproc_eeg.set']
-    >>> eeglab2fif.inputs.behav_file = ['sub-01_task-faces_events.tsv']
+    >>> eeglab2fif.inputs.events_file = ['sub-01_task-faces_events.tsv']
     >>> eeglab2fif.inputs.epochs_fif_fname = 'sub-01_epo.fif'
     >>> eeglab2fif.inputs.electrode_positions_file = 'sub-01_eeg.xyz'
     >>> eeglab2fif.inputs.EEG_params = {"expe_name":"faces",
@@ -386,7 +386,7 @@ class EEGLAB2fif(BaseInterface):
 
     def _run_interface(self, runtime):
         epochs_file = self.inputs.eeg_ts_file[0]
-        behav_file = self.inputs.behav_file[0]
+        behav_file = self.inputs.events_file[0]
         montage_fname = self.inputs.electrode_positions_file
         EEG_params = self.inputs.EEG_params
         self.epochs_fif_fname = self.inputs.epochs_fif_fname

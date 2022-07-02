@@ -98,7 +98,7 @@ class EEGPreparerStage(Stage):
         self.inputs = [
             "eeg_format",
             "epochs",
-            "behav_file",
+            "events_file",
             "parcellation",
             "cartool_dir",
             "cmp3_dir",
@@ -148,7 +148,7 @@ class EEGPreparerStage(Stage):
                 flow.connect(
                     [
                         (inputnode, eeglab2fif_node, [('epochs', 'eeg_ts_file'),
-                                                      ('behav_file', 'behav_file'),
+                                                      ('events_file', 'events_file'),
                                                       ('epochs_fif_fname', 'epochs_fif_fname'),
                                                       ('EEG_params', 'EEG_params'),
                                                       ('output_query', 'output_query'),
@@ -218,7 +218,7 @@ class EEGPreparerStage(Stage):
                 flow.connect(
                     [
                         (inputnode, eeglab2fif_node, [('epochs', 'eeg_ts_file'),
-                                                      ('behav_file', 'behav_file'),
+                                                      ('events_file', 'events_file'),
                                                       ('epochs_fif_fname', 'epochs_fif_fname'),
                                                       ('electrode_positions_file', 'electrode_positions_file'),
                                                       ('EEG_params', 'EEG_params'),
