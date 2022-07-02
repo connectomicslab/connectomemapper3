@@ -44,7 +44,7 @@ class EEGPreparerConfig(HasTraits):
         (Default: `'cartool-v3.80'`)
 
     cmp3_dir = Str
-        Name of cartool derivatives directory
+        Name of CMP3 derivatives directory
         (Default: `'cmp'`)
 
     EEG_params = Dict()
@@ -217,8 +217,8 @@ class EEGPreparerStage(Stage):
                         (inputnode, eeglab2fif_node, [('epochs', 'eeg_ts_file'),
                                                       ('behav_file', 'behav_file'),
                                                       ('epochs_fif_fname', 'epochs_fif_fname'),
-                                                      ('electrode_positions_file','electrode_positions_file'),
-                                                      ('EEG_params','EEG_params'),
+                                                      ('electrode_positions_file', 'electrode_positions_file'),
+                                                      ('EEG_params', 'EEG_params'),
                                                       ('output_query', 'output_query'),
                                                       ('derivative_list', 'derivative_list')]),
                         (eeglab2fif_node, createsrc_node, [('output_query', 'output_query'),
