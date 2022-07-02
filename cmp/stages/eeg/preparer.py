@@ -60,10 +60,13 @@ class EEGPreparerConfig(HasTraits):
     invsol_format = Enum('Cartool-LAURA', 'Cartool-LORETA', 'mne-sLORETA',
                          desc='Cartool vs mne')
 
-    parcellation = Dict({'label': 'aparc', 'desc': '', 'suffix': ''})
-    cartool_dir = Str('cartool-v3.80')
-    cmp3_dir = Str('cmp')
-    EEG_params = Dict()
+    parcellation = Dict({'label': 'aparc', 'desc': '', 'suffix': ''},
+                        desc="Dictionary used to differentiate parcellation files")
+    cartool_dir = Str('cartool-v3.80',
+                      desc="Name of cartool derivatives directory")
+    cmp3_dir = Str('cmp',
+                   desc="Name of CMP3 derivatives directory")
+    EEG_params = Dict(desc="Dictionary storing extra EEG parameters")
 
 
 class EEGPreparerStage(Stage):
