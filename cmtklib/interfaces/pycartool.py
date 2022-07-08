@@ -5,38 +5,51 @@
 #  This software is distributed under the open-source license Modified BSD.
 """The PyCartool module provides Nipype interfaces with Cartool using pycartool."""
 
+import os
 import pickle
+
+import nibabel
 import numpy as np
 
 import mne
 import pycartool as cart
+from nipype import BaseInterface
 
 from nipype.interfaces.base import (
     BaseInterface, BaseInterfaceInputSpec,
     TraitedSpec, traits
 )
+from traits import api
 
 
 class CartoolInverseSolutionROIExtractionInputSpec(BaseInterfaceInputSpec):
-    eeg_ts_file = traits.List(
+    epochs_file = traits.File(
         exists=True, desc='eeg * epochs in .set format', mandatory=True)
 
-    invsol_file = traits.List(
+    invsol_file = traits.File(
         exists=True, desc='Inverse solution (.is file loaded with pycartool)', mandatory=True)
 
-    rois_file = traits.List(
-        exists=True, desc='Rois file, loaded with pickle', mandatory=True)
+    mapping_spi_rois_file = traits.File(
+        exists=True,
+        desc='Cartool-reconstructed sources / parcellation ROI mapping file, loaded with pickle',
+        mandatory=True
+    )
 
-    invsol_params = traits.Dict(
-        desc='Parameters for inverse solution and roi tc extraction', mandatory=True)
+    lamb = traits.Float(6, desc='Regularization weight')
 
-    roi_ts_file = traits.File(
-        exists=False, desc="rois * time series in .npy format")
+    svd_toi_begin = traits.Float(0, desc='Start TOI for SVD projection')
+
+    svd_toi_end = traits.Float(0.25, desc='End TOI for SVD projection')
+
+    out_roi_ts_fname = traits.Str(
+        exists=False,
+        desc="Name of output file for rois * time series in .npy format",
+        mandatory=True
+    )
 
 
 class CartoolInverseSolutionROIExtractionOutputSpec(TraitedSpec):
-    roi_ts_file = traits.File(
-        exists=True, desc="rois * time series in .npy format")
+    roi_ts_file = traits.File(desc="Path to output  ROI time series file in .npy format")
 
 
 class CartoolInverseSolutionROIExtraction(BaseInterface):
@@ -46,11 +59,13 @@ class CartoolInverseSolutionROIExtraction(BaseInterface):
     --------
     >>> from cmtklib.interfaces.pycartool import CartoolInverseSolutionROIExtraction
     >>> cartool_inv_sol = CartoolInverseSolutionROIExtraction()
-    >>> cartool_inv_sol.inputs.eeg_ts_file = 'sub-01_task-faces_desc-preproc_eeg.set'
+    >>> cartool_inv_sol.inputs.epochs_file = 'sub-01_task-faces_desc-preproc_eeg.set'
     >>> cartool_inv_sol.inputs.invsol_file = 'sub-01_eeg.LORETA.is'
-    >>> cartool_inv_sol.inputs.rois_file = 'sub-01_label-L2008_desc-scale1.rois'
-    >>> cartool_inv_sol.inputs.invsol_params = {'lamda': 6, 'svd_params': {'toi_begin': 0, 'toi_end': 0.25}}
-    >>> cartool_inv_sol.inputs.roi_ts_file = 'sub-01_task-faces_label-L2008_desc-scale1_LORETA.npy'
+    >>> cartool_inv_sol.inputs.mapping_spi_rois_file = 'sub-01_atlas-L2018_res-scale1.pickle.rois'
+    >>> cartool_inv_sol.inputs.lamd = 6
+    >>> cartool_inv_sol.inputs.svd_toi_begin = 0
+    >>> cartool_inv_sol.inputs.svd_toi_end = 0.25
+    >>> cartool_inv_sol.inputs.out_roi_ts_fname = 'sub-01_task-faces_atlas-L2008_res-scale1_rec-LORETA_timeseries.npy'
     >>> cartool_inv_sol.run()  # doctest: +SKIP
 
     References
@@ -63,17 +78,18 @@ class CartoolInverseSolutionROIExtraction(BaseInterface):
     output_spec = CartoolInverseSolutionROIExtractionOutputSpec
 
     def _run_interface(self, runtime):
-
-        epochs_file = self.inputs.eeg_ts_file[0]
-        invsol_file = self.inputs.invsol_file[0]
-        lamda = self.inputs.invsol_params['lamda']
-        rois_file = self.inputs.rois_file[0]
-        svd_params = self.inputs.invsol_params['svd_params']
-        self.roi_ts_file = self.inputs.roi_ts_file
-
-        roi_tcs = self.apply_inverse_epochs_cartool(epochs_file, invsol_file, lamda, rois_file, svd_params)
+        svd_params = {
+            "toi_begin": self.inputs.svd_toi_begin,
+            "toi_end": self.inputs.svd_toi_end
+        }
+        roi_tcs = self.apply_inverse_epochs_cartool(
+            self.inputs.epochs_file,
+            self.inputs.invsol_file,
+            self.inputs.lamb,
+            self.inputs.mapping_spi_rois_file,
+            svd_params
+        )
         np.save(self.roi_ts_file, roi_tcs)
-
         return runtime
 
     @staticmethod
@@ -118,5 +134,99 @@ class CartoolInverseSolutionROIExtraction(BaseInterface):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['roi_ts_file'] = self.roi_ts_file
+        outputs['roi_ts_file'] = self._gen_output_filename_roi_ts()
         return outputs
+
+    def _gen_output_filename_roi_ts(self):
+        # Return the absolute path of the output ROI time series file
+        return os.path.abspath(self.inputs.out_roi_ts_fname)
+
+
+class CreateSpiRoisMappingInputSpec(BaseInterfaceInputSpec):
+    roi_volume_file = traits.File(exits=True, desc="Parcellation file in nifti format", mandatory=True)
+
+    spi_file = traits.File(exits=True, desc="Cartool reconstructed sources file in spi format", mandatory=True)
+
+    out_mapping_spi_rois_fname = traits.Str(
+        desc="Name of output sources / parcellation ROI mapping file in .pickle.rois format",
+        mandatory=True
+    )
+
+
+class CreateSpiRoisMappingOutputSpec(TraitedSpec):
+    mapping_spi_rois_file = traits.File(
+        desc="Path to output Cartool-reconstructed sources / parcellation ROI mapping file "
+             "in .pickle.rois format"
+    )
+
+
+class CreateSpiRoisMapping(BaseInterface):
+    """Create Cartool-reconstructed sources / parcellation ROI mapping file.
+
+    Examples
+    --------
+    >>> from cmtklib.interfaces.pycartool import CreateSpiRoisMapping
+    >>> createrois = CreateSpiRoisMapping()
+    >>> createrois.inputs.roi_volume_file = '/path/to/sub-01_atlas-L2018_res-scale1_dseg.nii.gz'
+    >>> createrois.inputs.spi_file = '/path/to/sub-01_eeg.spi'
+    >>> createrois.inputs.out_mapping_spi_rois_fname = 'sub-01_atlas-L2018_res-scale1_eeg.pickle.rois'
+    >>> createrois.run()  # doctest: +SKIP
+
+    """
+
+    input_spec = CreateSpiRoisMappingInputSpec
+    output_spec = CreateSpiRoisMappingOutputSpec
+
+    def _run_interface(self, runtime):
+        mapping_spi_roi = self._create_mapping_spi_rois(
+            self.inputs.roi_volume_file,
+            self.inputs.spi_file
+        )
+
+        with open(self._gen_output_filename_mapping_spi_rois(), "wb") as f:
+            pickle.dump(mapping_spi_roi, f)
+
+        return runtime
+
+    @staticmethod
+    def _create_mapping_spi_rois(roi_volume_file, spi_file):
+        # Load input parcellation and spi files
+        source = cart.source_space.read_spi(spi_file)
+        imdata = nibabel.load(roi_volume_file).get_fdata()
+
+        x, y, z = np.where(imdata)
+        center_brain = [np.mean(x), np.mean(y), np.mean(z)]
+        source.coordinates[:, 0] = -source.coordinates[:, 0]
+        source.coordinates = source.coordinates - source.coordinates.mean(0) + center_brain
+
+        xyz = source.get_coordinates()
+        xyz = np.round(xyz).astype(int)
+        num_spi = len(xyz)
+
+        # label positions
+        rois_file = np.zeros(num_spi)
+        x_roi, y_roi, z_roi = np.where((imdata > 0) & (imdata < np.unique(imdata)[-1]))
+
+        # For each coordinate
+        for spi_id, spi in enumerate(xyz):
+            distances = ((spi.reshape(-1, 1) - [x_roi, y_roi, z_roi]) ** 2).sum(0)
+            roi_id = np.argmin(distances)
+            rois_file[spi_id] = imdata[x_roi[roi_id], y_roi[roi_id], z_roi[roi_id]]
+
+        groups_of_indexes = [np.where(rois_file == roi)[0].tolist() for roi in np.unique(rois_file)]
+        names = [str(int(i)) for i in np.unique(rois_file) if i != 0]
+
+        mapping_spi_roi = cart.regions_of_interest.RegionsOfInterest(
+            names=names, groups_of_indexes=groups_of_indexes, source_space=source
+        )
+
+        return mapping_spi_roi
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["mapping_spi_rois_file"] = self._gen_output_filename_mapping_spi_rois()
+        return outputs
+
+    def _gen_output_filename_mapping_spi_rois(self):
+        # Return the absolute path of the output inverse operator file
+        return os.path.abspath(self.inputs.out_inv_fname)
