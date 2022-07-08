@@ -421,13 +421,13 @@ def init_dmri_project(project_info, bids_layout, is_new_project, gui=True, debug
             ):
                 project_info.dmri_config_file = os.path.join(
                     derivatives_directory,
-                    "%s_%s_diffusion_config.ini"
+                    "%s_%s_diffusion_config.json"
                     % (project_info.subject, project_info.subject_session),
                 )
             else:
                 project_info.dmri_config_file = os.path.join(
                     derivatives_directory,
-                    "%s_diffusion_config.ini" % project_info.subject,
+                    "%s_diffusion_config.json" % project_info.subject,
                 )
 
             if os.path.exists(project_info.dmri_config_file):
@@ -531,12 +531,12 @@ def init_fmri_project(project_info, bids_layout, is_new_project, gui=True, debug
             ):
                 project_info.fmri_config_file = os.path.join(
                     derivatives_directory,
-                    "%s_%s_fMRI_config.ini"
+                    "%s_%s_fMRI_config.json"
                     % (project_info.subject, project_info.subject_session),
                 )
             else:
                 project_info.fmri_config_file = os.path.join(
-                    derivatives_directory, "%s_fMRI_config.ini" % project_info.subject
+                    derivatives_directory, "%s_fMRI_config.json" % project_info.subject
                 )
 
             if os.path.exists(project_info.fmri_config_file):
@@ -635,12 +635,12 @@ def init_anat_project(project_info, is_new_project, debug=False):
         ):
             project_info.anat_config_file = os.path.join(
                 derivatives_directory,
-                "%s_%s_anatomical_config.ini"
+                "%s_%s_anatomical_config.json"
                 % (project_info.subject, project_info.subject_session),
             )
         else:
             project_info.anat_config_file = os.path.join(
-                derivatives_directory, "%s_anatomical_config.ini" % project_info.subject
+                derivatives_directory, "%s_anatomical_config.json" % project_info.subject
             )
 
         if os.path.exists(project_info.anat_config_file):
@@ -669,7 +669,7 @@ def init_anat_project(project_info, is_new_project, debug=False):
     return anat_pipeline
 
 
-def init_eeg_project(project_info, bids_layout, is_new_project, gui=False, debug=False):  # pragma: no cover
+def init_eeg_project(project_info, is_new_project, debug=False):  # pragma: no cover
     """Initialize the eeg processing pipeline.
 
     Parameters
@@ -677,15 +677,9 @@ def init_eeg_project(project_info, bids_layout, is_new_project, gui=False, debug
     project_info : cmp.project.CMP_Project_Info
         Instance of ``cmp.project.CMP_Project_Info`` object
 
-    bids_layout : bids.BIDSLayout
-        Instance of ``BIDSLayout`` object
-
     is_new_project : bool
         Specify if it corresponds or not to a new project.
         If `True`, it will create initial pipeline configuration files.
-
-    gui : bool
-        Might be obsolete and removed in future versions
 
     debug : bool
         If `True`, display extra prints to support debugging
@@ -715,7 +709,7 @@ def init_eeg_project(project_info, bids_layout, is_new_project, gui=False, debug
         refresh_folder(bids_directory, derivatives_directory,
                        project_info.subject, eeg_pipeline.input_folders)
 
-    eeg_inputs_checked = eeg_pipeline.check_input(layout=bids_layout, gui=gui)
+    eeg_inputs_checked = eeg_pipeline.check_input()
     if eeg_inputs_checked:
         if is_new_project and eeg_pipeline is not None:
             print("> Initialize eeg project")
@@ -731,20 +725,15 @@ def init_eeg_project(project_info, bids_layout, is_new_project, gui=False, debug
 
             if (project_info.subject_session != '') and (project_info.subject_session is not None):
                 project_info.eeg_config_file = os.path.join(
-                    derivatives_directory, '%s_%s_eeg_config.ini' % (project_info.subject,
+                    derivatives_directory, '%s_%s_eeg_config.json' % (project_info.subject,
                                                                      project_info.subject_session))
             else:
                 project_info.eeg_config_file = os.path.join(
-                    derivatives_directory, '%s_eeg_config.ini' % project_info.subject)
+                    derivatives_directory, '%s_eeg_config.json' % project_info.subject)
 
             if os.path.exists(project_info.eeg_config_file):
-                warn_res = project_info.configure_traits(view='eeg_warning_view')
-                if warn_res:
-                    eeg_save_config(eeg_pipeline, project_info.eeg_config_file)
-                else:
-                    return None
-            else:
-                eeg_save_config(eeg_pipeline, project_info.eeg_config_file)
+                print(f' .. WARNING: Overwrite EEG pipeline configuration file to {project_info.eeg_config_file}')
+            eeg_save_config(eeg_pipeline, project_info.eeg_config_file)
 
         else:
             if debug:  # pragma: no cover
