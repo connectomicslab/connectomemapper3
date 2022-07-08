@@ -13,13 +13,11 @@ import numpy as np
 
 import mne
 import pycartool as cart
-from nipype import BaseInterface
 
 from nipype.interfaces.base import (
     BaseInterface, BaseInterfaceInputSpec,
     TraitedSpec, traits
 )
-from traits import api
 
 
 class CartoolInverseSolutionROIExtractionInputSpec(BaseInterfaceInputSpec):
