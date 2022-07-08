@@ -6,6 +6,7 @@
 
 """ Module that defines methods for handling CMP3 configuration files."""
 import os
+import sys
 from pathlib import Path
 import configparser
 import json
@@ -14,6 +15,7 @@ from ast import literal_eval
 
 from cmp.info import __version__
 from cmtklib.util import BColors, print_warning, print_error, print_blue
+from cmtklib.bids.io import CustomBIDSFile
 
 
 def check_configuration_version(config):
@@ -104,6 +106,16 @@ def save_configparser_as_json(config, config_json_path, ini_mode=False, debug=Fa
             "tracking_processing_tool"
         )
 
+    # In the case of EEG pipeline
+    if "eeg_preprocessing_stage" in config.sections():
+        electrodes_file_fmt = config["eeg_preprocessing_stage"].get(
+            "electrodes_file_fmt"
+        )
+    if "eeg_source_imaging_stage" in config.sections():
+        esi_tool = config["eeg_source_imaging_stage"].get(
+            "electrodes_file_fmt"
+        )
+
     for section in config.sections():
         config_json[section] = {}
         for name, value in config.items(section):
@@ -149,6 +161,30 @@ def save_configparser_as_json(config, config_json_path, ini_mode=False, debug=Fa
                             print_warning(f"  .. DEBUG: Skip parameter {section} / {name}")
                         continue
 
+            if "eeg_preprocessing_stage" in section:
+                if electrodes_file_fmt == "BIDS":
+                    if "cartool_electrodes" in name:
+                        if debug:  # pragma: no cover
+                            print_warning(f"  .. DEBUG: Skip parameter {section} / {name}")
+                        continue
+                else:  # Cartool
+                    if "bids_electrodes" in name:
+                        if debug:  # pragma: no cover
+                            print_warning(f"  .. DEBUG: Skip parameter {section} / {name}")
+                        continue
+
+            if "eeg_source_imaging_stage" in section:
+                if esi_tool == "Cartool":
+                    if "mne_esi" in name:
+                        if debug:  # pragma: no cover
+                            print_warning(f"  .. DEBUG: Skip parameter {section} / {name}")
+                        continue
+                else:  # MNE
+                    if "cartool" in name:
+                        if debug:  # pragma: no cover
+                            print_warning(f"  .. DEBUG: Skip parameter {section} / {name}")
+                        continue
+
             if "_editor" in name:
                 if debug:  # pragma: no cover
                     print_warning(f"  .. DEBUG: Skip parameter {section} / {name}")
@@ -188,6 +224,18 @@ def save_configparser_as_json(config, config_json_path, ini_mode=False, debug=Fa
                     )
                 config_json[section][name] = value
                 is_iterable = True
+            elif isinstance(value, int):
+                if debug:  # pragma: no cover
+                    print_warning(
+                        f"  .. DEBUG: Processing {section} / {name} / {value} as int"
+                    )
+                config_json[section][name] = [value]
+            elif isinstance(value, float):
+                if debug:  # pragma: no cover
+                    print_warning(
+                        f"  .. DEBUG: Processing {section} / {name} / {value} as float"
+                    )
+                config_json[section][name] = [value]
             elif isinstance(value, list):
                 if debug:  # pragma: no cover
                     print_warning(
@@ -213,7 +261,7 @@ def save_configparser_as_json(config, config_json_path, ini_mode=False, debug=Fa
                     print_warning(
                         f"  .. DEBUG: Processing {section} / {name} / {value} as not a string"
                     )
-                config_json[section][name] = [value]
+                config_json[section][name] = literal_eval(value.__str__())
             elif value and isinstance(value, str):
                 value = value.strip()
                 if value.isnumeric():
@@ -529,7 +577,14 @@ def set_pipeline_attributes_from_config(pipeline, config, debug=False):
                                           'custom_gm_mask',
                                           'custom_csf_mask',
                                           'custom_aparcaseg',
-                                          'custom_parcellation']:  # subconfig or custom inputs
+                                          'custom_parcellation',
+                                          'eeg_ts_file',
+                                          'events_file',
+                                          'cartool_electrodes_file',
+                                          'bids_electrodes_file',
+                                          'mne_electrode_transform_file',
+                                          'cartool_spi_file',
+                                          'cartool_invsol_file']:  # subconfig or custom inputs
                 sub_config = getattr(stage.config, key)
                 stage_sub_keys = [
                     prop
@@ -645,7 +700,14 @@ def create_configparser_from_pipeline(pipeline, debug=False):
                                           'custom_gm_mask',
                                           'custom_csf_mask',
                                           'custom_aparcaseg',
-                                          'custom_parcellation']:  # subconfig or custom inputs
+                                          'custom_parcellation',
+                                          'eeg_ts_file',
+                                          'events_file',
+                                          'cartool_electrodes_file',
+                                          'bids_electrodes_file',
+                                          'mne_electrode_transform_file',
+                                          'cartool_spi_file',
+                                          'cartool_invsol_file']:  # subconfig or custom inputs
                 stage_sub_keys = [
                     prop for prop in list(keyval.traits().keys()) if "trait" not in prop
                 ]
@@ -782,7 +844,7 @@ def fmri_load_config_json(pipeline, config_path):
 
 
 def eeg_save_config(pipeline, config_path):
-    """Save the INI configuration file of a eeg pipeline.
+    """Save the JSON configuration file of a eeg pipeline.
 
     Parameters
     ----------
@@ -798,7 +860,7 @@ def eeg_save_config(pipeline, config_path):
 
 
 def eeg_load_config_json(pipeline, config_path):
-    """Load the JSON configuration file of a eeg pipeline.
+    """Load the JSON configuration file of an EEG pipeline.
 
     Parameters
     ----------
@@ -808,12 +870,13 @@ def eeg_load_config_json(pipeline, config_path):
     config_path : string
         Path of the JSON configuration file
     """
-    print_blue('  .. LOAD: Load eeg config file : {}'.format(config_path))
+    print_blue('  .. LOAD: Load EEG config file : {}'.format(config_path))
     # datalad_is_available = is_tool('datalad')
     with open(config_path, 'r') as f:
         config = json.load(f)
 
     check_configuration_version(config)
+    print(config)
     set_pipeline_attributes_from_config(pipeline, config)
 
     return True
