@@ -26,6 +26,7 @@ dependencies:
           - duecredit==0.9.1
           - obspy==1.2.2
           - mne==0.24.1
+          - mne_connectivity==0.3
           - datalad[full]==0.15.4
           - datalad-container==1.1.5
           - datalad-neuroimaging==0.3.1
