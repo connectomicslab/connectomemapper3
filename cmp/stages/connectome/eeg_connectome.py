@@ -26,7 +26,7 @@ class EEGConnectomeConfig(HasTraits):
     connectivity_metrics : ['coh', 'cohy', 'imcoh', 'plv', 'ciplv', 'ppc', 'pli', 'wpli', 'wpli2_debiased']
         Set of frequency- and time-frequency-domain connectivity metrics to compute
 
-    output_types: ['tsv', 'gPickle', 'mat', 'graphml']
+    output_types: ['tsv', 'gpickle', 'mat', 'graphml']
         Output connectome file format
 
     See Also
@@ -39,7 +39,7 @@ class EEGConnectomeConfig(HasTraits):
          'pli', 'wpli', 'wpli2_debiased']
     )
 
-    output_types = List(['tsv', 'gPickle', 'mat', 'graphml'])
+    output_types = List(['tsv', 'gpickle', 'mat', 'graphml'])
 
     def __str__(self):
         str_repr = '\tEEGSourceImagingConfig:\n'

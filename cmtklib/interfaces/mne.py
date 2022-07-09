@@ -630,7 +630,7 @@ class MNESpectralConnectivityInputSpec(BaseInterfaceInputSpec):
     )
 
     output_types = traits.List(
-        ['tsv', 'gPickle', 'mat', 'graphml'],
+        ['tsv', 'gpickle', 'mat', 'graphml'],
         desc="Set of format to save output connectome files"
     )
 
@@ -652,7 +652,7 @@ class MNESpectralConnectivity(BaseInterface):
     >>> from cmtklib.interfaces.mne import MNESpectralConnectivity
     >>> eeg_cmat = MNESpectralConnectivity()
     >>> eeg_cmat.inputs.connectivity_metrics = ['imcoh', 'pli', 'wpli']
-    >>> eeg_cmat.inputs.output_types = ['gPickle', 'mat', 'graphml']
+    >>> eeg_cmat.inputs.output_types = ['tsv', 'gpickle', 'mat', 'graphml']
     >>> eeg_cmat.inputs.epochs_file = '/path/to/sub-01_epo.fif'
     >>> eeg_cmat.inputs.roi_ts_file = '/path/to/sub-01_timeseries.pickle'
     >>> eeg_cmat.run()  # doctest: +SKIP
@@ -697,7 +697,7 @@ class MNESpectralConnectivity(BaseInterface):
             roi_labels=roi_labels,
             output_dir=os.getcwd(),
             output_basename=self.inputs.out_cmat_fname,
-            output_types=['tsv', 'gpickle', 'mat', 'graphml']
+            output_types=self.inputs.output_types
         )
 
         return runtime
