@@ -434,6 +434,7 @@ def convert_list_to_tuple(lists):
     ----------
     lists : [bvecs, bvals]
         List of files containing bvecs and bvals
+
     Returns
     -------
     out_tuple : (bvecs, bvals)
@@ -453,3 +454,37 @@ def check_directory_exists(mandatory_dir):  # pragma: no cover
     f_path = Path(mandatory_dir)
     if not f_path.is_dir():
         raise FileNotFoundError(f"No directory is found at: {str(f_path)}")
+
+
+def find_toolbox_derivatives_containing_file(bids_dir, fname, debug=True):
+    """Find the toolbox derivatives directory in the derivatives folder of the BIDS dataset containing a file.
+
+    This function is used by the EEGPipeline.
+
+    Parameters
+    ----------
+    bids_dir : str
+        Path the BIDS root directory
+
+    fname : str
+        Filename to find
+
+    debug : bool
+        If `True`, print the directory found
+
+    Returns
+    -------
+    out_tuple : (bvecs, bvals)
+        Tuple of files containing bvecs and bvals
+    """
+    deriv_dir = os.path.join(bids_dir, "derivatives")
+    for root, dirs, files in os.walk(deriv_dir, topdown=False):
+        for name in files:
+            if name == fname:
+                # Extract the name of the toolbox directory only
+                toolbox_derivatives_dirname = root.split("/derivatives/")[-1].split('/')[0]
+                if debug:
+                    print(toolbox_derivatives_dirname)
+                return toolbox_derivatives_dirname
+    # Raise exception if no file is found
+    raise FileNotFoundError(f"No file {fname} was found in directory {deriv_dir}")
