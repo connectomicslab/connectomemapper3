@@ -186,6 +186,45 @@ class CustomBIDSFile(HasTraits):
             print(f" .. DEBUG : Generated file path (no extension) = {filepath}")
         return filepath
 
+    def get_filename(self, subject, session=None, debug=True):
+        """Return the filename path with extension of the represented BIDS file.
+
+        Parameters
+        ----------
+        subject: str
+            Subject filename entity e.g. "sub-01"
+
+        session: str
+            Session filename entity e.g. "ses-01" if applicable
+            (Default: None)
+
+        debug: bool
+            Debug mode (Extra output messages) if `True`
+
+        """
+        # Build filename
+
+        fname = f'{subject}'
+        if session is not None and session != "":
+            # Handle the subject/session filename and structure
+            fname += f'_{session}'
+        if self.task is not None and self.task != "":
+            fname += f'_task-{self.task}'
+        if self.label is not None and self.label != "":
+            fname += f'_label-{self.label}'
+        if self.atlas is not None and self.atlas != "":
+            fname += f'_atlas-{self.atlas}'
+        if self.res is not None and self.res != "":
+            fname += f'_res-{self.res}'
+        if self.rec is not None and self.rec != "":
+            fname += f'_rec-{self.rec}'
+        if self.desc is not None and self.desc != "":
+            fname += f'_desc-{self.desc}'
+        fname += f'_{self.suffix}.{self.extension}'
+        if debug:  # pragma: no cover
+            print(f" .. DEBUG : Generated file name = {fname}")
+        return fname
+
 
 class CustomParcellationBIDSFile(CustomBIDSFile):
     """Represent a custom parcellation files in the form `sub-<label>_atlas-<label>[_res-<label>]_dseg.nii.gz`."""
