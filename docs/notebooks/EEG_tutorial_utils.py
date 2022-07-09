@@ -2,23 +2,23 @@
 # -*- coding: utf-8 -*-
 """
 Created on Thu Feb 17 15:25:54 2022
+Modified on Sat Jul 09 2022
 
-@author: katharina
+@author: katharina Glomb, Sebastien Tourbier
 """
 
 import os
-import shutil
-import nibabel
+import json
 import mne
 import numpy as np
-from cmtklib.bids.io import __cmp_directory__, __freesurfer_directory__
+from cmtklib.bids.io import __cmp_directory__
 
 
 def create_trans_files(data_dir,sub):
-    '''
+    """
     Helper function that will create the -trans.fif-files necessary to adjust
     electrode positions and run the EEG pipeline tutorial with VEPCON data.
-    '''
+    """
 
     # Create transform matrix and turn it into trans object
     # transform matrix is a 4x4 matrix whose last column, rows 1-3 indicate shifts
@@ -112,3 +112,44 @@ def create_trans_files(data_dir,sub):
     if not os.path.exists(trans_dir):
         os.mkdir(trans_dir)
     mne.write_trans(os.path.join(trans_dir, sub+'_trans.fif'), trans)
+
+
+def fix_vepcon_derivatives_dataset_description_files(vepcon_dir):
+    """
+    Helper function that fixes in the VEPCON dataset (v1.1.1) `dataset_description.json` files
+    in the `derivatives/cartool-v3.80` and `derivatives/eeglab-v14.1.1`.
+    """
+    dataset_description_files = {
+        'cartool': {
+            "Name": "Cartool Outputs (v3.80)",
+            "BIDSVersion": "n/a",
+            "DatasetType": "derivatives",
+            "GeneratedBy": [
+                {
+                    "Name": "cartool",
+                    "Version": "v3.80"
+                }
+            ]
+        },
+        'eeglab': {
+            "Name": "EEGLAB Outputs (v14.1.1)",
+            "BIDSVersion": "n/a",
+            "DatasetType": "derivatives",
+            "GeneratedBy": [
+                {
+                    "Name": "EEGLAB",
+                    "Version": "v14.1.1"
+                }
+            ],
+            "License": "TODO: To be updated (See https://creativecommons.org/about/cclicenses/)"
+        }
+    }
+    for key, dd_dict in  dataset_description_files.items():
+        dd_file = os.path.join(
+            vepcon_dir, 'derivatives',
+            f'{key}-{dd_dict["GeneratedBy"][0]["Version"]}',
+            'dataset_description.json'
+        )
+        with open(dd_file, 'w') as f:
+            print(f'Replace {dd_file}')
+            json.dump(dd_dict, f)
