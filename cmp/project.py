@@ -394,12 +394,18 @@ def init_dmri_project(project_info, bids_layout, is_new_project, gui=True, debug
             dmri_pipeline.input_folders,
             session=project_info.subject_session,
         )
+        subject_derivatives_directory = os.path.join(
+            derivatives_directory, project_info.subject, project_info.subject_session
+        )
     else:
         refresh_folder(
             bids_directory,
             derivatives_directory,
             project_info.subject,
             dmri_pipeline.input_folders,
+        )
+        subject_derivatives_directory = os.path.join(
+            derivatives_directory, project_info.subject
         )
 
     dmri_inputs_checked = dmri_pipeline.check_input(layout=bids_layout, gui=gui)
@@ -408,25 +414,25 @@ def init_dmri_project(project_info, bids_layout, is_new_project, gui=True, debug
             is_new_project and dmri_pipeline is not None
         ):  # and dmri_pipelineis not None:
             print("> Initialize dmri project")
-            if not os.path.exists(derivatives_directory):
+            if not os.path.exists(subject_derivatives_directory):
                 try:
-                    os.makedirs(derivatives_directory)
+                    os.makedirs(subject_derivatives_directory)
                 except os.error:
-                    print("... Info : %s was already existing" % derivatives_directory)
+                    print("... Info : %s was already existing" % subject_derivatives_directory)
                 finally:
-                    print("... Info : Created directory %s" % derivatives_directory)
+                    print("... Info : Created directory %s" % subject_derivatives_directory)
 
             if (project_info.subject_session != "") and (
                 project_info.subject_session is not None
             ):
                 project_info.dmri_config_file = os.path.join(
-                    derivatives_directory,
+                    subject_derivatives_directory,
                     "%s_%s_diffusion_config.json"
                     % (project_info.subject, project_info.subject_session),
                 )
             else:
                 project_info.dmri_config_file = os.path.join(
-                    derivatives_directory,
+                    subject_derivatives_directory,
                     "%s_diffusion_config.json" % project_info.subject,
                 )
 
@@ -504,12 +510,18 @@ def init_fmri_project(project_info, bids_layout, is_new_project, gui=True, debug
             fmri_pipeline.input_folders,
             session=project_info.subject_session,
         )
+        subject_derivatives_directory = os.path.join(
+            derivatives_directory, project_info.subject, project_info.subject_session
+        )
     else:
         refresh_folder(
             bids_directory,
             derivatives_directory,
             project_info.subject,
             fmri_pipeline.input_folders,
+        )
+        subject_derivatives_directory = os.path.join(
+            derivatives_directory, project_info.subject
         )
 
     fmri_inputs_checked = fmri_pipeline.check_input(layout=bids_layout, gui=gui)
@@ -518,25 +530,25 @@ def init_fmri_project(project_info, bids_layout, is_new_project, gui=True, debug
             is_new_project and fmri_pipeline is not None
         ):  # and fmri_pipelineis not None:
             print("> Initialize fmri project")
-            if not os.path.exists(derivatives_directory):
+            if not os.path.exists(subject_derivatives_directory):
                 try:
-                    os.makedirs(derivatives_directory)
+                    os.makedirs(subject_derivatives_directory)
                 except os.error:
-                    print("... Info : %s was already existing" % derivatives_directory)
+                    print("... Info : %s was already existing" % subject_derivatives_directory)
                 finally:
-                    print("... Info : Created directory %s" % derivatives_directory)
+                    print("... Info : Created directory %s" % subject_derivatives_directory)
 
             if (project_info.subject_session != "") and (
                 project_info.subject_session is not None
             ):
                 project_info.fmri_config_file = os.path.join(
-                    derivatives_directory,
+                    subject_derivatives_directory,
                     "%s_%s_fMRI_config.json"
                     % (project_info.subject, project_info.subject_session),
                 )
             else:
                 project_info.fmri_config_file = os.path.join(
-                    derivatives_directory, "%s_fMRI_config.json" % project_info.subject
+                    subject_derivatives_directory, "%s_fMRI_config.json" % project_info.subject
                 )
 
             if os.path.exists(project_info.fmri_config_file):
@@ -610,6 +622,9 @@ def init_anat_project(project_info, is_new_project, debug=False):
             anat_pipeline.input_folders,
             session=project_info.subject_session,
         )
+        subject_derivatives_directory = os.path.join(
+            derivatives_directory, project_info.subject, project_info.subject_session
+        )
     else:
         if debug:  # pragma: no cover
             print("Refresh folder WITHOUT session")
@@ -619,28 +634,31 @@ def init_anat_project(project_info, is_new_project, debug=False):
             project_info.subject,
             anat_pipeline.input_folders,
         )
+        subject_derivatives_directory = os.path.join(
+            derivatives_directory, project_info.subject
+        )
 
     if is_new_project and anat_pipeline is not None:
         print("> Initialize anatomical project")
-        if not os.path.exists(derivatives_directory):
+        if not os.path.exists(subject_derivatives_directory):
             try:
-                os.makedirs(derivatives_directory)
+                os.makedirs(subject_derivatives_directory)
             except os.error:
-                print("... Info: %s was already existing" % derivatives_directory)
+                print("... Info: %s was already existing" % subject_derivatives_directory)
             finally:
-                print("... Info : Created directory %s" % derivatives_directory)
+                print("... Info : Created directory %s" % subject_derivatives_directory)
 
         if (project_info.subject_session != "") and (
             project_info.subject_session is not None
         ):
             project_info.anat_config_file = os.path.join(
-                derivatives_directory,
+                subject_derivatives_directory,
                 "%s_%s_anatomical_config.json"
                 % (project_info.subject, project_info.subject_session),
             )
         else:
             project_info.anat_config_file = os.path.join(
-                derivatives_directory, "%s_anatomical_config.json" % project_info.subject
+                subject_derivatives_directory, "%s_anatomical_config.json" % project_info.subject
             )
 
         if os.path.exists(project_info.anat_config_file):
@@ -703,33 +721,43 @@ def init_eeg_project(project_info, is_new_project, debug=False):  # pragma: no c
             eeg_pipeline.input_folders,
             session=project_info.subject_session
         )
+        subject_derivatives_directory = os.path.join(
+            derivatives_directory, project_info.subject, project_info.subject_session
+        )
     else:
         if debug:  # pragma: no cover
             print('Refresh folder WITHOUT session')
-        refresh_folder(bids_directory, derivatives_directory,
-                       project_info.subject, eeg_pipeline.input_folders)
+        refresh_folder(
+            bids_directory,
+            derivatives_directory,
+            project_info.subject,
+            eeg_pipeline.input_folders
+        )
+        subject_derivatives_directory = os.path.join(
+            derivatives_directory, project_info.subject
+        )
 
     eeg_inputs_checked = eeg_pipeline.check_input()
     if eeg_inputs_checked:
         if is_new_project and eeg_pipeline is not None:
             print("> Initialize eeg project")
-            if not os.path.exists(derivatives_directory):
+            if not os.path.exists(subject_derivatives_directory):
                 try:
-                    os.makedirs(derivatives_directory)
+                    os.makedirs(subject_derivatives_directory)
                 except os.error:  # pragma: no cover
                     print("... Info: %s was already existing" %
-                          derivatives_directory)
+                          subject_derivatives_directory)
                 finally:
                     print("... Info : Created directory %s" %
-                          derivatives_directory)
+                          subject_derivatives_directory)
 
             if (project_info.subject_session != '') and (project_info.subject_session is not None):
                 project_info.eeg_config_file = os.path.join(
-                    derivatives_directory, '%s_%s_eeg_config.json' % (project_info.subject,
+                    subject_derivatives_directory, '%s_%s_eeg_config.json' % (project_info.subject,
                                                                      project_info.subject_session))
             else:
                 project_info.eeg_config_file = os.path.join(
-                    derivatives_directory, '%s_eeg_config.json' % project_info.subject)
+                    subject_derivatives_directory, '%s_eeg_config.json' % project_info.subject)
 
             if os.path.exists(project_info.eeg_config_file):
                 print(f' .. WARNING: Overwrite EEG pipeline configuration file to {project_info.eeg_config_file}')
