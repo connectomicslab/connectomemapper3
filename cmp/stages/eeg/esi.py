@@ -9,7 +9,8 @@
 # General imports
 import os
 from traits.api import (
-    HasTraits, Enum, Instance, Bool, Float
+    HasTraits, Enum, Instance,
+    Bool, Float, Str
 )
 
 # Nipype imports
@@ -18,8 +19,9 @@ import nipype.pipeline.engine as pe
 # Own imports
 from cmp.stages.common import Stage
 from cmtklib.bids.io import (
+    __freesurfer_directory__, __cmp_directory__,
     CustomEEGMNETransformBIDSFile, CustomEEGCartoolSpiBIDSFile,
-    CustomEEGCartoolInvSolBIDSFile, __freesurfer_directory__
+    CustomEEGCartoolInvSolBIDSFile,
 )
 from cmtklib.interfaces.pycartool import (
     CreateSpiRoisMapping, CartoolInverseSolutionROIExtraction
@@ -117,6 +119,11 @@ class EEGSourceImagingConfig(HasTraits):
              "file created by Cartool"
     )
     cartool_esi_method = Enum(['LAURA', 'LORETA'], desc="Cartool Source Imaging method")
+
+    parcellation_cmp_dir = Str(
+        __cmp_directory__,
+        desc="CMP3 derivatives directory containing the parcellation results"
+    )
 
     parcellation_scheme = Enum(
         "NativeFreeSurfer", "Lausanne2018",
