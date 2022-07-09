@@ -344,6 +344,7 @@ class EEGPipeline(Pipeline):
         substitutions = [
             ("bem.fif", f"{self.subject}_task-{bids_task_label}_bem.fif"),
             ("epo.fif", f"{self.subject}_task-{bids_task_label}_epo.fif"),
+            ("src.fif", f"{self.subject}_task-{bids_task_label}_src.fif"),
             ("fwd.fif", f"{self.subject}_task-{bids_task_label}_fwd.fif"),
             ("inv.fif", f"{self.subject}_task-{bids_task_label}_inv.fif"),
             ("noisecov.fif", f"{self.subject}_task-{bids_task_label}_noisecov.fif"),
@@ -541,6 +542,7 @@ class EEGPipeline(Pipeline):
                 [
                     (esi_flow, sinker, [("outputnode.bem_file", "eeg.@bem_file")]),
                     (esi_flow, sinker, [("outputnode.noise_cov_file", "eeg.@noise_cov_file")]),
+                    (esi_flow, sinker, [("outputnode.src_file", "eeg.@src_file")]),
                     (esi_flow, sinker, [("outputnode.fwd_file", "eeg.@fwd_file")]),
                     (esi_flow, sinker, [("outputnode.inv_file", "eeg.@inv_file")]),
                 ]

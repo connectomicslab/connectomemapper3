@@ -221,6 +221,7 @@ class EEGSourceImagingStage(Stage):
             "bem_file",
             "noise_cov_file",
             "fwd_file",
+            "src_file",
             "inv_file",
             "roi_ts_file",
             "mapping_spi_rois_file"
