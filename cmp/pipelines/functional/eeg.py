@@ -31,6 +31,7 @@ from cmtklib.bids.io import (
     __nipype_directory__,
     CustomParcellationBIDSFile
 )
+from cmtklib.util import find_toolbox_derivatives_containing_file
 
 
 class GlobalConfig(HasTraits):
@@ -138,14 +139,22 @@ class EEGPipeline(Pipeline):
                 output_dir=self.output_directory
             ),
         }
+
         self.parcellation_scheme = project_info.parcellation_scheme
+        self.parcellation_cmp_dir = self.stages["EEGSourceImaging"].config.parcellation_cmp_dir
+
         self.stages["EEGSourceImaging"].config.parcellation_scheme = self.parcellation_scheme
+
         self.stages["EEGSourceImaging"].config.on_trait_change(self._update_parcellation_scheme, 'parcellation_scheme')
+        self.stages["EEGSourceImaging"].config.on_trait_change(self._update_parcellation_cmp_dir, 'parcellation_cmp_dir')
 
         Pipeline.__init__(self, project_info)
 
     def _update_parcellation_scheme(self):
         self.parcellation_scheme = self.stages["EEGSourceImaging"].config.parcellation_scheme
+
+    def _update_parcellation_cmp_dir(self):
+        self.parcellation_cmp_dir = self.stages["EEGSourceImaging"].config.parcellation_cmp_dir
 
     def check_config(self):
         # TODO: To Be Implemented if Necessary
@@ -160,11 +169,12 @@ class EEGPipeline(Pipeline):
             True if inputs are available
         """
         print("**** Check Inputs ****")
-        # TODO: Might need to specify base_dir of Node and not use tmp dir
-        # eeg_available = False
-        # epochs_available = False
         valid_inputs = True
-        datasource = self.create_datagrabber_node(name="eeg_check_input")
+        print(f'Base dir: {self.get_nipype_eeg_pipeline_subject_dir()}')
+        datasource = self.create_datagrabber_node(
+            name="eeg_check_input",
+            base_directory=self.get_nipype_eeg_pipeline_subject_dir()
+        )
         res = datasource.run()
         outputs: dict = res.outputs.__dict__
         for key in outputs.keys():
@@ -182,13 +192,16 @@ class EEGPipeline(Pipeline):
     # def check_output(self):
     #     raise NotImplementedError
 
-    def create_datagrabber_node(self, name="eeg_datasource", debug=False):
+    def create_datagrabber_node(self, name="eeg_datasource", base_directory=None, debug=False):
         """Create the appropriate Nipype BIDSDataGrabber node depending on the configuration of the different EEG pipeline stages.
 
         Parameters
         ----------
         name: str
             Name of the datagrabber node
+
+        base_directory: str
+            Path to the directory that store the check_input node output
 
         debug: bool
             Print extra debugging messages if `True`
@@ -259,12 +272,24 @@ class EEGPipeline(Pipeline):
         if self.parcellation_scheme == "Lausanne2018":
             roi_volume_file.atlas = "L2018"
             roi_volume_file.res = self.stages["EEGSourceImaging"].config.lausanne2018_parcellation_res
+            roi_volume_file.get_filename(
+                subject=self.global_conf.subject,
+                session=self.global_conf.subject_session
+            )
         else:  # Native freesurfer
             roi_volume_file.atlas = "Desikan"
             roi_volume_file.res = ""
-        roi_volume_file.toolbox_derivatives_dir = os.path.join(
-            self.base_directory, "derivatives", f'cmp-{__version__}'
-        )
+
+        if base_directory is not None:  # self.parcellation_cmp_dir has not been updated yet
+            roi_volume_file.toolbox_derivatives_dir = find_toolbox_derivatives_containing_file(
+                bids_dir=self.base_directory,
+                fname=roi_volume_file.get_filename(
+                    subject=self.global_conf.subject,
+                    session=self.global_conf.subject_session
+                )
+            )
+        else:
+            roi_volume_file.toolbox_derivatives_dir = self.parcellation_cmp_dir
         input_files.append(roi_volume_file)
         output_query.update(
             {"roi_volume_file": roi_volume_file.get_query_dict()}
@@ -305,6 +330,7 @@ class EEGPipeline(Pipeline):
                 index_derivatives=False,
                 extra_derivatives=extra_derivatives
             ),
+            base_dir=base_directory,
             name=name
         )
         datasource.inputs.base_dir = self.base_directory
@@ -382,6 +408,27 @@ class EEGPipeline(Pipeline):
         sinker.inputs.substitutions = substitutions
 
         return sinker
+
+    def get_nipype_eeg_pipeline_subject_dir(self):
+        """Return the path to Nipype eeg_pipeline folder of a given subject / session."""
+        if "_" in self.subject:
+            subject = self.subject.split("_")[0]
+
+        if self.global_conf.subject_session == "":
+            nipype_deriv_subject_directory = os.path.join(
+                self.output_directory, __nipype_directory__,
+                self.subject
+            )
+        else:
+            nipype_deriv_subject_directory = os.path.join(
+                self.output_directory, __nipype_directory__,
+                subject, self.global_conf.subject_session,
+            )
+
+        nipype_eeg_pipeline_subject_dir = os.path.join(nipype_deriv_subject_directory, "eeg_pipeline")
+
+        return nipype_eeg_pipeline_subject_dir
+
 
     def init_subject_derivatives_dirs(self):
         """Return the paths to Nipype and CMP derivatives folders of a given subject / session.
