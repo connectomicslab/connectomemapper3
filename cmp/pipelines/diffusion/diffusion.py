@@ -157,6 +157,26 @@ class DiffusionPipeline(Pipeline):
 
         # self.anat_flow = anat_flow
 
+    def _subject_changed(self, new):
+        """Update subject in the connectome stage configuration when ``subject`` is updated.
+
+        Parameters
+        ----------
+        new : string
+            New value.
+        """
+        self.stages["Connectome"].config.subject = new
+
+    def _diffusion_imaging_model_changed(self, new):
+        """Update ``self.stages['Diffusion'].config.diffusion_imaging_model`` when ``diffusion_imaging_model`` is updated.
+
+        Parameters
+        ----------
+        new : string
+            New value.
+        """
+        self.stages["Diffusion"].config.diffusion_imaging_model = new
+
     def check_config(self):
         """Check if the list output formats in the configuration of the connectome stage is not empty.
 

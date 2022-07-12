@@ -349,26 +349,6 @@ class DiffusionPipelineUI(DiffusionPipeline):
         """
         self.stages["Connectome"].configure_traits(view=self.view_mode)
 
-    def _subject_changed(self, new):
-        """Update subject in the connectome stage configuration when ``subject`` is updated.
-
-        Parameters
-        ----------
-        new : string
-            New value.
-        """
-        self.stages["Connectome"].config.subject = new
-
-    def _diffusion_imaging_model_changed(self, new):
-        """Update ``self.stages['Diffusion'].config.diffusion_imaging_model`` when ``diffusion_imaging_model`` is updated.
-
-        Parameters
-        ----------
-        new : string
-            New value.
-        """
-        self.stages["Diffusion"].config.diffusion_imaging_model = new
-
     def check_input(self, layout, gui=True):
         """Method that checks if inputs of the diffusion pipeline are available in the datasets.
 
