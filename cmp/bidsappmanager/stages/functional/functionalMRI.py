@@ -46,8 +46,9 @@ class FunctionalMRIConfigUI(FunctionalMRIConfig):
             show_border=True,
         ),
         HGroup(
-            Item("lowpass_filter", label="Low cutoff (volumes)"),
-            Item("highpass_filter", label="High cutoff (volumes)"),
+            Item("bandpass_filtering", label="Perform bandpass filtering"),
+            Item("lowpass_filter", label="Low cutoff (volumes)", visible_when="bandpass_filtering"),
+            Item("highpass_filter", label="High cutoff (volumes)", visible_when="bandpass_filtering"),
             label="Bandpass filtering",
             show_border=True,
         ),
