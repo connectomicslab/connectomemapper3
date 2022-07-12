@@ -199,6 +199,58 @@ class fMRIPipelineUI(fMRIPipeline):
                     self.stages[stage].name,
                 )
 
+        self.stages["FunctionalMRI"].config.on_trait_change(
+            self.update_nuisance_requirements, "global_nuisance"
+        )
+        self.stages["FunctionalMRI"].config.on_trait_change(
+            self.update_nuisance_requirements, "csf"
+        )
+        self.stages["FunctionalMRI"].config.on_trait_change(
+            self.update_nuisance_requirements, "wm"
+        )
+        self.stages["Connectome"].config.on_trait_change(
+            self.update_scrubbing, "apply_scrubbing"
+        )
+
+    def update_registration(self):
+        """Configure the list of registration tools."""
+        if (
+            "Nonlinear (FSL)"
+            in self.stages["Registration"].config.registration_mode_trait
+        ):
+            self.stages["Registration"].config.registration_mode_trait = [
+                "Linear (FSL)",
+                "BBregister (FS)",
+                "Nonlinear (FSL)",
+            ]
+        else:
+            self.stages["Registration"].config.registration_mode_trait = [
+                "Linear (FSL)",
+                "BBregister (FS)",
+            ]
+
+    def update_nuisance_requirements(self):
+        """Update nuisance requirements.
+
+        Configure the registration to apply the estimated transformation to multiple segmentation masks
+        depending on the Nuisance correction steps performed.
+        """
+        self.stages["Registration"].config.apply_to_eroded_brain = self.stages[
+            "FunctionalMRI"
+        ].config.global_nuisance
+        self.stages["Registration"].config.apply_to_eroded_csf = self.stages[
+            "FunctionalMRI"
+        ].config.csf
+        self.stages["Registration"].config.apply_to_eroded_wm = self.stages[
+            "FunctionalMRI"
+        ].config.wm
+
+    def update_scrubbing(self):
+        """Update to precompute or inputs for scrubbing during the FunctionalMRI stage."""
+        self.stages["FunctionalMRI"].config.scrubbing = self.stages[
+            "Connectome"
+        ].config.apply_scrubbing
+
     def _preprocessing_fired(self, info):
         """Method that displays the window for the preprocessing stage.
 
