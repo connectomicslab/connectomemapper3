@@ -651,11 +651,11 @@ jobs:
             - /tmp/data/ds-sample
       - restore_cache:
           keys:
-            - data-ds003505-v2-1-{{ .Branch }}-{{ .Revision }}
-            - data-ds003505-v2-1--{{ .Revision }}
-            - data-ds003505-v2-1-{{ .Branch }}-
-            - data-ds003505-v2-1-master-
-            - data-ds003505-v2-1-
+            - data-ds003505-v2-2-{{ .Branch }}-{{ .Revision }}
+            - data-ds003505-v2-2--{{ .Revision }}
+            - data-ds003505-v2-2-{{ .Branch }}-
+            - data-ds003505-v2-2-master-
+            - data-ds003505-v2-2-
           paths:
             - /tmp/data/ds003505
       - run:
@@ -727,7 +727,7 @@ jobs:
               echo "FreeSurfer license.txt was cached"
             fi
       - save_cache:
-          key: data-ds003505-v2-1-{{ .Branch }}-{{ .Revision }}
+          key: data-ds003505-v2-2-{{ .Branch }}-{{ .Revision }}
           paths:
             - /tmp/data/ds003505
       # - persist_to_workspace:

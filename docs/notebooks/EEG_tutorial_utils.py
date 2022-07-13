@@ -152,4 +152,4 @@ def fix_vepcon_derivatives_dataset_description_files(vepcon_dir):
         )
         with open(dd_file, 'w') as f:
             print(f'Replace {dd_file}')
-            json.dump(dd_dict, f)
+            json.dump(dd_dict, f, indent=4)
