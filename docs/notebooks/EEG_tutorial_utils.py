@@ -14,7 +14,7 @@ import numpy as np
 from cmtklib.bids.io import __cmp_directory__
 
 
-def create_trans_files(data_dir,sub):
+def create_trans_files(data_dir, sub):
     """
     Helper function that will create the -trans.fif-files necessary to adjust
     electrode positions and run the EEG pipeline tutorial with VEPCON data.
@@ -111,7 +111,10 @@ def create_trans_files(data_dir,sub):
         os.mkdir(os.path.join(data_dir, 'derivatives', __cmp_directory__, sub))
     if not os.path.exists(trans_dir):
         os.mkdir(trans_dir)
-    mne.write_trans(os.path.join(trans_dir, sub+'_trans.fif'), trans)
+    trans_file = os.path.join(trans_dir, sub+'_trans.fif')
+    if not os.path.exists(trans_file):
+        print(f'Create transform file: {trans_file}')
+        mne.write_trans(trans_file, trans)
 
 
 def fix_vepcon_derivatives_dataset_description_files(vepcon_dir):
