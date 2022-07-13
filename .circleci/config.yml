@@ -64,10 +64,13 @@ commands:
             bash miniconda.sh -bfp /home/circleci/miniconda
             export PATH="/home/circleci/miniconda/bin:$PATH"
             conda update -y conda
+            conda create -n py37cmp-data python=3.7
+            source activate py37cmp-data
             rm miniconda.sh
       - run:
           name: "Setup git-annex & DataLad"
           command: |
+            source activate py37cmp-data
             conda install -y -c anaconda -c conda-forge git-annex datalad
             git config --global user.name 'CMP3 Bot'
             git config --global user.email 'connectomicslab.chuv@gmail.com'
@@ -644,6 +647,7 @@ jobs:
       - run:
           name: Install ds003505 (VEPCON)
           command: |
+            source activate py37cmp-data
             datalad install https://github.com/OpenNeuroDatasets/ds003505.git
             datalad get -J 2 -d ds003505/ ds003505/sub-01/anat/*
             datalad get -J 2 -d ds003505/ ds003505/derivatives/freesurfer-7.1.1/sub-01/*
@@ -653,6 +657,7 @@ jobs:
       - run:
           name: Fix dataset_description.json of Cartool and EEGLab derivatives
           command: |
+            source activate py37cmp-data
             cat > fix_dataset_description_files.py \<<- "EOF"
             #!/usr/bin/env python3
             import os
@@ -666,6 +671,7 @@ jobs:
       - run:
           name: Create the -trans.fif-file necessary to adjust electrode positions
           command: |
+            source activate py37cmp-data
             cat > create_transform_file.py \<<- "EOF"
             #!/usr/bin/env python3
             import os
