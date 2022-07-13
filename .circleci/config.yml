@@ -583,7 +583,7 @@ jobs:
       - save_cache:
           key: env-v1-{{ .Branch }}-{{ .BuildNum }}
           paths:
-            - $HOME/miniconda
+            - /home/circleci/miniconda
       - checkout:
           path: /home/circleci/src/connectomemapper3
       - restore_cache:
