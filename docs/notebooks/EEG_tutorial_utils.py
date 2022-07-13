@@ -106,10 +106,8 @@ def create_trans_files(data_dir, cmp3_dir, sub):
     trans = mne.transforms.Transform('head', 'mri', trans=head_to_mri)
     trans_dir = os.path.join(data_dir, 'derivatives', cmp3_dir, sub, 'eeg')
     # if dir doesn't exist yet, create it
-    if not os.path.exists(os.path.join(data_dir, 'derivatives', cmp3_dir, sub)):
-        os.mkdir(os.path.join(data_dir, 'derivatives', cmp3_dir, sub))
     if not os.path.exists(trans_dir):
-        os.mkdir(trans_dir)
+        os.makedirs(trans_dir)
     trans_file = os.path.join(trans_dir, sub+'_trans.fif')
     if not os.path.exists(trans_file):
         print(f'Create transform file: {trans_file}')
