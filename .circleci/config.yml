@@ -68,6 +68,7 @@ commands:
               conda create -n py37cmp-data python=3.7 pip
               source activate py37cmp-data
               rm miniconda.sh
+            fi
       - run:
           name: "Install and setup git-annex & DataLad in the environment"
           command: |
@@ -78,6 +79,7 @@ commands:
               pip install mne
               git config --global user.name 'CMP3 Bot'
               git config --global user.email 'connectomicslab.chuv@gmail.com'
+            fi
       - run:
           name: "Install MNE in the environment"
           command: |
@@ -85,6 +87,7 @@ commands:
               export PATH="$HOME/miniconda/bin:$PATH"
               source activate py37cmp-data
               pip install mne
+            fi
 
   install-conda-and-cmp3:
     parameters:
