@@ -661,6 +661,7 @@ jobs:
           command: |
             export PATH="$HOME/miniconda/bin:$PATH"
             source activate py37cmp-data
+            cd /home/circleci/src/connectomemapper3
             cat > fix_dataset_description_files.py \<<- "EOF"
             #!/usr/bin/env python3
             import os
@@ -670,13 +671,13 @@ jobs:
             fix_vepcon_derivatives_dataset_description_files('/tmp/data/ds003505')
             os.chdir(cwd)
             EOF
-            cd /home/circleci/src/connectomemapper3
             python fix_dataset_description_files.py
       - run:
           name: Create the -trans.fif-file necessary to adjust electrode positions
           command: |
             export PATH="$HOME/miniconda/bin:$PATH"
             source activate py37cmp-data
+            cd /home/circleci/src/connectomemapper3
             cat > create_transform_file.py \<<- "EOF"
             #!/usr/bin/env python3
             import os
@@ -686,7 +687,6 @@ jobs:
             create_trans_files('/tmp/data/ds003505', 'sub-01')
             os.chdir(cwd)
             EOF
-            cd /home/circleci/src/connectomemapper3
             python create_transform_file.py
       - run:
           name: Store FreeSurfer license file
