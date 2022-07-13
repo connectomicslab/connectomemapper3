@@ -552,13 +552,30 @@ jobs:
     steps:
       - restore_cache:
           keys:
-            - data-v2-4-{{ .Branch }}-{{ .Revision }}
-            - data-v2-4--{{ .Revision }}
-            - data-v2-4-{{ .Branch }}-
-            - data-v2-4-master-
-            - data-v2-4-
+            - env-v1-{{ .Branch }}-
+            - env-v1-master-
+            - env-v1-
+      - run:
+          name: Setup git-annex & DataLad
+          command: |
+            conda install -y -c anaconda -c conda-forge git-annex datalad
+            git config --global user.name 'CMP3 Bot'
+            git config --global user.email 'connectomicslab.chuv@gmail.com'
+      - save_cache:
+          key: env-v1-{{ .Branch }}-{{ .BuildNum }}
           paths:
-            - /tmp/data
+            - /opt/conda
+      - checkout:
+          path: /home/circleci/src/connectomemapper3
+      - restore_cache:
+          keys:
+            - data-ds-sample-v2-4-{{ .Branch }}-{{ .Revision }}
+            - data-ds-sample-v2-4--{{ .Revision }}
+            - data-ds-sample-v2-4-{{ .Branch }}-
+            - data-ds-sample-v2-4-master-
+            - data-ds-sample-v2-4-
+          paths:
+            - /tmp/data/ds-sample
       - run:
           name: Get test data from ds-sample
           command: |
@@ -598,14 +615,74 @@ jobs:
             else
               echo "FreeSurfer license.txt was cached"
             fi
-      - persist_to_workspace:
-          root: /tmp
-          paths:
-            - data
       - save_cache:
-         key: data-v2-4-{{ .Branch }}-{{ .Revision }}
-         paths:
-            - /tmp/data
+          key: data-ds-sample-v2-4-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - /tmp/data/ds-sample
+      - restore_cache:
+          keys:
+            - data-ds003505-v1-{{ .Branch }}-{{ .Revision }}
+            - data-ds003505-v1--{{ .Revision }}
+            - data-ds003505-v1-{{ .Branch }}-
+            - data-ds003505-v1-master-
+            - data-ds003505-v1-
+          paths:
+            - /tmp/data/ds003505
+      - run:
+          name: Install ds003505 (VEPCON)
+          command: |
+            datalad install https://github.com/OpenNeuroDatasets/ds003505.git
+            datalad get -J 2 -d ds003505/ ds003505/sub-01/anat/*
+            datalad get -J 2 -d ds003505/ ds003505/derivatives/freesurfer-7.1.1/sub-01/*
+            datalad get -J 2 -d ds003505/ ds003505/derivatives/cmp-v3.0.3/sub-01/anat
+            datalad get -J 2 -d ds003505/ ds003505/derivatives/eeglab-v14.1.1/sub-01/eeg/sub-01_task-faces_*.*
+            datalad get -J 2 -d ds003505/ ds003505/derivatives/cartool-v3.80/sub-01/eeg/*
+      - run:
+          name: Fix dataset_description.json of Cartool and EEGLab derivatives
+          command: |
+            cat <<EOF > fix_dataset_description_files.py
+            #!/usr/bin/env python3
+            import os
+            cwd = os.getcwd()
+            os.chdir('/home/circleci/src/connectomemapper3')
+            from docs.notebooks.EEG_tutorial_utils import fix_vepcon_derivatives_dataset_description_files
+            fix_vepcon_derivatives_dataset_description_files('/tmp/data/ds003505')
+            os.chdir(cwd)
+            EOF
+            python fix_dataset_description_files.py
+      - run:
+          name: Create the -trans.fif-file necessary to adjust electrode positions
+          command: |
+            cat <<EOF > create_transform_file.py
+            #!/usr/bin/env python3
+            import os
+            cwd = os.getcwd()
+            os.chdir('/home/circleci/src/connectomemapper3')
+            from docs.notebooks.EEG_tutorial_utils import create_trans_files
+            create_trans_files('/tmp/data/ds003505', 'sub-01')
+            os.chdir(cwd)
+            EOF
+            python create_transform_file.py
+      - run:
+          name: Store FreeSurfer license file
+          command: |
+            if [[ ! -e /tmp/data/ds003505/code/license.txt ]]; then
+              mkdir -p /tmp/data/ds003505/code
+              cd /tmp/data/ds003505/code
+              echo `echo c2ViYXN0aWVuLnRvdXJiaWVyMUBnbWFpbC5jb20KMzAwNzYKICpDYUpVZ0VMQlJEYkEKIEZTMkkyWDNwNkpicWcK== | base64 -di` > /tmp/data/ds003505/code/license.txt
+              cat /tmp/data/ds003505/code/license.txt
+              echo "FreeSurfer license.txt been successfully created"
+            else
+              echo "FreeSurfer license.txt was cached"
+            fi
+      - save_cache:
+          key: data-ds003505-v1-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - /tmp/data/ds003505
+      # - persist_to_workspace:
+      #     root: /tmp
+      #     paths:
+      #       - data/ds003505
 
   test1_docker_parcellation:
     machine:
@@ -632,6 +709,15 @@ jobs:
             fi
       - attach_workspace:
           at: /tmp
+      - restore_cache:
+          keys:
+            - data-ds-sample-v2-4-{{ .Branch }}-{{ .Revision }}
+            - data-ds-sample-v2-4--{{ .Revision }}
+            - data-ds-sample-v2-4-{{ .Branch }}-
+            - data-ds-sample-v2-4-master-
+            - data-ds-sample-v2-4-
+          paths:
+            - /tmp/data/ds-sample
       - load-docker-image-archive:
           archive_file: "/tmp/cache/docker/docker.tar.zst"
       - install-conda-and-cmp3:
@@ -695,6 +781,15 @@ jobs:
             fi
       - attach_workspace:
           at: /tmp
+      - restore_cache:
+          keys:
+            - data-ds-sample-v2-4-{{ .Branch }}-{{ .Revision }}
+            - data-ds-sample-v2-4--{{ .Revision }}
+            - data-ds-sample-v2-4-{{ .Branch }}-
+            - data-ds-sample-v2-4-master-
+            - data-ds-sample-v2-4-
+          paths:
+            - /tmp/data/ds-sample
       - load-docker-image-archive:
           archive_file: "/tmp/cache/docker/docker.tar.zst"
       - install-conda-and-cmp3:
@@ -755,6 +850,15 @@ jobs:
             fi
       - attach_workspace:
           at: /tmp
+      - restore_cache:
+          keys:
+            - data-ds-sample-v2-4-{{ .Branch }}-{{ .Revision }}
+            - data-ds-sample-v2-4--{{ .Revision }}
+            - data-ds-sample-v2-4-{{ .Branch }}-
+            - data-ds-sample-v2-4-master-
+            - data-ds-sample-v2-4-
+          paths:
+            - /tmp/data/ds-sample
       - run:
           name: "Copy anatomical pipeline output from test 1"
           command: |
@@ -814,6 +918,15 @@ jobs:
             fi
       - attach_workspace:
           at: /tmp
+      - restore_cache:
+          keys:
+            - data-ds-sample-v2-4-{{ .Branch }}-{{ .Revision }}
+            - data-ds-sample-v2-4--{{ .Revision }}
+            - data-ds-sample-v2-4-{{ .Branch }}-
+            - data-ds-sample-v2-4-master-
+            - data-ds-sample-v2-4-
+          paths:
+            - /tmp/data/ds-sample
       - run:
           name: "Copy anatomical pipeline output from test 1"
           command: |
@@ -876,6 +989,15 @@ jobs:
             fi
       - attach_workspace:
           at: /tmp
+      - restore_cache:
+          keys:
+            - data-ds-sample-v2-4-{{ .Branch }}-{{ .Revision }}
+            - data-ds-sample-v2-4--{{ .Revision }}
+            - data-ds-sample-v2-4-{{ .Branch }}-
+            - data-ds-sample-v2-4-master-
+            - data-ds-sample-v2-4-
+          paths:
+            - /tmp/data/ds-sample
       - run:
           name: "Copy anatomical pipeline output from test 1"
           command: |
@@ -938,6 +1060,15 @@ jobs:
             fi
       - attach_workspace:
           at: /tmp
+      - restore_cache:
+          keys:
+            - data-ds-sample-v2-4-{{ .Branch }}-{{ .Revision }}
+            - data-ds-sample-v2-4--{{ .Revision }}
+            - data-ds-sample-v2-4-{{ .Branch }}-
+            - data-ds-sample-v2-4-master-
+            - data-ds-sample-v2-4-
+          paths:
+            - /tmp/data/ds-sample
       - run:
           name: "Copy anatomical pipeline output from test 1"
           command: |
@@ -1000,6 +1131,15 @@ jobs:
             fi
       - attach_workspace:
           at: /tmp
+      - restore_cache:
+          keys:
+            - data-ds-sample-v2-4-{{ .Branch }}-{{ .Revision }}
+            - data-ds-sample-v2-4--{{ .Revision }}
+            - data-ds-sample-v2-4-{{ .Branch }}-
+            - data-ds-sample-v2-4-master-
+            - data-ds-sample-v2-4-
+          paths:
+            - /tmp/data/ds-sample
       - run:
           name: "Copy anatomical pipeline output from test 1"
           command: |
@@ -1062,6 +1202,15 @@ jobs:
             fi
       - attach_workspace:
           at: /tmp
+      - restore_cache:
+          keys:
+            - data-ds-sample-v2-4-{{ .Branch }}-{{ .Revision }}
+            - data-ds-sample-v2-4--{{ .Revision }}
+            - data-ds-sample-v2-4-{{ .Branch }}-
+            - data-ds-sample-v2-4-master-
+            - data-ds-sample-v2-4-
+          paths:
+            - /tmp/data/ds-sample
       - run:
           name: "Copy anatomical pipeline output from test 1"
           command: |
@@ -1124,6 +1273,15 @@ jobs:
             fi
       - attach_workspace:
           at: /tmp
+      - restore_cache:
+          keys:
+            - data-ds-sample-v2-4-{{ .Branch }}-{{ .Revision }}
+            - data-ds-sample-v2-4--{{ .Revision }}
+            - data-ds-sample-v2-4-{{ .Branch }}-
+            - data-ds-sample-v2-4-master-
+            - data-ds-sample-v2-4-
+          paths:
+            - /tmp/data/ds-sample
       - singularity/install-go:
           go-version: '1.13'
       - singularity/debian-install-3:
