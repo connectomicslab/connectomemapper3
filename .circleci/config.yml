@@ -60,28 +60,31 @@ commands:
           name: "Install miniconda in /home/circleci/miniconda and create py37cmp-data environment"
           no_output_timeout: 5h
           command: |
-            wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
-            bash miniconda.sh -bfp /home/circleci/miniconda
-            export PATH="/home/circleci/miniconda/bin:$PATH"
-            conda update -y conda
-            conda create -n py37cmp-data python=3.7 pip
-            source activate py37cmp-data
-            rm miniconda.sh
+            if [[ ! -d /home/circleci/miniconda ]]; then
+              wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
+              bash miniconda.sh -bfp /home/circleci/miniconda
+              export PATH="/home/circleci/miniconda/bin:$PATH"
+              conda update -y conda
+              conda create -n py37cmp-data python=3.7 pip
+              source activate py37cmp-data
+              rm miniconda.sh
       - run:
           name: "Install and setup git-annex & DataLad in the environment"
           command: |
-            export PATH="$HOME/miniconda/bin:$PATH"
-            source activate py37cmp-data
-            conda install -y -c anaconda -c conda-forge git-annex datalad
-            pip install mne
-            git config --global user.name 'CMP3 Bot'
-            git config --global user.email 'connectomicslab.chuv@gmail.com'
+            if [[ ! -d /home/circleci/miniconda ]]; then
+              export PATH="$HOME/miniconda/bin:$PATH"
+              source activate py37cmp-data
+              conda install -y -c anaconda -c conda-forge git-annex datalad
+              pip install mne
+              git config --global user.name 'CMP3 Bot'
+              git config --global user.email 'connectomicslab.chuv@gmail.com'
       - run:
           name: "Install MNE in the environment"
           command: |
-            export PATH="$HOME/miniconda/bin:$PATH"
-            source activate py37cmp-data
-            pip install mne
+            if [[ ! -d /home/circleci/miniconda ]]; then
+              export PATH="$HOME/miniconda/bin:$PATH"
+              source activate py37cmp-data
+              pip install mne
 
   install-conda-and-cmp3:
     parameters:
