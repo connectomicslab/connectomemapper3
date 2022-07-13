@@ -651,11 +651,11 @@ jobs:
             - /tmp/data/ds-sample
       - restore_cache:
           keys:
-            - data-ds003505-v1-{{ .Branch }}-{{ .Revision }}
-            - data-ds003505-v1--{{ .Revision }}
-            - data-ds003505-v1-{{ .Branch }}-
-            - data-ds003505-v1-master-
-            - data-ds003505-v1-
+            - data-ds003505-v2-{{ .Branch }}-{{ .Revision }}
+            - data-ds003505-v2--{{ .Revision }}
+            - data-ds003505-v2-{{ .Branch }}-
+            - data-ds003505-v2-master-
+            - data-ds003505-v2-
           paths:
             - /tmp/data/ds003505
       - run:
@@ -698,6 +698,8 @@ jobs:
             EOF
               python fix_dataset_description_files.py
             fi
+            cat /tmp/data/ds003505/derivatives/cartool-v3.80/dataset_description.json
+            cat /tmp/data/ds003505/derivatives/eeglab-v14.1.1/dataset_description.json
       - run:
           name: Create the -trans.fif-file necessary to adjust electrode positions
           command: |
@@ -729,7 +731,7 @@ jobs:
               echo "FreeSurfer license.txt was cached"
             fi
       - save_cache:
-          key: data-ds003505-v1-{{ .Branch }}-{{ .Revision }}
+          key: data-ds003505-v2-{{ .Branch }}-{{ .Revision }}
           paths:
             - /tmp/data/ds003505
       # - persist_to_workspace:
