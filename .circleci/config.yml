@@ -54,6 +54,23 @@ commands:
             mkdir -p "/tmp/data/<<parameters.circleci_job>>/ds-sample"
             cp -R /tmp/data/ds-sample/* "/tmp/data/<<parameters.circleci_job>>/ds-sample"
 
+
+  install-conda:
+    parameters:
+      run_name:
+        type: string
+        default: "Setup miniconda environment and install connectomemapper3 with Python wrappers"
+    steps:
+      - run:
+          name: <<parameters.run_name>>
+          no_output_timeout: 5h
+          command: |
+            wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
+            bash miniconda.sh -bfp /opt/miniconda
+            export PATH="/opt/miniconda/bin:$PATH"
+            conda update -y conda
+            rm miniconda.sh
+
   install-conda-and-cmp3:
     parameters:
       run_name:
@@ -555,11 +572,10 @@ jobs:
             - env-v1-{{ .Branch }}-
             - env-v1-master-
             - env-v1-
-      - install-conda-and-cmp3:
-          run_name: "Setup miniconda environment and install connectomemapper3 with Python wrappers"
-          cmp3_dir: /home/circleci/src/connectomemapper3
+      - install-conda:
+          run_name: "Install miniconda"
       - run:
-          name: Setup git-annex & DataLad
+          name: "Setup git-annex & DataLad"
           command: |
             conda install -y -c anaconda -c conda-forge git-annex datalad
             git config --global user.name 'CMP3 Bot'
@@ -567,7 +583,7 @@ jobs:
       - save_cache:
           key: env-v1-{{ .Branch }}-{{ .BuildNum }}
           paths:
-            - /opt/conda
+            - /opt/miniconda
       - checkout:
           path: /home/circleci/src/connectomemapper3
       - restore_cache:
