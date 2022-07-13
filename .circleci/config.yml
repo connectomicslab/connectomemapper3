@@ -651,11 +651,11 @@ jobs:
             - /tmp/data/ds-sample
       - restore_cache:
           keys:
-            - data-ds003505-v2-{{ .Branch }}-{{ .Revision }}
-            - data-ds003505-v2--{{ .Revision }}
-            - data-ds003505-v2-{{ .Branch }}-
-            - data-ds003505-v2-master-
-            - data-ds003505-v2-
+            - data-ds003505-v2-1-{{ .Branch }}-{{ .Revision }}
+            - data-ds003505-v2-1--{{ .Revision }}
+            - data-ds003505-v2-1-{{ .Branch }}-
+            - data-ds003505-v2-1-master-
+            - data-ds003505-v2-1-
           paths:
             - /tmp/data/ds003505
       - run:
@@ -680,14 +680,13 @@ jobs:
       - run:
           name: Fix dataset_description.json of Cartool and EEGLab derivatives
           command: |
-            if [[ ! -d /tmp/data/ds003505 ]]; then
-              export PATH="$HOME/miniconda/bin:$PATH"
-              source activate py37cmp-data
-              cd /home/circleci/src/connectomemapper3
-              ls -la /tmp/data/ds003505/derivatives
-              ls -la /tmp/data/ds003505/derivatives/cartool-v3.80
-              ls -la /tmp/data/ds003505/derivatives/eeglab-v14.1.1
-              cat > fix_dataset_description_files.py \<<- "EOF"
+            export PATH="$HOME/miniconda/bin:$PATH"
+            source activate py37cmp-data
+            cd /home/circleci/src/connectomemapper3
+            ls -la /tmp/data/ds003505/derivatives
+            ls -la /tmp/data/ds003505/derivatives/cartool-v3.80
+            ls -la /tmp/data/ds003505/derivatives/eeglab-v14.1.1
+            cat > fix_dataset_description_files.py \<<- "EOF"
             #!/usr/bin/env python3
             import os
             cwd = os.getcwd()
@@ -696,18 +695,16 @@ jobs:
             fix_vepcon_derivatives_dataset_description_files('/tmp/data/ds003505')
             os.chdir(cwd)
             EOF
-              python fix_dataset_description_files.py
-            fi
+            python fix_dataset_description_files.py
             cat /tmp/data/ds003505/derivatives/cartool-v3.80/dataset_description.json
             cat /tmp/data/ds003505/derivatives/eeglab-v14.1.1/dataset_description.json
       - run:
           name: Create the -trans.fif-file necessary to adjust electrode positions
           command: |
-            if [[ ! -d /tmp/data/ds003505 ]]; then
-              export PATH="$HOME/miniconda/bin:$PATH"
-              source activate py37cmp-data
-              cd /home/circleci/src/connectomemapper3
-              cat > create_transform_file.py \<<- "EOF"
+            export PATH="$HOME/miniconda/bin:$PATH"
+            source activate py37cmp-data
+            cd /home/circleci/src/connectomemapper3
+            cat > create_transform_file.py \<<- "EOF"
             #!/usr/bin/env python3
             import os
             cwd = os.getcwd()
@@ -716,8 +713,7 @@ jobs:
             create_trans_files('/tmp/data/ds003505', 'cmp-v3.1.0', 'sub-01')
             os.chdir(cwd)
             EOF
-              python create_transform_file.py
-            fi
+            python create_transform_file.py
       - run:
           name: Store FreeSurfer license file
           command: |
@@ -731,7 +727,7 @@ jobs:
               echo "FreeSurfer license.txt was cached"
             fi
       - save_cache:
-          key: data-ds003505-v2-{{ .Branch }}-{{ .Revision }}
+          key: data-ds003505-v2-1-{{ .Branch }}-{{ .Revision }}
           paths:
             - /tmp/data/ds003505
       # - persist_to_workspace:
