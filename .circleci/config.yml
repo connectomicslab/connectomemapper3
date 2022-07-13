@@ -667,12 +667,17 @@ jobs:
             datalad get -J 2 -d ds003505/ ds003505/derivatives/cmp-v3.0.3/sub-01/anat/*
             datalad get -J 2 -d ds003505/ ds003505/derivatives/eeglab-v14.1.1/sub-01/eeg/sub-01_task-faces_*.*
             datalad get -J 2 -d ds003505/ ds003505/derivatives/cartool-v3.80/sub-01/eeg/*
+            datalad unlock /tmp/data/ds003505/derivatives/cartool-v3.80/dataset_description.json
+            datalad unlock /tmp/data/ds003505/derivatives/eeglab-v14.1.1/dataset_description.json
       - run:
           name: Fix dataset_description.json of Cartool and EEGLab derivatives
           command: |
             export PATH="$HOME/miniconda/bin:$PATH"
             source activate py37cmp-data
             cd /home/circleci/src/connectomemapper3
+            ls -la /tmp/data/ds003505/derivatives
+            ls -la /tmp/data/ds003505/derivatives/cartool-v3.80
+            ls -la /tmp/data/ds003505/derivatives/eeglab-v14.1.1
             cat > fix_dataset_description_files.py \<<- "EOF"
             #!/usr/bin/env python3
             import os
