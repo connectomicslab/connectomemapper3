@@ -555,6 +555,9 @@ jobs:
             - env-v1-{{ .Branch }}-
             - env-v1-master-
             - env-v1-
+      - install-conda-and-cmp3:
+          run_name: "Setup miniconda environment and install connectomemapper3 with Python wrappers"
+          cmp3_dir: /home/circleci/src/connectomemapper3
       - run:
           name: Setup git-annex & DataLad
           command: |
