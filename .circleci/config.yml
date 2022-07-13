@@ -661,55 +661,61 @@ jobs:
       - run:
           name: Install ds003505 (VEPCON)
           command: |
-            export PATH="$HOME/miniconda/bin:$PATH"
-            source activate py37cmp-data
-            datalad install https://github.com/OpenNeuroDatasets/ds003505.git
-            datalad get -J 2 -d ds003505/ ds003505/dataset_description.json
-            datalad get -J 2 -d ds003505/ ds003505/participants.json
-            datalad get -J 2 -d ds003505/ ds003505/participants.tsv
-            datalad get -J 2 -d ds003505/ ds003505/sub-01/anat/*
-            datalad get -J 2 -d ds003505/ ds003505/derivatives/*/dataset_description.json
-            datalad get -J 2 -d ds003505/ ds003505/derivatives/freesurfer-7.1.1/sub-01/*
-            datalad get -J 2 -d ds003505/ ds003505/derivatives/cmp-v3.0.3/sub-01/anat/*
-            datalad get -J 2 -d ds003505/ ds003505/derivatives/eeglab-v14.1.1/sub-01/eeg/sub-01_task-faces_*.*
-            datalad get -J 2 -d ds003505/ ds003505/derivatives/cartool-v3.80/sub-01/eeg/*
-            datalad unlock -d ds003505/ ds003505/derivatives/cartool-v3.80/dataset_description.json
-            datalad unlock -d ds003505/ ds003505/derivatives/eeglab-v14.1.1/dataset_description.json
+            if [[ ! -d /tmp/data/ds003505 ]]; then
+              export PATH="$HOME/miniconda/bin:$PATH"
+              source activate py37cmp-data
+              datalad install https://github.com/OpenNeuroDatasets/ds003505.git
+              datalad get -J 2 -d ds003505/ ds003505/dataset_description.json
+              datalad get -J 2 -d ds003505/ ds003505/participants.json
+              datalad get -J 2 -d ds003505/ ds003505/participants.tsv
+              datalad get -J 2 -d ds003505/ ds003505/sub-01/anat/*
+              datalad get -J 2 -d ds003505/ ds003505/derivatives/*/dataset_description.json
+              datalad get -J 2 -d ds003505/ ds003505/derivatives/freesurfer-7.1.1/sub-01/*
+              datalad get -J 2 -d ds003505/ ds003505/derivatives/cmp-v3.0.3/sub-01/anat/*
+              datalad get -J 2 -d ds003505/ ds003505/derivatives/eeglab-v14.1.1/sub-01/eeg/sub-01_task-faces_*.*
+              datalad get -J 2 -d ds003505/ ds003505/derivatives/cartool-v3.80/sub-01/eeg/*
+              datalad unlock -d ds003505/ ds003505/derivatives/cartool-v3.80/dataset_description.json
+              datalad unlock -d ds003505/ ds003505/derivatives/eeglab-v14.1.1/dataset_description.json
+            fi
       - run:
           name: Fix dataset_description.json of Cartool and EEGLab derivatives
           command: |
-            export PATH="$HOME/miniconda/bin:$PATH"
-            source activate py37cmp-data
-            cd /home/circleci/src/connectomemapper3
-            ls -la /tmp/data/ds003505/derivatives
-            ls -la /tmp/data/ds003505/derivatives/cartool-v3.80
-            ls -la /tmp/data/ds003505/derivatives/eeglab-v14.1.1
-            cat > fix_dataset_description_files.py \<<- "EOF"
-            #!/usr/bin/env python3
-            import os
-            cwd = os.getcwd()
-            os.chdir('/home/circleci/src/connectomemapper3')
-            from docs.notebooks.EEG_tutorial_utils import fix_vepcon_derivatives_dataset_description_files
-            fix_vepcon_derivatives_dataset_description_files('/tmp/data/ds003505')
-            os.chdir(cwd)
-            EOF
-            python fix_dataset_description_files.py
+            if [[ ! -d /tmp/data/ds003505 ]]; then
+              export PATH="$HOME/miniconda/bin:$PATH"
+              source activate py37cmp-data
+              cd /home/circleci/src/connectomemapper3
+              ls -la /tmp/data/ds003505/derivatives
+              ls -la /tmp/data/ds003505/derivatives/cartool-v3.80
+              ls -la /tmp/data/ds003505/derivatives/eeglab-v14.1.1
+              cat > fix_dataset_description_files.py \<<- "EOF"
+              #!/usr/bin/env python3
+              import os
+              cwd = os.getcwd()
+              os.chdir('/home/circleci/src/connectomemapper3')
+              from docs.notebooks.EEG_tutorial_utils import fix_vepcon_derivatives_dataset_description_files
+              fix_vepcon_derivatives_dataset_description_files('/tmp/data/ds003505')
+              os.chdir(cwd)
+              EOF
+              python fix_dataset_description_files.py
+            fi
       - run:
           name: Create the -trans.fif-file necessary to adjust electrode positions
           command: |
-            export PATH="$HOME/miniconda/bin:$PATH"
-            source activate py37cmp-data
-            cd /home/circleci/src/connectomemapper3
-            cat > create_transform_file.py \<<- "EOF"
-            #!/usr/bin/env python3
-            import os
-            cwd = os.getcwd()
-            os.chdir('/home/circleci/src/connectomemapper3')
-            from docs.notebooks.EEG_tutorial_utils import create_trans_files
-            create_trans_files('/tmp/data/ds003505', 'cmp-v3.1.0', 'sub-01')
-            os.chdir(cwd)
-            EOF
-            python create_transform_file.py
+            if [[ ! -d /tmp/data/ds003505 ]]; then
+              export PATH="$HOME/miniconda/bin:$PATH"
+              source activate py37cmp-data
+              cd /home/circleci/src/connectomemapper3
+              cat > create_transform_file.py \<<- "EOF"
+              #!/usr/bin/env python3
+              import os
+              cwd = os.getcwd()
+              os.chdir('/home/circleci/src/connectomemapper3')
+              from docs.notebooks.EEG_tutorial_utils import create_trans_files
+              create_trans_files('/tmp/data/ds003505', 'cmp-v3.1.0', 'sub-01')
+              os.chdir(cwd)
+              EOF
+              python create_transform_file.py
+            fi
       - run:
           name: Store FreeSurfer license file
           command: |
