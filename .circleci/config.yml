@@ -577,7 +577,7 @@ jobs:
     machine:
       # Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
       image: ubuntu-2004:202201-02
-    working_directory: /home/circleci/data
+    working_directory: /tmp/data
     steps:
       - restore_cache:
           keys:
