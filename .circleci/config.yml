@@ -54,22 +54,23 @@ commands:
             mkdir -p "/tmp/data/<<parameters.circleci_job>>/ds-sample"
             cp -R /tmp/data/ds-sample/* "/tmp/data/<<parameters.circleci_job>>/ds-sample"
 
-
-  install-conda:
-    parameters:
-      run_name:
-        type: string
-        default: "Install miniconda in $HOME/miniconda"
+  install-conda-gitannex-and-datalad:
     steps:
       - run:
-          name: <<parameters.run_name>>
+          name: "Install miniconda in /home/circleci/miniconda"
           no_output_timeout: 5h
           command: |
             wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
-            bash miniconda.sh -bfp $HOME/miniconda
-            export PATH="$HOME/miniconda/bin:$PATH"
+            bash miniconda.sh -bfp /home/circleci/miniconda
+            export PATH="/home/circleci/miniconda/bin:$PATH"
             conda update -y conda
             rm miniconda.sh
+      - run:
+          name: "Setup git-annex & DataLad"
+          command: |
+            conda install -y -c anaconda -c conda-forge git-annex datalad
+            git config --global user.name 'CMP3 Bot'
+            git config --global user.email 'connectomicslab.chuv@gmail.com'
 
   install-conda-and-cmp3:
     parameters:
@@ -572,14 +573,7 @@ jobs:
             - env-v1-{{ .Branch }}-
             - env-v1-master-
             - env-v1-
-      - install-conda:
-          run_name: "Install miniconda in ${HOME}/miniconda"
-      - run:
-          name: "Setup git-annex & DataLad"
-          command: |
-            conda install -y -c anaconda -c conda-forge git-annex datalad
-            git config --global user.name 'CMP3 Bot'
-            git config --global user.email 'connectomicslab.chuv@gmail.com'
+      - install-conda-gitannex-and-datalad
       - save_cache:
           key: env-v1-{{ .Branch }}-{{ .BuildNum }}
           paths:
