@@ -688,14 +688,14 @@ jobs:
               ls -la /tmp/data/ds003505/derivatives/cartool-v3.80
               ls -la /tmp/data/ds003505/derivatives/eeglab-v14.1.1
               cat > fix_dataset_description_files.py \<<- "EOF"
-              #!/usr/bin/env python3
-              import os
-              cwd = os.getcwd()
-              os.chdir('/home/circleci/src/connectomemapper3')
-              from docs.notebooks.EEG_tutorial_utils import fix_vepcon_derivatives_dataset_description_files
-              fix_vepcon_derivatives_dataset_description_files('/tmp/data/ds003505')
-              os.chdir(cwd)
-              EOF
+            #!/usr/bin/env python3
+            import os
+            cwd = os.getcwd()
+            os.chdir('/home/circleci/src/connectomemapper3')
+            from docs.notebooks.EEG_tutorial_utils import fix_vepcon_derivatives_dataset_description_files
+            fix_vepcon_derivatives_dataset_description_files('/tmp/data/ds003505')
+            os.chdir(cwd)
+            EOF
               python fix_dataset_description_files.py
             fi
       - run:
@@ -706,14 +706,14 @@ jobs:
               source activate py37cmp-data
               cd /home/circleci/src/connectomemapper3
               cat > create_transform_file.py \<<- "EOF"
-              #!/usr/bin/env python3
-              import os
-              cwd = os.getcwd()
-              os.chdir('/home/circleci/src/connectomemapper3')
-              from docs.notebooks.EEG_tutorial_utils import create_trans_files
-              create_trans_files('/tmp/data/ds003505', 'cmp-v3.1.0', 'sub-01')
-              os.chdir(cwd)
-              EOF
+            #!/usr/bin/env python3
+            import os
+            cwd = os.getcwd()
+            os.chdir('/home/circleci/src/connectomemapper3')
+            from docs.notebooks.EEG_tutorial_utils import create_trans_files
+            create_trans_files('/tmp/data/ds003505', 'cmp-v3.1.0', 'sub-01')
+            os.chdir(cwd)
+            EOF
               python create_transform_file.py
             fi
       - run:
