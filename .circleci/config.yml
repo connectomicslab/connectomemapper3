@@ -59,15 +59,15 @@ commands:
     parameters:
       run_name:
         type: string
-        default: "Setup miniconda environment and install connectomemapper3 with Python wrappers"
+        default: "Install miniconda in $HOME/miniconda"
     steps:
       - run:
           name: <<parameters.run_name>>
           no_output_timeout: 5h
           command: |
             wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
-            bash miniconda.sh -bfp /opt/miniconda
-            export PATH="/opt/miniconda/bin:$PATH"
+            bash miniconda.sh -bfp $HOME/miniconda
+            export PATH="$HOME/miniconda/bin:$PATH"
             conda update -y conda
             rm miniconda.sh
 
@@ -573,7 +573,7 @@ jobs:
             - env-v1-master-
             - env-v1-
       - install-conda:
-          run_name: "Install miniconda"
+          run_name: "Install miniconda in ${HOME}/miniconda"
       - run:
           name: "Setup git-annex & DataLad"
           command: |
@@ -583,7 +583,7 @@ jobs:
       - save_cache:
           key: env-v1-{{ .Branch }}-{{ .BuildNum }}
           paths:
-            - /opt/miniconda
+            - $HOME/miniconda
       - checkout:
           path: /home/circleci/src/connectomemapper3
       - restore_cache:
