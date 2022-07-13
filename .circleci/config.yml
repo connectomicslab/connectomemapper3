@@ -68,11 +68,12 @@ commands:
             source activate py37cmp-data
             rm miniconda.sh
       - run:
-          name: "Setup git-annex & DataLad"
+          name: "Setup git-annex, DataLad & MNE"
           command: |
             export PATH="$HOME/miniconda/bin:$PATH"
             source activate py37cmp-data
-            conda install -y -c anaconda -c conda-forge git-annex datalad mne
+            conda install -y -c anaconda -c conda-forge git-annex datalad pip
+            pip install mne
             git config --global user.name 'CMP3 Bot'
             git config --global user.email 'connectomicslab.chuv@gmail.com'
 
