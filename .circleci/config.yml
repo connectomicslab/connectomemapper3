@@ -640,7 +640,7 @@ jobs:
       - run:
           name: Fix dataset_description.json of Cartool and EEGLab derivatives
           command: |
-            cat <<EOF > fix_dataset_description_files.py
+            cat > fix_dataset_description_files.py << EOF
             #!/usr/bin/env python3
             import os
             cwd = os.getcwd()
@@ -653,7 +653,7 @@ jobs:
       - run:
           name: Create the -trans.fif-file necessary to adjust electrode positions
           command: |
-            cat <<EOF > create_transform_file.py
+            cat > create_transform_file.py << EOF
             #!/usr/bin/env python3
             import os
             cwd = os.getcwd()
