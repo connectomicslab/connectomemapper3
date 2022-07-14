@@ -35,7 +35,10 @@ commands:
         default: ${CIRCLE_JOB}
       run_name:
         type: string
-        default: "Remove any config file present in ds-sample/code and create ds-sample/test"
+        default: "Remove any config file present in <dataset>/code and create <dataset>/test"
+      dataset:
+        type: string
+        default: "ds-sample"
     steps:
       - run:
           name: <<parameters.run_name>>
@@ -45,14 +48,14 @@ commands:
             #THISVERSION=v$( python /home/circleci/src/connectomemapper3/get_version.py )
             #echo "THISVERSION : ${THISVERSION}"
             ls -la  /tmp/data/ds-sample/code
-            # Remove existing config files in ds-sample (Make sure we are using the ones stored in the repo)
-            rm -f /tmp/data/ds-sample/code/*.ini
+            # Remove existing config files in dataset dir (Make sure we are using the ones stored in the repo)
+            rm -f /tmp/data/<<parameters.dataset_dir>>/code/*.ini
             # Create the test folder to store list of test output files
-            mkdir -p /tmp/data/ds-sample/test
+            mkdir -p /tmp/data/<<parameters.dataset_dir>>/test
             # Create the dataset dedicated to this job and copy data into it
-            echo "Create test-dedicated dataset at: /tmp/data/<<parameters.circleci_job>>/ds-sample"
-            mkdir -p "/tmp/data/<<parameters.circleci_job>>/ds-sample"
-            cp -R /tmp/data/ds-sample/* "/tmp/data/<<parameters.circleci_job>>/ds-sample"
+            echo "Create test-dedicated dataset at: /tmp/data/<<parameters.circleci_job>>/<<parameters.dataset_dir>>"
+            mkdir -p "/tmp/data/<<parameters.circleci_job>>/<<parameters.dataset_dir>>"
+            cp -R /tmp/data/<<parameters.dataset_dir>>/* "/tmp/data/<<parameters.circleci_job>>/<<parameters.dataset_dir>>"
 
   install-conda-gitannex-and-datalad:
     steps:
@@ -1442,7 +1445,7 @@ jobs:
     resource_class: large
     working_directory: /tmp/data
     environment:
-      - FS_LICENSE: /tmp/data/ds003505/code/license.txt
+      - FS_LICENSE: /tmp/data/${CIRCLE_JOB}/ds003505/code/license.txt
     steps:
       - run:
           name: Get precise CPU specifications
@@ -1476,6 +1479,7 @@ jobs:
           cmp3_dir: /home/circleci/src/connectomemapper3
       - clean-configuration-files:
           circleci_job: ${CIRCLE_JOB}
+          dataset: "ds003505"
       - test-docker-anat-eeg-pipelines-wrapper:
           circleci_job: ${CIRCLE_JOB}
           run_name: Run anatomical and eeg pipelines on ds003505 - VEPCON dataset (test 10 - Lausanne2018 + MNE)
