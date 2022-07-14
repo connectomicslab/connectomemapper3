@@ -47,7 +47,7 @@ commands:
             # Get version, update files.
             #THISVERSION=v$( python /home/circleci/src/connectomemapper3/get_version.py )
             #echo "THISVERSION : ${THISVERSION}"
-            ls -la  /tmp/data/ds-sample/code
+            ls -la  /tmp/data/<<parameters.dataset>>/code
             # Remove existing config files in <<parameters.dataset>> dir
             # to make sure we are using the ones stored in the repo
             rm -f /tmp/data/<<parameters.dataset>>/code/*.ini
