@@ -5,22 +5,20 @@
 #  This software is distributed under the open-source license Modified BSD.
 """This module defines the `connectomemapper3` script that is called by the BIDS App."""
 
+# General imports
 import sys
 import os
 import argparse
-
 import subprocess
-
-# BIDS import
-from bids import BIDSLayout
+import warnings
 
 # CMP imports
 import cmp.project
 from cmp.info import __version__, __copyright__
 from cmtklib.util import print_error, print_blue, print_warning
 
-import warnings
 
+# Filter warning
 warnings.filterwarnings(
     "ignore",
     message="""UserWarning: No valid root directory found for domain 'derivatives'.
@@ -118,27 +116,27 @@ def create_parser():
     p.add_argument(
         "--anat_pipeline_config",
         required=True,
-        help="Configuration .txt file for processing stages of "
+        help="Configuration .json file for processing stages of "
         "the anatomical MRI processing pipeline",
     )
 
     p.add_argument(
         "--dwi_pipeline_config",
-        help="Configuration .txt file for processing stages of "
+        help="Configuration .json file for processing stages of "
         "the diffusion MRI processing pipeline",
     )
 
     p.add_argument(
         "--func_pipeline_config",
-        help="Configuration .txt file for processing stages of "
+        help="Configuration .json file for processing stages of "
         "the fMRI processing pipeline",
     )
 
-    # p.add_argument(
-    #     "--eeg_pipeline_config",
-    #     help="Configuration .txt file for processing stages of "
-    #     "the EEG source reconstruction pipeline"
-    # )
+    p.add_argument(
+        "--eeg_pipeline_config",
+        help="Configuration .json file for processing stages of "
+        "the EEG source reconstruction pipeline"
+    )
 
     p.add_argument(
         "--session_label",
