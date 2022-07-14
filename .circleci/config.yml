@@ -48,14 +48,15 @@ commands:
             #THISVERSION=v$( python /home/circleci/src/connectomemapper3/get_version.py )
             #echo "THISVERSION : ${THISVERSION}"
             ls -la  /tmp/data/ds-sample/code
-            # Remove existing config files in dataset dir (Make sure we are using the ones stored in the repo)
-            rm -f /tmp/data/<<parameters.dataset_dir>>/code/*.ini
+            # Remove existing config files in <<parameters.dataset>> dir
+            # to make sure we are using the ones stored in the repo
+            rm -f /tmp/data/<<parameters.dataset>>/code/*.ini
             # Create the test folder to store list of test output files
-            mkdir -p /tmp/data/<<parameters.dataset_dir>>/test
+            mkdir -p /tmp/data/<<parameters.dataset>>/test
             # Create the dataset dedicated to this job and copy data into it
-            echo "Create test-dedicated dataset at: /tmp/data/<<parameters.circleci_job>>/<<parameters.dataset_dir>>"
-            mkdir -p "/tmp/data/<<parameters.circleci_job>>/<<parameters.dataset_dir>>"
-            cp -R /tmp/data/<<parameters.dataset_dir>>/* "/tmp/data/<<parameters.circleci_job>>/<<parameters.dataset_dir>>"
+            echo "Create test-dedicated dataset at: /tmp/data/<<parameters.circleci_job>>/<<parameters.dataset>>"
+            mkdir -p "/tmp/data/<<parameters.circleci_job>>/<<parameters.dataset>>"
+            cp -R /tmp/data/<<parameters.dataset>>/* "/tmp/data/<<parameters.circleci_job>>/<<parameters.dataset>>"
 
   install-conda-gitannex-and-datalad:
     steps:
