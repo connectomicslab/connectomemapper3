@@ -114,7 +114,8 @@ commands:
             # Create the dataset dedicated to this job and copy data into it
             echo "Create test-dedicated dataset at: /tmp/data/<<parameters.circleci_job>>/ds-sample"
             mkdir -p "/tmp/data/<<parameters.circleci_job>>/ds-sample"
-            cp -RL /tmp/data/ds-sample/* "/tmp/data/<<parameters.circleci_job>>/ds-sample"
+            # cp -RL /tmp/data/ds-sample/* "/tmp/data/<<parameters.circleci_job>>/ds-sample"
+            rsync -rpLPv --ignore-errors /tmp/data/ds-sample/* "/tmp/data/<<parameters.circleci_job>>/ds-sample"
 
   install-conda-gitannex-and-datalad:
     steps:
