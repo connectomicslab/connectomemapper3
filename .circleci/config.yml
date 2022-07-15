@@ -115,8 +115,8 @@ commands:
             # Create the dataset dedicated to this job and copy data into it
             echo "Create test-dedicated dataset at: /tmp/data/<<parameters.circleci_job>>/ds-sample"
             mkdir -p "/tmp/data/<<parameters.circleci_job>>/ds-sample"
-            # cp -RL /tmp/data/ds-sample/* "/tmp/data/<<parameters.circleci_job>>/ds-sample"
-            rsync -rpLPv --ignore-errors /tmp/data/ds-sample/* "/tmp/data/<<parameters.circleci_job>>/ds-sample"
+            cp -R /tmp/data/ds-sample/* "/tmp/data/<<parameters.circleci_job>>/ds-sample"
+            # rsync -rpLPv --ignore-errors /tmp/data/ds-sample/* "/tmp/data/<<parameters.circleci_job>>/ds-sample"
 
   install-conda-gitannex-and-datalad:
     steps:
@@ -794,6 +794,7 @@ jobs:
               export PATH="$HOME/miniconda/bin:$PATH"
               source activate py37cmp-data
               datalad install https://github.com/OpenNeuroDatasets/ds003505.git
+              # Download content of all files necessary to run anatomical and eeg pipelines on sub-01
               datalad get -J 2 -d ds003505/ ds003505/dataset_description.json
               datalad get -J 2 -d ds003505/ ds003505/participants.json
               datalad get -J 2 -d ds003505/ ds003505/participants.tsv
