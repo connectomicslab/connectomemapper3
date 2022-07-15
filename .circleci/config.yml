@@ -82,6 +82,7 @@ commands:
             rsync -rpLPv --ignore-errors \
               /tmp/data/ds003505/derivatives/freesurfer-7.1.1/sub-01/* \
               "/tmp/data/<<parameters.circleci_job>>/ds003505/derivatives/freesurfer-7.1.1/sub-01"
+            rm -rvf /tmp/data/<<parameters.circleci_job>>/ds003505/derivatives/freesurfer-7.1.1/sub-01/mri/*.nii.gz
             rsync -rpLPv --ignore-errors \
               /tmp/data/ds003505/derivatives/eeglab-v14.1.1/sub-01/eeg/sub-01_task-faces_*.* \
               "/tmp/data/<<parameters.circleci_job>>/ds003505/derivatives/eeglab-v14.1.1/sub-01/eeg"
@@ -802,8 +803,10 @@ jobs:
               datalad get -J 2 -d ds003505/ ds003505/derivatives/cmp-v3.0.3/sub-01/anat/*
               datalad get -J 2 -d ds003505/ ds003505/derivatives/eeglab-v14.1.1/sub-01/eeg/sub-01_task-faces_*.*
               datalad get -J 2 -d ds003505/ ds003505/derivatives/cartool-v3.80/sub-01/eeg/*
+              # Unlock files that might be modified
               datalad unlock -d ds003505/ ds003505/derivatives/cartool-v3.80/dataset_description.json
               datalad unlock -d ds003505/ ds003505/derivatives/eeglab-v14.1.1/dataset_description.json
+              datalad unlock -d ds003505/ ds003505/derivatives/freesurfer-7.1.1/sub-01/*
             fi
       - run:
           name: Fix dataset_description.json of Cartool and EEGLab derivatives
