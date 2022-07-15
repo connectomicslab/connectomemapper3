@@ -50,6 +50,7 @@ commands:
             echo "Create test-dedicated dataset at: /tmp/data/<<parameters.circleci_job>>/ds003505"
             mkdir -p "/tmp/data/<<parameters.circleci_job>>/ds003505/code"
             mkdir -p "/tmp/data/<<parameters.circleci_job>>/ds003505/sub-01/anat"
+            mkdir -p "/tmp/data/<<parameters.circleci_job>>/ds003505/derivatives/cmp-v3.1.0/sub-01/eeg"
             mkdir -p "/tmp/data/<<parameters.circleci_job>>/ds003505/derivatives/freesurfer-7.1.1/sub-01"
             mkdir -p "/tmp/data/<<parameters.circleci_job>>/ds003505/derivatives/eeglab-v14.1.1/sub-01/eeg"
             mkdir -p "/tmp/data/<<parameters.circleci_job>>/ds003505/derivatives/cartool-v3.80/sub-01/eeg"
@@ -74,6 +75,9 @@ commands:
             rsync -rpLPv --ignore-errors \
               /tmp/data/ds003505/sub-01/anat/* \
               "/tmp/data/<<parameters.circleci_job>>/ds003505/sub-01/anat"
+            rsync -rpLPv --ignore-errors \
+              /tmp/data/ds003505/derivatives/cmp-v3.1.0/sub-01/eeg/* \
+              "/tmp/data/<<parameters.circleci_job>>/ds003505/derivatives/cmp-v3.1.0/sub-01/eeg"
             rsync -rpLPv --ignore-errors \
               /tmp/data/ds003505/derivatives/freesurfer-7.1.1/sub-01/* \
               "/tmp/data/<<parameters.circleci_job>>/ds003505/derivatives/freesurfer-7.1.1/sub-01"
