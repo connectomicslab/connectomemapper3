@@ -577,9 +577,9 @@ jobs:
             docker save sebastientourbier/connectomemapper3 \
             | zstd -10 --threads=4 > /tmp/cache/docker/docker.tar.zst
       - persist_to_workspace:
-          root: /tmp
+          root: /tmp/cache/docker
           paths:
-            - cache/docker/docker.tar.zst
+            - docker.tar.zst
       #- save_cache:
       #    key: docker-v1-{{ .Branch }}-{{ .Revision }}
       #    paths:
@@ -644,9 +644,9 @@ jobs:
           name: "Display storage information ALL"
           command: df -h
       - persist_to_workspace:
-          root: /tmp
+          root: /tmp/cache/singularity
           paths:
-            - cache/singularity/connectomemapper3.simg
+            - connectomemapper3.simg
 
   get_data:
     machine:
@@ -828,7 +828,7 @@ jobs:
               circleci step halt
             fi
       - attach_workspace:
-          at: /tmp
+          at: /tmp/cache/docker
       - restore_cache:
           keys:
             - data-ds-sample-v2-4-{{ .Branch }}-{{ .Revision }}
@@ -900,7 +900,7 @@ jobs:
               circleci step halt
             fi
       - attach_workspace:
-          at: /tmp
+          at: /tmp/cache/docker
       - restore_cache:
           keys:
             - data-ds-sample-v2-4-{{ .Branch }}-{{ .Revision }}
@@ -933,9 +933,9 @@ jobs:
                 -not -name "*.mat" -not -name "*.gpickle" -not -name "*.lta" -not -name "*.json" -not -name "*.txt" \
                 -not -name "*.log" -not -name "*.pklz" -type f -delete
       - persist_to_workspace:
-          root: /tmp
+          root: /tmp/data
           paths:
-            - data/ds-sample/test/test-02_*
+            - ds-sample/test/test-02_*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
@@ -969,7 +969,7 @@ jobs:
               circleci step halt
             fi
       - attach_workspace:
-          at: /tmp
+          at: /tmp/cache/docker
       - restore_cache:
           keys:
             - data-ds-sample-v2-4-{{ .Branch }}-{{ .Revision }}
@@ -1001,9 +1001,9 @@ jobs:
           dwi_pipeline_config: "ref_diffusion_config_1.ini"
           check_output: true
       - persist_to_workspace:
-          root: /tmp
+          root: /tmp/data
           paths:
-            - data/ds-sample/test/test-03_*
+            - ds-sample/test/test-03_*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
@@ -1037,7 +1037,7 @@ jobs:
               circleci step halt
             fi
       - attach_workspace:
-          at: /tmp
+          at: /tmp/cache/docker
       - restore_cache:
           keys:
             - data-ds-sample-v2-4-{{ .Branch }}-{{ .Revision }}
@@ -1072,9 +1072,9 @@ jobs:
           dwi_pipeline_config: "ref_diffusion_config_2.ini"
           check_output: true
       - persist_to_workspace:
-          root: /tmp
+          root: /tmp/data
           paths:
-            - data/ds-sample/test/test-04_*
+            - ds-sample/test/test-04_*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
@@ -1108,7 +1108,7 @@ jobs:
               circleci step halt
             fi
       - attach_workspace:
-          at: /tmp
+          at: /tmp/cache/docker
       - restore_cache:
           keys:
             - data-ds-sample-v2-4-{{ .Branch }}-{{ .Revision }}
@@ -1143,9 +1143,9 @@ jobs:
           dwi_pipeline_config: "ref_diffusion_config_3.ini"
           check_output: true
       - persist_to_workspace:
-          root: /tmp
+          root: /tmp/data
           paths:
-            - data/ds-sample/test/test-05_*
+            - ds-sample/test/test-05_*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
@@ -1179,7 +1179,7 @@ jobs:
               circleci step halt
             fi
       - attach_workspace:
-          at: /tmp
+          at: /tmp/cache/docker
       - restore_cache:
           keys:
             - data-ds-sample-v2-4-{{ .Branch }}-{{ .Revision }}
@@ -1214,9 +1214,9 @@ jobs:
           dwi_pipeline_config: "ref_diffusion_config_4.ini"
           check_output: true
       - persist_to_workspace:
-          root: /tmp
+          root: /tmp/data
           paths:
-            - data/ds-sample/test/test-06_*
+            - ds-sample/test/test-06_*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
@@ -1250,7 +1250,7 @@ jobs:
               circleci step halt
             fi
       - attach_workspace:
-          at: /tmp
+          at: /tmp/cache/docker
       - restore_cache:
           keys:
             - data-ds-sample-v2-4-{{ .Branch }}-{{ .Revision }}
@@ -1285,9 +1285,9 @@ jobs:
           func_pipeline_config: "ref_fMRI_config_1.ini"
           check_output: true
       - persist_to_workspace:
-          root: /tmp
+          root: /tmp/data
           paths:
-            - data/ds-sample/test/test-07_*
+            - ds-sample/test/test-07_*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
@@ -1321,7 +1321,7 @@ jobs:
               circleci step halt
             fi
       - attach_workspace:
-          at: /tmp
+          at: /tmp/cache/docker
       - restore_cache:
           keys:
             - data-ds-sample-v2-4-{{ .Branch }}-{{ .Revision }}
@@ -1356,9 +1356,9 @@ jobs:
           func_pipeline_config: "ref_fMRI_config_2.ini"
           check_output: true
       - persist_to_workspace:
-          root: /tmp
+          root: /tmp/data
           paths:
-            - data/ds-sample/test/test-08_*
+            - ds-sample/test/test-08_*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
@@ -1392,7 +1392,7 @@ jobs:
               circleci step halt
             fi
       - attach_workspace:
-          at: /tmp
+          at: /tmp/cache/singularity
       - restore_cache:
           keys:
             - data-ds-sample-v2-4-{{ .Branch }}-{{ .Revision }}
@@ -1427,9 +1427,9 @@ jobs:
                 -not -name "*.mat" -not -name "*.gpickle" -not -name "*.lta" -not -name "*.json" -not -name "*.txt" \
                 -not -name "*.log" -not -name "*.pklz" -type f -delete
       - persist_to_workspace:
-          root: /tmp
+          root: /tmp/data
           paths:
-            - data/ds-sample/test/test-09_*
+            - ds-sample/test/test-09_*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
@@ -1463,7 +1463,7 @@ jobs:
               circleci step halt
             fi
       - attach_workspace:
-          at: /tmp
+          at: /tmp/cache/docker
       - restore_cache:
           keys:
             - data-ds003505-v2-2-{{ .Branch }}-{{ .Revision }}
@@ -1491,9 +1491,9 @@ jobs:
           eeg_pipeline_config: "ref_EEG_config_1.json"
           check_output: true
       - persist_to_workspace:
-          root: /tmp
+          root: /tmp/data
           paths:
-            - data/ds003505/test/test-10_*
+            - ds003505/test/test-10_*
       - store_artifacts:
           path: /tmp/data/ds003505/test
       - store_artifacts:
@@ -1509,7 +1509,7 @@ jobs:
     working_directory: /tmp/data/ds-sample/test
     steps:
       - attach_workspace:
-          at: /tmp
+          at: /tmp/data
       - run:
           name: Run Codacy Coverage Reporter to convert and upload the reports to Codacy
           command: |
@@ -1559,7 +1559,7 @@ jobs:
     working_directory: /home/circleci/src/connectomemapper3
     steps:
       - attach_workspace:
-          at: /tmp
+          at: /tmp/data
       - checkout:
           path: /home/circleci/src/connectomemapper3
       - codecov/upload:
@@ -1601,7 +1601,7 @@ jobs:
             fi
 
       - attach_workspace:
-          at: /tmp
+          at: /tmp/cache/docker
       - load-docker-image-archive:
           archive_file: "/tmp/cache/docker/docker.tar.zst"
       - run:
@@ -1628,7 +1628,7 @@ jobs:
       - checkout:
           path: /home/circleci/src/connectomemapper3
       - attach_workspace:
-          at: /tmp
+          at: /tmp/cache/docker
       - load-docker-image-archive:
           archive_file: "/tmp/cache/docker/docker.tar.zst"
       - run:
@@ -1664,7 +1664,7 @@ jobs:
               circleci step halt
             fi
       - attach_workspace:
-          at: /tmp
+          at: /tmp/cache/singularity
       - singularity/install-go:
           go-version: '1.13'
       - singularity/debian-install-3:
@@ -1695,7 +1695,7 @@ jobs:
       - checkout:
           path: /home/circleci/src/connectomemapper3
       - attach_workspace:
-          at: /tmp
+          at: /tmp/cache/docker
       - load-docker-image-archive:
           archive_file: "/tmp/cache/docker/docker.tar.zst"
       - run:
@@ -1733,7 +1733,7 @@ jobs:
               circleci step halt
             fi
       - attach_workspace:
-          at: /tmp
+          at: /tmp/cache/singularity
       - singularity/install-go:
           go-version: '1.13'
       - singularity/debian-install-3:
