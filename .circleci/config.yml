@@ -56,7 +56,7 @@ commands:
             # Create the dataset dedicated to this job and copy data into it
             echo "Create test-dedicated dataset at: /tmp/data/<<parameters.circleci_job>>/<<parameters.dataset>>"
             mkdir -p "/tmp/data/<<parameters.circleci_job>>/<<parameters.dataset>>"
-            cp -R /tmp/data/<<parameters.dataset>>/* "/tmp/data/<<parameters.circleci_job>>/<<parameters.dataset>>"
+            cp -RL /tmp/data/<<parameters.dataset>>/* "/tmp/data/<<parameters.circleci_job>>/<<parameters.dataset>>"
 
   install-conda-gitannex-and-datalad:
     steps:
