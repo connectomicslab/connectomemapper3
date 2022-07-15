@@ -28,17 +28,70 @@ commands:
               docker images
             fi
 
-  clean-configuration-files:
+  prepare-ds003505-dataset:
+    parameters:
+      circleci_job:
+        type: string
+        default: ${CIRCLE_JOB}
+    steps:
+      - run:
+          name: Prepare ds003505 dataset in /tmp/data/<<parameters.circleci_job>>/ds003505
+          no_output_timeout: 8h
+          command: |
+            # Get version, update files.
+            #THISVERSION=v$( python /home/circleci/src/connectomemapper3/get_version.py )
+            #echo "THISVERSION : ${THISVERSION}"
+            # Clean code directory
+            rm -rf /tmp/data/ds003505/code/*
+            ls -la  /tmp/data/ds003505/code
+            # Create the test folder to store list of test output files
+            mkdir -p /tmp/data/ds003505/test
+            # Create the dataset dedicated to this job and copy data for sub-01 into it
+            echo "Create test-dedicated dataset at: /tmp/data/<<parameters.circleci_job>>/ds003505"
+            mkdir -p "/tmp/data/<<parameters.circleci_job>>/ds003505/code"
+            mkdir -p "/tmp/data/<<parameters.circleci_job>>/ds003505/sub-01/anat"
+            mkdir -p "/tmp/data/<<parameters.circleci_job>>/ds003505/derivatives/freesurfer-7.1.1/sub-01"
+            mkdir -p "/tmp/data/<<parameters.circleci_job>>/ds003505/derivatives/eeglab-v14.1.1/sub-01/eeg"
+            mkdir -p "/tmp/data/<<parameters.circleci_job>>/ds003505/derivatives/cartool-v3.80/sub-01/eeg"
+            rsync -pLPv --ignore-errors \
+              /tmp/data/ds003505/dataset_description.json \
+              "/tmp/data/<<parameters.circleci_job>>/ds003505/dataset_description.json"
+            rsync -pLPv --ignore-errors \
+              /tmp/data/ds003505/participants.tsv \
+              "/tmp/data/<<parameters.circleci_job>>/ds003505/participants.tsv"
+            rsync -pLPv --ignore-errors \
+              /tmp/data/ds003505/participants.json \
+              "/tmp/data/<<parameters.circleci_job>>/ds003505/participants.json"
+            rsync -pLPv --ignore-errors \
+              /tmp/data/ds003505/derivatives/freesurfer-7.1.1/dataset_description.json \
+              "/tmp/data/<<parameters.circleci_job>>/ds003505/derivatives/freesurfer-7.1.1/dataset_description.json"
+            rsync -pLPv --ignore-errors \
+              /tmp/data/ds003505/derivatives/eeglab-v14.1.1/dataset_description.json \
+              "/tmp/data/<<parameters.circleci_job>>/ds003505/derivatives/eeglab-v14.1.1/dataset_description.json"
+            rsync -pLPv --ignore-errors \
+              /tmp/data/ds003505/derivatives/cartool-v3.80/dataset_description.json \
+              "/tmp/data/<<parameters.circleci_job>>/ds003505/derivatives/cartool-v3.80/dataset_description.json"
+            rsync -rpLPv --ignore-errors \
+              /tmp/data/ds003505/sub-01/anat/* \
+              "/tmp/data/<<parameters.circleci_job>>/ds003505/sub-01/anat"
+            rsync -rpLPv --ignore-errors \
+              /tmp/data/ds003505/derivatives/freesurfer-7.1.1/sub-01/* \
+              "/tmp/data/<<parameters.circleci_job>>/ds003505/derivatives/freesurfer-7.1.1/sub-01"
+            rsync -rpLPv --ignore-errors \
+              /tmp/data/ds003505/derivatives/eeglab-v14.1.1/sub-01/eeg/sub-01_task-faces_*.* \
+              "/tmp/data/<<parameters.circleci_job>>/ds003505/derivatives/eeglab-v14.1.1/sub-01/eeg"
+            rsync -rpLPv --ignore-errors \
+              /tmp/data/ds003505/derivatives/cartool-v3.80/sub-01/eeg/* \
+              "/tmp/data/<<parameters.circleci_job>>/ds003505/derivatives/cartool-v3.80/sub-01/eeg"
+
+  prepare-ds-sample-dataset:
     parameters:
       circleci_job:
         type: string
         default: ${CIRCLE_JOB}
       run_name:
         type: string
-        default: "Remove any config file present in <dataset>/code and create <dataset>/test"
-      dataset:
-        type: string
-        default: "ds-sample"
+        default: "Remove any config file present in ds-sample/code and create ds-sample/test"
     steps:
       - run:
           name: <<parameters.run_name>>
@@ -47,17 +100,17 @@ commands:
             # Get version, update files.
             #THISVERSION=v$( python /home/circleci/src/connectomemapper3/get_version.py )
             #echo "THISVERSION : ${THISVERSION}"
-            ls -la  /tmp/data/<<parameters.dataset>>/code
-            # Remove existing config files in <<parameters.dataset>> dir
+            ls -la  /tmp/data/ds-sample/code
+            # Remove existing config files in ds-sample dir
             # to make sure we are using the ones stored in the repo
-            rm -f /tmp/data/<<parameters.dataset>>/code/*.ini
+            rm -f /tmp/data/ds-sample/code/*.ini
             # Create the test folder to store list of test output files
-            mkdir -p /tmp/data/<<parameters.dataset>>/test
+            mkdir -p /tmp/data/ds-sample/test
             # Create the dataset dedicated to this job and copy data into it
-            echo "Create test-dedicated dataset at: /tmp/data/<<parameters.circleci_job>>/<<parameters.dataset>>"
-            mkdir -p "/tmp/data/<<parameters.circleci_job>>/<<parameters.dataset>>"
-            # cp -RL /tmp/data/<<parameters.dataset>>/* "/tmp/data/<<parameters.circleci_job>>/<<parameters.dataset>>"
-            rsync -rpLPv --ignore-errors /tmp/data/<<parameters.dataset>>/* "/tmp/data/<<parameters.circleci_job>>/<<parameters.dataset>>"
+            echo "Create test-dedicated dataset at: /tmp/data/<<parameters.circleci_job>>/ds-sample"
+            mkdir -p "/tmp/data/<<parameters.circleci_job>>/ds-sample"
+            # cp -RL /tmp/data/ds-sample/* "/tmp/data/<<parameters.circleci_job>>/ds-sample"
+            rsync -rpLPv --ignore-errors /tmp/data/ds-sample/* "/tmp/data/<<parameters.circleci_job>>/ds-sample"
 
   install-conda-gitannex-and-datalad:
     steps:
@@ -844,7 +897,7 @@ jobs:
       - install-conda-and-cmp3:
           run_name: "Setup miniconda environment and install connectomemapper3 with Python wrappers"
           cmp3_dir: /home/circleci/src/connectomemapper3
-      - clean-configuration-files:
+      - prepare-ds-sample-dataset:
           circleci_job: ${CIRCLE_JOB}
       - test-docker-anat-pipeline-wrapper:
           circleci_job: ${CIRCLE_JOB}
@@ -916,7 +969,7 @@ jobs:
       - install-conda-and-cmp3:
           run_name: "Setup miniconda environment and install connectomemapper3 with Python wrappers"
           cmp3_dir: /home/circleci/src/connectomemapper3
-      - clean-configuration-files:
+      - prepare-ds-sample-dataset:
           circleci_job: ${CIRCLE_JOB}
       - test-docker-anat-pipeline-wrapper:
           circleci_job: ${CIRCLE_JOB}
@@ -991,7 +1044,7 @@ jobs:
       - install-conda-and-cmp3:
           run_name: "Setup miniconda environment and install connectomemapper3 with Python wrappers"
           cmp3_dir: /home/circleci/src/connectomemapper3
-      - clean-configuration-files:
+      - prepare-ds-sample-dataset:
           circleci_job: ${CIRCLE_JOB}
       - test-docker-anat-dwi-pipelines-wrapper:
           circleci_job: ${CIRCLE_JOB}
@@ -1062,7 +1115,7 @@ jobs:
       - install-conda-and-cmp3:
           run_name: "Setup miniconda environment and install connectomemapper3 with Python wrappers"
           cmp3_dir: /home/circleci/src/connectomemapper3
-      - clean-configuration-files:
+      - prepare-ds-sample-dataset:
           circleci_job: ${CIRCLE_JOB}
       - test-docker-anat-dwi-pipelines-wrapper:
           circleci_job: ${CIRCLE_JOB}
@@ -1133,7 +1186,7 @@ jobs:
       - install-conda-and-cmp3:
           run_name: "Setup miniconda environment and install connectomemapper3 with Python wrappers"
           cmp3_dir: /home/circleci/src/connectomemapper3
-      - clean-configuration-files:
+      - prepare-ds-sample-dataset:
           circleci_job: ${CIRCLE_JOB}
       - test-docker-anat-dwi-pipelines-wrapper:
           circleci_job: ${CIRCLE_JOB}
@@ -1204,7 +1257,7 @@ jobs:
       - install-conda-and-cmp3:
           run_name: "Setup miniconda environment and install connectomemapper3 with Python wrappers"
           cmp3_dir: /home/circleci/src/connectomemapper3
-      - clean-configuration-files:
+      - prepare-ds-sample-dataset:
           circleci_job: ${CIRCLE_JOB}
       - test-docker-anat-dwi-pipelines-wrapper:
           circleci_job: ${CIRCLE_JOB}
@@ -1275,7 +1328,7 @@ jobs:
       - install-conda-and-cmp3:
           run_name: "Setup miniconda environment and install connectomemapper3 with Python wrappers"
           cmp3_dir: /home/circleci/src/connectomemapper3
-      - clean-configuration-files:
+      - prepare-ds-sample-dataset:
           circleci_job: ${CIRCLE_JOB}
       - test-docker-anat-func-pipelines-wrapper:
           circleci_job: ${CIRCLE_JOB}
@@ -1346,7 +1399,7 @@ jobs:
       - install-conda-and-cmp3:
           run_name: "Setup miniconda environment and install connectomemapper3 with Python wrappers"
           cmp3_dir: /home/circleci/src/connectomemapper3
-      - clean-configuration-files:
+      - prepare-ds-sample-dataset:
           circleci_job: ${CIRCLE_JOB}
       - test-docker-anat-func-pipelines-wrapper:
           circleci_job: ${CIRCLE_JOB}
@@ -1410,7 +1463,7 @@ jobs:
       - install-conda-and-cmp3:
           run_name: "Setup miniconda environment and install connectomemapper3 with Python wrappers"
           cmp3_dir: /home/circleci/src/connectomemapper3
-      - clean-configuration-files:
+      - prepare-ds-sample-dataset:
           circleci_job: ${CIRCLE_JOB}
       - test-singularity-anat-pipeline-wrapper:
           circleci_job: ${CIRCLE_JOB}
@@ -1479,9 +1532,8 @@ jobs:
       - install-conda-and-cmp3:
           run_name: "Setup miniconda environment and install connectomemapper3 with Python wrappers"
           cmp3_dir: /home/circleci/src/connectomemapper3
-      - clean-configuration-files:
+      - prepare-ds003505-dataset:
           circleci_job: ${CIRCLE_JOB}
-          dataset: "ds003505"
       - test-docker-anat-eeg-pipelines-wrapper:
           circleci_job: ${CIRCLE_JOB}
           run_name: Run anatomical and eeg pipelines on ds003505 - VEPCON dataset (test 10 - Lausanne2018 + MNE)
