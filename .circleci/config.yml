@@ -1541,7 +1541,7 @@ jobs:
           dataset: "ds003505"
           config_dir: /home/circleci/src/connectomemapper3/.circleci/tests/configuration_files
           anat_pipeline_config: "ref_anatomical_config_1.json"
-          eeg_pipeline_config: "ref_EEG_config_1.json"
+          eeg_pipeline_config: "ref_eeg_config_1.json"
           check_output: true
       - persist_to_workspace:
           root: /tmp/data
