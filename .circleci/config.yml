@@ -657,7 +657,7 @@ jobs:
               circleci step halt
             fi
       - attach_workspace:
-          at: /tmp
+          at: /tmp/cache/docker
       - run:
           name: "Starting local registry"
           command: docker run -d -p 5000:5000 --restart=always --name registry registry:2
