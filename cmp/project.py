@@ -1085,7 +1085,11 @@ def run_individual(
             project.dmri_config_file = os.path.abspath(dwi_pipeline_config)
             project.fmri_config_file = os.path.abspath(func_pipeline_config)
             exit_code = run_dmri_pipeline(project, bids_layout, anat_pipeline)
+            if exit_code == 1:
+                return exit_code
             exit_code = run_fmri_pipeline(project, bids_layout, anat_pipeline)
+            if exit_code == 1:
+                return exit_code
 
         # Perform anatomical/diffusion/EEG pipeline
         elif dwi_pipeline_config is not None and eeg_pipeline_config is not None and func_pipeline_config is None:
