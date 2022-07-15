@@ -30,11 +30,11 @@
     "eeg_source_imaging_stage": {
         "esi_tool": "MNE",
         "mne_apply_electrode_transform": true,
-        "mne_electrode_transform_file.toolbox_derivatives_dir": "cmp-v3.0.3",
+        "mne_electrode_transform_file.toolbox_derivatives_dir": "cmp-v3.1.0",
         "mne_electrode_transform_file.datatype": "eeg",
         "mne_electrode_transform_file.suffix": "trans",
         "mne_electrode_transform_file.extension": "fif",
-        "parcellation_cmp_dir": "cmp-v3.0.3",
+        "parcellation_cmp_dir": "cmp-v3.1.0",
         "parcellation_scheme": "Lausanne2018",
         "lausanne2018_parcellation_res": "scale1",
         "mne_esi_method": "sLORETA",
