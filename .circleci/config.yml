@@ -780,35 +780,36 @@ jobs:
             - /tmp/data/ds-sample
       - restore_cache:
           keys:
-            - data-ds003505-v2-2-{{ .Branch }}-{{ .Revision }}
-            - data-ds003505-v2-2--{{ .Revision }}
-            - data-ds003505-v2-2-{{ .Branch }}-
-            - data-ds003505-v2-2-master-
-            - data-ds003505-v2-2-
+            - data-ds003505-v2-3-{{ .Branch }}-{{ .Revision }}
+            - data-ds003505-v2-3--{{ .Revision }}
+            - data-ds003505-v2-3-{{ .Branch }}-
+            - data-ds003505-v2-3-master-
+            - data-ds003505-v2-3-
           paths:
             - /tmp/data/ds003505
       - run:
           name: Install ds003505 (VEPCON)
           command: |
+            export PATH="$HOME/miniconda/bin:$PATH"
+            source activate py37cmp-data
             if [[ ! -d /tmp/data/ds003505 ]]; then
-              export PATH="$HOME/miniconda/bin:$PATH"
-              source activate py37cmp-data
               datalad install https://github.com/OpenNeuroDatasets/ds003505.git
-              # Download content of all files necessary to run anatomical and eeg pipelines on sub-01
-              datalad get -J 2 -d ds003505/ ds003505/dataset_description.json
-              datalad get -J 2 -d ds003505/ ds003505/participants.json
-              datalad get -J 2 -d ds003505/ ds003505/participants.tsv
-              datalad get -J 2 -d ds003505/ ds003505/sub-01/anat/*
-              datalad get -J 2 -d ds003505/ ds003505/derivatives/*/dataset_description.json
-              datalad get -J 2 -d ds003505/ ds003505/derivatives/freesurfer-7.1.1/sub-01/*
-              datalad get -J 2 -d ds003505/ ds003505/derivatives/cmp-v3.0.3/sub-01/anat/*
-              datalad get -J 2 -d ds003505/ ds003505/derivatives/eeglab-v14.1.1/sub-01/eeg/sub-01_task-faces_*.*
-              datalad get -J 2 -d ds003505/ ds003505/derivatives/cartool-v3.80/sub-01/eeg/*
-              # Unlock files that might be modified
-              datalad unlock -d ds003505/ ds003505/derivatives/cartool-v3.80/dataset_description.json
-              datalad unlock -d ds003505/ ds003505/derivatives/eeglab-v14.1.1/dataset_description.json
-              datalad unlock -d ds003505/ ds003505/derivatives/freesurfer-7.1.1/sub-01/*
             fi
+            # Download content of all files necessary to run anatomical and eeg pipelines on sub-01
+            datalad get -J 2 -d ds003505/ ds003505/dataset_description.json
+            datalad get -J 2 -d ds003505/ ds003505/participants.json
+            datalad get -J 2 -d ds003505/ ds003505/participants.tsv
+            datalad get -J 2 -d ds003505/ ds003505/sub-01/anat/*
+            datalad get -J 2 -d ds003505/ ds003505/derivatives/*/dataset_description.json
+            datalad get -J 2 -d ds003505/ ds003505/derivatives/freesurfer-7.1.1/sub-01/*
+            datalad get -J 2 -d ds003505/ ds003505/derivatives/cmp-v3.0.3/sub-01/anat/*
+            datalad get -J 2 -d ds003505/ ds003505/derivatives/eeglab-v14.1.1/sub-01/eeg/sub-01_task-faces_*.*
+            datalad get -J 2 -d ds003505/ ds003505/derivatives/cartool-v3.80/sub-01/eeg/*
+            # Unlock files that might be modified
+            datalad unlock -d ds003505/ ds003505/derivatives/cartool-v3.80/dataset_description.json
+            datalad unlock -d ds003505/ ds003505/derivatives/eeglab-v14.1.1/dataset_description.json
+            datalad unlock -d ds003505/ -r ds003505/derivatives/freesurfer-7.1.1/sub-01/*
+            datalad unlock -d ds003505/ ds003505/derivatives/freesurfer-7.1.1/sub-01/tmp/aparc+aseg.mgz
       - run:
           name: Fix dataset_description.json of Cartool and EEGLab derivatives
           command: |
@@ -859,7 +860,7 @@ jobs:
               echo "FreeSurfer license.txt was cached"
             fi
       - save_cache:
-          key: data-ds003505-v2-2-{{ .Branch }}-{{ .Revision }}
+          key: data-ds003505-v2-3-{{ .Branch }}-{{ .Revision }}
           paths:
             - /tmp/data/ds003505
       # - persist_to_workspace:
@@ -1529,11 +1530,11 @@ jobs:
           at: /tmp/cache/docker
       - restore_cache:
           keys:
-            - data-ds003505-v2-2-{{ .Branch }}-{{ .Revision }}
-            - data-ds003505-v2-2--{{ .Revision }}
-            - data-ds003505-v2-2-{{ .Branch }}-
-            - data-ds003505-v2-2-master-
-            - data-ds003505-v2-2-
+            - data-ds003505-v2-3-{{ .Branch }}-{{ .Revision }}
+            - data-ds003505-v2-3--{{ .Revision }}
+            - data-ds003505-v2-3-{{ .Branch }}-
+            - data-ds003505-v2-3-master-
+            - data-ds003505-v2-3-
           paths:
             - /tmp/data/ds003505
       - load-docker-image-archive:
