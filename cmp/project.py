@@ -1164,7 +1164,6 @@ def run_dmri_pipeline(project, bids_layout, anat_pipeline):
             exit_code = 1
             return exit_code
 
-        dmri_pipeline.check_stages_execution()
         dmri_pipeline.fill_stages_outputs()
     return exit_code
 
@@ -1194,7 +1193,6 @@ def run_fmri_pipeline(project, bids_layout, anat_pipeline):
             exit_code = 1
             return exit_code
 
-        fmri_pipeline.check_stages_execution()
         fmri_pipeline.fill_stages_outputs()
 
     return exit_code
@@ -1225,7 +1223,6 @@ def run_eeg_pipeline(project, anat_pipeline):
             exit_code = 1
             return exit_code
 
-        eeg_pipeline.check_stages_execution()
         eeg_pipeline.fill_stages_outputs()
 
     return exit_code

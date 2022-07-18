@@ -397,16 +397,9 @@ class EEGSourceImagingStage(Stage):
         # fmt: on
 
     def define_inspect_outputs(self):
-        raise NotImplementedError
+        """Update the `inspect_outputs` class attribute.
 
-    def has_run(self):
-        """Function that returns `True` if the stage has been run successfully.
-
-        Returns
-        -------
-        `True` if the stage has been run successfully
+        It contains a dictionary of stage outputs with corresponding commands for visual inspection.
         """
-        return True
-        # if self.config.eeg_format == ".set":
-        #     if self.config.invsol_format.split("-")[0] == "Cartool":
-        #         return os.path.exists(self.config.roi_ts_file)
+        self.inspect_outputs_dict = {}
+        self.inspect_outputs = ["Outputs not available"]

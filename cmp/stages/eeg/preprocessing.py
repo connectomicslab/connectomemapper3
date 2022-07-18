@@ -204,7 +204,12 @@ class EEGPreprocessingStage(Stage):
             # fmt: on
 
     def define_inspect_outputs(self):
-        raise NotImplementedError
+        """Update the `inspect_outputs` class attribute.
+
+        It contains a dictionary of stage outputs with corresponding commands for visual inspection.
+        """
+        self.inspect_outputs_dict = {}
+        self.inspect_outputs = ["Outputs not available"]
 
     def has_run(self):
         """Function that returns `True` if the stage has been run successfully.

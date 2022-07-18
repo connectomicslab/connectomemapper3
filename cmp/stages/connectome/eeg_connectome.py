@@ -111,15 +111,5 @@ class EEGConnectomeStage(Stage):
 
         It contains a dictionary of stage outputs with corresponding commands for visual inspection.
         """
-        return NotImplementedError
-
-    def has_run(self):
-        """Function that returns `True` if the stage has been run successfully.
-
-        Returns
-        -------
-        `True` if the stage has been run successfully
-        """
-        return True
-
-
+        self.inspect_outputs_dict = {}
+        self.inspect_outputs = ["Outputs not available"]

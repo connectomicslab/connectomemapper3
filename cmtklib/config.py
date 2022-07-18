@@ -6,7 +6,6 @@
 
 """ Module that defines methods for handling CMP3 configuration files."""
 import os
-import sys
 from pathlib import Path
 import configparser
 import json
@@ -15,7 +14,6 @@ from ast import literal_eval
 
 from cmp.info import __version__
 from cmtklib.util import BColors, print_warning, print_error, print_blue
-from cmtklib.bids.io import CustomBIDSFile
 
 
 def check_configuration_version(config):
