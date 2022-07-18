@@ -66,7 +66,7 @@ class EEGPreprocessingConfig(HasTraits):
     cmp.stages.eeg.preparer.EEGPreprocessingStage
     """
 
-    task_label = Str("", desc="Task label (e.g. _task-<label>_)")
+    task_label = Str("Undefined", desc="Task label (e.g. _task-<label>_)")
 
     eeg_ts_file = Instance(
         CustomEEGPreprocBIDSFile, (),
@@ -144,7 +144,6 @@ class EEGPreprocessingStage(Stage):
         self.bids_dir = bids_dir
         self.output_dir = output_dir
         self.config = EEGPreprocessingConfig()
-        self.config.task_label = sorted(BIDSLayout(bids_dir).get_tasks())[0]
         self.inputs = [
             "eeg_ts_file",
             "events_file",
