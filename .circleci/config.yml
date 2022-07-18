@@ -51,6 +51,7 @@ commands:
             # Create dataset subfolders and copy data for sub-01 into them
             echo "Create test-dedicated dataset at: /tmp/data/<<parameters.circleci_job>>/ds003505"
             mkdir -p "/tmp/data/<<parameters.circleci_job>>/ds003505/sub-01/anat"
+            mkdir -p "/tmp/data/<<parameters.circleci_job>>/ds003505/sub-01/eeg"
             mkdir -p "/tmp/data/<<parameters.circleci_job>>/ds003505/derivatives/cmp-v3.1.0/sub-01/eeg"
             mkdir -p "/tmp/data/<<parameters.circleci_job>>/ds003505/derivatives/freesurfer-7.1.1/sub-01"
             mkdir -p "/tmp/data/<<parameters.circleci_job>>/ds003505/derivatives/eeglab-v14.1.1/sub-01/eeg"
@@ -76,6 +77,9 @@ commands:
             rsync -rpLPv --ignore-errors \
               /tmp/data/ds003505/sub-01/anat/* \
               "/tmp/data/<<parameters.circleci_job>>/ds003505/sub-01/anat"
+            rsync -rpLPv --ignore-errors \
+              /tmp/data/ds003505/sub-01/eeg/*_events.* \
+              "/tmp/data/<<parameters.circleci_job>>/ds003505/sub-01/eeg"
             rsync -rpLPv --ignore-errors \
               /tmp/data/ds003505/derivatives/cmp-v3.1.0/sub-01/eeg/* \
               "/tmp/data/<<parameters.circleci_job>>/ds003505/derivatives/cmp-v3.1.0/sub-01/eeg"
@@ -800,6 +804,8 @@ jobs:
             datalad get -J 2 -d ds003505/ ds003505/participants.json
             datalad get -J 2 -d ds003505/ ds003505/participants.tsv
             datalad get -J 2 -d ds003505/ ds003505/sub-01/anat/*
+            datalad get -J 2 -d ds003505/ ds003505/sub-01/eeg/sub-01_task-faces_events.json
+            datalad get -J 2 -d ds003505/ ds003505/sub-01/eeg/sub-01_task-faces_events.tsv
             datalad get -J 2 -d ds003505/ ds003505/derivatives/*/dataset_description.json
             datalad get -J 2 -d ds003505/ ds003505/derivatives/freesurfer-7.1.1/sub-01/*
             datalad get -J 2 -d ds003505/ ds003505/derivatives/cmp-v3.0.3/sub-01/anat/*
