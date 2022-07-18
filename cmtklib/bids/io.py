@@ -353,7 +353,7 @@ class CustomEEGCartoolElectrodesBIDSFile(CustomBIDSFile):
     """Represent a custom BIDS-formatted electrode file produced by Cartool, in the form `sub-<label>_eeg.xyz`."""
 
     def __init__(self):
-        super().__init__(p_datatype="eeg", p_suffix="eeg", p_extension="xyz")
+        super().__init__(p_datatype="eeg", p_task="", p_suffix="eeg", p_extension="xyz")
 
 
 class CustomEEGCartoolSpiBIDSFile(CustomBIDSFile):
