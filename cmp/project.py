@@ -736,42 +736,45 @@ def init_eeg_project(project_info, is_new_project, debug=False):  # pragma: no c
             derivatives_directory, project_info.subject
         )
 
-    eeg_inputs_checked = eeg_pipeline.check_input()
-    if eeg_inputs_checked:
-        if is_new_project and eeg_pipeline is not None:
-            print("> Initialize eeg project")
-            if not os.path.exists(subject_derivatives_directory):
-                try:
-                    os.makedirs(subject_derivatives_directory)
-                except os.error:  # pragma: no cover
-                    print("... Info: %s was already existing" %
-                          subject_derivatives_directory)
-                finally:
-                    print("... Info : Created directory %s" %
-                          subject_derivatives_directory)
+    if is_new_project and eeg_pipeline is not None:
+        print("> Initialize eeg project")
+        if not os.path.exists(subject_derivatives_directory):
+            try:
+                os.makedirs(subject_derivatives_directory)
+            except os.error:  # pragma: no cover
+                print("... Info: %s was already existing" %
+                      subject_derivatives_directory)
+            finally:
+                print("... Info : Created directory %s" %
+                      subject_derivatives_directory)
 
-            if (project_info.subject_session != '') and (project_info.subject_session is not None):
-                project_info.eeg_config_file = os.path.join(
-                    subject_derivatives_directory, '%s_%s_eeg_config.json' % (project_info.subject,
-                                                                     project_info.subject_session))
-            else:
-                project_info.eeg_config_file = os.path.join(
-                    subject_derivatives_directory, '%s_eeg_config.json' % project_info.subject)
-
-            if os.path.exists(project_info.eeg_config_file):
-                print(f' .. WARNING: Overwrite EEG pipeline configuration file to {project_info.eeg_config_file}')
-            eeg_save_config(eeg_pipeline, project_info.eeg_config_file)
-
+        if (project_info.subject_session != '') and (project_info.subject_session is not None):
+            project_info.eeg_config_file = os.path.join(
+                subject_derivatives_directory, '%s_%s_eeg_config.json' % (
+                    project_info.subject, project_info.subject_session
+                )
+            )
         else:
-            if debug:  # pragma: no cover
-                print("int_project eeg_pipeline.global_config.subjects : ")
-                print(eeg_pipeline.global_conf.subjects)
+            project_info.eeg_config_file = os.path.join(
+                subject_derivatives_directory, '%s_eeg_config.json' % project_info.subject)
 
-            eeg_conf_loaded = eeg_load_config_json(
-                eeg_pipeline, project_info.eeg_config_file)
+        if os.path.exists(project_info.eeg_config_file):
+            print(f' .. WARNING: Overwrite EEG pipeline configuration file to {project_info.eeg_config_file}')
+        eeg_save_config(eeg_pipeline, project_info.eeg_config_file)
 
-            if not eeg_conf_loaded:
-                return None
+        eeg_inputs_checked = True
+
+    else:
+        if debug:  # pragma: no cover
+            print("init_project eeg_pipeline.global_config.subjects : ")
+            print(eeg_pipeline.global_conf.subjects)
+
+        eeg_conf_loaded = eeg_load_config_json(eeg_pipeline, project_info.eeg_config_file)
+
+        eeg_inputs_checked = eeg_pipeline.check_input()
+
+        if not eeg_conf_loaded:
+            raise FileNotFoundError(f"Problem to load the eeg pipeline config file {project_info.eeg_config_file}")
 
     eeg_pipeline.config_file = project_info.eeg_config_file
 
