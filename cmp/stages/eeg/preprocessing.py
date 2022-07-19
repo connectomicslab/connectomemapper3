@@ -210,15 +210,3 @@ class EEGPreprocessingStage(Stage):
         """
         self.inspect_outputs_dict = {}
         self.inspect_outputs = ["Outputs not available"]
-
-    def has_run(self):
-        """Function that returns `True` if the stage has been run successfully.
-
-        Returns
-        -------
-        `True` if the stage has been run successfully
-        """
-        # if self.config.eeg_format == ".set":
-        #     if self.config.inverse_solution.split('-')[0] == "Cartool":
-        #         return os.path.exists(self.config.epochs_fif)
-        return True
