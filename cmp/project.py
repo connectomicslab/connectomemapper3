@@ -1142,7 +1142,6 @@ def run_anat_pipeline(project, bids_layout, number_of_threads):
             return exit_code
 
     anat_valid_outputs, msg = anat_pipeline.check_output()
-    anat_pipeline.check_stages_execution()
     anat_pipeline.fill_stages_outputs()
 
     return anat_pipeline, exit_code, anat_valid_outputs, msg
