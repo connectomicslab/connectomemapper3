@@ -677,10 +677,16 @@ class MNESpectralConnectivity(BaseInterface):
             rtc_epo = pickle.load(f)
 
         label_ts = rtc_epo['data']
-        con = mnec.spectral_connectivity(
-            label_ts, method=con_methods, mode='multitaper', sfreq=sfreq,
-            faverage=True, mt_adaptive=True, n_jobs=1,
-            verbose='WARNING')
+        con = mnec.spectral_connectivity_epochs(
+            data=label_ts,
+            method=con_methods,
+            mode='multitaper',
+            sfreq=sfreq,
+            faverage=True,
+            mt_adaptive=True,
+            n_jobs=1,
+            verbose='WARNING'
+        )
 
         # Prepare the connectivity data for saving with CMP3 the connectome files
         # con is a 3D array, get the connectivity for the first (and only) freq. band
