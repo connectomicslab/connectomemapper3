@@ -667,21 +667,20 @@ class MNESpectralConnectivity(BaseInterface):
     output_spec = MNESpectralConnectivityOutputSpec
 
     def _run_interface(self, runtime):
-        epochs = mne.read_epochs(
-            self.inputs.epochs_file
-        )
-        sfreq = epochs.info['sfreq']  # the sampling frequency
-        con_methods = self.inputs.connectivity_metrics
+        # Load Epochs file in fif format
+        epochs = mne.read_epochs(self.inputs.epochs_file)
 
+        # Load Epochs ROI time series file
         with open(self.inputs.roi_ts_file, 'rb') as f:
-            rtc_epo = pickle.load(f)
+            roi_ts_epo = pickle.load(f)
 
-        label_ts = rtc_epo['data']
+        # Compute time / frequency connectivity metrics
+        # of input Epochs ROI time series
         con = mnec.spectral_connectivity_epochs(
-            data=label_ts,
-            method=con_methods,
+            data=roi_ts_epo['data'],
+            method=self.inputs.connectivity_metrics,
             mode='multitaper',
-            sfreq=sfreq,
+            sfreq=epochs.info['sfreq'],  # the sampling frequency
             faverage=True,
             mt_adaptive=True,
             n_jobs=1,
@@ -692,11 +691,11 @@ class MNESpectralConnectivity(BaseInterface):
         # con is a 3D array, get the connectivity for the first (and only) freq. band
         # for each method
         con_res = dict()
-        for method, c in zip(con_methods, con):
+        for method, c in zip(self.inputs.connectivity_metrics, con):
             con_res[method] = np.squeeze(c.get_data(output='dense'))
 
         # Get parcellation labels used by MNE
-        roi_labels = [label.name for label in rtc_epo['labels']]
+        roi_labels = [label.name for label in roi_ts_epo['labels']]
 
         save_eeg_connectome_file(
             con_res=con_res,
