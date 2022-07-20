@@ -8,11 +8,10 @@
 
 # General imports
 import os
-
-from bids import BIDSLayout
 from traits.api import (
     HasTraits, Enum, Instance, Float, Str
 )
+
 # Nipype imports
 import nipype.pipeline.engine as pe
 

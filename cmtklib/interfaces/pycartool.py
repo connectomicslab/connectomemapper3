@@ -5,19 +5,21 @@
 #  This software is distributed under the open-source license Modified BSD.
 """The PyCartool module provides Nipype interfaces with Cartool using pycartool."""
 
+# General imports
 import os
 import pickle
-
 import nibabel
 import numpy as np
 
-import mne
-import pycartool as cart
-
+# Nipype imports
 from nipype.interfaces.base import (
     BaseInterface, BaseInterfaceInputSpec,
     TraitedSpec, traits
 )
+
+# EEG package imports
+import mne
+import pycartool as cart
 
 
 class CartoolInverseSolutionROIExtractionInputSpec(BaseInterfaceInputSpec):

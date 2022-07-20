@@ -4,21 +4,27 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 """The MNE module provides Nipype interfaces for MNE tools missing in Nipype or modified."""
+
+# General imports
 import csv
 import os
 import pickle
 import warnings
 import subprocess
-
-import mne
-import mne_connectivity as mnec
 import numpy as np
 import pandas as pd
+
+# Nipype imports
 from nipype.interfaces.base import (
     BaseInterface, BaseInterfaceInputSpec,
     TraitedSpec, traits, OutputMultiPath, File
 )
 
+# MNE imports
+import mne
+import mne_connectivity as mnec
+
+# Own imports
 from cmtklib.eeg import save_eeg_connectome_file
 
 

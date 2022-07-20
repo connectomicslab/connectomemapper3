@@ -11,6 +11,7 @@ from traits.api import (
     HasTraits, List
 )
 
+# Nipype imports
 import nipype.pipeline.engine as pe
 
 # Own imports
@@ -106,7 +107,7 @@ class EEGConnectomeStage(Stage):
         )
         # fmt: on
 
-    def define_inspect_outputs(self):  # pragma: no cover
+    def define_inspect_outputs(self):
         """Update the `inspect_outputs` class attribute.
 
         It contains a dictionary of stage outputs with corresponding commands for visual inspection.

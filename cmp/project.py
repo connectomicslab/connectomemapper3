@@ -686,7 +686,7 @@ def init_anat_project(project_info, is_new_project, debug=False):
     return anat_pipeline
 
 
-def init_eeg_project(project_info, is_new_project, debug=False):  # pragma: no cover
+def init_eeg_project(project_info, is_new_project, debug=False):
     """Initialize the eeg processing pipeline.
 
     Parameters
@@ -773,7 +773,7 @@ def init_eeg_project(project_info, is_new_project, debug=False):  # pragma: no c
 
         eeg_inputs_checked = eeg_pipeline.check_input()
 
-        if not eeg_conf_loaded:
+        if not eeg_conf_loaded:  # pragma: no cover
             raise FileNotFoundError(f"Problem to load the eeg pipeline config file {project_info.eeg_config_file}")
 
     eeg_pipeline.config_file = project_info.eeg_config_file
@@ -1039,7 +1039,7 @@ def run_individual(
         project.subject_sessions = ["{}".format(session_label)]
         project.subject_session = "{}".format(session_label)
         print("INFO : Detected session(s)")
-    else:  # pragma: no cover
+    else:
         print("INFO : No detected session")
         project.subject_sessions = [""]
         project.subject_session = ""

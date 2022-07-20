@@ -7,22 +7,20 @@
 """EEG pipeline Class definition."""
 
 # General imports
-import ast
 import json
 import os
 import datetime
 from traits.api import (
     HasTraits, Instance, Str, List,
-    Directory, Dict, Enum
+    Directory, Enum
 )
 
 import nipype.interfaces.io as nio
 import nipype.pipeline.engine as pe
 from nipype import config, logging
 
+# Own imports
 from cmp.pipelines.common import Pipeline
-
-from cmp.info import __version__
 from cmp.stages.eeg.esi import EEGSourceImagingStage
 from cmp.stages.eeg.preprocessing import EEGPreprocessingStage
 from cmp.stages.connectome.eeg_connectome import EEGConnectomeStage
