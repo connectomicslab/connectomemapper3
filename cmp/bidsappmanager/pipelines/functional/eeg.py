@@ -4,5 +4,4 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-""" EEG pipeline Class definition
-"""
+"""EEG pipeline UI Class definition."""
