@@ -263,8 +263,8 @@ class EEGPipeline(Pipeline):
             input_files.append(self.stages["EEGSourceImaging"].config.cartool_invsol_file)
             output_query.update(
                 {
-                    "spi_file": self.stages["EEGPreprocessing"].config.cartool_spi_file.get_query_dict(),
-                    "invsol_file": self.stages["EEGPreprocessing"].config.cartool_invsol_file.get_query_dict()
+                    "spi_file": self.stages["EEGSourceImaging"].config.cartool_spi_file.get_query_dict(),
+                    "invsol_file": self.stages["EEGSourceImaging"].config.cartool_invsol_file.get_query_dict()
                 }
             )
 
