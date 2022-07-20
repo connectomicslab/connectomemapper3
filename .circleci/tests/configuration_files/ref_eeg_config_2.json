@@ -1,0 +1,70 @@
+{
+    "Global": {
+        "process_type": "EEG",
+        "subjects": [
+            "sub-01"
+        ],
+        "subject": "sub-01",
+        "version": "v3.1.0"
+    },
+    "eeg_preprocessing_stage": {
+        "task_label": "faces",
+        "eeg_ts_file.extension": "set",
+        "eeg_ts_file.toolbox_derivatives_dir": "eeglab-v14.1.1",
+        "eeg_ts_file.datatype": "eeg",
+        "eeg_ts_file.suffix": "eeg",
+        "eeg_ts_file.desc": "preproc",
+        "eeg_ts_file.task": "faces",
+        "events_file.datatype": "eeg",
+        "events_file.suffix": "events",
+        "events_file.extension": "tsv",
+        "events_file.task": "faces",
+        "electrodes_file_fmt": "Cartool",
+        "cartool_electrodes_file.toolbox_derivatives_dir": "cartool-v3.80",
+        "cartool_electrodes_file.datatype": "eeg",
+        "cartool_electrodes_file.suffix": "eeg",
+        "cartool_electrodes_file.extension": "xyz",
+        "t_min": -0.2,
+        "t_max": 0.5
+    },
+    "eeg_source_imaging_stage": {
+        "esi_tool": "Cartool",
+        "cartool_spi_file.toolbox_derivatives_dir": "cartool-v3.80",
+        "cartool_spi_file.datatype": "eeg",
+        "cartool_spi_file.suffix": "eeg",
+        "cartool_spi_file.extension": "spi",
+        "cartool_invsol_file.toolbox_derivatives_dir": "cartool-v3.80",
+        "cartool_invsol_file.datatype": "eeg",
+        "cartool_invsol_file.suffix": "eeg",
+        "cartool_invsol_file.esi_method": "LAURA",
+        "cartool_invsol_file.extension": "LAURA.is",
+        "parcellation_cmp_dir": "cmp-v3.1.0",
+        "parcellation_scheme": "Lausanne2018",
+        "lausanne2018_parcellation_res": "scale1",
+        "cartool_esi_lamb": 6.0,
+        "cartool_svd_toi_begin": 0.0,
+        "cartool_svd_toi_end": 0.25
+    },
+    "eeg_connectome_stage": {
+        "connectivity_metrics": [
+            "coh",
+            "cohy",
+            "imcoh",
+            "plv",
+            "ciplv",
+            "ppc",
+            "pli",
+            "wpli",
+            "wpli2_debiased"
+        ],
+        "output_types": [
+            "tsv",
+            "gpickle",
+            "mat",
+            "graphml"
+        ]
+    },
+    "Multi-processing": {
+        "number_of_cores": 1
+    }
+}
