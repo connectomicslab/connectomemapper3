@@ -275,9 +275,9 @@ class EEGSourceImagingStage(Stage):
         invsol_node = pe.Node(
             interface=CartoolInverseSolutionROIExtraction(
                 out_roi_ts_fname="timeseries.npy",
-                lam=self.config.eeg_cartool_esi_lamb,
-                svd_toi_begin=self.config.eeg_cartool_svd_toi_begin,
-                svd_toi_end=self.config.eeg_cartool_svd_toi_end
+                lam=self.config.cartool_esi_lamb,
+                svd_toi_begin=self.config.cartool_svd_toi_begin,
+                svd_toi_end=self.config.cartool_svd_toi_end
             ),
             name="cartool_invsol"
         )
