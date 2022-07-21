@@ -229,4 +229,4 @@ class CreateSpiRoisMapping(BaseInterface):
 
     def _gen_output_filename_mapping_spi_rois(self):
         # Return the absolute path of the output inverse operator file
-        return os.path.abspath(self.inputs.out_inv_fname)
+        return os.path.abspath(self.inputs.out_mapping_spi_rois_fname)
