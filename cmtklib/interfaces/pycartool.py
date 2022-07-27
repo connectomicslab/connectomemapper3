@@ -35,7 +35,7 @@ class CartoolInverseSolutionROIExtractionInputSpec(BaseInterfaceInputSpec):
         mandatory=True
     )
 
-    lamb = traits.Float(6, desc='Regularization weight')
+    lamb = traits.Int(6, desc='Regularization weight')
 
     svd_toi_begin = traits.Float(0, desc='Start TOI for SVD projection')
 
