@@ -89,7 +89,7 @@ class CartoolInverseSolutionROIExtraction(BaseInterface):
             self.inputs.mapping_spi_rois_file,
             svd_params
         )
-        np.save(self.roi_ts_file, roi_tcs)
+        np.save(self._gen_output_filename_roi_ts(), roi_tcs)
         return runtime
 
     @staticmethod
