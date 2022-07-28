@@ -1388,6 +1388,17 @@ class MainWindowHandler(Handler):
     fmri_processed : traits.Bool
         Indicate if fMRI pipeline was run
         (Default: False)
+
+    eeg_pipeline : Instance(HasTraits)
+        Instance of :class:`EEGPipelineUI` class
+
+    eeg_inputs_checked : traits.Bool
+        Indicate if EEG pipeline inputs are available
+        (Default: False)
+
+    eeg_processed : traits.Bool
+        Indicate if EEG pipeline was run
+        (Default: False)
     """
 
     project_loaded = Bool(False)
@@ -1404,6 +1415,10 @@ class MainWindowHandler(Handler):
     fmri_pipeline = Instance(HasTraits)
     fmri_inputs_checked = Bool(False)
     fmri_processed = Bool(False)
+
+    eeg_pipeline = Instance(HasTraits)
+    eeg_inputs_checked = Bool(False)
+    eeg_processed = Bool(False)
 
     def load_dataset(self, ui_info, debug=False):
         """Function that creates a new :class:`ProjectInfoUI` instance from an existing project.
@@ -1487,6 +1502,7 @@ class MainWindowHandler(Handler):
         t2_available = False
         diffusion_available = False
         fmri_available = False
+        eeg_available = False
 
         # print("Local BIDS dataset: %s" % loaded_project.base_directory)
         if np_res:
@@ -2153,6 +2169,14 @@ class BIDSAppInterfaceWindowHandler(Handler):
                 )
             )
 
+        if ui_info.ui.context["object"].run_eeg_pipeline:
+            cmd.append("-v")
+            cmd.append(
+                "{}:/code/ref_EEG_config.json".format(
+                    ui_info.ui.context["object"].eeg_config
+                )
+            )
+
         cmd.append("-u")
         cmd.append("{}:{}".format(os.geteuid(), os.getegid()))
 
@@ -2174,6 +2198,10 @@ class BIDSAppInterfaceWindowHandler(Handler):
         if ui_info.ui.context["object"].run_fmri_pipeline:
             cmd.append("--func_pipeline_config")
             cmd.append("/code/ref_fMRI_config.json")
+
+        if ui_info.ui.context["object"].run_eeg_pipeline:
+            cmd.append("--eeg_pipeline_config")
+            cmd.append("/code/ref_EEG_config.json")
 
         print_blue(" ".join(cmd))
 
