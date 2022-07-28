@@ -10,7 +10,7 @@
 import os
 from traits.api import (
     HasTraits, Enum, Instance,
-    Bool, Float, Str
+    Bool, Float, Str, Int
 )
 
 # Nipype imports
@@ -135,7 +135,7 @@ class EEGSourceImagingConfig(HasTraits):
              "parcellation scheme is used "
     )
 
-    cartool_esi_lamb = Float(6, desc='Regularization weight')
+    cartool_esi_lamb = Int(6, desc='Regularization weight')
     cartool_svd_toi_begin = Float(0, desc='Start TOI for SVD projection')
     cartool_svd_toi_end = Float(0.25, desc='End TOI for SVD projection')
 
@@ -275,7 +275,7 @@ class EEGSourceImagingStage(Stage):
         invsol_node = pe.Node(
             interface=CartoolInverseSolutionROIExtraction(
                 out_roi_ts_fname="timeseries.npy",
-                lam=self.config.cartool_esi_lamb,
+                lamb=self.config.cartool_esi_lamb,
                 svd_toi_begin=self.config.cartool_svd_toi_begin,
                 svd_toi_end=self.config.cartool_svd_toi_end
             ),

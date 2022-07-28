@@ -35,7 +35,7 @@ class CartoolInverseSolutionROIExtractionInputSpec(BaseInterfaceInputSpec):
         mandatory=True
     )
 
-    lamb = traits.Float(6, desc='Regularization weight')
+    lamb = traits.Int(6, desc='Regularization weight')
 
     svd_toi_begin = traits.Float(0, desc='Start TOI for SVD projection')
 
@@ -89,7 +89,7 @@ class CartoolInverseSolutionROIExtraction(BaseInterface):
             self.inputs.mapping_spi_rois_file,
             svd_params
         )
-        np.save(self.roi_ts_file, roi_tcs)
+        np.save(self._gen_output_filename_roi_ts(), roi_tcs)
         return runtime
 
     @staticmethod
@@ -98,7 +98,8 @@ class CartoolInverseSolutionROIExtraction(BaseInterface):
         invsol = cart.io.inverse_solution.read_is(invsol_file)
         pickle_in = open(rois_file, "rb")
         rois = pickle.load(pickle_in)
-        K = invsol['regularisation_solutions'][lamda]
+        print(f'  .. DEBUG: Invsol loaded = {invsol}')
+        mat_k = invsol['regularisation_solutions'][lamda]
         n_rois = len(rois.names)
         times = epochs.times
         tstep = times[1] - times[0]
@@ -111,9 +112,9 @@ class CartoolInverseSolutionROIExtraction(BaseInterface):
 
             for k, e in enumerate(epochs):
                 # logger.info('Processing epoch : %d%s' % (k + 1, total))
-                roi_stc[0, :, :, k] = K[0, spis_this_roi] @ e
-                roi_stc[1, :, :, k] = K[1, spis_this_roi] @ e
-                roi_stc[2, :, :, k] = K[2, spis_this_roi] @ e
+                roi_stc[0, :, :, k] = mat_k[0, spis_this_roi] @ e
+                roi_stc[1, :, :, k] = mat_k[1, spis_this_roi] @ e
+                roi_stc[2, :, :, k] = mat_k[2, spis_this_roi] @ e
 
             stim_onset = np.where(times == 0)[0][0]
             svd_t_begin = stim_onset + int(svd_params['toi_begin'] / tstep)
@@ -229,4 +230,4 @@ class CreateSpiRoisMapping(BaseInterface):
 
     def _gen_output_filename_mapping_spi_rois(self):
         # Return the absolute path of the output inverse operator file
-        return os.path.abspath(self.inputs.out_inv_fname)
+        return os.path.abspath(self.inputs.out_mapping_spi_rois_fname)

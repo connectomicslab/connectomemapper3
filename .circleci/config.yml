@@ -1620,17 +1620,6 @@ jobs:
             - data-ds003505-v2-3-
           paths:
             - /tmp/data/ds003505
-      - attach_workspace:
-          at: /tmp/data
-      - run:
-          name: "Copy anatomical pipeline output from test 10"
-          command: |
-            mkdir -p /tmp/data/${CIRCLE_JOB}/ds003505/derivatives
-            cp -r /tmp/data/test10_docker_eeg/ds003505/derivatives/nipype-* \
-            /tmp/data/${CIRCLE_JOB}/ds003505/derivatives
-            rm -r /tmp/data/ds003505/derivatives/freesurfer-*
-            cp -r /tmp/data/test10_docker_eeg/ds003505/derivatives/freesurfer-* \
-            /tmp/data/${CIRCLE_JOB}/ds003505/derivatives
       - load-docker-image-archive:
           archive_file: "/tmp/cache/docker/docker.tar.zst"
       - install-conda-and-cmp3:
@@ -1638,6 +1627,17 @@ jobs:
           cmp3_dir: /home/circleci/src/connectomemapper3
       - prepare-ds003505-dataset:
           circleci_job: ${CIRCLE_JOB}
+      - attach_workspace:
+          at: /tmp/data
+      - run:
+          name: "Copy only anatomical pipeline output from test 10"
+          command: |
+            cp -r /tmp/data/test10_docker_eeg/ds003505/derivatives/nipype-* \
+            /tmp/data/${CIRCLE_JOB}/ds003505/derivatives
+            rm -rvf /tmp/data/${CIRCLE_JOB}/ds003505/derivatives/nipype-*/sub-01/eeg_pipeline
+            rm -rvf /tmp/data/${CIRCLE_JOB}/ds003505/derivatives/freesurfer-*
+            cp -r /tmp/data/test10_docker_eeg/ds003505/derivatives/freesurfer-* \
+            /tmp/data/${CIRCLE_JOB}/ds003505/derivatives
       - test-docker-anat-eeg-pipelines-wrapper:
           circleci_job: ${CIRCLE_JOB}
           run_name: Run anatomical and eeg pipelines on ds003505 - VEPCON dataset (test 11 - Lausanne2018 + PyCartool)
