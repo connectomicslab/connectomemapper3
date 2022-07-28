@@ -152,7 +152,7 @@ class fMRIPipelineUI(fMRIPipeline):
 
         See also
         ---------
-        cmp.pipelines.functional.fMRIPipeline.__init__
+        cmp.pipelines.functional.fMRI.fMRIPipeline.__init__
         """
         fMRIPipeline.__init__(self, project_info)
 
