@@ -57,13 +57,17 @@ class PipelineConfiguratorWindow(HasTraits):
             Boolean that indicates if anatomical pipeline inputs are available
             (Default: False)
 
-        dmri_inputs_checked = : traits.Bool
-            Boolean that indicates if diffusion pipeline inputs are available
-            (Default: False)
+    dmri_inputs_checked = : traits.Bool
+        Boolean that indicates if diffusion pipeline inputs are available
+        (Default: False)
 
-        fmri_inputs_checked : traits.Bool
-            Boolean that indicates if functional pipeline inputs are available
-            (Default: False)
+    fmri_inputs_checked : traits.Bool
+        Boolean that indicates if functional pipeline inputs are available
+        (Default: False)
+
+    eeg_inputs_checked : traits.Bool
+        Boolean that indicates if EEG pipeline inputs are available
+        (Default: False)
 
     anat_save_config : traits.ui.Action
         TraitsUI Action to save the anatomical pipeline configuration
@@ -73,6 +77,9 @@ class PipelineConfiguratorWindow(HasTraits):
 
     fmri_save_config : traits.ui.Action
         TraitsUI Action to save the functional pipeline configuration
+
+    eeg_save_config : traits.ui.Action
+        TraitsUI Action to save the EEG pipeline configuration
 
     save_all_config : traits.ui.Button
         Button to save all configuration files at once
@@ -85,10 +92,12 @@ class PipelineConfiguratorWindow(HasTraits):
     anat_pipeline = Instance(HasTraits)
     dmri_pipeline = Instance(HasTraits)
     fmri_pipeline = Instance(HasTraits)
+    eeg_pipeline = Instance(HasTraits)
 
     anat_inputs_checked = Bool(False)
     dmri_inputs_checked = Bool(False)
     fmri_inputs_checked = Bool(False)
+    eeg_inputs_checked = Bool(False)
 
     anat_save_config = Action(
         name="Save anatomical pipeline configuration as...",
@@ -100,6 +109,9 @@ class PipelineConfiguratorWindow(HasTraits):
     )
     fmri_save_config = Action(
         name="Save fMRI pipeline configuration as...", action="save_fmri_config_file"
+    )
+    eeg_save_config = Action(
+        name="Save EEG pipeline configuration as...", action="save_fmri_config_file"
     )
 
     # anat_load_config = Action(name='Load anatomical pipeline configuration...',action='anat_load_config_file')
@@ -135,6 +147,17 @@ class PipelineConfiguratorWindow(HasTraits):
                     visible_when="fmri_inputs_checked",
                 ),
                 label="fMRI pipeline",
+                dock="tab",
+            ),
+            Group(
+                Item(
+                    "eeg_pipeline",
+                    style="custom",
+                    show_label=False,
+                    enabled_when="eeg_inputs_checked",
+                    visible_when="eeg_inputs_checked",
+                ),
+                label="EEG pipeline",
                 dock="tab",
             ),
             orientation="horizontal",
@@ -190,9 +213,11 @@ class PipelineConfiguratorWindow(HasTraits):
         anat_pipeline=None,
         dmri_pipeline=None,
         fmri_pipeline=None,
+        eeg_pipeline=None,
         anat_inputs_checked=False,
         dmri_inputs_checked=False,
         fmri_inputs_checked=False,
+        eeg_inputs_checked=False
     ):
         """Constructor of an :class:``PipelineConfiguratorWindow`` instance.
 
@@ -202,15 +227,19 @@ class PipelineConfiguratorWindow(HasTraits):
             :class:`CMP_Project_Info` object (Default: None)
 
         anat_pipeline <cmp.bidsappmanager.pipelines.anatomical.AnatomicalPipelineUI>
-            Instance of :class:`cmp.bidsappmanager.pipelines.anatomical.AnatomicalPipelineUI`
+            Instance of :class:`cmp.bidsappmanager.pipelines.anatomical.anatomical.AnatomicalPipelineUI`
             (Default: None)
 
         dmri_pipeline <cmp.bidsappmanager.pipelines.diffusion.DiffusionPipelineUI>
-            Instance of :class:`cmp.bidsappmanager.pipelines.diffusion.DiffusionPipelineUI`
+            Instance of :class:`cmp.bidsappmanager.pipelines.diffusion.diffusion.DiffusionPipelineUI`
             (Default: None)
 
-        fmri_pipeline <cmp.bidsappmanager.pipelines.functional.fMRIPipelineUI>
+        fmri_pipeline <cmp.bidsappmanager.pipelines.functional.fMRI.fMRIPipelineUI>
             Instance of :class:`cmp.bidsappmanager.pipelines.functional.fMRIPipelineUI`
+            (Default: None)
+
+        eeg_pipeline <cmp.bidsappmanager.pipelines.functional.eeg.EEGPipelineUI>
+            Instance of :class:`cmp.bidsappmanager.pipelines.functional.eeg.EEGPipelineUI`
             (Default: None)
 
         anat_inputs_checked : traits.Bool
@@ -224,6 +253,10 @@ class PipelineConfiguratorWindow(HasTraits):
         fmri_inputs_checked : traits.Bool
             Boolean that indicates if functional pipeline inputs are available
             (Default: False)
+
+        eeg_inputs_checked : traits.Bool
+            Boolean that indicates if EEG pipeline inputs are available
+            (Default: False)
         """
         print("> Initialize window...")
         self.project_info = project_info
@@ -231,6 +264,7 @@ class PipelineConfiguratorWindow(HasTraits):
         self.anat_pipeline = anat_pipeline
         self.dmri_pipeline = dmri_pipeline
         self.fmri_pipeline = fmri_pipeline
+        self.eeg_pipeline = eeg_pipeline
 
         if self.anat_pipeline is not None:
             self.anat_pipeline.view_mode = "config_view"
@@ -241,9 +275,13 @@ class PipelineConfiguratorWindow(HasTraits):
         if self.fmri_pipeline is not None:
             self.fmri_pipeline.view_mode = "config_view"
 
+        if self.eeg_pipeline is not None:
+            self.eeg_pipeline.view_mode = "config_view"
+
         self.anat_inputs_checked = anat_inputs_checked
         self.dmri_inputs_checked = dmri_inputs_checked
         self.fmri_inputs_checked = fmri_inputs_checked
+        self.eeg_inputs_checked = eeg_inputs_checked
 
     def update_diffusion_imaging_model(self, new):
         self.dmri_pipeline.diffusion_imaging_model = new
@@ -271,3 +309,10 @@ class PipelineConfiguratorWindow(HasTraits):
             )
             project.fmri_save_config(self.fmri_pipeline, fmri_config_file)
             print("  * fMRI config saved as  {}".format(fmri_config_file))
+
+        if self.eeg_inputs_checked:
+            eeg_config_file = os.path.join(
+                self.project_info.base_directory, "code", "ref_EEG_config.json"
+            )
+            project.eeg_save_config(self.eeg_pipeline, eeg_config_file)
+            print("  * EEG config saved as  {}".format(eeg_config_file))
