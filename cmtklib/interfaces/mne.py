@@ -722,7 +722,7 @@ class MNESpectralConnectivity(BaseInterface):
 
         # Get parcellation labels used by MNE
         labels_parc = mne.read_labels_from_annot(
-            self.inputs.subject,
+            subject=self.inputs.fs_subject,
             parc=self.inputs.parc_annot,
             subjects_dir=self.inputs.fs_subjects_dir
         )
