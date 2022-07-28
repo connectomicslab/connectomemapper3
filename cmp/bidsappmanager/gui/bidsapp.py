@@ -109,6 +109,9 @@ class BIDSAppInterfaceWindow(HasTraits):
     fmri_config : traits.File
         Configuration file for the functional MRI pipeline
 
+    eeg_config : traits.File
+        Configuration file for the EEG pipeline
+
     run_anat_pipeline : traits.Bool
         If True, run the anatomical pipeline
 
@@ -117,6 +120,9 @@ class BIDSAppInterfaceWindow(HasTraits):
 
     run_fmri_pipeline : traits.Bool
         If True, run the functional pipeline
+
+    run_eeg_pipeline : traits.Bool
+        If True, run the EEG pipeline
 
     bidsapp_tag : traits.Enum
         Selection of BIDS App version to use
@@ -203,13 +209,16 @@ class BIDSAppInterfaceWindow(HasTraits):
     anat_config = File(desc="Path to the configuration file of the anatomical pipeline")
     dmri_config = File(desc="Path to the configuration file of the diffusion pipeline")
     fmri_config = File(desc="Path to the configuration file of the fMRI pipeline")
+    eeg_config = File(desc="Path to the configuration file of the EEG pipeline")
 
     run_anat_pipeline = Bool(True, desc="Run the anatomical pipeline")
     run_dmri_pipeline = Bool(False, desc="Run the diffusion pipeline")
     run_fmri_pipeline = Bool(False, desc="Run the fMRI pipeline")
+    run_eeg_pipeline = Bool(False, desc="Run the EEG pipeline")
 
     dmri_inputs_checked = Bool(False)
     fmri_inputs_checked = Bool(False)
+    eeg_inputs_checked = Bool(False)
 
     settings_checked = Bool(False)
     docker_running = Bool(False)
@@ -369,6 +378,17 @@ class BIDSAppInterfaceWindow(HasTraits):
                         label="fMRI pipeline",
                         visible_when="fmri_inputs_checked==True",
                     ),
+                    Group(
+                        Item("run_eeg_pipeline", label="Run processing stages"),
+                        Item(
+                            "eeg_config",
+                            editor=FileEditor(dialog_style="open"),
+                            label="Configuration file",
+                            visible_when="run_fmri_pipeline",
+                        ),
+                        label="EEG pipeline",
+                        visible_when="eeg_inputs_checked==True",
+                    ),
                     label="Configuration of processing pipelines",
                 ),
                 VGroup(
@@ -485,6 +505,7 @@ class BIDSAppInterfaceWindow(HasTraits):
         anat_config="",
         dmri_config="",
         fmri_config="",
+        eeg_config="",
     ):
         """Constructor of an :class:``BIDSAppInterfaceWindow`` instance.
 
@@ -507,6 +528,9 @@ class BIDSAppInterfaceWindow(HasTraits):
 
         fmri_config : string
             Path to functional pipeline configuration file (Default: \'\')
+
+        eeg_config : string
+            Path to EEG pipeline configuration file (Default: \'\')
         """
         print("> Initialize window...")
         if multiprocessing.cpu_count() < 4:
@@ -565,6 +589,21 @@ class BIDSAppInterfaceWindow(HasTraits):
 
         print(f"  .. rsfMRI available: {self.fmri_inputs_checked}")
 
+        # Check if EEG data is available in the dataset
+        eeg_files = bids_layout.get(
+            datatype="eeg",
+            suffix="eeg",
+            return_type="file",
+        )
+        if not eeg_files:
+            self.eeg_inputs_checked = False
+            self.run_eeg_pipeline = False
+        else:
+            self.eeg_inputs_checked = True
+            self.run_eeg_pipeline = True
+
+        print(f"  .. EEG available: {self.eeg_inputs_checked}")
+
         # Initialize output directory to be /bids_dir/derivatives
         self.output_dir = os.path.join(bids_root, "derivatives")
 
@@ -572,6 +611,7 @@ class BIDSAppInterfaceWindow(HasTraits):
         self.anat_config = anat_config
         self.dmri_config = dmri_config
         self.fmri_config = fmri_config
+        self.eeg_config = eeg_config
 
         if 'FREESURFER_HOME' in os.environ:
             self.fs_license = os.path.join(
@@ -588,6 +628,7 @@ class BIDSAppInterfaceWindow(HasTraits):
 
         self.on_trait_change(self.update_run_dmri_pipeline, "run_dmri_pipeline")
         self.on_trait_change(self.update_run_fmri_pipeline, "run_fmri_pipeline")
+        self.on_trait_change(self.update_run_eeg_pipeline, "run_eeg_pipeline")
 
         self.on_trait_change(
             self.number_of_parallel_procs_updated,
@@ -602,6 +643,8 @@ class BIDSAppInterfaceWindow(HasTraits):
         self.on_trait_change(self.update_checksettings, "dmri_config")
         self.on_trait_change(self.update_checksettings, "run_fmri_pipeline")
         self.on_trait_change(self.update_checksettings, "fmri_config")
+        self.on_trait_change(self.update_checksettings, "run_eeg_pipeline")
+        self.on_trait_change(self.update_checksettings, "eeg_config")
         self.on_trait_change(self.update_checksettings, "fs_license")
 
     def number_of_parallel_procs_updated(self, new):
@@ -626,6 +669,10 @@ class BIDSAppInterfaceWindow(HasTraits):
 
     def update_run_fmri_pipeline(self, new):
         """Callback function when ``run_fmri_pipeline`` is updated."""
+        self.run_anat_pipeline = True
+
+    def update_run_eeg_pipeline(self, new):
+        """Callback function when ``run_eeg_pipeline`` is updated."""
         self.run_anat_pipeline = True
 
     def update_checksettings(self, new):
@@ -700,6 +747,11 @@ class BIDSAppInterfaceWindow(HasTraits):
         else:
             print_warning("Warning: Configuration file for fMRI pipeline not existing!")
 
+        if os.path.isfile(self.eeg_config):
+            print(f"* EEG configuration file : {self.eeg_config}")
+        else:
+            print_warning("Warning: Configuration file for EEG pipeline not existing!")
+
         if os.path.isfile(self.fs_license):
             print(f"* Freesurfer license : {self.fs_license}")
         else:
@@ -757,6 +809,10 @@ class BIDSAppInterfaceWindow(HasTraits):
             cmd.append("-v")
             cmd.append(f"{self.fmri_config}:/code/ref_fMRI_config.json")
 
+        if self.run_eeg_pipeline:
+            cmd.append("-v")
+            cmd.append(f"{self.eeg_config}:/code/ref_EEG_config.json")
+
         cmd.append("-u")
         cmd.append(f"{os.geteuid()}:{os.getegid()}")
 
@@ -778,6 +834,10 @@ class BIDSAppInterfaceWindow(HasTraits):
 
         if self.run_fmri_pipeline:
             cmd.append("--func_pipeline_config")
+            cmd.append("/code/ref_fMRI_config.json")
+
+        if self.run_fmri_pipeline:
+            cmd.append("--eeg_pipeline_config")
             cmd.append("/code/ref_fMRI_config.json")
 
         cmd.append("--fs_license")
@@ -837,6 +897,10 @@ class BIDSAppInterfaceWindow(HasTraits):
             cmd.append("--input")
             cmd.append(f"{self.fmri_config}")
 
+        if self.run_eeg_pipeline:
+            cmd.append("--input")
+            cmd.append(f"{self.eeg_config}")
+
         cmd.append("--output")
         cmd.append(f"{self.output_dir}")
         cmd.append("/bids_dir")
@@ -859,6 +923,10 @@ class BIDSAppInterfaceWindow(HasTraits):
 
         if self.run_fmri_pipeline:
             cmd.append("--func_pipeline_config")
+            cmd.append(f"/{{inputs[{i}]}}")
+
+        if self.run_eeg_pipeline:
+            cmd.append("--eeg_pipeline_config")
             cmd.append(f"/{{inputs[{i}]}}")
 
         print_blue("... Datalad cmd : {}".format(" ".join(cmd)))
@@ -1244,9 +1312,3 @@ class BIDSAppInterfaceWindow(HasTraits):
             self.configure_traits(view='carbon_footprint_view')
 
         return True
-
-    # def stop_bids_app(self, ui_info):
-    #     print("Stop BIDS App")
-    #     #self.docker_process.kill()
-    #     self.docker_running = False
-    #     return True
