@@ -92,7 +92,7 @@ class CartoolInverseSolutionROIExtraction(BaseInterface):
             svd_params
         )
         np.save(self._gen_output_filename_roi_ts(extension=".npy"), roi_tcs)
-        sio.save(self._gen_output_filename_roi_ts(extension=".mat"), {"ts": roi_tcs})
+        sio.savemat(self._gen_output_filename_roi_ts(extension=".mat"), {"ts": roi_tcs})
         return runtime
 
     @staticmethod

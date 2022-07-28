@@ -566,7 +566,6 @@ class MNEInverseSolutionROI(BaseInterface):
         )
         np.save(self._gen_output_filename_roi_ts(extension=".npy"), roi_tcs)
         sio.savemat(self._gen_output_filename_roi_ts(extension=".mat"), {"ts": roi_tcs})
-
         return runtime
 
     @staticmethod
