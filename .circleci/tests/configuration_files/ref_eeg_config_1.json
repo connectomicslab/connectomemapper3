@@ -41,6 +41,8 @@
         "mne_esi_method_snr": 3.0
     },
     "eeg_connectome_stage": {
+        "parcellation_scheme": "Lausanne2018",
+        "lausanne2018_parcellation_res": "scale1",
         "connectivity_metrics": [
             "coh",
             "cohy",
