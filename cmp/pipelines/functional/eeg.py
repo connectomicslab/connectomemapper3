@@ -135,6 +135,8 @@ class EEGPipeline(Pipeline):
                 output_dir=self.output_directory
             ),
             "EEGConnectome": EEGConnectomeStage(
+                subject=self.subject,
+                session=self.global_conf.subject_session,
                 bids_dir=project_info.base_directory,
                 output_dir=self.output_directory
             ),
@@ -146,12 +148,19 @@ class EEGPipeline(Pipeline):
         self.stages["EEGSourceImaging"].config.parcellation_scheme = self.parcellation_scheme
 
         self.stages["EEGSourceImaging"].config.on_trait_change(self._update_parcellation_scheme, 'parcellation_scheme')
+        self.stages["EEGSourceImaging"].config.on_trait_change(self._update_lausanne2018_parcellation_res, 'lausanne2018_parcellation_res')
         self.stages["EEGSourceImaging"].config.on_trait_change(self._update_parcellation_cmp_dir, 'parcellation_cmp_dir')
 
         Pipeline.__init__(self, project_info)
 
     def _update_parcellation_scheme(self):
         self.parcellation_scheme = self.stages["EEGSourceImaging"].config.parcellation_scheme
+        self.stages["EEGConnectome"].config.parcellation_scheme =\
+            self.stages["EEGSourceImaging"].config.parcellation_scheme
+
+    def _update_lausanne2018_parcellation_res(self):
+        self.stages["EEGConnectome"].config.lausanne2018_parcellation_res =\
+            self.stages["EEGSourceImaging"].config.lausanne2018_parcellation_res
 
     def _update_parcellation_cmp_dir(self):
         self.parcellation_cmp_dir = self.stages["EEGSourceImaging"].config.parcellation_cmp_dir
@@ -382,8 +391,8 @@ class EEGPipeline(Pipeline):
             # fmt:off
             substitutions += [
                 (
-                    "timeseries.pickle",
-                    f"{self.subject}_task-{bids_task_label}_atlas-{bids_atlas_label}_timeseries.pickle"
+                    "timeseries",
+                    f"{self.subject}_task-{bids_task_label}_atlas-{bids_atlas_label}_timeseries"
                 ),
                 (
                     "conndata-network_connectivity",
@@ -396,8 +405,8 @@ class EEGPipeline(Pipeline):
             # fmt:off
             substitutions += [
                 (
-                    "timeseries.pickle",
-                    f"{self.subject}_task-{bids_task_label}_atlas-{bids_atlas_label}_res-{scale}_timeseries.pickle"
+                    "timeseries",
+                    f"{self.subject}_task-{bids_task_label}_atlas-{bids_atlas_label}_res-{scale}_timeseries"
                 ),
                 (
                     "conndata-network_connectivity",
@@ -429,7 +438,6 @@ class EEGPipeline(Pipeline):
         nipype_eeg_pipeline_subject_dir = os.path.join(nipype_deriv_subject_directory, "eeg_pipeline")
 
         return nipype_eeg_pipeline_subject_dir
-
 
     def init_subject_derivatives_dirs(self):
         """Return the paths to Nipype and CMP derivatives folders of a given subject / session.
@@ -599,9 +607,10 @@ class EEGPipeline(Pipeline):
         # fmt: off
         eeg_flow.connect(
             [
-                (esi_flow, cmat_flow, [("outputnode.roi_ts_file", "inputnode.roi_ts_file")]),
+                (esi_flow, cmat_flow, [("outputnode.roi_ts_npy_file", "inputnode.roi_ts_file")]),
                 (preproc_flow, cmat_flow, [("outputnode.epochs_file", "inputnode.epochs_file")]),
-                (esi_flow, sinker, [("outputnode.roi_ts_file", "eeg.@roi_ts_file")]),
+                (esi_flow, sinker, [("outputnode.roi_ts_npy_file", "eeg.@roi_ts_npy_file"),
+                                    ("outputnode.roi_ts_mat_file", "eeg.@roi_ts_mat_file")]),
                 (preproc_flow, sinker, [("outputnode.epochs_file", "eeg.@epochs_file")]),
                 (cmat_flow, sinker, [("outputnode.connectivity_matrices", "eeg.@connectivity_matrices")]),
             ]

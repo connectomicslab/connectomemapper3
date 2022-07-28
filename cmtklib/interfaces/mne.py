@@ -8,11 +8,11 @@
 # General imports
 import csv
 import os
-import pickle
 import warnings
 import subprocess
 import numpy as np
 import pandas as pd
+import scipy.io as sio
 
 # Nipype imports
 from nipype.interfaces.base import (
@@ -501,13 +501,15 @@ class MNEInverseSolutionROIInputSpec(BaseInterfaceInputSpec):
         desc="SNR value such as the ESI method regularization weight lambda2 is set to  `1.0 / esi_method_snr ** 2`",
     )
 
-    out_roi_ts_fname = traits.Str(desc="Output filename for rois * time series in .npy format")
+    out_roi_ts_fname_prefix = traits.Str(desc="Output filename prefix (no extension) for rois * time series in .npy and .mat formats")
 
     out_inv_fname = traits.Str(desc="Output filename for inverse operator in fif format", mandatory=True)
 
 
 class MNEInverseSolutionROIOutputSpec(TraitedSpec):
-    roi_ts_file = traits.File(desc="Path to output ROI time series file in .npy format")
+    roi_ts_npy_file = traits.File(desc="Path to output ROI time series file in .npy format")
+
+    roi_ts_mat_file = traits.File(desc="Path to output ROI time series file in .mat format")
 
     inv_file = traits.File(desc="Path to output inverse operator file in fif format.")
 
@@ -528,7 +530,7 @@ class MNEInverseSolutionROI(BaseInterface):
     >>> inv_sol.inputs.noise_cov_file = '/path/to/sub-01_noisecov.fif'
     >>> inv_sol.inputs.fwd_file = '/path/to/sub-01_fwd.fif'
     >>> inv_sol.inputs.parc_annot = 'lausanne2018.scale1'
-    >>> inv_sol.inputs.out_roi_ts_fname = 'sub-01_atlas-L2018_res-scale1_desc-epo_timeseries.npy'
+    >>> inv_sol.inputs.out_roi_ts_fname_prefix = 'sub-01_atlas-L2018_res-scale1_desc-epo_timeseries'
     >>> inv_sol.inputs.out_inv_fname = 'sub-01_inv.fif'
     >>> inv_sol.run()  # doctest: +SKIP
 
@@ -562,9 +564,9 @@ class MNEInverseSolutionROI(BaseInterface):
             self.inputs.esi_method,
             self.inputs.esi_method_snr
         )
-        with open(self.inputs.out_roi_ts_fname, "wb") as f:
-            pickle.dump(roi_tcs, f, pickle.HIGHEST_PROTOCOL)
-        # np.save(self.roi_ts_file, roi_tcs)
+        np.save(self._gen_output_filename_roi_ts(extension=".npy"), roi_tcs)
+        sio.savemat(self._gen_output_filename_roi_ts(extension=".mat"), {"ts": roi_tcs})
+
         return runtime
 
     @staticmethod
@@ -572,10 +574,12 @@ class MNEInverseSolutionROI(BaseInterface):
         fs_subjects_dir, subject, epochs_file, fwd_file, noise_cov_file,
         src_file, parc_annot, out_inv_fname, esi_method, esi_method_snr
     ):
+        # Load files
         epochs = mne.read_epochs(epochs_file)
         fwd = mne.read_forward_solution(fwd_file)
         noise_cov = mne.read_cov(noise_cov_file)
         src = mne.read_source_spaces(src_file, patch_stats=False, verbose=None)
+
         # Compute the inverse operator
         inverse_operator = mne.minimum_norm.make_inverse_operator(
             epochs.info, fwd, noise_cov, loose=1, depth=None, fixed=False
@@ -583,50 +587,64 @@ class MNEInverseSolutionROI(BaseInterface):
         # inverse_operator = mne.minimum_norm.make_inverse_operator(
         #     epochs.info, fwd, noise_cov, loose=0, depth=None, fixed=True)
         mne.minimum_norm.write_inverse_operator(out_inv_fname, inverse_operator)
+
         # Compute the time courses of the source points
         lambda2 = 1.0 / esi_method_snr ** 2
         evoked = epochs.average().pick("eeg")
-        # stcs, inverse_matrix = my_mne_minimum_norm_inverse.apply_inverse_epochs(
-        #   epochs, inverse_operator, lambda2, method, pick_ori="normal", nave=evoked.nave,return_generator=False
-        # )
         stcs = mne.minimum_norm.apply_inverse_epochs(
-            epochs, inverse_operator, lambda2, esi_method, pick_ori=None, nave=evoked.nave, return_generator=False
+            epochs, inverse_operator, lambda2, esi_method,
+            pick_ori=None, nave=evoked.nave, return_generator=False
         )
-        # get ROI time courses
-        # read the labels of the source points
+
+        # Read the labels of the source points
         labels_parc = mne.read_labels_from_annot(
             subject, parc=parc_annot, subjects_dir=fs_subjects_dir
         )
-        # get the ROI time courses
-        data = mne.extract_label_time_course(
-            stcs, labels_parc, src, mode="pca_flip", allow_empty=True, return_generator=False
+
+        # Get the ROI time courses
+        return mne.extract_label_time_course(
+            stcs,
+            labels_parc,
+            src,
+            mode="pca_flip",
+            allow_empty=True,
+            return_generator=False
         )
-
-        roi_tcs = dict()
-        roi_tcs["data"] = data
-        roi_tcs["labels"] = labels_parc
-
-        return roi_tcs
 
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs["inv_file"] = self._gen_output_filename_inv()
-        outputs["roi_ts_file"] = self._gen_output_filename_roi_ts()
+        outputs["roi_ts_npy_file"] = self._gen_output_filename_roi_ts(extension=".npy")
+        outputs["roi_ts_mat_file"] = self._gen_output_filename_roi_ts(extension=".mat")
         return outputs
 
     def _gen_output_filename_inv(self):
         # Return the absolute path of the output inverse operator file
         return os.path.abspath(self.inputs.out_inv_fname)
 
-    def _gen_output_filename_roi_ts(self):
+    def _gen_output_filename_roi_ts(self, extension):
         # Return the absolute path of the output ROI time series file
-        return os.path.abspath(self.inputs.out_roi_ts_fname)
+        return os.path.abspath(self.inputs.out_roi_ts_fname_prefix + extension)
 
 
 class MNESpectralConnectivityInputSpec(BaseInterfaceInputSpec):
+    fs_subject = traits.Str(desc="FreeSurfer subject ID", mandatory=True)
+
+    fs_subjects_dir = traits.Directory(desc="Freesurfer subjects (derivatives) directory",
+                                       exists=True,
+                                       mandatory=True)
+
     epochs_file = File(exists=True, desc="Epochs file in fif format")
 
-    roi_ts_file = File(exists=True, desc="Extracted ROI time courses from ESI in pickle format")
+    roi_ts_file = File(exists=True, desc="Extracted ROI time courses from ESI in .npy format")
+
+    parc_annot = traits.Enum(
+        ['aparc', 'lausanne2018.scale1', 'lausanne2018.scale2',
+         'lausanne2018.scale3', 'lausanne2018.scale4', 'lausanne2018.scale5'],
+        desc="The parcellation to use, e.g., 'aparc', 'lausanne2018.scale1', "
+             "'lausanne2018.scale2', 'lausanne2018.scale3', 'lausanne2018.scale4' or"
+             "'lausanne2018.scale5'"
+    )
 
     connectivity_metrics = traits.List(
         ['coh', 'cohy', 'imcoh',
@@ -657,10 +675,13 @@ class MNESpectralConnectivity(BaseInterface):
     --------
     >>> from cmtklib.interfaces.mne import MNESpectralConnectivity
     >>> eeg_cmat = MNESpectralConnectivity()
+    >>> eeg_cmat.inputs.fs_subject = 'sub-01'
+    >>> eeg_cmat.inputs.fs_subjects_dir = '/path/to/bids_dataset/derivatives/freesurfer-7.1.1'
+    >>> eeg_cmat.inputs.parc_annot = 'lausanne2018.scale1'
     >>> eeg_cmat.inputs.connectivity_metrics = ['imcoh', 'pli', 'wpli']
     >>> eeg_cmat.inputs.output_types = ['tsv', 'gpickle', 'mat', 'graphml']
     >>> eeg_cmat.inputs.epochs_file = '/path/to/sub-01_epo.fif'
-    >>> eeg_cmat.inputs.roi_ts_file = '/path/to/sub-01_timeseries.pickle'
+    >>> eeg_cmat.inputs.roi_ts_file = '/path/to/sub-01_timeseries.npy'
     >>> eeg_cmat.run()  # doctest: +SKIP
 
     References
@@ -677,13 +698,12 @@ class MNESpectralConnectivity(BaseInterface):
         epochs = mne.read_epochs(self.inputs.epochs_file)
 
         # Load Epochs ROI time series file
-        with open(self.inputs.roi_ts_file, 'rb') as f:
-            roi_ts_epo = pickle.load(f)
+        roi_ts_epo = np.load(self.inputs.roi_ts_file)
 
         # Compute time / frequency connectivity metrics
         # of input Epochs ROI time series
         con = mnec.spectral_connectivity_epochs(
-            data=roi_ts_epo['data'],
+            data=roi_ts_epo,
             method=self.inputs.connectivity_metrics,
             mode='multitaper',
             sfreq=epochs.info['sfreq'],  # the sampling frequency
@@ -701,7 +721,12 @@ class MNESpectralConnectivity(BaseInterface):
             con_res[method] = np.squeeze(c.get_data(output='dense'))
 
         # Get parcellation labels used by MNE
-        roi_labels = [label.name for label in roi_ts_epo['labels']]
+        labels_parc = mne.read_labels_from_annot(
+            subject=self.inputs.fs_subject,
+            parc=self.inputs.parc_annot,
+            subjects_dir=self.inputs.fs_subjects_dir
+        )
+        roi_labels = [label.name for label in labels_parc]
 
         save_eeg_connectome_file(
             con_res=con_res,
