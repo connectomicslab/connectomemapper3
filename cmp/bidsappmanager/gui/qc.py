@@ -51,6 +51,9 @@ class QualityInspectorWindow(HasTraits):
     fmri_pipeline : Instance(HasTraits)
         Instance of functional MRI pipeline
 
+    eeg_pipeline : Instance(HasTraits)
+        Instance of EEG pipeline
+
     anat_inputs_checked : traits.Bool
         Indicates if inputs of anatomical pipeline are available
         (Default: False)
@@ -61,6 +64,10 @@ class QualityInspectorWindow(HasTraits):
 
     fmri_inputs_checked : traits.Bool
         Indicates if inputs of functional pipeline are available
+        (Default: False)
+
+    eeg_inputs_checked : traits.Bool
+        Indicates if inputs of EEG pipeline are available
         (Default: False)
 
     output_anat_available : traits.Bool
@@ -75,6 +82,10 @@ class QualityInspectorWindow(HasTraits):
         Indicates if outputs of functional pipeline are available
         (Default: False)
 
+    output_eeg_available : traits.Bool
+        Indicates if outputs of EEG pipeline are available
+        (Default: False)
+
     traits_view : QtView
         TraitsUI QtView that describes the content of the window
     """
@@ -83,14 +94,17 @@ class QualityInspectorWindow(HasTraits):
     anat_pipeline = Instance(HasTraits)
     dmri_pipeline = Instance(HasTraits)
     fmri_pipeline = Instance(HasTraits)
+    eeg_pipeline = Instance(HasTraits)
 
     anat_inputs_checked = Bool(False)
     dmri_inputs_checked = Bool(False)
     fmri_inputs_checked = Bool(False)
+    eeg_inputs_checked = Bool(False)
 
     output_anat_available = Bool(False)
     output_dmri_available = Bool(False)
     output_fmri_available = Bool(False)
+    output_eeg_available = Bool(False)
 
     traits_view = QtView(
         Group(
@@ -122,6 +136,16 @@ class QualityInspectorWindow(HasTraits):
                     visible_when="output_fmri_available",
                 ),
                 label="fMRI pipeline",
+                dock="tab",
+            ),
+            Group(
+                Item(
+                    "eeg_pipeline",
+                    style="custom",
+                    show_label=False,
+                    visible_when="output_eeg_available",
+                ),
+                label="EEG pipeline",
                 dock="tab",
             ),
             orientation="horizontal",
@@ -163,6 +187,7 @@ class QualityInspectorWindow(HasTraits):
         anat_inputs_checked=False,
         dmri_inputs_checked=False,
         fmri_inputs_checked=False,
+        eeg_inputs_checked=False
     ):
         """Constructor of an :class:``PipelineConfiguratorWindow`` instance.
 
@@ -182,6 +207,10 @@ class QualityInspectorWindow(HasTraits):
         fmri_inputs_checked : traits.Bool
             Boolean that indicates if functional pipeline inputs are available
             (Default: False)
+
+        eeg_inputs_checked : traits.Bool
+            Boolean that indicates if functional pipeline inputs are available
+            (Default: False)
         """
         print("> Initialize window...")
         self.project_info = project_info
@@ -189,6 +218,7 @@ class QualityInspectorWindow(HasTraits):
         self.anat_inputs_checked = anat_inputs_checked
         self.dmri_inputs_checked = dmri_inputs_checked
         self.fmri_inputs_checked = fmri_inputs_checked
+        self.eeg_inputs_checked = eeg_inputs_checked
 
         aborded = self.select_subject()
 
@@ -281,9 +311,6 @@ class QualityInspectorWindow(HasTraits):
                     else:
                         self.dmri_pipeline = None
 
-                    # self.dmri_pipeline.subject = self.project_info.subject
-                    # self.dmri_pipeline.global_conf.subject = self.project_info.subject
-
                 if self.fmri_inputs_checked:
                     self.project_info.fmri_config_file = os.path.join(
                         self.project_info.base_directory,
@@ -306,16 +333,27 @@ class QualityInspectorWindow(HasTraits):
                     else:
                         self.fmri_pipeline = None
 
-                    # self.fmri_pipeline.subject = self.project_info.subject
-                    # self.fmri_pipeline.global_conf.subject = self.project_info.subject
-
-                # self.anat_pipeline.global_conf.subject_session = self.project_info.subject_session
-
-                # if self.dmri_pipeline is not None:
-                #     self.dmri_pipeline.global_conf.subject_session = self.project_info.subject_session
-                #
-                # if self.fmri_pipeline is not None:
-                #     self.fmri_pipeline.global_conf.subject_session = self.project_info.subject_session
+                if self.eeg_inputs_checked:
+                    self.project_info.eeg_config_file = os.path.join(
+                        self.project_info.base_directory,
+                        "derivatives",
+                        __cmp_directory__,
+                        "{}".format(self.project_info.subject),
+                        "{}".format(self.project_info.subject_session),
+                        "{}_{}_EEG_config.json".format(
+                            self.project_info.subject, self.project_info.subject_session
+                        ),
+                    )
+                    if os.access(self.project_info.eeg_config_file, os.F_OK):
+                        print("> Initialize EEG pipeline")
+                        (
+                            eeg_valid_inputs,
+                            self.eeg_pipeline,
+                        ) = project.init_eeg_project(
+                            self.project_info, bids_layout, False
+                        )
+                    else:
+                        self.eeg_pipeline = None
 
                 print(
                     "  .. INFO: Selected session %s" % self.project_info.subject_session
@@ -365,9 +403,6 @@ class QualityInspectorWindow(HasTraits):
                     else:
                         self.dmri_pipeline = None
 
-                    # self.dmri_pipeline.subject = self.project_info.subject
-                    # self.dmri_pipeline.global_conf.subject = self.project_info.subject
-
                 if self.fmri_inputs_checked:
                     self.project_info.fmri_config_file = os.path.join(
                         self.project_info.base_directory,
@@ -386,10 +421,25 @@ class QualityInspectorWindow(HasTraits):
                     else:
                         self.fmri_pipeline = None
 
-                    # self.fmri_pipeline.subject = self.project_info.subject
-                    # self.fmri_pipeline.global_conf.subject = self.project_info.subject
+                if self.eeg_inputs_checked:
+                    self.project_info.eeg_config_file = os.path.join(
+                        self.project_info.base_directory,
+                        "derivatives",
+                        __cmp_directory__,
+                        "{}".format(self.project_info.subject),
+                        "{}_EEG_config.json".format(self.project_info.subject),
+                    )
+                    if os.access(self.project_info.eeg_config_file, os.F_OK):
+                        print("> Initialize EEG pipeline")
+                        (
+                            eeg_valid_inputs,
+                            self.eeg_pipeline,
+                        ) = project.init_eeg_project(
+                            self.project_info, bids_layout, False
+                        )
+                    else:
+                        self.eeg_pipeline = None
 
-                # self.anat_pipeline.global_conf.subject_session = ''
                 if self.anat_pipeline is not None:
                     self.anat_pipeline.stages[
                         "Segmentation"
@@ -436,6 +486,17 @@ class QualityInspectorWindow(HasTraits):
                     ):
                         self.output_fmri_available = True
 
+            if self.eeg_pipeline is not None:
+                print("> EEG pipeline output inspection")
+                self.eeg_pipeline.view_mode = "inspect_outputs_view"
+                for stage in list(self.eeg_pipeline.stages.values()):
+                    print("  ... Inspect stage {}".format(stage))
+                    stage.define_inspect_outputs()
+                    if (len(stage.inspect_outputs) > 0) and (
+                        stage.inspect_outputs[0] != "Outputs not available"
+                    ):
+                        self.output_eeg_available = True
+
             print_blue(
                 "  .. Anatomical output(s) available : %s" % self.output_anat_available
             )
@@ -445,11 +506,15 @@ class QualityInspectorWindow(HasTraits):
             print_blue(
                 "  .. fMRI output(s) available : %s" % self.output_fmri_available
             )
+            print_blue(
+                "  .. EEG output(s) available : %s" % self.output_fmri_available
+            )
 
             if (
                 self.output_anat_available
                 or self.output_dmri_available
                 or self.output_fmri_available
+                or self.output_eeg_available
             ):
                 valid_selected_subject = True
             else:
