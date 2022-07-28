@@ -718,6 +718,7 @@ class MNESpectralConnectivity(BaseInterface):
         con_res = dict()
         for method, c in zip(self.inputs.connectivity_metrics, con):
             con_res[method] = np.squeeze(c.get_data(output='dense'))
+            print(f'con_res[method] shape: {con_res[method].shape}')
 
         # Get parcellation labels used by MNE
         labels_parc = mne.read_labels_from_annot(
@@ -726,6 +727,8 @@ class MNESpectralConnectivity(BaseInterface):
             subjects_dir=self.inputs.fs_subjects_dir
         )
         roi_labels = [label.name for label in labels_parc]
+        print(f'roi_labels: {roi_labels}')
+        print(f'roi_labels (length): {len(roi_labels)}')
 
         save_eeg_connectome_file(
             con_res=con_res,
