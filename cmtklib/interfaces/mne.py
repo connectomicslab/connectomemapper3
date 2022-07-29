@@ -742,6 +742,7 @@ class MNESpectralConnectivity(BaseInterface):
             # Cartool is also using sub-cortical
             df_labels = pd.read_csv(self.inputs.roi_volume_tsv_file, delimiter="\t")
             roi_labels = list(df_labels["name"])
+            print(f'new roi_labels (length): {len(roi_labels)}')
 
         save_eeg_connectome_file(
             con_res=con_res,
