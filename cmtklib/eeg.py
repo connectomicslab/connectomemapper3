@@ -164,8 +164,7 @@ def save_eeg_connectome_file(output_dir, output_basename, con_res, roi_labels, o
                 g2[u_gml][v_gml][key] = d_gml[key]
         for u_gml, d_gml in G_out.nodes(data=True):
             g2.add_node(u_gml)
-            # g2.nodes[u_gml]["dn_multiscaleID"] = d_gml["dn_multiscaleID"]
-            g2.nodes[u_gml]["dn_mneID"] = d_gml["dn_mneID"]
+            g2.nodes[u_gml]["dn_multiscaleID"] = d_gml["dn_multiscaleID"]
             g2.nodes[u_gml]["dn_fsname"] = d_gml["dn_fsname"]
             g2.nodes[u_gml]["dn_hemisphere"] = d_gml["dn_hemisphere"]
             g2.nodes[u_gml]["dn_name"] = d_gml["dn_name"]
