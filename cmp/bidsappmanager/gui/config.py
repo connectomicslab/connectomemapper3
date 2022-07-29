@@ -111,12 +111,8 @@ class PipelineConfiguratorWindow(HasTraits):
         name="Save fMRI pipeline configuration as...", action="save_fmri_config_file"
     )
     eeg_save_config = Action(
-        name="Save EEG pipeline configuration as...", action="save_fmri_config_file"
+        name="Save EEG pipeline configuration as...", action="save_eeg_config_file"
     )
-
-    # anat_load_config = Action(name='Load anatomical pipeline configuration...',action='anat_load_config_file')
-    # dmri_load_config = Action(name='Load diffusion pipeline configuration...',action='load_dmri_config_file')
-    # fmri_load_config = Action(name='Load fMRI pipeline configuration...',action='load_fmri_config_file')
 
     save_all_config = Button("")
 
