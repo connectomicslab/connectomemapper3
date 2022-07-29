@@ -483,7 +483,7 @@ class MNEInverseSolutionROIInputSpec(BaseInterfaceInputSpec):
 
     fwd_file = traits.File(desc="Forward solution in fif format", mandatory=True)
 
-    parc_annot = traits.Enum(
+    atlas_annot = traits.Enum(
         ['aparc', 'lausanne2018.scale1', 'lausanne2018.scale2',
          'lausanne2018.scale3', 'lausanne2018.scale4', 'lausanne2018.scale5'],
         desc="The parcellation to use, e.g., 'aparc', 'lausanne2018.scale1', "
@@ -529,7 +529,7 @@ class MNEInverseSolutionROI(BaseInterface):
     >>> inv_sol.inputs.bem_file = '/path/to/sub-01_bem.fif'
     >>> inv_sol.inputs.noise_cov_file = '/path/to/sub-01_noisecov.fif'
     >>> inv_sol.inputs.fwd_file = '/path/to/sub-01_fwd.fif'
-    >>> inv_sol.inputs.parc_annot = 'lausanne2018.scale1'
+    >>> inv_sol.inputs.atlas_annot = 'lausanne2018.scale1'
     >>> inv_sol.inputs.out_roi_ts_fname_prefix = 'sub-01_atlas-L2018_res-scale1_desc-epo_timeseries'
     >>> inv_sol.inputs.out_inv_fname = 'sub-01_inv.fif'
     >>> inv_sol.run()  # doctest: +SKIP
@@ -559,7 +559,7 @@ class MNEInverseSolutionROI(BaseInterface):
             self.inputs.fwd_file,
             self.inputs.noise_cov_file,
             self.inputs.src_file,
-            self.inputs.parc_annot,
+            self.inputs.atlas_annot,
             self.inputs.out_inv_fname,
             self.inputs.esi_method,
             self.inputs.esi_method_snr
@@ -571,7 +571,7 @@ class MNEInverseSolutionROI(BaseInterface):
     @staticmethod
     def _createInv_MNE(
         fs_subjects_dir, subject, epochs_file, fwd_file, noise_cov_file,
-        src_file, parc_annot, out_inv_fname, esi_method, esi_method_snr
+        src_file, atlas_annot, out_inv_fname, esi_method, esi_method_snr
     ):
         # Load files
         epochs = mne.read_epochs(epochs_file)
@@ -597,7 +597,7 @@ class MNEInverseSolutionROI(BaseInterface):
 
         # Read the labels of the source points
         labels_parc = mne.read_labels_from_annot(
-            subject, parc=parc_annot, subjects_dir=fs_subjects_dir
+            subject, parc=atlas_annot, subjects_dir=fs_subjects_dir
         )
 
         # Get the ROI time courses
@@ -637,7 +637,9 @@ class MNESpectralConnectivityInputSpec(BaseInterfaceInputSpec):
 
     roi_ts_file = File(exists=True, desc="Extracted ROI time courses from ESI in .npy format")
 
-    parc_annot = traits.Enum(
+    roi_volume_tsv_file = File(exists=True, desc="Index / label atlas mapping file in .tsv format accordingly to BIDS")
+
+    atlas_annot = traits.Enum(
         ['aparc', 'lausanne2018.scale1', 'lausanne2018.scale2',
          'lausanne2018.scale3', 'lausanne2018.scale4', 'lausanne2018.scale5'],
         desc="The parcellation to use, e.g., 'aparc', 'lausanne2018.scale1', "
@@ -676,7 +678,7 @@ class MNESpectralConnectivity(BaseInterface):
     >>> eeg_cmat = MNESpectralConnectivity()
     >>> eeg_cmat.inputs.fs_subject = 'sub-01'
     >>> eeg_cmat.inputs.fs_subjects_dir = '/path/to/bids_dataset/derivatives/freesurfer-7.1.1'
-    >>> eeg_cmat.inputs.parc_annot = 'lausanne2018.scale1'
+    >>> eeg_cmat.inputs.atlas_annot = 'lausanne2018.scale1'
     >>> eeg_cmat.inputs.connectivity_metrics = ['imcoh', 'pli', 'wpli']
     >>> eeg_cmat.inputs.output_types = ['tsv', 'gpickle', 'mat', 'graphml']
     >>> eeg_cmat.inputs.epochs_file = '/path/to/sub-01_epo.fif'
@@ -716,19 +718,30 @@ class MNESpectralConnectivity(BaseInterface):
         # con is a 3D array, get the connectivity for the first (and only) freq. band
         # for each method
         con_res = dict()
+        nb_rois: int = 0
         for method, c in zip(self.inputs.connectivity_metrics, con):
             con_res[method] = np.squeeze(c.get_data(output='dense'))
-            print(f'con_res[method] shape: {con_res[method].shape}')
+
+            if nb_rois == 0:
+                nb_rois = con_res[method].shape[0]
 
         # Get parcellation labels used by MNE
         labels_parc = mne.read_labels_from_annot(
             subject=self.inputs.fs_subject,
-            parc=self.inputs.parc_annot,
+            parc=self.inputs.atlas_annot,
             subjects_dir=self.inputs.fs_subjects_dir
         )
         roi_labels = [label.name for label in labels_parc]
-        print(f'roi_labels: {roi_labels}')
+
+        print(f'nb_rois: {nb_rois}')
         print(f'roi_labels (length): {len(roi_labels)}')
+
+        # Special handle of labels for Cartool as it includes
+        # all cortical and sub-cortical rois
+        if self.inputs.roi_volume_tsv_file and (len(roi_labels) < nb_rois):
+            # Cartool is also using sub-cortical
+            df_labels = pd.read_csv(self.inputs.roi_volume_tsv_file, delimiter="\t")
+            roi_labels = list(df_labels["name"])
 
         save_eeg_connectome_file(
             con_res=con_res,

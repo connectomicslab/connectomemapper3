@@ -94,7 +94,7 @@ class EEGConnectomeStage(Stage):
                            else '_'.join([subject, session]))
 
         self.config = EEGConnectomeConfig()
-        self.inputs = ["roi_ts_file", "epochs_file"]
+        self.inputs = ["roi_ts_file", "epochs_file", "roi_volume_tsv_file"]
         self.outputs = ["connectivity_matrices"]
 
     def create_workflow(self, flow, inputnode, outputnode):
@@ -116,7 +116,7 @@ class EEGConnectomeStage(Stage):
             interface=MNESpectralConnectivity(
                 fs_subject=self.fs_subject,
                 fs_subjects_dir=self.fs_subjects_dir,
-                parc_annot=(f'lausanne2018.{self.config.lausanne2018_parcellation_res}'
+                atlas_annot=(f'lausanne2018.{self.config.lausanne2018_parcellation_res}'
                             if self.config.parcellation_scheme == "Lausanne2018"
                             else 'aparc'),
                 connectivity_metrics=self.config.connectivity_metrics,
@@ -130,7 +130,8 @@ class EEGConnectomeStage(Stage):
         flow.connect(
             [
                 (inputnode, eeg_cmat, [("epochs_file", "epochs_file"),
-                                       ("roi_ts_file", "roi_ts_file")]),
+                                       ("roi_ts_file", "roi_ts_file"),
+                                       ("roi_volume_tsv_file", "roi_volume_tsv_file")]),
                 (eeg_cmat, outputnode, [("connectivity_matrices", "connectivity_matrices")])
             ]
         )

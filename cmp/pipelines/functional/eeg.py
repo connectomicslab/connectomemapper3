@@ -7,6 +7,7 @@
 """EEG pipeline Class definition."""
 
 # General imports
+import copy
 import json
 import os
 import datetime
@@ -306,6 +307,17 @@ class EEGPipeline(Pipeline):
         )
         if debug:  # pragma: no cover
             print(f'\t.. DEBUG: Use parcellation {roi_volume_file}.')
+
+        # Handle parcellation tsv file
+        roi_volume_tsv_file = copy.deepcopy(roi_volume_file)
+        roi_volume_tsv_file.extension = "tsv"
+
+        input_files.append(roi_volume_tsv_file)
+        output_query.update(
+            {"roi_volume_tsv_file": roi_volume_tsv_file.get_query_dict()}
+        )
+        if debug:  # pragma: no cover
+            print(f'\t.. DEBUG: Use parcellation index/label mapping {roi_volume_tsv_file}.')
 
         output_query_json = json.loads(json.dumps(output_query))
 
@@ -607,6 +619,7 @@ class EEGPipeline(Pipeline):
         # fmt: off
         eeg_flow.connect(
             [
+                (datasource, cmat_flow, [(("roi_volume_tsv_file", extract_first_file_from_list), "inputnode.roi_volume_tsv_file")]),
                 (esi_flow, cmat_flow, [("outputnode.roi_ts_npy_file", "inputnode.roi_ts_file")]),
                 (preproc_flow, cmat_flow, [("outputnode.epochs_file", "inputnode.epochs_file")]),
                 (esi_flow, sinker, [("outputnode.roi_ts_npy_file", "eeg.@roi_ts_npy_file"),
