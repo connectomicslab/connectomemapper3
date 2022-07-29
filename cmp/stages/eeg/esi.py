@@ -357,7 +357,7 @@ class EEGSourceImagingStage(Stage):
                 fs_subjects_dir=self.fs_subjects_dir,
                 out_roi_ts_fname_prefix="timeseries",
                 out_inv_fname="inv.fif",
-                parc_annot=(f'lausanne2018.{self.config.lausanne2018_parcellation_res}'
+                atlas_annot=(f'lausanne2018.{self.config.lausanne2018_parcellation_res}'
                             if self.config.parcellation_scheme == "Lausanne2018"
                             else 'aparc'),
                 esi_method=self.config.mne_esi_method,

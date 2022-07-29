@@ -46,6 +46,8 @@
         "cartool_svd_toi_end": 0.25
     },
     "eeg_connectome_stage": {
+        "parcellation_scheme": "Lausanne2018",
+        "lausanne2018_parcellation_res": "scale1",
         "connectivity_metrics": [
             "coh",
             "cohy",
