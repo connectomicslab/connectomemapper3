@@ -80,7 +80,7 @@ class EEGPreprocessingConfigUI(EEGPreprocessingConfig):
                     visible_when='electrodes_file_fmt=="BIDS"'
                 ),
                 Group(
-                    Include("cartool_electrodes_group"),
+                    Include("cartool_electrodes_file_group"),
                     visible_when='electrodes_file_fmt=="Cartool"'
                 ),
                 label="EEG Preprocessed inputs",

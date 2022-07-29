@@ -54,6 +54,7 @@ class EEGSourceImagingConfigUI(EEGSourceImagingConfig):
         label="Inverse solution file"
     )
 
+    # TODO: Add parcellation traits
     traits_view = View(
         VGroup(
             VGroup(
