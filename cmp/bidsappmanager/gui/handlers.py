@@ -13,10 +13,8 @@ from traitsui.message import error
 
 # Own imports
 from cmtklib.config import (
-    anat_save_config, get_anat_process_detail_json,
-    dmri_save_config, fmri_save_config,
-    get_dmri_process_detail_json, get_fmri_process_detail_json,
-    anat_load_config_json, dmri_load_config_json,
+    anat_save_config, dmri_save_config, fmri_save_config, eeg_save_config,
+    anat_load_config_json, dmri_load_config_json, eeg_load_config_json,
     fmri_load_config_json, convert_config_ini_2_json
 )
 from cmtklib.process import run
@@ -26,6 +24,7 @@ import cmp.bidsappmanager.project
 from cmp.bidsappmanager.pipelines.anatomical import anatomical as anatomical_pipeline
 from cmp.bidsappmanager.pipelines.diffusion import diffusion as diffusion_pipeline
 from cmp.bidsappmanager.pipelines.functional import fMRI as fMRI_pipeline
+from cmp.bidsappmanager.pipelines.functional import eeg as EEG_pipeline
 
 
 class ConfigQualityWindowHandler(Handler):
@@ -72,6 +71,17 @@ class ConfigQualityWindowHandler(Handler):
 
     fmri_processed : traits.Bool
         Indicate if fMRI pipeline was run
+        (Default: False)
+
+    eeg_pipeline : Instance(HasTraits)
+        Instance of :class:`EEGPipelineUI` class
+
+    eeg_inputs_checked : traits.Bool
+        Indicate if EEG pipeline inputs are available
+        (Default: False)
+
+    eeg_processed : traits.Bool
+        Indicate if EEG pipeline was run
         (Default: False)
     """
 
@@ -1330,7 +1340,7 @@ class ConfigQualityWindowHandler(Handler):
         ui_info : QtView
             TraitsUI QtView associated with ``self``
         """
-        dialog = FileDialog(action="open", wildcard="*diffusion_config.json")
+        dialog = FileDialog(action="open", wildcard="*fMRI_config.json")
         dialog.open()
         if dialog.return_code == OK:
             if (
@@ -1346,9 +1356,66 @@ class ConfigQualityWindowHandler(Handler):
                 ui_info.ui.context["object"].project_info.fmri_config_file,
             )
 
+    @classmethod
+    def save_eeg_config_file(self, ui_info):
+        """Function that saves the EEG pipeline configuration file.
+
+        Parameters
+        ----------
+        ui_info : QtView
+            TraitsUI QtView associated with ``self``
+        """
+        print_blue("[Save EEG pipeline configuration]")
+        dialog = FileDialog(
+            action="save as",
+            default_filename=os.path.join(
+                ui_info.ui.context["object"].project_info.base_directory,
+                "code",
+                "ref_EEG_config.json",
+            ),
+        )
+        dialog.open()
+        if dialog.return_code == OK:
+            eeg_save_config(
+                ui_info.ui.context["object"].eeg_pipeline,
+                ui_info.ui.context["object"].project_info.eeg_config_file,
+            )
+            if (
+                dialog.path
+                != ui_info.ui.context["object"].project_info.eeg_config_file
+            ):
+                shutil.copy(
+                    ui_info.ui.context["object"].project_info.eeg_config_file,
+                    dialog.path,
+                )
+
+    def load_eeg_config_file(self, ui_info):
+        """Function that loads the EEG pipeline configuration file.
+
+        Parameters
+        ----------
+        ui_info : QtView
+            TraitsUI QtView associated with ``self``
+        """
+        dialog = FileDialog(action="open", wildcard="*EEG_config.json")
+        dialog.open()
+        if dialog.return_code == OK:
+            if (
+                dialog.path
+                != ui_info.ui.context["object"].project_info.eeg_config_file
+            ):
+                shutil.copy(
+                    dialog.path,
+                    ui_info.ui.context["object"].project_info.eeg_config_file,
+                )
+            eeg_load_config_json(
+                self.eeg_pipeline,
+                ui_info.ui.context["object"].project_info.eeg_config_file,
+            )
+
 
 class MainWindowHandler(Handler):
-    """Event handler of the Configurator and Inspector (Quality Control) windows.
+    """Event handler of the main window.
 
     Attributes
     ----------
@@ -1608,6 +1675,19 @@ class MainWindowHandler(Handler):
                         print("        * Available DWI(s): {}".format(query_files))
                         diffusion_available = True
 
+                    query_files = [
+                        f.filename
+                        for f in bids_layout.get(
+                            subject=subject,
+                            session=sessions[0],
+                            datatype="eeg",
+                            suffix="eeg",
+                        )
+                    ]
+                    if len(query_files) > 0:
+                        print("        * Available EEG data: {}".format(query_files))
+                        eeg_available = True
+
                 else:
                     print(
                         f"    ... Check for available input modalities for subject {subject}..."
@@ -1651,12 +1731,24 @@ class MainWindowHandler(Handler):
                     if len(query_files) > 0:
                         print("        * Available BOLD(s): {}".format(query_files))
                         fmri_available = True
+
+                    query_files = [
+                        f.filename
+                        for f in bids_layout.get(subject=subject, datatype="eeg", suffix="eeg")
+                    ]
+                    if len(query_files) > 0:
+                        print("        * Available EEG data: {}".format(query_files))
+                        eeg_available = True
             except ValueError as e:
                 msg = str(e)
                 error(message=msg, title="BIDS error")
-            except Exception:
-                error(message="Invalid BIDS dataset. Please see documentation for more details.",
-                  title="BIDS error")
+                return
+            except Exception as e:
+                error(
+                    message="Invalid BIDS dataset. Please see documentation for more details.\n"
+                            f"Exception traceback: {e.__traceback__}",
+                    title="BIDS error"
+                )
                 return
 
             ui_info.ui.context["object"].project_info = loaded_project
@@ -1678,9 +1770,16 @@ class MainWindowHandler(Handler):
                 if debug:  # pragma: no cover
                     print("fmri input check : {}".format(fmri_inputs_checked))
 
+            eeg_inputs_checked = False
+            if t1_available and eeg_available:
+                eeg_inputs_checked = True
+                if debug:  # pragma: no cover
+                    print("eeg input check : {}".format(eeg_inputs_checked))
+
             self.anat_inputs_checked = anat_inputs_checked
             self.dmri_inputs_checked = dmri_inputs_checked
             self.fmri_inputs_checked = fmri_inputs_checked
+            self.eeg_inputs_checked = eeg_inputs_checked
 
             if anat_inputs_checked:
 
@@ -2038,29 +2137,44 @@ class MainWindowHandler(Handler):
 
                     self.project_loaded = True
 
+                if eeg_inputs_checked:
+                    self.eeg_pipeline = EEG_pipeline.EEGPipelineUI(loaded_project)
+                    self.eeg_pipeline.number_of_cores = loaded_project.number_of_cores
+                    self.eeg_pipeline.parcellation_scheme = \
+                        ui_info.ui.context["object"].project_info.parcellation_scheme
+                    code_directory = os.path.join(loaded_project.base_directory, "code")
+                    eeg_config_file = os.path.join(
+                        code_directory, "ref_EEG_config.json"
+                    )
 
                     loaded_project.eeg_config_file = eeg_config_file
                     self.eeg_pipeline.config_file = eeg_config_file
 
-        while len(processes) > 0:
-            self.manage_bidsapp_procs(processes)
+                    if (
+                        not os.path.isfile(eeg_config_file)
+                        and self.eeg_pipeline is not None
+                    ):
+                        print(">> Create new reference EEG config file...")
+                        eeg_save_config(self.eeg_pipeline, eeg_config_file)
+                    else:
+                        print(">> Load reference EEG config file...")
 
-        print("Processing with BIDS App Finished")
+                        # if datalad_is_available:
+                        #     print('... Datalad get reference fMRI config file : {}'.format(loaded_project.anat_config_file))
+                        #     cmd = 'datalad run -m "Get reference fMRI config file" bash -c "datalad get code/ref_fMRI_config.json"'
+                        #     try:
+                        #         print('... cmd: {}'.format(cmd))
+                        #         core.run( cmd, env={}, cwd=os.path.abspath(loaded_project.base_directory))
+                        #     except Exception:
+                        #         print("    ERROR: Failed to get file")
 
-        ui_info.ui.context["object"].docker_running = False
+                        eeg_load_config_json(
+                            self.eeg_pipeline, loaded_project.eeg_config_file
+                        )
 
-        return True
+                    ui_info.ui.context["object"].eeg_pipeline = self.eeg_pipeline
+                    loaded_project.eeg_available = self.eeg_inputs_checked
 
-    @classmethod
-    def stop_bids_app(ui_info):
-        """Function that stops the BIDS execution.
+                    ui_info.ui.context["object"].project_info = loaded_project
 
-        Parameters
-        ----------
-        ui_info : QtView
-            TraitsUI QtView associated with this handler
-        """
-        print("Stop BIDS App")
-        # self.docker_process.kill()
-        ui_info.ui.context["object"].docker_running = False
-        return True
+                    self.project_loaded = True
