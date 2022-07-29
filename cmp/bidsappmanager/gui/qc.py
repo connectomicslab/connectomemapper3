@@ -12,6 +12,7 @@ import os
 from traitsui.qt4.extra.qt_view import QtView
 from traitsui.api import *
 from traits.api import *
+from traitsui.handler import Handler
 
 from bids import BIDSLayout
 
@@ -162,7 +163,7 @@ class QualityInspectorWindow(HasTraits):
                 name="File",
             ),
         ),
-        handler=cmp.bidsappmanager.gui.handlers.ConfigQualityWindowHandler(),
+        handler=Handler(),
         style_sheet=style_sheet,
         width=0.5,
         height=0.8,

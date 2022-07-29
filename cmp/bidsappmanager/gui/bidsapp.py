@@ -25,6 +25,7 @@ from pyface.api import ImageResource
 from traitsui.qt4.extra.qt_view import QtView
 from traitsui.api import *
 from traits.api import *
+from traitsui.handler import Handler
 
 from bids import BIDSLayout
 
@@ -467,6 +468,7 @@ class BIDSAppInterfaceWindow(HasTraits):
             springy=True,
         ),
         title="Connectome Mapper 3 BIDS App GUI",
+        handler=Handler(),
         buttons=[],
         width=0.6,
         height=0.8,

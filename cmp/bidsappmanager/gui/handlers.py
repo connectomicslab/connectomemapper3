@@ -18,7 +18,11 @@ from cmtklib.config import (
     fmri_load_config_json, convert_config_ini_2_json
 )
 from cmtklib.process import run
-from cmtklib.util import print_warning, print_error, print_blue
+from cmtklib.util import (
+    print_warning,
+    # print_error,
+    print_blue
+)
 
 import cmp.bidsappmanager.project
 from cmp.bidsappmanager.pipelines.anatomical import anatomical as anatomical_pipeline
