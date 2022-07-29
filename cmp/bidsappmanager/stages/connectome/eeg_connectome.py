@@ -133,11 +133,17 @@ class EEGConnectomeStageUI(EEGConnectomeStage):
         buttons=["OK", "Cancel"],
     )
 
-    def __init__(self, bids_dir, output_dir):
+    def __init__(self, subject, session, bids_dir, output_dir):
         """Constructor of the EEGConnectomeStageUI class.
 
         Parameters
         ----------
+        subject : str
+            Subject label
+
+        session : str
+            Session label
+
         bids_dir : traits.Directory
             BIDS root directory
 
@@ -148,7 +154,7 @@ class EEGConnectomeStageUI(EEGConnectomeStage):
         ---------
         cmp.stages.connectome.eeg_connectome.EEGConnectomeStage.__init__
         """
-        EEGConnectomeStage.__init__(self, bids_dir, output_dir)
+        EEGConnectomeStage.__init__(self, subject, session, bids_dir, output_dir)
         self.config = EEGConnectomeConfigUI()
 
     def _inspect_output_button_fired(self, info):

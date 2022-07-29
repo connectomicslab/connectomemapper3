@@ -30,19 +30,57 @@ class EEGPreprocessingConfigUI(EEGPreprocessingConfig):
     cmp.stages.eeg.preprocessing.EEGPreprocessingConfig
     """
 
+    eeg_ts_file_group = VGroup(
+        Item('object.eeg_ts_file.toolbox_derivatives_dir', label="Derivatives directory"),
+        Item('object.eeg_ts_file.task', label="task", style='readonly'),
+        Item('object.eeg_ts_file.desc', label="desc"),
+        Item('object.eeg_ts_file.suffix', label="suffix", style='readonly'),
+        Item('object.eeg_ts_file.extension', label="extension"),
+        label="Preprocessed EEG recording file"
+    )
+
+    events_file_group = VGroup(
+        Item('object.events_file.toolbox_derivatives_dir', label="Derivatives directory"),
+        Item('object.events_file.task', label="task", style='readonly'),
+        Item('object.events_file.desc', label="desc"),
+        Item('object.events_file.suffix', label="suffix", style='readonly'),
+        label="Recording events file"
+    )
+
+    bids_electrodes_file_group = VGroup(
+        Item('object.bids_electrodes_file.toolbox_derivatives_dir', label="Derivatives directory"),
+        Item('object.bids_electrodes_file.task', label="task", style='readonly'),
+        Item('object.bids_electrodes_file.desc', label="desc"),
+        Item('object.bids_electrodes_file.suffix', label="suffix", style='readonly'),
+        Item('object.bids_electrodes_file.extension', label="extension", style='readonly'),
+        label="Electrodes file (BIDS)"
+    )
+
+    cartool_electrodes_file_group = VGroup(
+        Item('object.cartool_electrodes_file.toolbox_derivatives_dir', label="Derivatives directory"),
+        Item('object.cartool_electrodes_file.desc', label="desc"),
+        Item('object.cartool_electrodes_file.suffix', label="suffix", style='readonly'),
+        Item('object.cartool_electrodes_file.extension', label="extension", style='readonly'),
+        label="Electrodes file (Cartool)"
+    )
+
     traits_view = View(
         VGroup(
             VGroup(
                 Item("task_label"),
-                Item("eeg_ts_file"),
-                Item("events_file"),
+                Group(
+                    Include('eeg_ts_file_group'),
+                ),
+                Group(
+                    Include('events_file_group'),
+                ),
                 Item("electrodes_file_fmt"),
-                Item(
-                    "bids_electrodes_file",
+                Group(
+                    Include("bids_electrodes_file_group"),
                     visible_when='electrodes_file_fmt=="BIDS"'
                 ),
-                Item(
-                    "cartool_electrodes_file",
+                Group(
+                    Include("cartool_electrodes_group"),
                     visible_when='electrodes_file_fmt=="Cartool"'
                 ),
                 label="EEG Preprocessed inputs",
@@ -53,8 +91,8 @@ class EEGPreprocessingConfigUI(EEGPreprocessingConfig):
                 label="Epochs time window"
             )
         ),
-        width=0.5,
-        height=0.5,
+        width=0.4,
+        height=0.6,
     )
 
 
@@ -112,19 +150,25 @@ class EEGPreprocessingStageUI(EEGPreprocessingStage):
         ),
         scrollable=True,
         resizable=True,
-        height=350,
-        width=650,
+        height=650,
+        width=450,
         kind="livemodal",
         title="Edit stage configuration",
         buttons=["OK", "Cancel"],
     )
 
     # General and UI members
-    def __init__(self, bids_dir, output_dir):
-        """Constructor of the diffusion PreprocessingStageUI class.
+    def __init__(self, subject, session, bids_dir, output_dir):
+        """Constructor of the EEGPreprocessingStageUI class.
 
         Parameters
         -----------
+        subject : str
+            Subject label
+
+        session : str
+            Session label
+
         bids_dir : path
             BIDS root directory
 
@@ -136,7 +180,7 @@ class EEGPreprocessingStageUI(EEGPreprocessingStage):
         cmp.stages.eeg.preprocessing.EEGPreprocessingStage.__init_
         cmp.cmpbidsappmanager.stages.eeg.preprocessing.EEGPreprocessingStageUI
         """
-        EEGPreprocessingStage.__init__(self, bids_dir, output_dir)
+        EEGPreprocessingStage.__init__(self, subject, session, bids_dir, output_dir)
         self.config = EEGPreprocessingConfigUI()
 
     def _inspect_output_button_fired(self, info):

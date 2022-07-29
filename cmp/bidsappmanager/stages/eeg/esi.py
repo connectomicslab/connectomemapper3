@@ -30,6 +30,30 @@ class EEGSourceImagingConfigUI(EEGSourceImagingConfig):
     cmp.stages.eeg.esi.EEGSourceImagingConfig
     """
 
+    mne_electrode_transform_file_group = VGroup(
+        Item('object.mne_electrode_transform_file.toolbox_derivatives_dir', label="Derivatives directory"),
+        Item('object.mne_electrode_transform_file.desc', label="desc"),
+        Item('object.mne_electrode_transform_file.suffix', label="suffix", style='readonly'),
+        Item('object.mne_electrode_transform_file.extension', label="extension", style='readonly'),
+        label="MNE electrode transform"
+    )
+
+    cartool_spi_file_group = VGroup(
+        Item('object.cartool_spi_file.toolbox_derivatives_dir', label="Derivatives directory"),
+        Item('object.cartool_spi_file.desc', label="desc"),
+        Item('object.cartool_spi_file.suffix', label="suffix", style='readonly'),
+        Item('object.cartool_spi_file.extension', label="extension"),
+        label="Source space file"
+    )
+
+    cartool_invsol_file_group = VGroup(
+        Item('object.cartool_invsol_file.toolbox_derivatives_dir', label="Derivatives directory"),
+        Item('object.cartool_invsol_file.desc', label="desc"),
+        Item('object.cartool_invsol_file.suffix', label="suffix", style='readonly'),
+        Item('object.cartool_invsol_file.extension', label="extension"),
+        label="Inverse solution file"
+    )
+
     traits_view = View(
         VGroup(
             VGroup(
@@ -44,8 +68,8 @@ class EEGSourceImagingConfigUI(EEGSourceImagingConfig):
                 ),
                 VGroup(
                     Item("mne_apply_electrode_transform"),
-                    Item(
-                        "mne_electrode_transform_file",
+                    Group(
+                        Include("mne_electrode_transform_file_group"),
                         visible_when='mne_apply_electrode_transform'
                     ),
                     label="Extra MNE transform of electrode positions"
@@ -55,8 +79,8 @@ class EEGSourceImagingConfigUI(EEGSourceImagingConfig):
             ),
             VGroup(
                 VGroup(
-                    Item("cartool_spi_file"),
-                    Item("cartool_invsol_file"),
+                    Group(Include("cartool_spi_file_group")),
+                    Group(Include("cartool_invsol_file_group")),
                     label="Input files"
                 ),
                 VGroup(
@@ -73,8 +97,8 @@ class EEGSourceImagingConfigUI(EEGSourceImagingConfig):
                 visible_when='esi_tool=="Cartool"'
             )
         ),
-        width=0.5,
-        height=0.5,
+        width=0.4,
+        height=0.6,
     )
 
 
@@ -132,19 +156,25 @@ class EEGSourceImagingStageUI(EEGSourceImagingStage):
         ),
         scrollable=True,
         resizable=True,
-        height=350,
-        width=650,
+        height=650,
+        width=450,
         kind="livemodal",
         title="Edit stage configuration",
         buttons=["OK", "Cancel"],
     )
 
     # General and UI members
-    def __init__(self, bids_dir, output_dir):
-        """Constructor of the diffusion EEGSourceImagingStageUI class.
+    def __init__(self, subject, session, bids_dir, output_dir):
+        """Constructor of the EEGSourceImagingStageUI class.
 
         Parameters
         -----------
+        subject : str
+            Subject label
+
+        session : str
+            Session label
+
         bids_dir : path
             BIDS root directory
 
@@ -156,7 +186,7 @@ class EEGSourceImagingStageUI(EEGSourceImagingStage):
         cmp.stages.eeg.esi.EEGSourceImagingStage.__init_
         cmp.cmpbidsappmanager.stages.esi.EEGSourceImagingStageUI
         """
-        EEGSourceImagingStage.__init__(self, bids_dir, output_dir)
+        EEGSourceImagingStage.__init__(self, subject, session, bids_dir, output_dir)
         self.config = EEGSourceImagingConfigUI()
 
     def _inspect_output_button_fired(self, info):

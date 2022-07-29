@@ -388,7 +388,7 @@ class BIDSAppInterfaceWindow(HasTraits):
                             "eeg_config",
                             editor=FileEditor(dialog_style="open"),
                             label="Configuration file",
-                            visible_when="run_fmri_pipeline",
+                            visible_when="run_eeg_pipeline",
                         ),
                         label="EEG pipeline",
                         visible_when="eeg_inputs_checked==True",
