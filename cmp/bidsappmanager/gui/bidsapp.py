@@ -50,7 +50,10 @@ from cmtklib.carbonfootprint import (
 import cmp.bidsappmanager.gui.handlers
 import cmp.bidsappmanager.project as project
 from cmp.bidsappmanager.gui.traits import MultiSelectAdapter
-from cmp.bidsappmanager.gui.globals import get_icon, modal_width
+from cmp.bidsappmanager.gui.globals import (
+    # get_icon,
+    modal_width
+)
 
 # Remove warnings visible whenever you import scipy (or another package)
 # that was compiled against an older numpy than is installed.
@@ -464,7 +467,6 @@ class BIDSAppInterfaceWindow(HasTraits):
             springy=True,
         ),
         title="Connectome Mapper 3 BIDS App GUI",
-        handler=cmp.bidsappmanager.gui.handlers.BIDSAppInterfaceWindowHandler(),
         buttons=[],
         width=0.6,
         height=0.8,
