@@ -94,8 +94,9 @@ def save_eeg_connectome_file(output_dir, output_basename, con_res, roi_labels, o
         output_basename
     )
 
-    # In TSV format (by default to be BIDS compliant)
+    # In TSV format by default to be BIDS compliant
     print(f"Save {con_basepath}.tsv...")
+
     # Write header fields
     with open(f"{con_basepath}.tsv", "w") as out_file:
         tsv_writer = csv.writer(out_file, delimiter="\t")
@@ -113,11 +114,13 @@ def save_eeg_connectome_file(output_dir, output_basename, con_res, roi_labels, o
             encoding="utf-8",
         )
 
+    # In GPickle format
     if "gpickle" in output_types:
         # Storing network/graph in gpickle that might be prefered by the user
         print(f"Save {con_basepath}.gpickle...")
         nx.write_gpickle(G_out, f"{con_basepath}.gpickle")
 
+    # In MAT format
     if "mat" in output_types:
         edge_struct = {}
         for edge_key in edge_keys:
@@ -151,6 +154,8 @@ def save_eeg_connectome_file(output_dir, output_basename, con_res, roi_labels, o
             long_field_names=True,
             mdict={"fc": edge_struct, "nodes": node_struct},
         )
+
+    # In GRAPHML format
     if "graphml" in output_types:
         g2 = nx.Graph()
         for u_gml, v_gml, d_gml in G_out.edges(data=True):
