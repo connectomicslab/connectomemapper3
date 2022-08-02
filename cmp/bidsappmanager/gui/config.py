@@ -189,7 +189,7 @@ class PipelineConfiguratorWindow(HasTraits):
         title="Connectome Mapper 3 Configurator",
         menubar=MenuBar(
             Menu(
-                ActionGroup(anat_save_config, dmri_save_config, fmri_save_config),
+                ActionGroup(anat_save_config, dmri_save_config, fmri_save_config, eeg_save_config),
                 ActionGroup(Action(name="Quit", action="_on_close")),
                 name="File",
             )
