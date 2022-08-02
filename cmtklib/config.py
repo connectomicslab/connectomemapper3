@@ -111,7 +111,7 @@ def save_configparser_as_json(config, config_json_path, ini_mode=False, debug=Fa
         )
     if "eeg_source_imaging_stage" in config.sections():
         esi_tool = config["eeg_source_imaging_stage"].get(
-            "electrodes_file_fmt"
+            "esi_tool"
         )
 
     for section in config.sections():
@@ -173,7 +173,7 @@ def save_configparser_as_json(config, config_json_path, ini_mode=False, debug=Fa
 
             if "eeg_source_imaging_stage" in section:
                 if esi_tool == "Cartool":
-                    if "mne_esi" in name:
+                    if "mne" in name:
                         if debug:  # pragma: no cover
                             print_warning(f"  .. DEBUG: Skip parameter {section} / {name}")
                         continue
