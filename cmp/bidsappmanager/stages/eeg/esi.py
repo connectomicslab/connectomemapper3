@@ -58,44 +58,48 @@ class EEGSourceImagingConfigUI(EEGSourceImagingConfig):
     traits_view = View(
         VGroup(
             VGroup(
-                Item("esi_tool"),
-                label="ESI tool selection",
+                Item("parcellation_cmp_dir", label="Toolbox derivatives directory"),
+                HGroup(
+                    Item("parcellation_scheme", label="Parcellation scheme"),
+                    Item("lausanne2018_parcellation_res",
+                         label="Scale",
+                         visible_when='parcellation_scheme=="Lausanne2018"'),
+                ),
+                label="Structural parcellation",
             ),
             VGroup(
+                Item("esi_tool", label="Tool"),
                 VGroup(
-                    Item("mne_esi_method"),
-                    Item("mne_esi_method_snr"),
-                    label="EEG source imaging method"
-                ),
-                VGroup(
-                    Item("mne_apply_electrode_transform"),
+                    VGroup(
+                        Item("mne_esi_method"),
+                        Item("mne_esi_method_snr"),
+                        Item("mne_apply_electrode_transform", label="Apply electrode transform"),
+                        label="Method"
+                    ),
                     Group(
                         Include("mne_electrode_transform_file_group"),
                         visible_when='mne_apply_electrode_transform'
                     ),
-                    label="Extra MNE transform of electrode positions"
-                ),
-                label="MNE configuration",
-                visible_when='esi_tool=="MNE"'
-            ),
-            VGroup(
-                VGroup(
-                    Group(Include("cartool_spi_file_group")),
-                    Group(Include("cartool_invsol_file_group")),
-                    label="Input files"
+                    visible_when='esi_tool=="MNE"'
                 ),
                 VGroup(
-                    Item("cartool_esi_method"),
-                    Item("cartool_esi_lamb"),
-                    label="EEG source imaging method"
+                    VGroup(
+                        Group(Include("cartool_spi_file_group")),
+                        Group(Include("cartool_invsol_file_group"))
+                    ),
+                    VGroup(
+                        Item("cartool_esi_method"),
+                        Item("cartool_esi_lamb"),
+                        label="Method"
+                    ),
+                    VGroup(
+                        Item("cartool_svd_toi_begin", label="Start TOI"),
+                        Item("cartool_svd_toi_end", label="End TOI"),
+                        label="SVD for ROI time courses extraction"
+                    ),
+                    visible_when='esi_tool=="Cartool"'
                 ),
-                VGroup(
-                    Item("cartool_svd_toi_begin", label="Start TOI"),
-                    Item("cartool_svd_toi_end", label="End TOI"),
-                    label="SVD for ROI time courses extraction"
-                ),
-                label="Cartool configuration",
-                visible_when='esi_tool=="Cartool"'
+                label="EEG Source Imaging"
             )
         ),
         width=0.4,
