@@ -26,7 +26,7 @@ class EEGConnectomeConfig(HasTraits):
 
     Attributes
     ----------
-    parcellation_scheme : Enum(["NativeFreeSurfer", "Lausanne2018"])
+    parcellation_scheme : Enum(["NativeFreesurfer", "Lausanne2018"])
         Parcellation used to create the ROI source time-series
 
     lausanne2018_parcellation_res : Enum(["scale1", "scale2", "scale3", "scale4", "scale5"])
@@ -43,7 +43,7 @@ class EEGConnectomeConfig(HasTraits):
     cmp.stages.connectome.eeg_connectome.EEGConnectomeStage
     """
     parcellation_scheme = Enum(
-        "NativeFreeSurfer", "Lausanne2018",
+        "NativeFreesurfer", "Lausanne2018",
         desc="Parcellation used to create the ROI source time-series"
     )
 

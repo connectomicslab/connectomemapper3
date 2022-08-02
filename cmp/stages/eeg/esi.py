@@ -61,7 +61,7 @@ class EEGSourceImagingConfig(HasTraits):
     cartool_esi_method : Enum(['LAURA', 'LORETA'])
         Cartool Source Imaging method
 
-    parcellation_scheme : Enum(["NativeFreeSurfer", "Lausanne2018"])
+    parcellation_scheme : Enum(["NativeFreesurfer", "Lausanne2018"])
         Parcellation used to create the ROI source time-series
 
     lausanne2018_parcellation_res : Enum(["scale1", "scale2", "scale3", "scale4", "scale5"])
@@ -126,7 +126,7 @@ class EEGSourceImagingConfig(HasTraits):
     )
 
     parcellation_scheme = Enum(
-        "NativeFreeSurfer", "Lausanne2018",
+        "NativeFreesurfer", "Lausanne2018",
         desc="Parcellation used to create the ROI source time-series"
     )
     lausanne2018_parcellation_res = Enum(
