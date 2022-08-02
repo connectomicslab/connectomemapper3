@@ -70,7 +70,7 @@ class EEGPipelineUI(EEGPipeline):
                 "preprocessing",
                 style="custom",
                 width=222,
-                height=129,
+                height=130,
                 resizable=False,
                 style_sheet=return_button_style_sheet(
                     ImageResource("eeg_preprocessing").absolute_path
@@ -86,7 +86,7 @@ class EEGPipelineUI(EEGPipeline):
                 "sourceimaging",
                 style="custom",
                 width=222,
-                height=168,
+                height=130,
                 resizable=False,
                 style_sheet=return_button_style_sheet(
                     ImageResource("eeg_sourceimaging").absolute_path
@@ -102,7 +102,7 @@ class EEGPipelineUI(EEGPipeline):
                 "connectome",
                 style="custom",
                 width=222,
-                height=129,
+                height=130,
                 resizable=False,
                 style_sheet=return_button_style_sheet(
                     ImageResource("eeg_connectome").absolute_path
