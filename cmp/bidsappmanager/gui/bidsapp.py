@@ -840,9 +840,9 @@ class BIDSAppInterfaceWindow(HasTraits):
             cmd.append("--func_pipeline_config")
             cmd.append("/code/ref_fMRI_config.json")
 
-        if self.run_fmri_pipeline:
+        if self.run_eeg_pipeline:
             cmd.append("--eeg_pipeline_config")
-            cmd.append("/code/ref_fMRI_config.json")
+            cmd.append("/code/ref_EEG_config.json")
 
         cmd.append("--fs_license")
         cmd.append("/bids_dir/code/license.txt")
@@ -1133,6 +1133,12 @@ class BIDSAppInterfaceWindow(HasTraits):
                         f'"$(pwd)"/code/{os.path.basename(self.fmri_config)}:/code/ref_fMRI_config.json'
                     )
 
+                if self.run_eeg_pipeline:
+                    docker_cmd.append("-v")
+                    docker_cmd.append(
+                        f'"$(pwd)"/code/{os.path.basename(self.eeg_config)}:/code/ref_EEG_config.json'
+                    )
+
                 docker_cmd.append("-u")
                 docker_cmd.append("{}:{}".format(os.geteuid(), os.getegid()))
 
@@ -1189,6 +1195,16 @@ class BIDSAppInterfaceWindow(HasTraits):
                         datalad_get_list.append(
                             "sub-{}/ses-*/func/sub-{}*_bold.*".format(label, label)
                         )
+                    if self.run_eeg_pipeline:
+                        datalad_get_list.append(
+                            "sub-{}/ses-*/eeg/sub-{}*.*".format(label, label)
+                        )
+                        datalad_get_list.append(
+                            f"derivatives/cartool*/sub-{label}/ses-*/eeg/sub-{label}*.*"
+                        )
+                        datalad_get_list.append(
+                            f"derivatives/eeglab*/sub-{label}/ses-*/eeg/sub-{label}*.*"
+                        )
             else:
                 for label in self.list_of_subjects_to_be_processed:
                     datalad_get_list.append(
@@ -1204,6 +1220,16 @@ class BIDSAppInterfaceWindow(HasTraits):
                     if self.run_fmri_pipeline:
                         datalad_get_list.append(
                             "sub-{}/func/sub-{}*_bold.*".format(label, label)
+                        )
+                    if self.run_eeg_pipeline:
+                        datalad_get_list.append(
+                            "sub-{}/eeg/sub-{}*.*".format(label, label)
+                        )
+                        datalad_get_list.append(
+                            f"derivatives/cartool*/sub-{label}/eeg/sub-{label}*.*"
+                        )
+                        datalad_get_list.append(
+                            f"derivatives/eeglab*/sub-{label}/eeg/sub-{label}*.*"
                         )
 
             cmd = (
