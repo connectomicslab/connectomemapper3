@@ -1058,9 +1058,10 @@ class BIDSAppInterfaceWindow(HasTraits):
                     msg = ("Add all files to datalad. "
                            "Dataset ready to be linked with the BIDS App.")
 
-                except Exception:
+                except Exception as e:
                     msg = "Save state after error at datalad dataset creation"
-                    print_error("    DATALAD ERROR: Failed to create the datalad dataset")
+                    print_error("    DATALAD ERROR: Failed to create the datalad dataset"
+                                f"\n    {e}")
             else:
                 msg = "Datalad dataset up-to-date and ready to be linked with the BIDS App."
                 print("    INFO: A datalad dataset already exists!")
@@ -1078,8 +1079,9 @@ class BIDSAppInterfaceWindow(HasTraits):
             try:
                 print_blue(f"... cmd: {cmd}")
                 self.run(cmd, env={}, cwd=os.path.abspath(self.bids_root))
-            except Exception:
-                print_error("    DATALAD ERROR: Failed to add changes to dataset")
+            except Exception as e:
+                print_error("    DATALAD ERROR: Failed to add changes to dataset"
+                            f"\n    {e}")
 
             datalad_container = os.path.join(
                 self.bids_root,
@@ -1167,8 +1169,9 @@ class BIDSAppInterfaceWindow(HasTraits):
                     print_blue(f"... cmd: {cmd}")
                     self.run(cmd, env={}, cwd=os.path.join(self.bids_root))
                     print("    INFO: Container image has been linked to dataset with success!")
-                except Exception:
-                    print_error("   DATALAD ERROR: Failed to link the container image to the dataset")
+                except Exception as e:
+                    print_error("   DATALAD ERROR: Failed to link the container image to the dataset"
+                                f"\n    {e}")
 
             # Create a list of files to be retrieved by datalad get
             datalad_get_list = [self.anat_config]
@@ -1239,8 +1242,9 @@ class BIDSAppInterfaceWindow(HasTraits):
             try:
                 print_blue(f"... cmd: {cmd}")
                 self.run(cmd, env={}, cwd=os.path.abspath(self.bids_root))
-            except Exception:
-                print_error("    DATALAD ERROR: Failed to add existing files to dataset")
+            except Exception as e:
+                print_error("    DATALAD ERROR: Failed to add existing files to dataset"
+                            f"\n    {e}")
 
             cmd = 'datalad run -d . -m "Get files for sub-{}" bash -c "datalad get {}"'.format(
                 self.list_of_subjects_to_be_processed, " ".join(datalad_get_list)
@@ -1248,11 +1252,10 @@ class BIDSAppInterfaceWindow(HasTraits):
             try:
                 print_blue(f"... cmd: {cmd}")
                 self.run(cmd, env={}, cwd=os.path.abspath(self.bids_root))
-            except Exception:
+            except Exception as e:
                 print_error(
-                    "    DATALAD ERROR: Failed to get files (cmd: datalad get {})".format(
-                        " ".join(datalad_get_list)
-                    )
+                    f'    DATALAD ERROR: Failed to get files (cmd: datalad get {" ".join(datalad_get_list)})'
+                    f"\n    {e}"
                 )
 
             cmd = (
@@ -1262,15 +1265,17 @@ class BIDSAppInterfaceWindow(HasTraits):
             try:
                 print_blue(f"... cmd: {cmd}")
                 self.run(cmd, env={}, cwd=os.path.abspath(self.bids_root))
-            except Exception:
-                print_error("    DATALAD ERROR: Failed to commit changes to dataset")
+            except Exception as e:
+                print_error("    DATALAD ERROR: Failed to commit changes to dataset"
+                            f"\n    {e}")
 
             cmd = "datalad status -d ."
             try:
                 print_blue(f"... cmd: {cmd}")
                 self.run(cmd, env={}, cwd=os.path.abspath(self.bids_root))
-            except Exception:
-                print_error("    DATALAD ERROR: Failed to run datalad rev-status")
+            except Exception as e:
+                print_error("    DATALAD ERROR: Failed to run datalad rev-status"
+                            f"\n    {e}")
 
         # Create and start the carbon footprint tracker
         if self.track_carbon_footprint:
@@ -1309,17 +1314,19 @@ class BIDSAppInterfaceWindow(HasTraits):
             try:
                 print_blue(f"... cmd: {cmd}")
                 self.run(cmd, env={}, cwd=os.path.abspath(self.bids_root))
-            except Exception:
+            except Exception as e:
                 print_error(
                     "    DATALAD ERROR: Failed to commit derivatives to datalad dataset"
+                    f"\n    {e}"
                 )
 
             cmd = "datalad diff -t HEAD~1"
             try:
                 print_blue(f"... cmd: {cmd}")
                 self.run(cmd, env={}, cwd=os.path.abspath(self.bids_root))
-            except Exception:
-                print_error("    DATALAD ERROR: Failed to run datalad diff -t HEAD~1")
+            except Exception as e:
+                print_error("    DATALAD ERROR: Failed to run datalad diff -t HEAD~1"
+                            f"\n    {e}")
 
         print("Processing with BIDS App Finished\n")
         self.docker_running = False
