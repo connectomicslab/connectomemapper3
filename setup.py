@@ -53,6 +53,7 @@ packages = [
     "cmp.bidsappmanager.stages",
     "cmp.bidsappmanager.stages.preprocessing",
     "cmp.bidsappmanager.stages.segmentation",
+    "cmp.bidsappmanager.stages.eeg",
     "cmp.bidsappmanager.stages.parcellation",
     "cmp.bidsappmanager.stages.registration",
     "cmp.bidsappmanager.stages.diffusion",
