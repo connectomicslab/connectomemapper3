@@ -45,6 +45,7 @@ packages = [
     "cmp.stages.connectome",
     "cmp.stages.eeg",
     "cmp.pipelines",
+    "cmp.viz",
     "cmp.pipelines.anatomical",
     "cmp.pipelines.diffusion",
     "cmp.pipelines.functional",

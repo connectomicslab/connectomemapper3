@@ -84,7 +84,10 @@ autodoc_mock_imports = ['graphviz',
                         'statsmodels',
                         'pydicom',
                         'networkx',
-                        'datalad']
+                        'datalad',
+                        "mne_connectivity",
+                        "PyQt5",
+                        ]
 
 # Allow errors in notebooks for doc
 nbsphinx_allow_errors = True
