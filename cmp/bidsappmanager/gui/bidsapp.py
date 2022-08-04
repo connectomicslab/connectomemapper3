@@ -20,7 +20,6 @@ import time
 import glob
 from pathlib import Path
 
-from codecarbon import EmissionsTracker
 from pyface.api import ImageResource
 from traitsui.qt4.extra.qt_view import QtView
 from traitsui.api import *
@@ -488,7 +487,7 @@ class BIDSAppInterfaceWindow(HasTraits):
         # icon=get_icon("bidsapp.png")
     )
 
-    carbon_footprint_view = View(
+    carbon_footprint_view = QtView(
         Group(
             Item("carbon_emission_msg", editor=HTMLEditor(), show_label=False),
         ),

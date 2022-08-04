@@ -351,7 +351,7 @@ class QualityInspectorWindow(HasTraits):
                             eeg_valid_inputs,
                             self.eeg_pipeline,
                         ) = project.init_eeg_project(
-                            self.project_info, bids_layout, False
+                            self.project_info, False
                         )
                     else:
                         self.eeg_pipeline = None
@@ -436,7 +436,7 @@ class QualityInspectorWindow(HasTraits):
                             eeg_valid_inputs,
                             self.eeg_pipeline,
                         ) = project.init_eeg_project(
-                            self.project_info, bids_layout, False
+                            self.project_info, False
                         )
                     else:
                         self.eeg_pipeline = None
@@ -508,7 +508,7 @@ class QualityInspectorWindow(HasTraits):
                 "  .. fMRI output(s) available : %s" % self.output_fmri_available
             )
             print_blue(
-                "  .. EEG output(s) available : %s" % self.output_fmri_available
+                "  .. EEG output(s) available : %s" % self.output_eeg_available
             )
 
             if (
