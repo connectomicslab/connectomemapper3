@@ -191,18 +191,6 @@ class EEGSourceImagingStage(Stage):
         - :class:`~cmtklib.interfaces.pycartool.CartoolInverseSolutionROIExtraction`: Use Pycartool to load inverse solutions
           estimated by Cartool and generate the ROI time courses.
 
-
-    Methods
-    -------
-    create_workflow()
-        Create the main workflow of the `EEGSourceImagingStage`
-
-    create_cartool_workflow()
-        Create the Cartool workflow of the `EEGSourceImagingStage`
-
-    create_mne_workflow()
-        Create the MNE workflow of the `EEGSourceImagingStage`
-
     See Also
     --------
     cmp.pipelines.functional.eeg.EEGPipeline

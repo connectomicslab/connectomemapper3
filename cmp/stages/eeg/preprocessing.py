@@ -31,8 +31,8 @@ class EEGPreprocessingConfig(HasTraits):
     Attributes
     ----------
 
-    <task_label : Str
-        Task label (e.g. `_task-<label>_`)>
+    task_label : Str
+        Task label (e.g. `_task-<label>_`)
 
     eeg_ts_file : CustomEEGPreprocBIDSFile
         Instance of :obj:`~cmtklib.bids.io.CustomEEGPreprocBIDSFile`
@@ -125,11 +125,6 @@ class EEGPreprocessingStage(Stage):
     by calling, if necessary the following interface:
 
         - :class:`~cmtklib.interfaces.mne.EEGLAB2fif`: Reads eeglab data and converts them to MNE format (`.fif` file extension).
-
-    Methods
-    -------
-    create_workflow()
-        Create the workflow of the `EEGPreprocessingStage`
 
     See Also
     --------

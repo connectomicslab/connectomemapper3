@@ -70,11 +70,6 @@ class EEGConnectomeConfig(HasTraits):
 class EEGConnectomeStage(Stage):
     """Class that represents the connectome building stage of a :class:`~cmp.pipelines.functional.eeg.EEGPipeline`.
 
-    Methods
-    -------
-    create_workflow()
-        Create the workflow of the EEG `EEGConnectomeStage`
-
     See Also
     --------
     cmp.pipelines.functional.eeg.EEGPipeline
