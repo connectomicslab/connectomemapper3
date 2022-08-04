@@ -60,6 +60,16 @@ Here are a few usage examples:
              --fs_subject sub-01 \
              --fs_subjects_dir /path/to/derivatives/freesurfer-7.1.1 \
              --src_file /path/to/sub-01_task-faces_src.fif
+
+    6. Plot the noise covariance
+
+    .. code-block:: bash
+
+        $ python cmp/cli/visualize_eeg_pipeline_outputs.py \
+             --epo_file /path/to/sub-01_task-faces_epo.fif \
+             --fs_subject sub-01 \
+             --fs_subjects_dir /path/to/derivatives/freesurfer-7.1.1 \
+             --noisecov_file /path/to/sub-01_task-faces_noisecov.fif
 """
 
 import sys
