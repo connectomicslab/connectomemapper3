@@ -154,7 +154,7 @@ class EEGPreprocessingStage(Stage):
         Parameters
         ----------
         flow : nipype.pipeline.engine.Workflow
-            The nipype.pipeline.engine.Workflow instance of the Diffusion pipeline
+            The nipype.pipeline.engine.Workflow instance of the EEG pipeline
 
         inputnode : nipype.interfaces.utility.IdentityInterface
             Identity interface describing the inputs of the stage

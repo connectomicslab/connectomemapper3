@@ -230,12 +230,15 @@ class EEGSourceImagingStage(Stage):
         ]
 
     def create_workflow(self, flow, inputnode, outputnode):
-        """Create the stage workflow.
+        """Main method to create the stage workflow.
+
+        Based on the tool used for ESI, this method calls either the :func:`~cmp.stages.eeg.esi.create_cartool_workflow`
+        or the :func:`~cmp.stages.eeg.esi.create_mne_workflow method.
 
         Parameters
         ----------
         flow : nipype.pipeline.engine.Workflow
-            The nipype.pipeline.engine.Workflow instance of the Diffusion pipeline
+            The nipype.pipeline.engine.Workflow instance of the EEG pipeline
 
         inputnode : nipype.interfaces.utility.IdentityInterface
             Identity interface describing the inputs of the stage
@@ -249,12 +252,14 @@ class EEGSourceImagingStage(Stage):
             self.create_mne_workflow(flow, inputnode, outputnode)
 
     def create_cartool_workflow(self, flow, inputnode, outputnode):
-        """Create the stage workflow.
+        """Create the stage workflow using Cartool-precomputed inverse solutions.
+
+        It called by :func:`~cmp.stages.eeg.esi.create_workflow` main function if Cartool is selected for ESI.
 
         Parameters
         ----------
         flow : nipype.pipeline.engine.Workflow
-            The nipype.pipeline.engine.Workflow instance of the Diffusion pipeline
+            The nipype.pipeline.engine.Workflow instance of the EEG pipeline
 
         inputnode : nipype.interfaces.utility.IdentityInterface
             Identity interface describing the inputs of the stage
@@ -299,12 +304,14 @@ class EEGSourceImagingStage(Stage):
         # fmt: on
 
     def create_mne_workflow(self, flow, inputnode, outputnode):
-        """Create the stage workflow.
+        """Create the stage workflow using MNE.
+
+        It called by :func:`~cmp.stages.eeg.esi.create_workflow` main function if MNE is selected for ESI.
 
         Parameters
         ----------
         flow : nipype.pipeline.engine.Workflow
-            The nipype.pipeline.engine.Workflow instance of the Diffusion pipeline
+            The nipype.pipeline.engine.Workflow instance of the EEG pipeline
 
         inputnode : nipype.interfaces.utility.IdentityInterface
             Identity interface describing the inputs of the stage
