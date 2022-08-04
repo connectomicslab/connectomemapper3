@@ -150,6 +150,7 @@ def main():
                 'connectomemapper3 = cmp.cli.connectomemapper3:main',
                 'cmpbidsappmanager = cmp.cli.cmpbidsappmanager:main',
                 'showmatrix_gpickle = cmp.cli.showmatrix_gpickle:main',
+                'visualize_eeg_pipeline_outputs = cmp.cli.visualize_eeg_pipeline_outputs:main',
                 'connectomemapper3_docker = cmp.cli.connectomemapper3_docker:main',
                 'connectomemapper3_singularity = cmp.cli.connectomemapper3_singularity:main'
             ]
