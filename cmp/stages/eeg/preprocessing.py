@@ -20,6 +20,7 @@ from cmp.stages.common import Stage
 from cmtklib.bids.io import (
     CustomEEGPreprocBIDSFile, CustomEEGEventsBIDSFile,
     CustomEEGElectrodesBIDSFile, CustomEEGCartoolElectrodesBIDSFile,
+    __cmp_directory__
 )
 from cmtklib.interfaces.mne import EEGLAB2fif
 
@@ -30,8 +31,8 @@ class EEGPreprocessingConfig(HasTraits):
     Attributes
     ----------
 
-    task_label : Str
-        Task label (e.g. `_task-<label>_`)
+    <task_label : Str
+        Task label (e.g. `_task-<label>_`)>
 
     eeg_ts_file : CustomEEGPreprocBIDSFile
         Instance of :obj:`~cmtklib.bids.io.CustomEEGPreprocBIDSFile`
@@ -208,4 +209,31 @@ class EEGPreprocessingStage(Stage):
         It contains a dictionary of stage outputs with corresponding commands for visual inspection.
         """
         self.inspect_outputs_dict = {}
-        self.inspect_outputs = ["Outputs not available"]
+
+        subject_derivatives_dir = os.path.join(
+            self.output_dir, __cmp_directory__, self.bids_subject_label
+        )
+        if self.bids_session_label and self.bids_session_label != "":
+            subject_derivatives_dir = os.path.join(
+                subject_derivatives_dir, self.bids_session_label
+            )
+
+        subject_part = (f'{self.bids_subject_label}_{self.bids_session_label}'
+                        if self.bids_session_label and self.bids_session_label != ""
+                        else f'{self.bids_subject_label}')
+
+        epo_fname = f'{subject_part}_task-{self.config.task_label}_epo.fif'
+        epo_file = os.path.join(subject_derivatives_dir, "eeg", epo_fname)
+
+        if os.path.exists(epo_file):
+            self.inspect_outputs_dict[f"Epochs * Electrodes time series (Task:{self.config.task_label})"] = [
+                "visualize_eeg_pipeline_outputs",
+                "--epo_file", epo_file
+            ]
+
+        if not self.inspect_outputs_dict:
+            self.inspect_outputs = ["Outputs not available"]
+        else:
+            self.inspect_outputs = sorted(
+                [key for key in list(self.inspect_outputs_dict.keys())], key=str.lower
+            )

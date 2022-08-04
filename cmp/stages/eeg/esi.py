@@ -38,6 +38,9 @@ class EEGSourceImagingConfig(HasTraits):
 
     Attributes
     ----------
+    task_label : Str
+        Task label (e.g. `_task-<label>_`)
+
     esi_tool : Enum
         Select the tool used for EEG source imaging (inverse solution)
 
@@ -91,6 +94,9 @@ class EEGSourceImagingConfig(HasTraits):
     --------
     cmp.stages.eeg.esi.EEGSourceImagingStage
     """
+
+    task_label = Str("Undefined", desc="Task label (e.g. _task-<label>_)")
+
     esi_tool = Enum(
         "MNE", "Cartool",
         desc="Select the tool used for EEG source imaging (inverse solution)"
@@ -405,4 +411,137 @@ class EEGSourceImagingStage(Stage):
         It contains a dictionary of stage outputs with corresponding commands for visual inspection.
         """
         self.inspect_outputs_dict = {}
-        self.inspect_outputs = ["Outputs not available"]
+
+        if self.config.parcellation_scheme == "Lausanne2018":
+            atlas_label = 'L2018'
+            atlas_res = self.config.lausanne2018_parcellation_res
+        else:
+            atlas_label = 'Desikan'
+            atlas_res = ""
+
+        atlas_annot = (f'lausanne2018.{self.config.lausanne2018_parcellation_res}'
+                       if self.config.parcellation_scheme == "Lausanne2018"
+                       else 'aparc')
+
+        subject_derivatives_dir = os.path.join(
+            self.output_dir, __cmp_directory__, self.bids_subject_label
+        )
+        if self.bids_session_label and self.bids_session_label != "":
+            subject_derivatives_dir = os.path.join(
+                subject_derivatives_dir, self.bids_session_label
+            )
+
+        atlas_part = (f'atlas-{atlas_label}'
+                      if atlas_res == ""
+                      else f'atlas-{atlas_label}_res-{atlas_res}')
+        subject_part = (f'{self.bids_subject_label}_{self.bids_session_label}'
+                        if self.bids_session_label and self.bids_session_label != ""
+                        else f'{self.bids_subject_label}')
+
+        # Cartool
+        if self.config.esi_tool == "Cartool":
+            # ROI index/label mapping file
+            roi_tsv_fname =f'{subject_part}_{atlas_part}_dseg.tsv'
+            roi_tsv_file = os.path.join(subject_derivatives_dir, "anat", roi_tsv_fname)
+
+            # Epochs file
+            epo_fname = f'{subject_part}_task-{self.config.task_label}_epo.fif'
+            epo_file = os.path.join(subject_derivatives_dir, "eeg", epo_fname)
+
+            # ROI time series file
+            rtc_fname = f'{subject_part}_task-{self.config.task_label}_{atlas_part}_timeseries.npy'
+            rtc_file = os.path.join(subject_derivatives_dir, "eeg", rtc_fname)
+
+            print(f'epo_file: {epo_file}')
+            print(f'rtc_file: {rtc_file}')
+            print(f'roi_tsv_file: {roi_tsv_file}')
+
+            if os.path.exists(epo_file) and os.path.exists(rtc_file) and os.path.exists(roi_tsv_file):
+                self.inspect_outputs_dict[
+                    f'ROI time series (Task: {self.config.task_label} / Parcellation: {atlas_part.split("_")})'
+                ] = [
+                    "visualize_eeg_pipeline_outputs",
+                    "--epo_file", epo_file,
+                    "--rtc_file", rtc_file,
+                    "--fs_subject", self.fs_subject,
+                    "--fs_subjects_dir", self.fs_subjects_dir,
+                    "--atlas_annot", atlas_annot,
+                    "--roi_tsv_file", roi_tsv_file
+                ]
+
+        else:  # MNE
+            # Epochs file
+            epo_fname = f'{subject_part}_task-{self.config.task_label}_epo.fif'
+            epo_file = os.path.join(subject_derivatives_dir, "eeg", epo_fname)
+
+            # BEM file
+            bem_fname = f'{subject_part}_task-{self.config.task_label}_bem.fif'
+            bem_file = os.path.join(subject_derivatives_dir, "eeg", bem_fname)
+
+            # Source space file
+            src_fname = f'{subject_part}_task-{self.config.task_label}_src.fif'
+            src_file = os.path.join(subject_derivatives_dir, "eeg", src_fname)
+
+            # Noise covariance file
+            noisecov_fname = f'{subject_part}_task-{self.config.task_label}_noisecov.fif'
+            noisecov_file = os.path.join(subject_derivatives_dir, "eeg", noisecov_fname)
+
+            # ROI time series file
+            rtc_fname = f'{subject_part}_task-{self.config.task_label}_{atlas_part}_timeseries.npy'
+            rtc_file = os.path.join(subject_derivatives_dir, "eeg", rtc_fname)
+
+            print(f'epo_file: {epo_file}')
+            print(f'bem_file: {bem_file}')
+            print(f'src_file: {src_file}')
+            print(f'noisecov_file: {noisecov_file}')
+            print(f'rtc_file: {rtc_file}')
+
+            if os.path.exists(epo_file):
+                if os.path.exists(rtc_file):
+                    self.inspect_outputs_dict[
+                        f'ROI time series (Task: {self.config.task_label} / Parcellation: {atlas_part.split("_")})'
+                    ] = [
+                        "visualize_eeg_pipeline_outputs",
+                        "--epo_file", epo_file,
+                        "--rtc_file", rtc_file,
+                        "--fs_subject", self.fs_subject,
+                        "--fs_subjects_dir", self.fs_subjects_dir,
+                        "--atlas_annot", atlas_annot
+                    ]
+                if os.path.exists(noisecov_file):
+                    self.inspect_outputs_dict[
+                        f'Noise covariance (Task: {self.config.task_label})'
+                    ] = [
+                        "visualize_eeg_pipeline_outputs",
+                        "--epo_file", epo_file,
+                        "--noisecov_file", noisecov_file,
+                        "--fs_subject", self.fs_subject,
+                        "--fs_subjects_dir", self.fs_subjects_dir
+                    ]
+
+            if os.path.exists(bem_file):
+                self.inspect_outputs_dict[
+                    'BEM Surfaces'
+                ] = [
+                    "visualize_eeg_pipeline_outputs",
+                    "--bem_file", epo_file,
+                    "--fs_subject", self.fs_subject,
+                    "--fs_subjects_dir", self.fs_subjects_dir
+                ]
+                if os.path.exists(src_file):
+                    self.inspect_outputs_dict[
+                        'BEM surfaces with sources'
+                    ] = [
+                        "visualize_eeg_pipeline_outputs",
+                        "--bem_file", epo_file,
+                        "--src_file", src_file,
+                        "--fs_subject", self.fs_subject,
+                        "--fs_subjects_dir", self.fs_subjects_dir
+                    ]
+
+        if not self.inspect_outputs_dict:
+            self.inspect_outputs = ["Outputs not available"]
+        else:
+            self.inspect_outputs = sorted(
+                [key for key in list(self.inspect_outputs_dict.keys())], key=str.lower
+            )

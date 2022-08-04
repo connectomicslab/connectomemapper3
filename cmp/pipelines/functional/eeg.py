@@ -147,6 +147,9 @@ class EEGPipeline(Pipeline):
         self.parcellation_cmp_dir = self.stages["EEGSourceImaging"].config.parcellation_cmp_dir
 
         self.stages["EEGSourceImaging"].config.parcellation_scheme = self.parcellation_scheme
+        self.stages["EEGSourceImaging"].config.task_label = self.stages["EEGPreprocessing"].config.task_label
+
+        self.stages["EEGPreprocessing"].config.on_trait_change(self._update_task_label, 'task_label')
 
         self.stages["EEGSourceImaging"].config.on_trait_change(self._update_parcellation_scheme, 'parcellation_scheme')
         self.stages["EEGSourceImaging"].config.on_trait_change(self._update_lausanne2018_parcellation_res, 'lausanne2018_parcellation_res')
@@ -165,6 +168,9 @@ class EEGPipeline(Pipeline):
 
     def _update_parcellation_cmp_dir(self):
         self.parcellation_cmp_dir = self.stages["EEGSourceImaging"].config.parcellation_cmp_dir
+
+    def _update_task_label(self):
+        self.stages["EEGSourceImaging"].config.task_label = self.stages["EEGPreprocessing"].config.task_label
 
     def check_config(self):
         # TODO: To Be Implemented if Necessary
