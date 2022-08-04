@@ -254,7 +254,7 @@ class EEGSourceImagingStage(Stage):
     def create_cartool_workflow(self, flow, inputnode, outputnode):
         """Create the stage workflow using Cartool-precomputed inverse solutions.
 
-        It called by :func:`~cmp.stages.eeg.esi.create_workflow` main function if Cartool is selected for ESI.
+        This method is called by :func:`~cmp.stages.eeg.esi.create_workflow` main function if Cartool is selected for ESI.
 
         Parameters
         ----------
@@ -306,7 +306,7 @@ class EEGSourceImagingStage(Stage):
     def create_mne_workflow(self, flow, inputnode, outputnode):
         """Create the stage workflow using MNE.
 
-        It called by :func:`~cmp.stages.eeg.esi.create_workflow` main function if MNE is selected for ESI.
+        This method is called by :func:`~cmp.stages.eeg.esi.create_workflow` main function if MNE is selected for ESI.
 
         Parameters
         ----------
