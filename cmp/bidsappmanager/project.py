@@ -446,14 +446,13 @@ def init_eeg_project(project_info, is_new_project, debug=False):
         `EEGPipelineUI` object instance
     """
     eeg_pipeline = EEG_pipeline.EEGPipelineUI(project_info)
-    bids_directory = os.path.abspath(project_info.base_directory)
+
     derivatives_directory = os.path.abspath(project_info.output_directory)
 
     if (project_info.subject_session != '') and (project_info.subject_session is not None):
         if debug:  # pragma: no cover
             print('Refresh folder WITH session')
         refresh_folder(
-            bids_directory,
             derivatives_directory,
             project_info.subject,
             eeg_pipeline.input_folders,
@@ -466,11 +465,11 @@ def init_eeg_project(project_info, is_new_project, debug=False):
         if debug:  # pragma: no cover
             print('Refresh folder WITHOUT session')
         refresh_folder(
-            bids_directory,
             derivatives_directory,
             project_info.subject,
             eeg_pipeline.input_folders
         )
+
         subject_derivatives_directory = os.path.join(
             derivatives_directory, project_info.subject
         )
