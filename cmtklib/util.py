@@ -456,7 +456,7 @@ def check_directory_exists(mandatory_dir):  # pragma: no cover
         raise FileNotFoundError(f"No directory is found at: {str(f_path)}")
 
 
-def find_toolbox_derivatives_containing_file(bids_dir, fname, debug=True):
+def find_toolbox_derivatives_containing_file(bids_dir, fname, debug=False):
     """Find the toolbox derivatives directory in the derivatives folder of the BIDS dataset containing a file.
 
     This function is used by the EEGPipeline.

@@ -75,6 +75,15 @@ class EEGConnectomeStageUI(EEGConnectomeStage):
 
     Attributes
     ----------
+    log_visualization : traits.Bool
+        Log visualization that might be obsolete as this has been detached
+        after creation of the bidsappmanager (Default: True)
+
+    circular_layout : traits.Bool
+        Visualization of the connectivity matrix using a circular layout
+        that might be obsolete as this has been detached after creation
+        of the bidsappmanager (Default: False)
+
     inspect_output_button : traits.ui.Button
         Button that displays the selected connectivity matrix
         in the graphical component for quality inspection
@@ -90,13 +99,20 @@ class EEGConnectomeStageUI(EEGConnectomeStage):
     cmp.stages.connectome.eeg_connectome.EEGConnectomeStage
     """
 
-    # log_visualization = Bool(True)
-    # circular_layout = Bool(False)
+    log_visualization = Bool(True)
+    circular_layout = Bool(False)
+
     inspect_output_button = Button("View")
 
     inspect_outputs_view = View(
         Group(
             Item("name", editor=TitleEditor(), show_label=False),
+            Group(
+                Item("log_visualization", label="Log scale"),
+                Item("circular_layout", label="Circular layout"),
+                label="Visualization",
+                show_border=True,
+            ),
             Group(
                 Item("inspect_outputs_enum", show_label=False),
                 Item(
@@ -154,8 +170,34 @@ class EEGConnectomeStageUI(EEGConnectomeStage):
         ---------
         cmp.stages.connectome.eeg_connectome.EEGConnectomeStage.__init__
         """
-        EEGConnectomeStage.__init__(self, subject, session, bids_dir, output_dir)
+        EEGConnectomeStage.__init__(self, bids_dir, output_dir, subject, session)
         self.config = EEGConnectomeConfigUI()
+
+    def _log_visualization_changed(self, new):
+        """Update the value of log_visualization in the config.
+
+        Parameters
+        ----------
+        new : traits.Bool
+            New value
+        """
+        self.define_inspect_outputs(
+            log_visualization=new,
+            circular_layout=self.circular_layout
+        )
+
+    def _circular_layout_changed(self, new):
+        """Update the value of circular_layout in the config.
+
+        Parameters
+        ----------
+        new : traits.Bool
+            New value
+        """
+        self.define_inspect_outputs(
+            log_visualization=self.log_visualization,
+            circular_layout=new
+        )
 
     def _inspect_output_button_fired(self, info):
         """Display the selected output when ``inspect_output_button`` is clicked.

@@ -191,7 +191,9 @@ class EEGSourceImagingStageUI(EEGSourceImagingStage):
         cmp.stages.eeg.esi.EEGSourceImagingStage.__init_
         cmp.cmpbidsappmanager.stages.esi.EEGSourceImagingStageUI
         """
-        EEGSourceImagingStage.__init__(self, subject, session, bids_dir, output_dir)
+        EEGSourceImagingStage.__init__(
+            self, subject=subject, session=session, bids_dir=bids_dir, output_dir=output_dir
+        )
         self.config = EEGSourceImagingConfigUI()
 
     def _inspect_output_button_fired(self, info):

@@ -136,22 +136,22 @@ class EEGPipelineUI(EEGPipeline):
 
         self.stages = {
             "EEGPreprocessing": EEGPreprocessingStageUI(
+                bids_dir=project_info.base_directory,
+                output_dir=self.output_directory,
                 subject=self.subject,
                 session=self.global_conf.subject_session,
-                bids_dir=project_info.base_directory,
-                output_dir=self.output_directory
             ),
             "EEGSourceImaging": EEGSourceImagingStageUI(
-                subject=self.subject,
-                session=self.global_conf.subject_session,
                 bids_dir=project_info.base_directory,
-                output_dir=self.output_directory
+                output_dir=self.output_directory,
+                subject=self.subject,
+                session=self.global_conf.subject_session
             ),
             "EEGConnectome": EEGConnectomeStageUI(
-                subject=self.subject,
-                session=self.global_conf.subject_session,
                 bids_dir=project_info.base_directory,
-                output_dir=self.output_directory
+                output_dir=self.output_directory,
+                subject=self.subject,
+                session=self.global_conf.subject_session
             ),
         }
 

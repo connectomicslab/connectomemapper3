@@ -717,7 +717,7 @@ def update_eeg_last_processed(project_info, pipeline):
             __cmp_directory__,
             project_info.subject,
             "tmp",
-            "EEG_pipeline",
+            "eeg_pipeline",
         )
     ):
         stage_dirs = []
@@ -728,7 +728,7 @@ def update_eeg_last_processed(project_info, pipeline):
                 __cmp_directory__,
                 project_info.subject,
                 "tmp",
-                "EEG_pipeline",
+                "eeg_pipeline",
             )
         ):
             for dirname in fnmatch.filter(dirnames, "*_stage"):

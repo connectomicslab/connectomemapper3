@@ -180,7 +180,9 @@ class EEGPreprocessingStageUI(EEGPreprocessingStage):
         cmp.stages.eeg.preprocessing.EEGPreprocessingStage.__init_
         cmp.cmpbidsappmanager.stages.eeg.preprocessing.EEGPreprocessingStageUI
         """
-        EEGPreprocessingStage.__init__(self, subject, session, bids_dir, output_dir)
+        EEGPreprocessingStage.__init__(
+            self, subject=subject, session=session, bids_dir=bids_dir, output_dir=output_dir
+        )
         self.config = EEGPreprocessingConfigUI()
 
     def _inspect_output_button_fired(self, info):
