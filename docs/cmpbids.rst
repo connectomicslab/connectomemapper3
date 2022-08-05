@@ -49,5 +49,7 @@ For instance, a BIDS dataset with T1w, DWI and rs-fMRI images should adopt the f
             ...
         ...
 
+For an example of a dataset containing T1w, DWI and preprocessed EEG data, please check the public `VEPCON dataset <https://openneuro.org/datasets/ds003505/versions/1.1.1>`_.
+
 .. important::
     Before using any BIDS App, we highly recommend you to validate your BIDS structured dataset with the free, online `BIDS Validator <http://bids-standard.github.io/bids-validator/>`_.
