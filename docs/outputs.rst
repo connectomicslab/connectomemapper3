@@ -44,9 +44,9 @@ Main Connectome Mapper Derivatives
 
 Main outputs produced by Connectome Mapper 3 are written to
 ``cmp/sub-<subject_label>/``. In this folder, a configuration file
-generated for each modality pipeline (i.e. anatomical/diffusion/fMRI)
+generated for each modality pipeline (i.e. anatomical/diffusion/fMRI/EEG)
 and used for processing each participant is saved as
-``sub-<subject_label>_anatomical/diffusion/fMRI_config.ini``.
+``sub-<subject_label>_anatomical/diffusion/fMRI/EEG_config.json``.
 It summarizes pipeline workflow options and parameters used for processing.
 An execution log of the full workflow is saved as `sub-<subject_label>_log.txt``.
 
