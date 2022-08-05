@@ -158,11 +158,11 @@ class SegmentationConfig(HasTraits):
     freesurfer_subject_id = Str
     freesurfer_args = Str("")
 
-    custom_brainmask = Instance(CustomBrainMaskBIDSFile , (),
+    custom_brainmask = Instance(CustomBrainMaskBIDSFile, (),
                                 desc="Instance of :obj:`~cmtklib.bids.io.CustomBrainMaskBIDSFile` "
                                      "that describes the custom BIDS formatted brain mask")
 
-    custom_wm_mask = Instance(CustomWMMaskBIDSFile , (),
+    custom_wm_mask = Instance(CustomWMMaskBIDSFile, (),
                               desc="Instance of :obj:`~cmtklib.bids.io.CustomWMMaskBIDSFile` "
                                    "that describes the custom BIDS formatted white-matter mask")
 

@@ -189,7 +189,7 @@ def cmat(
         A dictionary of key/value for each additional map where the value
         is the path to the map
 
-    output_types : ['gPickle','mat','graphml']
+    output_types : ['gpickle','mat','graphml']
 
     atlas_info : dict
         Dictionary storing information such as path to files related to a
@@ -200,7 +200,7 @@ def cmat(
     if atlas_info is None:
         atlas_info = {}
     if output_types is None:
-        output_types = ["gPickle"]
+        output_types = ["gpickle"]
 
     print("================================================")
     print(" > Creation of connectome maps")
@@ -578,7 +578,7 @@ def cmat(
             )
 
         # Storing network/graph in other formats that might be prefered by the user
-        if "gPickle" in output_types:
+        if "gpickle" in output_types:
             print("    - connectome_%s.gpickle" % parkey)
             nx.write_gpickle(G_out, "connectome_%s.gpickle" % parkey)
 
@@ -736,7 +736,7 @@ class DmriCmat(BaseInterface):
     >>>                             '/path/to/sub-01_atlas-L2018_desc-scale4_dseg.graphml',
     >>>                             '/path/to/sub-01_atlas-L2018_desc-scale5_dseg.graphml']
     >>> cmat.inputs.parcellation scheme = 'Lausanne2018'
-    >>> cmat.inputs.output_types = ['gPickle','mat','graphml']
+    >>> cmat.inputs.output_types = ['gpickle','mat','graphml']
     >>> cmat.run()  # doctest: +SKIP
 
     """
@@ -854,7 +854,7 @@ class RsfmriCmat(BaseInterface):
     >>>                             '/path/to/sub-01_atlas-L2018_desc-scale5_dseg.graphml']
     >>> cmat.inputs.parcellation scheme = 'Lausanne2018'
     >>> cmat.inputs.apply_scrubbing = False
-    >>> cmat.inputs.output_types = ['gPickle','mat','graphml']
+    >>> cmat.inputs.output_types = ['gpickle','mat','graphml']
     >>> cmat.run() # doctest: +SKIP
 
     """
@@ -1019,7 +1019,7 @@ class RsfmriCmat(BaseInterface):
                 )
 
             # storing network
-            if "gPickle" in self.inputs.output_types:
+            if "gpickle" in self.inputs.output_types:
                 print("    - connectome_%s.gpickle" % parkey)
                 nx.write_gpickle(G, "connectome_%s.gpickle" % parkey)
 

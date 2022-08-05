@@ -399,8 +399,8 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             ]
             # Keep only unique custom derivatives to make the BIDSLayout happy
             custom_derivatives_dirnames = list(set(custom_derivatives_dirnames))
-            for custom_derivatives_dirname in  custom_derivatives_dirnames:
-                if custom_derivatives_dirname not in layout.derivatives:
+            for custom_derivatives_dirname in custom_derivatives_dirnames:
+                if custom_derivatives_dirname not in layout.derivatives.keys():
                     print(f"    * Add custom_derivatives_dirname: {custom_derivatives_dirname}")
                     layout.add_derivatives(os.path.join(self.base_directory, 'derivatives', custom_derivatives_dirname))
 
