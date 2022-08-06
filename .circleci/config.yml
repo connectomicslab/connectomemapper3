@@ -28,7 +28,73 @@ commands:
               docker images
             fi
 
-  clean-configuration-files:
+  prepare-ds003505-dataset:
+    parameters:
+      circleci_job:
+        type: string
+        default: ${CIRCLE_JOB}
+    steps:
+      - run:
+          name: Prepare ds003505 dataset in /tmp/data/<<parameters.circleci_job>>/ds003505
+          no_output_timeout: 8h
+          command: |
+            # Get version, update files.
+            #THISVERSION=v$( python /home/circleci/src/connectomemapper3/get_version.py )
+            #echo "THISVERSION : ${THISVERSION}"
+            # Create the dataset dedicated to this job, make empty code directory
+            # and copy the FS license
+            mkdir -p "/tmp/data/<<parameters.circleci_job>>/ds003505/code"
+            cp -f /tmp/data/ds003505/code/license.txt "/tmp/data/<<parameters.circleci_job>>/ds003505/code/license.txt"
+            ls -la /tmp/data/<<parameters.circleci_job>>/ds003505/code
+            # Create the test folder to store list of test output files
+            mkdir -p /tmp/data/ds003505/test
+            # Create dataset subfolders and copy data for sub-01 into them
+            echo "Create test-dedicated dataset at: /tmp/data/<<parameters.circleci_job>>/ds003505"
+            mkdir -p "/tmp/data/<<parameters.circleci_job>>/ds003505/sub-01/anat"
+            mkdir -p "/tmp/data/<<parameters.circleci_job>>/ds003505/sub-01/eeg"
+            mkdir -p "/tmp/data/<<parameters.circleci_job>>/ds003505/derivatives/cmp-v3.1.0/sub-01/eeg"
+            mkdir -p "/tmp/data/<<parameters.circleci_job>>/ds003505/derivatives/freesurfer-7.1.1/sub-01"
+            mkdir -p "/tmp/data/<<parameters.circleci_job>>/ds003505/derivatives/eeglab-v14.1.1/sub-01/eeg"
+            mkdir -p "/tmp/data/<<parameters.circleci_job>>/ds003505/derivatives/cartool-v3.80/sub-01/eeg"
+            rsync -pLPv --ignore-errors \
+              /tmp/data/ds003505/dataset_description.json \
+              "/tmp/data/<<parameters.circleci_job>>/ds003505/dataset_description.json"
+            rsync -pLPv --ignore-errors \
+              /tmp/data/ds003505/participants.tsv \
+              "/tmp/data/<<parameters.circleci_job>>/ds003505/participants.tsv"
+            rsync -pLPv --ignore-errors \
+              /tmp/data/ds003505/participants.json \
+              "/tmp/data/<<parameters.circleci_job>>/ds003505/participants.json"
+            rsync -pLPv --ignore-errors \
+              /tmp/data/ds003505/derivatives/freesurfer-7.1.1/dataset_description.json \
+              "/tmp/data/<<parameters.circleci_job>>/ds003505/derivatives/freesurfer-7.1.1/dataset_description.json"
+            rsync -pLPv --ignore-errors \
+              /tmp/data/ds003505/derivatives/eeglab-v14.1.1/dataset_description.json \
+              "/tmp/data/<<parameters.circleci_job>>/ds003505/derivatives/eeglab-v14.1.1/dataset_description.json"
+            rsync -pLPv --ignore-errors \
+              /tmp/data/ds003505/derivatives/cartool-v3.80/dataset_description.json \
+              "/tmp/data/<<parameters.circleci_job>>/ds003505/derivatives/cartool-v3.80/dataset_description.json"
+            rsync -rpLPv --ignore-errors \
+              /tmp/data/ds003505/sub-01/anat/* \
+              "/tmp/data/<<parameters.circleci_job>>/ds003505/sub-01/anat"
+            rsync -rpLPv --ignore-errors \
+              /tmp/data/ds003505/sub-01/eeg/*_events.* \
+              "/tmp/data/<<parameters.circleci_job>>/ds003505/sub-01/eeg"
+            rsync -rpLPv --ignore-errors \
+              /tmp/data/ds003505/derivatives/cmp-v3.1.0/sub-01/eeg/* \
+              "/tmp/data/<<parameters.circleci_job>>/ds003505/derivatives/cmp-v3.1.0/sub-01/eeg"
+            rsync -rpLPv --ignore-errors \
+              /tmp/data/ds003505/derivatives/freesurfer-7.1.1/sub-01/* \
+              "/tmp/data/<<parameters.circleci_job>>/ds003505/derivatives/freesurfer-7.1.1/sub-01"
+            rm -rvf /tmp/data/<<parameters.circleci_job>>/ds003505/derivatives/freesurfer-7.1.1/sub-01/mri/*.nii.gz
+            rsync -rpLPv --ignore-errors \
+              /tmp/data/ds003505/derivatives/eeglab-v14.1.1/sub-01/eeg/sub-01_task-faces_*.* \
+              "/tmp/data/<<parameters.circleci_job>>/ds003505/derivatives/eeglab-v14.1.1/sub-01/eeg"
+            rsync -rpLPv --ignore-errors \
+              /tmp/data/ds003505/derivatives/cartool-v3.80/sub-01/eeg/* \
+              "/tmp/data/<<parameters.circleci_job>>/ds003505/derivatives/cartool-v3.80/sub-01/eeg"
+
+  prepare-ds-sample-dataset:
     parameters:
       circleci_job:
         type: string
@@ -45,7 +111,8 @@ commands:
             #THISVERSION=v$( python /home/circleci/src/connectomemapper3/get_version.py )
             #echo "THISVERSION : ${THISVERSION}"
             ls -la  /tmp/data/ds-sample/code
-            # Remove existing config files in ds-sample (Make sure we are using the ones stored in the repo)
+            # Remove existing config files in ds-sample dir
+            # to make sure we are using the ones stored in the repo
             rm -f /tmp/data/ds-sample/code/*.ini
             # Create the test folder to store list of test output files
             mkdir -p /tmp/data/ds-sample/test
@@ -53,6 +120,42 @@ commands:
             echo "Create test-dedicated dataset at: /tmp/data/<<parameters.circleci_job>>/ds-sample"
             mkdir -p "/tmp/data/<<parameters.circleci_job>>/ds-sample"
             cp -R /tmp/data/ds-sample/* "/tmp/data/<<parameters.circleci_job>>/ds-sample"
+            # rsync -rpLPv --ignore-errors /tmp/data/ds-sample/* "/tmp/data/<<parameters.circleci_job>>/ds-sample"
+
+  install-conda-gitannex-and-datalad:
+    steps:
+      - run:
+          name: "Install miniconda in /home/circleci/miniconda and create py37cmp-data environment"
+          no_output_timeout: 5h
+          command: |
+            if [[ ! -d /home/circleci/miniconda ]]; then
+              wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
+              bash miniconda.sh -bfp /home/circleci/miniconda
+              export PATH="/home/circleci/miniconda/bin:$PATH"
+              conda update -y conda
+              conda create -n py37cmp-data python=3.7 pip
+              source activate py37cmp-data
+              rm miniconda.sh
+            fi
+      - run:
+          name: "Install and setup git-annex & DataLad in the environment"
+          command: |
+            if [[ ! -d /home/circleci/miniconda ]]; then
+              export PATH="$HOME/miniconda/bin:$PATH"
+              source activate py37cmp-data
+              conda install -y -c anaconda -c conda-forge git-annex datalad
+              pip install mne
+              git config --global user.name 'CMP3 Bot'
+              git config --global user.email 'connectomicslab.chuv@gmail.com'
+            fi
+      - run:
+          name: "Install MNE in the environment"
+          command: |
+            if [[ ! -d /home/circleci/miniconda ]]; then
+              export PATH="$HOME/miniconda/bin:$PATH"
+              source activate py37cmp-data
+              pip install mne
+            fi
 
   install-conda-and-cmp3:
     parameters:
@@ -316,6 +419,71 @@ commands:
             diff /home/circleci/src/connectomemapper3/.circleci/tests/expected_outputs/ds-sample_<<parameters.test_name>>_outputs.txt /tmp/data/ds-sample/test/<<parameters.test_name>>_outputs.out
             exit $?
 
+  test-docker-anat-eeg-pipelines-wrapper:
+    parameters:
+      circleci_job:
+        type: string
+        default: ${CIRCLE_JOB}
+      run_name:
+        type: string
+        default: "Run anatomical and EEG pipelines"
+      test_name:
+        type: string
+        default: "test-10"
+      dataset:
+        type: string
+        default: "ds003505"
+      config_dir:
+        type: string
+        default: "/home/circleci/src/connectomemapper3/.circleci/tests/configuration_files"
+      anat_pipeline_config:
+        type: string
+        default: "ref_anatomical_config_1.json"
+      eeg_pipeline_config:
+        type: string
+        default: "ref_eeg_config_1.json"
+      check_output:
+        type: boolean
+        default: true
+
+    steps:
+      - run:
+          name: <<parameters.run_name>>
+          no_output_timeout: 5h
+          command: |
+            export PATH="$HOME/miniconda/bin:$PATH"
+            # Activate the conda environment
+            source activate connectomemapper3
+            # Execute BIDS App via the singularity python wrapper
+            bids_dir="/tmp/data/<<parameters.circleci_job>>/<<parameters.dataset>>"
+            output_dir="${bids_dir}/derivatives"
+            connectomemapper3_docker \
+                "${bids_dir}" "${output_dir}" participant --participant_label 01 \
+                --docker_image "sebastientourbier/connectomemapper3" \
+                --config_dir <<parameters.config_dir>> \
+                --anat_pipeline_config <<parameters.anat_pipeline_config>> \
+                --eeg_pipeline_config <<parameters.eeg_pipeline_config>> \
+                --fs_license "${bids_dir}/code/license.txt" \
+                --ants_number_of_threads 1 \
+                --number_of_threads 1 \
+                --coverage \
+                --notrack \
+                --track_carbon_footprint
+            # Rename partial coverage
+            mv /tmp/data/<<parameters.circleci_job>>/<<parameters.dataset>>/code/coverage.xml /tmp/data/<<parameters.dataset>>/test/<<parameters.test_name>>_coverage.xml
+            # Rename execution log
+            mv /tmp/data/<<parameters.circleci_job>>/<<parameters.dataset>>/code/log.txt /tmp/data/<<parameters.dataset>>/test/<<parameters.test_name>>_log.txt
+            # Rename emissions log
+            mv /tmp/data/<<parameters.circleci_job>>/<<parameters.dataset>>/code/emissions.csv /tmp/data/<<parameters.dataset>>/test/<<parameters.test_name>>_co2emissions.csv
+      - run:
+          name: Checking outputs of Connectome Mapper run (<<parameters.test_name>>)
+          command: |
+            # Get all files in derivatives except the _*.json interface hash generated by nipype (find) /
+            # Remove the full path of the derivatives (sed) / sort the files and write it to a text file
+            sudo find /tmp/data/<<parameters.circleci_job>>/<<parameters.dataset>>/derivatives -path */mapflow -prune -o -not -name "_*.json" -type f -print | sed s+/tmp/data/<<parameters.circleci_job>>/<<parameters.dataset>>/derivatives/++ | sort > /tmp/data/<<parameters.dataset>>/test/<<parameters.test_name>>_outputs.out
+            diff /home/circleci/src/connectomemapper3/.circleci/tests/expected_outputs/<<parameters.dataset>>_<<parameters.test_name>>_outputs.txt /tmp/data/<<parameters.dataset>>/test/<<parameters.test_name>>_outputs.out
+            exit $?
+
 jobs:
 
   test-python-install:
@@ -473,9 +641,9 @@ jobs:
             docker save sebastientourbier/connectomemapper3 \
             | zstd -10 --threads=4 > /tmp/cache/docker/docker.tar.zst
       - persist_to_workspace:
-          root: /tmp
+          root: /tmp/cache/docker
           paths:
-            - cache/docker/docker.tar.zst
+            - docker.tar.zst
       #- save_cache:
       #    key: docker-v1-{{ .Branch }}-{{ .Revision }}
       #    paths:
@@ -499,7 +667,7 @@ jobs:
               circleci step halt
             fi
       - attach_workspace:
-          at: /tmp
+          at: /tmp/cache/docker
       - run:
           name: "Starting local registry"
           command: docker run -d -p 5000:5000 --restart=always --name registry registry:2
@@ -540,25 +708,37 @@ jobs:
           name: "Display storage information ALL"
           command: df -h
       - persist_to_workspace:
-          root: /tmp
+          root: /tmp/cache/singularity
           paths:
-            - cache/singularity/connectomemapper3.simg
+            - connectomemapper3.simg
 
   get_data:
     machine:
       # Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
       image: ubuntu-2004:202201-02
-    working_directory: /home/circleci/data
+    working_directory: /tmp/data
     steps:
       - restore_cache:
           keys:
-            - data-v2-4-{{ .Branch }}-{{ .Revision }}
-            - data-v2-4--{{ .Revision }}
-            - data-v2-4-{{ .Branch }}-
-            - data-v2-4-master-
-            - data-v2-4-
+            - env-v1-{{ .Branch }}-
+            - env-v1-master-
+            - env-v1-
+      - install-conda-gitannex-and-datalad
+      - save_cache:
+          key: env-v1-{{ .Branch }}-{{ .BuildNum }}
           paths:
-            - /tmp/data
+            - /home/circleci/miniconda
+      - checkout:
+          path: /home/circleci/src/connectomemapper3
+      - restore_cache:
+          keys:
+            - data-ds-sample-v2-4-{{ .Branch }}-{{ .Revision }}
+            - data-ds-sample-v2-4--{{ .Revision }}
+            - data-ds-sample-v2-4-{{ .Branch }}-
+            - data-ds-sample-v2-4-master-
+            - data-ds-sample-v2-4-
+          paths:
+            - /tmp/data/ds-sample
       - run:
           name: Get test data from ds-sample
           command: |
@@ -598,14 +778,101 @@ jobs:
             else
               echo "FreeSurfer license.txt was cached"
             fi
-      - persist_to_workspace:
-          root: /tmp
-          paths:
-            - data
       - save_cache:
-         key: data-v2-4-{{ .Branch }}-{{ .Revision }}
-         paths:
-            - /tmp/data
+          key: data-ds-sample-v2-4-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - /tmp/data/ds-sample
+      - restore_cache:
+          keys:
+            - data-ds003505-v2-3-{{ .Branch }}-{{ .Revision }}
+            - data-ds003505-v2-3--{{ .Revision }}
+            - data-ds003505-v2-3-{{ .Branch }}-
+            - data-ds003505-v2-3-master-
+            - data-ds003505-v2-3-
+          paths:
+            - /tmp/data/ds003505
+      - run:
+          name: Install ds003505 (VEPCON)
+          command: |
+            export PATH="$HOME/miniconda/bin:$PATH"
+            source activate py37cmp-data
+            if [[ ! -d /tmp/data/ds003505 ]]; then
+              datalad install https://github.com/OpenNeuroDatasets/ds003505.git
+            fi
+            # Download content of all files necessary to run anatomical and eeg pipelines on sub-01
+            datalad get -J 2 -d ds003505/ ds003505/dataset_description.json
+            datalad get -J 2 -d ds003505/ ds003505/participants.json
+            datalad get -J 2 -d ds003505/ ds003505/participants.tsv
+            datalad get -J 2 -d ds003505/ ds003505/sub-01/anat/*
+            datalad get -J 2 -d ds003505/ ds003505/sub-01/eeg/sub-01_task-faces_events.json
+            datalad get -J 2 -d ds003505/ ds003505/sub-01/eeg/sub-01_task-faces_events.tsv
+            datalad get -J 2 -d ds003505/ ds003505/derivatives/*/dataset_description.json
+            datalad get -J 2 -d ds003505/ ds003505/derivatives/freesurfer-7.1.1/sub-01/*
+            datalad get -J 2 -d ds003505/ ds003505/derivatives/cmp-v3.0.3/sub-01/anat/*
+            datalad get -J 2 -d ds003505/ ds003505/derivatives/eeglab-v14.1.1/sub-01/eeg/sub-01_task-faces_*.*
+            datalad get -J 2 -d ds003505/ ds003505/derivatives/cartool-v3.80/sub-01/eeg/*
+            # Unlock files that might be modified
+            datalad unlock -d ds003505/ ds003505/derivatives/cartool-v3.80/dataset_description.json
+            datalad unlock -d ds003505/ ds003505/derivatives/eeglab-v14.1.1/dataset_description.json
+            datalad unlock -d ds003505/ -r ds003505/derivatives/freesurfer-7.1.1/sub-01/*
+            datalad unlock -d ds003505/ ds003505/derivatives/freesurfer-7.1.1/sub-01/tmp/aparc+aseg.mgz
+      - run:
+          name: Fix dataset_description.json of Cartool and EEGLab derivatives
+          command: |
+            export PATH="$HOME/miniconda/bin:$PATH"
+            source activate py37cmp-data
+            cd /home/circleci/src/connectomemapper3
+            ls -la /tmp/data/ds003505/derivatives
+            ls -la /tmp/data/ds003505/derivatives/cartool-v3.80
+            ls -la /tmp/data/ds003505/derivatives/eeglab-v14.1.1
+            cat > fix_dataset_description_files.py \<<- "EOF"
+            #!/usr/bin/env python3
+            import os
+            cwd = os.getcwd()
+            os.chdir('/home/circleci/src/connectomemapper3')
+            from docs.notebooks.EEG_tutorial_utils import fix_vepcon_derivatives_dataset_description_files
+            fix_vepcon_derivatives_dataset_description_files('/tmp/data/ds003505')
+            os.chdir(cwd)
+            EOF
+            python fix_dataset_description_files.py
+            cat /tmp/data/ds003505/derivatives/cartool-v3.80/dataset_description.json
+            cat /tmp/data/ds003505/derivatives/eeglab-v14.1.1/dataset_description.json
+      - run:
+          name: Create the -trans.fif-file necessary to adjust electrode positions
+          command: |
+            export PATH="$HOME/miniconda/bin:$PATH"
+            source activate py37cmp-data
+            cd /home/circleci/src/connectomemapper3
+            cat > create_transform_file.py \<<- "EOF"
+            #!/usr/bin/env python3
+            import os
+            cwd = os.getcwd()
+            os.chdir('/home/circleci/src/connectomemapper3')
+            from docs.notebooks.EEG_tutorial_utils import create_trans_files
+            create_trans_files('/tmp/data/ds003505', 'cmp-v3.1.0', 'sub-01')
+            os.chdir(cwd)
+            EOF
+            python create_transform_file.py
+      - run:
+          name: Store FreeSurfer license file
+          command: |
+            if [[ ! -e /tmp/data/ds003505/code/license.txt ]]; then
+              mkdir -p /tmp/data/ds003505/code
+              cd /tmp/data/ds003505/code
+              echo `echo c2ViYXN0aWVuLnRvdXJiaWVyMUBnbWFpbC5jb20KMzAwNzYKICpDYUpVZ0VMQlJEYkEKIEZTMkkyWDNwNkpicWcK== | base64 -di` > /tmp/data/ds003505/code/license.txt
+              cat /tmp/data/ds003505/code/license.txt
+              echo "FreeSurfer license.txt been successfully created"
+            else
+              echo "FreeSurfer license.txt was cached"
+            fi
+      - save_cache:
+          key: data-ds003505-v2-3-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - /tmp/data/ds003505
+      # - persist_to_workspace:
+      #     root: /tmp
+      #     paths:
+      #       - data/ds003505
 
   test1_docker_parcellation:
     machine:
@@ -631,13 +898,22 @@ jobs:
               circleci step halt
             fi
       - attach_workspace:
-          at: /tmp
+          at: /tmp/cache/docker
+      - restore_cache:
+          keys:
+            - data-ds-sample-v2-4-{{ .Branch }}-{{ .Revision }}
+            - data-ds-sample-v2-4--{{ .Revision }}
+            - data-ds-sample-v2-4-{{ .Branch }}-
+            - data-ds-sample-v2-4-master-
+            - data-ds-sample-v2-4-
+          paths:
+            - /tmp/data/ds-sample
       - load-docker-image-archive:
           archive_file: "/tmp/cache/docker/docker.tar.zst"
       - install-conda-and-cmp3:
           run_name: "Setup miniconda environment and install connectomemapper3 with Python wrappers"
           cmp3_dir: /home/circleci/src/connectomemapper3
-      - clean-configuration-files:
+      - prepare-ds-sample-dataset:
           circleci_job: ${CIRCLE_JOB}
       - test-docker-anat-pipeline-wrapper:
           circleci_job: ${CIRCLE_JOB}
@@ -655,12 +931,12 @@ jobs:
                 -not -name "*.mat" -not -name "*.gpickle" -not -name "*.lta" -not -name "*.json" -not -name "*.txt" \
                 -not -name "*.log" -not -name "*.pklz" -type f -delete
       - persist_to_workspace:
-          root: /tmp
+          root: /tmp/data
           paths:
-            - data/ds-sample/test/test-01_*
-            - data/test1_docker_parcellation/ds-sample/derivatives/nipype-*
-            - data/test1_docker_parcellation/ds-sample/derivatives/freesurfer-*
-            - data/test1_docker_parcellation/ds-sample/derivatives/cmp-*
+            - ds-sample/test/test-01_*
+            - test1_docker_parcellation/ds-sample/derivatives/nipype-*
+            - test1_docker_parcellation/ds-sample/derivatives/freesurfer-*
+            - test1_docker_parcellation/ds-sample/derivatives/cmp-*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
@@ -694,13 +970,22 @@ jobs:
               circleci step halt
             fi
       - attach_workspace:
-          at: /tmp
+          at: /tmp/cache/docker
+      - restore_cache:
+          keys:
+            - data-ds-sample-v2-4-{{ .Branch }}-{{ .Revision }}
+            - data-ds-sample-v2-4--{{ .Revision }}
+            - data-ds-sample-v2-4-{{ .Branch }}-
+            - data-ds-sample-v2-4-master-
+            - data-ds-sample-v2-4-
+          paths:
+            - /tmp/data/ds-sample
       - load-docker-image-archive:
           archive_file: "/tmp/cache/docker/docker.tar.zst"
       - install-conda-and-cmp3:
           run_name: "Setup miniconda environment and install connectomemapper3 with Python wrappers"
           cmp3_dir: /home/circleci/src/connectomemapper3
-      - clean-configuration-files:
+      - prepare-ds-sample-dataset:
           circleci_job: ${CIRCLE_JOB}
       - test-docker-anat-pipeline-wrapper:
           circleci_job: ${CIRCLE_JOB}
@@ -718,9 +1003,9 @@ jobs:
                 -not -name "*.mat" -not -name "*.gpickle" -not -name "*.lta" -not -name "*.json" -not -name "*.txt" \
                 -not -name "*.log" -not -name "*.pklz" -type f -delete
       - persist_to_workspace:
-          root: /tmp
+          root: /tmp/data
           paths:
-            - data/ds-sample/test/test-02_*
+            - ds-sample/test/test-02_*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
@@ -754,7 +1039,18 @@ jobs:
               circleci step halt
             fi
       - attach_workspace:
-          at: /tmp
+          at: /tmp/cache/docker
+      - attach_workspace:
+          at: /tmp/data
+      - restore_cache:
+          keys:
+            - data-ds-sample-v2-4-{{ .Branch }}-{{ .Revision }}
+            - data-ds-sample-v2-4--{{ .Revision }}
+            - data-ds-sample-v2-4-{{ .Branch }}-
+            - data-ds-sample-v2-4-master-
+            - data-ds-sample-v2-4-
+          paths:
+            - /tmp/data/ds-sample
       - run:
           name: "Copy anatomical pipeline output from test 1"
           command: |
@@ -766,7 +1062,7 @@ jobs:
       - install-conda-and-cmp3:
           run_name: "Setup miniconda environment and install connectomemapper3 with Python wrappers"
           cmp3_dir: /home/circleci/src/connectomemapper3
-      - clean-configuration-files:
+      - prepare-ds-sample-dataset:
           circleci_job: ${CIRCLE_JOB}
       - test-docker-anat-dwi-pipelines-wrapper:
           circleci_job: ${CIRCLE_JOB}
@@ -777,9 +1073,9 @@ jobs:
           dwi_pipeline_config: "ref_diffusion_config_1.ini"
           check_output: true
       - persist_to_workspace:
-          root: /tmp
+          root: /tmp/data
           paths:
-            - data/ds-sample/test/test-03_*
+            - ds-sample/test/test-03_*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
@@ -813,7 +1109,18 @@ jobs:
               circleci step halt
             fi
       - attach_workspace:
-          at: /tmp
+          at: /tmp/cache/docker
+      - attach_workspace:
+          at: /tmp/data
+      - restore_cache:
+          keys:
+            - data-ds-sample-v2-4-{{ .Branch }}-{{ .Revision }}
+            - data-ds-sample-v2-4--{{ .Revision }}
+            - data-ds-sample-v2-4-{{ .Branch }}-
+            - data-ds-sample-v2-4-master-
+            - data-ds-sample-v2-4-
+          paths:
+            - /tmp/data/ds-sample
       - run:
           name: "Copy anatomical pipeline output from test 1"
           command: |
@@ -828,7 +1135,7 @@ jobs:
       - install-conda-and-cmp3:
           run_name: "Setup miniconda environment and install connectomemapper3 with Python wrappers"
           cmp3_dir: /home/circleci/src/connectomemapper3
-      - clean-configuration-files:
+      - prepare-ds-sample-dataset:
           circleci_job: ${CIRCLE_JOB}
       - test-docker-anat-dwi-pipelines-wrapper:
           circleci_job: ${CIRCLE_JOB}
@@ -839,9 +1146,9 @@ jobs:
           dwi_pipeline_config: "ref_diffusion_config_2.ini"
           check_output: true
       - persist_to_workspace:
-          root: /tmp
+          root: /tmp/data
           paths:
-            - data/ds-sample/test/test-04_*
+            - ds-sample/test/test-04_*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
@@ -875,7 +1182,18 @@ jobs:
               circleci step halt
             fi
       - attach_workspace:
-          at: /tmp
+          at: /tmp/cache/docker
+      - attach_workspace:
+          at: /tmp/data
+      - restore_cache:
+          keys:
+            - data-ds-sample-v2-4-{{ .Branch }}-{{ .Revision }}
+            - data-ds-sample-v2-4--{{ .Revision }}
+            - data-ds-sample-v2-4-{{ .Branch }}-
+            - data-ds-sample-v2-4-master-
+            - data-ds-sample-v2-4-
+          paths:
+            - /tmp/data/ds-sample
       - run:
           name: "Copy anatomical pipeline output from test 1"
           command: |
@@ -890,7 +1208,7 @@ jobs:
       - install-conda-and-cmp3:
           run_name: "Setup miniconda environment and install connectomemapper3 with Python wrappers"
           cmp3_dir: /home/circleci/src/connectomemapper3
-      - clean-configuration-files:
+      - prepare-ds-sample-dataset:
           circleci_job: ${CIRCLE_JOB}
       - test-docker-anat-dwi-pipelines-wrapper:
           circleci_job: ${CIRCLE_JOB}
@@ -901,9 +1219,9 @@ jobs:
           dwi_pipeline_config: "ref_diffusion_config_3.ini"
           check_output: true
       - persist_to_workspace:
-          root: /tmp
+          root: /tmp/data
           paths:
-            - data/ds-sample/test/test-05_*
+            - ds-sample/test/test-05_*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
@@ -937,7 +1255,18 @@ jobs:
               circleci step halt
             fi
       - attach_workspace:
-          at: /tmp
+          at: /tmp/cache/docker
+      - attach_workspace:
+          at: /tmp/data
+      - restore_cache:
+          keys:
+            - data-ds-sample-v2-4-{{ .Branch }}-{{ .Revision }}
+            - data-ds-sample-v2-4--{{ .Revision }}
+            - data-ds-sample-v2-4-{{ .Branch }}-
+            - data-ds-sample-v2-4-master-
+            - data-ds-sample-v2-4-
+          paths:
+            - /tmp/data/ds-sample
       - run:
           name: "Copy anatomical pipeline output from test 1"
           command: |
@@ -952,7 +1281,7 @@ jobs:
       - install-conda-and-cmp3:
           run_name: "Setup miniconda environment and install connectomemapper3 with Python wrappers"
           cmp3_dir: /home/circleci/src/connectomemapper3
-      - clean-configuration-files:
+      - prepare-ds-sample-dataset:
           circleci_job: ${CIRCLE_JOB}
       - test-docker-anat-dwi-pipelines-wrapper:
           circleci_job: ${CIRCLE_JOB}
@@ -963,9 +1292,9 @@ jobs:
           dwi_pipeline_config: "ref_diffusion_config_4.ini"
           check_output: true
       - persist_to_workspace:
-          root: /tmp
+          root: /tmp/data
           paths:
-            - data/ds-sample/test/test-06_*
+            - ds-sample/test/test-06_*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
@@ -999,7 +1328,18 @@ jobs:
               circleci step halt
             fi
       - attach_workspace:
-          at: /tmp
+          at: /tmp/cache/docker
+      - attach_workspace:
+          at: /tmp/data
+      - restore_cache:
+          keys:
+            - data-ds-sample-v2-4-{{ .Branch }}-{{ .Revision }}
+            - data-ds-sample-v2-4--{{ .Revision }}
+            - data-ds-sample-v2-4-{{ .Branch }}-
+            - data-ds-sample-v2-4-master-
+            - data-ds-sample-v2-4-
+          paths:
+            - /tmp/data/ds-sample
       - run:
           name: "Copy anatomical pipeline output from test 1"
           command: |
@@ -1014,7 +1354,7 @@ jobs:
       - install-conda-and-cmp3:
           run_name: "Setup miniconda environment and install connectomemapper3 with Python wrappers"
           cmp3_dir: /home/circleci/src/connectomemapper3
-      - clean-configuration-files:
+      - prepare-ds-sample-dataset:
           circleci_job: ${CIRCLE_JOB}
       - test-docker-anat-func-pipelines-wrapper:
           circleci_job: ${CIRCLE_JOB}
@@ -1025,9 +1365,9 @@ jobs:
           func_pipeline_config: "ref_fMRI_config_1.ini"
           check_output: true
       - persist_to_workspace:
-          root: /tmp
+          root: /tmp/data
           paths:
-            - data/ds-sample/test/test-07_*
+            - ds-sample/test/test-07_*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
@@ -1061,7 +1401,18 @@ jobs:
               circleci step halt
             fi
       - attach_workspace:
-          at: /tmp
+          at: /tmp/cache/docker
+      - attach_workspace:
+          at: /tmp/data
+      - restore_cache:
+          keys:
+            - data-ds-sample-v2-4-{{ .Branch }}-{{ .Revision }}
+            - data-ds-sample-v2-4--{{ .Revision }}
+            - data-ds-sample-v2-4-{{ .Branch }}-
+            - data-ds-sample-v2-4-master-
+            - data-ds-sample-v2-4-
+          paths:
+            - /tmp/data/ds-sample
       - run:
           name: "Copy anatomical pipeline output from test 1"
           command: |
@@ -1076,7 +1427,7 @@ jobs:
       - install-conda-and-cmp3:
           run_name: "Setup miniconda environment and install connectomemapper3 with Python wrappers"
           cmp3_dir: /home/circleci/src/connectomemapper3
-      - clean-configuration-files:
+      - prepare-ds-sample-dataset:
           circleci_job: ${CIRCLE_JOB}
       - test-docker-anat-func-pipelines-wrapper:
           circleci_job: ${CIRCLE_JOB}
@@ -1087,9 +1438,9 @@ jobs:
           func_pipeline_config: "ref_fMRI_config_2.ini"
           check_output: true
       - persist_to_workspace:
-          root: /tmp
+          root: /tmp/data
           paths:
-            - data/ds-sample/test/test-08_*
+            - ds-sample/test/test-08_*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
@@ -1123,7 +1474,16 @@ jobs:
               circleci step halt
             fi
       - attach_workspace:
-          at: /tmp
+          at: /tmp/cache/singularity
+      - restore_cache:
+          keys:
+            - data-ds-sample-v2-4-{{ .Branch }}-{{ .Revision }}
+            - data-ds-sample-v2-4--{{ .Revision }}
+            - data-ds-sample-v2-4-{{ .Branch }}-
+            - data-ds-sample-v2-4-master-
+            - data-ds-sample-v2-4-
+          paths:
+            - /tmp/data/ds-sample
       - singularity/install-go:
           go-version: '1.13'
       - singularity/debian-install-3:
@@ -1131,7 +1491,7 @@ jobs:
       - install-conda-and-cmp3:
           run_name: "Setup miniconda environment and install connectomemapper3 with Python wrappers"
           cmp3_dir: /home/circleci/src/connectomemapper3
-      - clean-configuration-files:
+      - prepare-ds-sample-dataset:
           circleci_job: ${CIRCLE_JOB}
       - test-singularity-anat-pipeline-wrapper:
           circleci_job: ${CIRCLE_JOB}
@@ -1149,9 +1509,9 @@ jobs:
                 -not -name "*.mat" -not -name "*.gpickle" -not -name "*.lta" -not -name "*.json" -not -name "*.txt" \
                 -not -name "*.log" -not -name "*.pklz" -type f -delete
       - persist_to_workspace:
-          root: /tmp
+          root: /tmp/data
           paths:
-            - data/ds-sample/test/test-09_*
+            - ds-sample/test/test-09_*
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
@@ -1161,13 +1521,152 @@ jobs:
       - store_artifacts:
           path: /tmp/data/test9_singularity_parcellation/ds-sample/derivatives/nipype-*
 
+  test10_docker_eeg:
+    machine:
+      # Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
+      image: ubuntu-2004:202201-02
+    resource_class: large
+    working_directory: /tmp/data
+    environment:
+      - FS_LICENSE: /tmp/data/${CIRCLE_JOB}/ds003505/code/license.txt
+    steps:
+      - run:
+          name: Get precise CPU specifications
+          command: |
+            cat  /proc/cpuinfo
+      - checkout:
+          path: /home/circleci/src/connectomemapper3
+      - run:
+          name: Check whether test10_docker_eeg should be skipped
+          command: |
+            cd /home/circleci/src/connectomemapper3
+            if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[skip[ _]?test10_docker_eeg\]' )" != "" ]]; then
+              echo "Skipping test10_docker_eeg job"
+              circleci step halt
+            fi
+      - attach_workspace:
+          at: /tmp/cache/docker
+      - restore_cache:
+          keys:
+            - data-ds003505-v2-3-{{ .Branch }}-{{ .Revision }}
+            - data-ds003505-v2-3--{{ .Revision }}
+            - data-ds003505-v2-3-{{ .Branch }}-
+            - data-ds003505-v2-3-master-
+            - data-ds003505-v2-3-
+          paths:
+            - /tmp/data/ds003505
+      - load-docker-image-archive:
+          archive_file: "/tmp/cache/docker/docker.tar.zst"
+      - install-conda-and-cmp3:
+          run_name: "Setup miniconda environment and install connectomemapper3 with Python wrappers"
+          cmp3_dir: /home/circleci/src/connectomemapper3
+      - prepare-ds003505-dataset:
+          circleci_job: ${CIRCLE_JOB}
+      - test-docker-anat-eeg-pipelines-wrapper:
+          circleci_job: ${CIRCLE_JOB}
+          run_name: Run anatomical and eeg pipelines on ds003505 - VEPCON dataset (test 10 - Lausanne2018 + MNE)
+          test_name: "test-10"
+          dataset: "ds003505"
+          config_dir: /home/circleci/src/connectomemapper3/.circleci/tests/configuration_files
+          anat_pipeline_config: "ref_anatomical_config_1.json"
+          eeg_pipeline_config: "ref_eeg_config_1.json"
+          check_output: true
+      - persist_to_workspace:
+          root: /tmp/data
+          paths:
+            - ds003505/test/test-10_*
+            - test10_docker_eeg/ds003505/derivatives/nipype-*/sub-01/anatomical_pipeline/*
+            - test10_docker_eeg/ds003505/derivatives/freesurfer-*
+      - store_artifacts:
+          path: /tmp/data/ds003505/test
+      - store_artifacts:
+          path: /tmp/data/test10_docker_eeg/ds003505/code
+      - store_artifacts:
+          path: /tmp/data/test10_docker_eeg/ds003505/derivatives/cmp-*
+      - store_artifacts:
+          path: /tmp/data/test10_docker_eeg/ds003505/derivatives/nipype-*
+
+  test11_docker_eeg:
+    machine:
+      # Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
+      image: ubuntu-2004:202201-02
+    resource_class: large
+    working_directory: /tmp/data
+    environment:
+      - FS_LICENSE: /tmp/data/${CIRCLE_JOB}/ds003505/code/license.txt
+    steps:
+      - run:
+          name: Get precise CPU specifications
+          command: |
+            cat  /proc/cpuinfo
+      - checkout:
+          path: /home/circleci/src/connectomemapper3
+      - run:
+          name: Check whether test11_docker_eeg should be skipped
+          command: |
+            cd /home/circleci/src/connectomemapper3
+            if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[skip[ _]?test11_docker_eeg\]' )" != "" ]]; then
+              echo "Skipping test11_docker_eeg job"
+              circleci step halt
+            fi
+      - attach_workspace:
+          at: /tmp/cache/docker
+      - restore_cache:
+          keys:
+            - data-ds003505-v2-3-{{ .Branch }}-{{ .Revision }}
+            - data-ds003505-v2-3--{{ .Revision }}
+            - data-ds003505-v2-3-{{ .Branch }}-
+            - data-ds003505-v2-3-master-
+            - data-ds003505-v2-3-
+          paths:
+            - /tmp/data/ds003505
+      - load-docker-image-archive:
+          archive_file: "/tmp/cache/docker/docker.tar.zst"
+      - install-conda-and-cmp3:
+          run_name: "Setup miniconda environment and install connectomemapper3 with Python wrappers"
+          cmp3_dir: /home/circleci/src/connectomemapper3
+      - prepare-ds003505-dataset:
+          circleci_job: ${CIRCLE_JOB}
+      - attach_workspace:
+          at: /tmp/data
+      - run:
+          name: "Copy only anatomical pipeline output from test 10"
+          command: |
+            cp -r /tmp/data/test10_docker_eeg/ds003505/derivatives/nipype-* \
+            /tmp/data/${CIRCLE_JOB}/ds003505/derivatives
+            rm -rvf /tmp/data/${CIRCLE_JOB}/ds003505/derivatives/nipype-*/sub-01/eeg_pipeline
+            rm -rvf /tmp/data/${CIRCLE_JOB}/ds003505/derivatives/freesurfer-*
+            cp -r /tmp/data/test10_docker_eeg/ds003505/derivatives/freesurfer-* \
+            /tmp/data/${CIRCLE_JOB}/ds003505/derivatives
+      - test-docker-anat-eeg-pipelines-wrapper:
+          circleci_job: ${CIRCLE_JOB}
+          run_name: Run anatomical and eeg pipelines on ds003505 - VEPCON dataset (test 11 - Lausanne2018 + PyCartool)
+          test_name: "test-11"
+          dataset: "ds003505"
+          config_dir: /home/circleci/src/connectomemapper3/.circleci/tests/configuration_files
+          anat_pipeline_config: "ref_anatomical_config_1.json"
+          eeg_pipeline_config: "ref_eeg_config_2.json"
+          check_output: true
+      - persist_to_workspace:
+          root: /tmp/data
+          paths:
+            - ds003505/test/test-11_*
+      - store_artifacts:
+          path: /tmp/data/ds003505/test
+      - store_artifacts:
+          path: /tmp/data/test11_docker_eeg/ds003505/code
+      - store_artifacts:
+          path: /tmp/data/test11_docker_eeg/ds003505/derivatives/cmp-*
+      - store_artifacts:
+          path: /tmp/data/test11_docker_eeg/ds003505/derivatives/nipype-*
+
   codacy_coverage_report:
     docker:
       - image: 'cimg/openjdk:8.0.312'
     working_directory: /tmp/data/ds-sample/test
     steps:
       - attach_workspace:
-          at: /tmp
+          at: /tmp/data
       - run:
           name: Run Codacy Coverage Reporter to convert and upload the reports to Codacy
           command: |
@@ -1205,6 +1704,12 @@ jobs:
             bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
                 --project-token ${CODACY_PROJECT_TOKEN} --commit-uuid ${COMMIT_UUID} \
                 -l Python -r /tmp/data/ds-sample/test/test-09_coverage.xml --partial &&\
+            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
+                --project-token ${CODACY_PROJECT_TOKEN} --commit-uuid ${COMMIT_UUID} \
+                -l Python -r /tmp/data/ds003505/test/test-10_coverage.xml --partial &&\
+            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
+                --project-token ${CODACY_PROJECT_TOKEN} --commit-uuid ${COMMIT_UUID} \
+                -l Python -r /tmp/data/ds003505/test/test-11_coverage.xml --partial &&\
             bash <(curl -Ls https://coverage.codacy.com/get.sh) final \
                 --project-token ${CODACY_PROJECT_TOKEN} --commit-uuid ${COMMIT_UUID}
 
@@ -1214,7 +1719,7 @@ jobs:
     working_directory: /home/circleci/src/connectomemapper3
     steps:
       - attach_workspace:
-          at: /tmp
+          at: /tmp/data
       - checkout:
           path: /home/circleci/src/connectomemapper3
       - codecov/upload:
@@ -1235,6 +1740,10 @@ jobs:
           file: /tmp/data/ds-sample/test/test-08_coverage.xml
       - codecov/upload:
           file: /tmp/data/ds-sample/test/test-09_coverage.xml
+      - codecov/upload:
+          file: /tmp/data/ds003505/test/test-10_coverage.xml
+      - codecov/upload:
+          file: /tmp/data/ds003505/test/test-11_coverage.xml
 
   build_docs:
     machine:
@@ -1254,7 +1763,7 @@ jobs:
             fi
 
       - attach_workspace:
-          at: /tmp
+          at: /tmp/cache/docker
       - load-docker-image-archive:
           archive_file: "/tmp/cache/docker/docker.tar.zst"
       - run:
@@ -1281,7 +1790,7 @@ jobs:
       - checkout:
           path: /home/circleci/src/connectomemapper3
       - attach_workspace:
-          at: /tmp
+          at: /tmp/cache/docker
       - load-docker-image-archive:
           archive_file: "/tmp/cache/docker/docker.tar.zst"
       - run:
@@ -1317,7 +1826,7 @@ jobs:
               circleci step halt
             fi
       - attach_workspace:
-          at: /tmp
+          at: /tmp/cache/singularity
       - singularity/install-go:
           go-version: '1.13'
       - singularity/debian-install-3:
@@ -1348,7 +1857,7 @@ jobs:
       - checkout:
           path: /home/circleci/src/connectomemapper3
       - attach_workspace:
-          at: /tmp
+          at: /tmp/cache/docker
       - load-docker-image-archive:
           archive_file: "/tmp/cache/docker/docker.tar.zst"
       - run:
@@ -1386,7 +1895,7 @@ jobs:
               circleci step halt
             fi
       - attach_workspace:
-          at: /tmp
+          at: /tmp/cache/singularity
       - singularity/install-go:
           go-version: '1.13'
       - singularity/debian-install-3:
@@ -1570,6 +2079,31 @@ workflows:
             tags:
               only: /.*/
 
+      - test10_docker_eeg:
+          requires:
+            - get_data
+            - build_docker
+          filters:
+            branches:
+              ignore:
+                - /docs?\/.*/
+                - paper-joss
+                - pull/142
+            tags:
+              only: /.*/
+
+      - test11_docker_eeg:
+          requires:
+            - test10_docker_eeg
+          filters:
+            branches:
+              ignore:
+                - /docs?\/.*/
+                - paper-joss
+                - pull/142
+            tags:
+              only: /.*/
+
       - codacy_coverage_report:
           requires:
             - test1_docker_parcellation
@@ -1581,6 +2115,8 @@ workflows:
             - test7_docker_fmri
             - test8_docker_fmri
             - test9_singularity_parcellation
+            - test10_docker_eeg
+            - test11_docker_eeg
           filters:
               branches:
                 ignore:
@@ -1601,6 +2137,8 @@ workflows:
             - test7_docker_fmri
             - test8_docker_fmri
             - test9_singularity_parcellation
+            - test10_docker_eeg
+            - test11_docker_eeg
           filters:
             branches:
               ignore:

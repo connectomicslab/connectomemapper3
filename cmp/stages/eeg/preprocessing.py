@@ -8,11 +8,10 @@
 
 # General imports
 import os
-
-from bids import BIDSLayout
 from traits.api import (
     HasTraits, Enum, Instance, Float, Str
 )
+
 # Nipype imports
 import nipype.pipeline.engine as pe
 
@@ -66,7 +65,7 @@ class EEGPreprocessingConfig(HasTraits):
     cmp.stages.eeg.preparer.EEGPreprocessingStage
     """
 
-    task_label = Str("", desc="Task label (e.g. _task-<label>_)")
+    task_label = Str("Undefined", desc="Task label (e.g. _task-<label>_)")
 
     eeg_ts_file = Instance(
         CustomEEGPreprocBIDSFile, (),
@@ -144,7 +143,6 @@ class EEGPreprocessingStage(Stage):
         self.bids_dir = bids_dir
         self.output_dir = output_dir
         self.config = EEGPreprocessingConfig()
-        self.config.task_label = sorted(BIDSLayout(bids_dir).get_tasks())[0]
         self.inputs = [
             "eeg_ts_file",
             "events_file",
@@ -205,16 +203,9 @@ class EEGPreprocessingStage(Stage):
             # fmt: on
 
     def define_inspect_outputs(self):
-        raise NotImplementedError
+        """Update the `inspect_outputs` class attribute.
 
-    def has_run(self):
-        """Function that returns `True` if the stage has been run successfully.
-
-        Returns
-        -------
-        `True` if the stage has been run successfully
+        It contains a dictionary of stage outputs with corresponding commands for visual inspection.
         """
-        # if self.config.eeg_format == ".set":
-        #     if self.config.inverse_solution.split('-')[0] == "Cartool":
-        #         return os.path.exists(self.config.epochs_fif)
-        return True
+        self.inspect_outputs_dict = {}
+        self.inspect_outputs = ["Outputs not available"]

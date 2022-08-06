@@ -10,7 +10,7 @@
 import os
 from traits.api import (
     HasTraits, Enum, Instance,
-    Bool, Float, Str
+    Bool, Float, Str, Int
 )
 
 # Nipype imports
@@ -135,7 +135,7 @@ class EEGSourceImagingConfig(HasTraits):
              "parcellation scheme is used "
     )
 
-    cartool_esi_lamb = Float(6, desc='Regularization weight')
+    cartool_esi_lamb = Int(6, desc='Regularization weight')
     cartool_svd_toi_begin = Float(0, desc='Start TOI for SVD projection')
     cartool_svd_toi_end = Float(0.25, desc='End TOI for SVD projection')
 
@@ -230,7 +230,8 @@ class EEGSourceImagingStage(Stage):
             "fwd_file",
             "src_file",
             "inv_file",
-            "roi_ts_file",
+            "roi_ts_npy_file",
+            "roi_ts_mat_file",
             "mapping_spi_rois_file"
         ]
 
@@ -274,10 +275,10 @@ class EEGSourceImagingStage(Stage):
         # fmt: off
         invsol_node = pe.Node(
             interface=CartoolInverseSolutionROIExtraction(
-                out_roi_ts_fname="timeseries.npy",
-                lam=self.config.eeg_cartool_esi_lamb,
-                svd_toi_begin=self.config.eeg_cartool_svd_toi_begin,
-                svd_toi_end=self.config.eeg_cartool_svd_toi_end
+                out_roi_ts_fname_prefix="timeseries",
+                lamb=self.config.cartool_esi_lamb,
+                svd_toi_begin=self.config.cartool_svd_toi_begin,
+                svd_toi_end=self.config.cartool_svd_toi_end
             ),
             name="cartool_invsol"
         )
@@ -297,7 +298,8 @@ class EEGSourceImagingStage(Stage):
         flow.connect(
             [
                 (mapping_spi_rois_node, outputnode, [("mapping_spi_rois_file", "mapping_spi_rois_file")]),
-                (invsol_node, outputnode, [("roi_ts_file", "roi_ts_file")])
+                (invsol_node, outputnode, [("roi_ts_npy_file", "roi_ts_npy_file"),
+                                           ("roi_ts_mat_file", "roi_ts_mat_file")])
             ]
         )
         # fmt: on
@@ -353,9 +355,9 @@ class EEGSourceImagingStage(Stage):
             interface=MNEInverseSolutionROI(
                 fs_subject=self.fs_subject,
                 fs_subjects_dir=self.fs_subjects_dir,
-                out_roi_ts_fname="timeseries.pickle",
+                out_roi_ts_fname_prefix="timeseries",
                 out_inv_fname="inv.fif",
-                parc_annot=(f'lausanne2018.{self.config.lausanne2018_parcellation_res}'
+                atlas_annot=(f'lausanne2018.{self.config.lausanne2018_parcellation_res}'
                             if self.config.parcellation_scheme == "Lausanne2018"
                             else 'aparc'),
                 esi_method=self.config.mne_esi_method,
@@ -390,23 +392,17 @@ class EEGSourceImagingStage(Stage):
                 (src_node, outputnode, [("src_file", "src_file")]),
                 (covmat_node, outputnode, [("noise_cov_file", "noise_cov_file")]),
                 (fwd_node, outputnode, [("fwd_file", "fwd_file")]),
-                (invsol_node, outputnode, [("roi_ts_file", "roi_ts_file"),
+                (invsol_node, outputnode, [("roi_ts_npy_file", "roi_ts_npy_file"),
+                                           ("roi_ts_mat_file", "roi_ts_mat_file"),
                                            ("inv_file", "inv_file")])
             ]
         )
         # fmt: on
 
     def define_inspect_outputs(self):
-        raise NotImplementedError
+        """Update the `inspect_outputs` class attribute.
 
-    def has_run(self):
-        """Function that returns `True` if the stage has been run successfully.
-
-        Returns
-        -------
-        `True` if the stage has been run successfully
+        It contains a dictionary of stage outputs with corresponding commands for visual inspection.
         """
-        return True
-        # if self.config.eeg_format == ".set":
-        #     if self.config.invsol_format.split("-")[0] == "Cartool":
-        #         return os.path.exists(self.config.roi_ts_file)
+        self.inspect_outputs_dict = {}
+        self.inspect_outputs = ["Outputs not available"]

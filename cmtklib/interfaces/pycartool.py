@@ -5,19 +5,22 @@
 #  This software is distributed under the open-source license Modified BSD.
 """The PyCartool module provides Nipype interfaces with Cartool using pycartool."""
 
+# General imports
 import os
 import pickle
-
 import nibabel
 import numpy as np
+import scipy.io as sio
 
-import mne
-import pycartool as cart
-
+# Nipype imports
 from nipype.interfaces.base import (
     BaseInterface, BaseInterfaceInputSpec,
     TraitedSpec, traits
 )
+
+# EEG package imports
+import mne
+import pycartool as cart
 
 
 class CartoolInverseSolutionROIExtractionInputSpec(BaseInterfaceInputSpec):
@@ -33,21 +36,22 @@ class CartoolInverseSolutionROIExtractionInputSpec(BaseInterfaceInputSpec):
         mandatory=True
     )
 
-    lamb = traits.Float(6, desc='Regularization weight')
+    lamb = traits.Int(6, desc='Regularization weight')
 
     svd_toi_begin = traits.Float(0, desc='Start TOI for SVD projection')
 
     svd_toi_end = traits.Float(0.25, desc='End TOI for SVD projection')
 
-    out_roi_ts_fname = traits.Str(
+    out_roi_ts_fname_prefix = traits.Str(
         exists=False,
-        desc="Name of output file for rois * time series in .npy format",
+        desc="Output name prefix (no extension) for rois * time series files",
         mandatory=True
     )
 
 
 class CartoolInverseSolutionROIExtractionOutputSpec(TraitedSpec):
-    roi_ts_file = traits.File(desc="Path to output  ROI time series file in .npy format")
+    roi_ts_npy_file = traits.File(desc="Path to output  ROI time series file in .npy format")
+    roi_ts_mat_file = traits.File(desc="Path to output  ROI time series file in .mat format")
 
 
 class CartoolInverseSolutionROIExtraction(BaseInterface):
@@ -63,7 +67,7 @@ class CartoolInverseSolutionROIExtraction(BaseInterface):
     >>> cartool_inv_sol.inputs.lamd = 6
     >>> cartool_inv_sol.inputs.svd_toi_begin = 0
     >>> cartool_inv_sol.inputs.svd_toi_end = 0.25
-    >>> cartool_inv_sol.inputs.out_roi_ts_fname = 'sub-01_task-faces_atlas-L2008_res-scale1_rec-LORETA_timeseries.npy'
+    >>> cartool_inv_sol.inputs.out_roi_ts_fname_prefix = 'sub-01_task-faces_atlas-L2008_res-scale1_rec-LORETA_timeseries'
     >>> cartool_inv_sol.run()  # doctest: +SKIP
 
     References
@@ -87,7 +91,8 @@ class CartoolInverseSolutionROIExtraction(BaseInterface):
             self.inputs.mapping_spi_rois_file,
             svd_params
         )
-        np.save(self.roi_ts_file, roi_tcs)
+        np.save(self._gen_output_filename_roi_ts(extension=".npy"), roi_tcs)
+        sio.savemat(self._gen_output_filename_roi_ts(extension=".mat"), {"ts": roi_tcs})
         return runtime
 
     @staticmethod
@@ -96,7 +101,8 @@ class CartoolInverseSolutionROIExtraction(BaseInterface):
         invsol = cart.io.inverse_solution.read_is(invsol_file)
         pickle_in = open(rois_file, "rb")
         rois = pickle.load(pickle_in)
-        K = invsol['regularisation_solutions'][lamda]
+        print(f'  .. DEBUG: Invsol loaded = {invsol}')
+        mat_k = invsol['regularisation_solutions'][lamda]
         n_rois = len(rois.names)
         times = epochs.times
         tstep = times[1] - times[0]
@@ -109,9 +115,9 @@ class CartoolInverseSolutionROIExtraction(BaseInterface):
 
             for k, e in enumerate(epochs):
                 # logger.info('Processing epoch : %d%s' % (k + 1, total))
-                roi_stc[0, :, :, k] = K[0, spis_this_roi] @ e
-                roi_stc[1, :, :, k] = K[1, spis_this_roi] @ e
-                roi_stc[2, :, :, k] = K[2, spis_this_roi] @ e
+                roi_stc[0, :, :, k] = mat_k[0, spis_this_roi] @ e
+                roi_stc[1, :, :, k] = mat_k[1, spis_this_roi] @ e
+                roi_stc[2, :, :, k] = mat_k[2, spis_this_roi] @ e
 
             stim_onset = np.where(times == 0)[0][0]
             svd_t_begin = stim_onset + int(svd_params['toi_begin'] / tstep)
@@ -132,12 +138,13 @@ class CartoolInverseSolutionROIExtraction(BaseInterface):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['roi_ts_file'] = self._gen_output_filename_roi_ts()
+        outputs["roi_ts_npy_file"] = self._gen_output_filename_roi_ts(extension=".npy")
+        outputs["roi_ts_mat_file"] = self._gen_output_filename_roi_ts(extension=".mat")
         return outputs
 
-    def _gen_output_filename_roi_ts(self):
+    def _gen_output_filename_roi_ts(self, extension):
         # Return the absolute path of the output ROI time series file
-        return os.path.abspath(self.inputs.out_roi_ts_fname)
+        return os.path.abspath(self.inputs.out_roi_ts_fname_prefix + extension)
 
 
 class CreateSpiRoisMappingInputSpec(BaseInterfaceInputSpec):
@@ -227,4 +234,4 @@ class CreateSpiRoisMapping(BaseInterface):
 
     def _gen_output_filename_mapping_spi_rois(self):
         # Return the absolute path of the output inverse operator file
-        return os.path.abspath(self.inputs.out_inv_fname)
+        return os.path.abspath(self.inputs.out_mapping_spi_rois_fname)

@@ -1120,24 +1120,3 @@ class PreprocessingStage(Stage):
         self.inspect_outputs = sorted(
             [key for key in list(self.inspect_outputs_dict.keys())], key=str.lower
         )
-
-    def has_run(self):
-        """Function that returns `True` if the stage has been run successfully.
-
-        Returns
-        -------
-        `True` if the stage has been run successfully
-        """
-        if not self.config.eddy_current_and_motion_correction:
-            if not self.config.denoising and not self.config.bias_field_correction:
-                return True
-            else:
-                return os.path.exists(
-                    os.path.join(
-                        self.stage_dir, "mr_convert_b", "result_mr_convert_b.pklz"
-                    )
-                )
-        else:
-            return os.path.exists(
-                os.path.join(self.stage_dir, "eddy", "result_eddy.pklz")
-            )

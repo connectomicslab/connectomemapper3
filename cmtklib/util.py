@@ -478,7 +478,7 @@ def find_toolbox_derivatives_containing_file(bids_dir, fname, debug=True):
         Tuple of files containing bvecs and bvals
     """
     deriv_dir = os.path.join(bids_dir, "derivatives")
-    for root, dirs, files in os.walk(deriv_dir, topdown=False):
+    for root, _, files in os.walk(deriv_dir, topdown=False):
         for name in files:
             if name == fname:
                 # Extract the name of the toolbox directory only

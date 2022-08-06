@@ -263,16 +263,3 @@ class ConnectomeStage(Stage):
                 [key for key in list(self.inspect_outputs_dict.keys())], key=str.lower
             )
             # print(self.inspect_outputs)
-
-    def has_run(self):
-        """Function that returns `True` if the stage has been run successfully.
-
-        Returns
-        -------
-        `True` if the stage has been run successfully
-        """
-        return os.path.exists(
-            os.path.join(
-                self.stage_dir, "compute_matrice", "result_compute_matrice.pklz"
-            )
-        )

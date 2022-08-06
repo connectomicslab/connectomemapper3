@@ -11,10 +11,9 @@ import os
 import json
 import mne
 import numpy as np
-from cmtklib.bids.io import __cmp_directory__
 
 
-def create_trans_files(data_dir,sub):
+def create_trans_files(data_dir, cmp3_dir, sub):
     """
     Helper function that will create the -trans.fif-files necessary to adjust
     electrode positions and run the EEG pipeline tutorial with VEPCON data.
@@ -105,13 +104,14 @@ def create_trans_files(data_dir,sub):
     
     # turn it into trans object and save
     trans = mne.transforms.Transform('head', 'mri', trans=head_to_mri)
-    trans_dir = os.path.join(data_dir, 'derivatives', __cmp_directory__, sub, 'eeg')
+    trans_dir = os.path.join(data_dir, 'derivatives', cmp3_dir, sub, 'eeg')
     # if dir doesn't exist yet, create it
-    if not os.path.exists(os.path.join(data_dir, 'derivatives', __cmp_directory__, sub)):
-        os.mkdir(os.path.join(data_dir, 'derivatives', __cmp_directory__, sub))
     if not os.path.exists(trans_dir):
-        os.mkdir(trans_dir)
-    mne.write_trans(os.path.join(trans_dir, sub+'_trans.fif'), trans)
+        os.makedirs(trans_dir)
+    trans_file = os.path.join(trans_dir, sub+'_trans.fif')
+    if not os.path.exists(trans_file):
+        print(f'Create transform file: {trans_file}')
+        mne.write_trans(trans_file, trans)
 
 
 def fix_vepcon_derivatives_dataset_description_files(vepcon_dir):
@@ -144,7 +144,7 @@ def fix_vepcon_derivatives_dataset_description_files(vepcon_dir):
             "License": "TODO: To be updated (See https://creativecommons.org/about/cclicenses/)"
         }
     }
-    for key, dd_dict in  dataset_description_files.items():
+    for key, dd_dict in dataset_description_files.items():
         dd_file = os.path.join(
             vepcon_dir, 'derivatives',
             f'{key}-{dd_dict["GeneratedBy"][0]["Version"]}',
@@ -152,4 +152,4 @@ def fix_vepcon_derivatives_dataset_description_files(vepcon_dir):
         )
         with open(dd_file, 'w') as f:
             print(f'Replace {dd_file}')
-            json.dump(dd_dict, f)
+            json.dump(dd_dict, f, indent=4)

@@ -285,27 +285,3 @@ class PreprocessingStage(Stage):
         self.inspect_outputs = sorted(
             [key for key in list(self.inspect_outputs_dict.keys())], key=str.lower
         )
-
-    def has_run(self):
-        """Function that returns `True` if the stage has been run successfully.
-
-        Returns
-        -------
-        `True` if the stage has been run successfully
-        """
-        if self.config.motion_correction:
-            return os.path.exists(
-                os.path.join(
-                    self.stage_dir, "motion_correction", "result_motion_correction.pklz"
-                )
-            )
-        elif self.config.slice_timing:
-            return os.path.exists(
-                os.path.join(self.stage_dir, "slice_timing", "result_slice_timing.pklz")
-            )
-        elif self.config.despiking:
-            return os.path.exists(
-                os.path.join(self.stage_dir, "converter", "result_converter.pklz")
-            )
-        else:
-            return True
