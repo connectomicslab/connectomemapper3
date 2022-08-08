@@ -322,7 +322,6 @@ def refresh_folder(
 
         for in_f in input_folders:
             paths.append(os.path.join(derivatives_directory, __cmp_directory__, subject, in_f))
-            # paths.append(os.path.join(derivatives_directory,'nipype',subject,in_f))
 
     else:
         paths.append(
@@ -337,7 +336,6 @@ def refresh_folder(
             paths.append(
                 os.path.join(derivatives_directory, __cmp_directory__, subject, session, in_f)
             )
-            # paths.append(os.path.join(derivatives_directory,'nipype',subject,session,in_f))
 
     for full_p in paths:
         if not os.path.exists(full_p):
@@ -411,7 +409,7 @@ def init_dmri_project(project_info, bids_layout, is_new_project, gui=True, debug
     if dmri_inputs_checked:
         if (
             is_new_project and dmri_pipeline is not None
-        ):  # and dmri_pipelineis not None:
+        ):
             print("> Initialize dmri project")
             if not os.path.exists(subject_derivatives_directory):
                 try:
@@ -527,7 +525,7 @@ def init_fmri_project(project_info, bids_layout, is_new_project, gui=True, debug
     if fmri_inputs_checked:
         if (
             is_new_project and fmri_pipeline is not None
-        ):  # and fmri_pipelineis not None:
+        ):
             print("> Initialize fmri project")
             if not os.path.exists(subject_derivatives_directory):
                 try:

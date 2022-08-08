@@ -75,7 +75,7 @@ class EEGPipeline(Pipeline):
     """
 
     now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
-    pipeline_name = Str("EEG_pipeline")
+    pipeline_name = Str("eeg_pipeline")
     input_folders = ["anat", "eeg"]
     subject = Str
     subject_directory = Directory
@@ -147,6 +147,9 @@ class EEGPipeline(Pipeline):
         self.parcellation_cmp_dir = self.stages["EEGSourceImaging"].config.parcellation_cmp_dir
 
         self.stages["EEGSourceImaging"].config.parcellation_scheme = self.parcellation_scheme
+        self.stages["EEGSourceImaging"].config.task_label = self.stages["EEGPreprocessing"].config.task_label
+
+        self.stages["EEGPreprocessing"].config.on_trait_change(self._update_task_label, 'task_label')
 
         self.stages["EEGSourceImaging"].config.on_trait_change(self._update_parcellation_scheme, 'parcellation_scheme')
         self.stages["EEGSourceImaging"].config.on_trait_change(self._update_lausanne2018_parcellation_res, 'lausanne2018_parcellation_res')
@@ -165,6 +168,10 @@ class EEGPipeline(Pipeline):
 
     def _update_parcellation_cmp_dir(self):
         self.parcellation_cmp_dir = self.stages["EEGSourceImaging"].config.parcellation_cmp_dir
+
+    def _update_task_label(self):
+        self.stages["EEGSourceImaging"].config.task_label = self.stages["EEGPreprocessing"].config.task_label
+        self.stages["EEGConnectome"].config.task_label = self.stages["EEGPreprocessing"].config.task_label
 
     def check_config(self):
         # TODO: To Be Implemented if Necessary
@@ -202,7 +209,7 @@ class EEGPipeline(Pipeline):
     # def check_output(self):
     #     raise NotImplementedError
 
-    def create_datagrabber_node(self, name="eeg_datasource", base_directory=None, debug=True):
+    def create_datagrabber_node(self, name="eeg_datasource", base_directory=None, debug=False):
         """Create the appropriate Nipype BIDSDataGrabber node depending on the configuration of the different EEG pipeline stages.
 
         Parameters

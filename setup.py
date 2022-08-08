@@ -45,6 +45,7 @@ packages = [
     "cmp.stages.connectome",
     "cmp.stages.eeg",
     "cmp.pipelines",
+    "cmp.viz",
     "cmp.pipelines.anatomical",
     "cmp.pipelines.diffusion",
     "cmp.pipelines.functional",
@@ -53,6 +54,7 @@ packages = [
     "cmp.bidsappmanager.stages",
     "cmp.bidsappmanager.stages.preprocessing",
     "cmp.bidsappmanager.stages.segmentation",
+    "cmp.bidsappmanager.stages.eeg",
     "cmp.bidsappmanager.stages.parcellation",
     "cmp.bidsappmanager.stages.registration",
     "cmp.bidsappmanager.stages.diffusion",
@@ -150,6 +152,7 @@ def main():
                 'connectomemapper3 = cmp.cli.connectomemapper3:main',
                 'cmpbidsappmanager = cmp.cli.cmpbidsappmanager:main',
                 'showmatrix_gpickle = cmp.cli.showmatrix_gpickle:main',
+                'visualize_eeg_pipeline_outputs = cmp.cli.visualize_eeg_pipeline_outputs:main',
                 'connectomemapper3_docker = cmp.cli.connectomemapper3_docker:main',
                 'connectomemapper3_singularity = cmp.cli.connectomemapper3_singularity:main'
             ]

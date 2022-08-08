@@ -139,7 +139,7 @@ class CustomBIDSFile(HasTraits):
         """Return the value of `custom_derivatives_dir` attribute."""
         return self.toolbox_derivatives_dir
 
-    def get_filename_path(self, base_dir, subject, session=None, debug=True):
+    def get_filename_path(self, base_dir, subject, session=None, debug=False):
         """Return the filename path without extension of the represented BIDS file.
 
         Parameters
@@ -186,7 +186,7 @@ class CustomBIDSFile(HasTraits):
             print(f" .. DEBUG : Generated file path (no extension) = {filepath}")
         return filepath
 
-    def get_filename(self, subject, session=None, debug=True):
+    def get_filename(self, subject, session=None, debug=False):
         """Return the filename path with extension of the represented BIDS file.
 
         Parameters
@@ -232,7 +232,7 @@ class CustomParcellationBIDSFile(CustomBIDSFile):
     def __init__(self):
         super().__init__(p_datatype="anat", p_suffix="dseg", p_atlas="L2018", p_extension="nii.gz")
 
-    def get_nb_of_regions(self, bids_dir, subject, session=None, debug=True):
+    def get_nb_of_regions(self, bids_dir, subject, session=None, debug=False):
         """Return the number of regions by reading its associated TSV side car file describing the nodes.
 
         Parameters
@@ -328,7 +328,7 @@ class CustomEEGEventsBIDSFile(CustomBIDSFile):
     def __init__(self):
         super().__init__(p_datatype="eeg", p_suffix="events", p_extension="tsv")
 
-    def extract_event_ids_from_json_sidecar(self, base_dir, subject, session=None, debug=True):
+    def extract_event_ids_from_json_sidecar(self, base_dir, subject, session=None, debug=False):
         events_json_file = self.get_filename_path(base_dir, subject, session, debug) + ".json"
         with open(events_json_file, "r") as f:
             json_content = json.load(f)
