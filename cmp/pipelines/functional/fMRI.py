@@ -586,12 +586,6 @@ class fMRIPipeline(Pipeline):
         bids_atlas_label : string
             Parcellation atlas label
 
-        recon_model : string
-            Diffusion signal model (`DTI` or `CSD`)
-
-        tracking_model : string
-            Tractography algorithm (`DET` or `PROB`)
-
         Returns
         -------
         sinker : Output Nipype DataSink Node

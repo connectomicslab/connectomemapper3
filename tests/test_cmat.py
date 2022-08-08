@@ -8,7 +8,7 @@ cmtk_cmat = pe.Node(interface=CMTK_cmat(), name="compute_matrice",
 dir = '/media/localadmin/HagmannHDD/Seb/ds-newtest5'
 
 cmtk_cmat.inputs.compute_curvature = False
-cmtk_cmat.inputs.output_types = ["gPickle"]
+cmtk_cmat.inputs.output_types = ["gpickle"]
 cmtk_cmat.inputs.track_file = op.join(dir,
                                       "derivatives/nipype/sub-A001/ses-20160707161422/diffusion_pipeline/diffusion_stage/tracking/trackvis/converted.trk")
 cmtk_cmat.inputs.roi_volumes = [op.join(dir,

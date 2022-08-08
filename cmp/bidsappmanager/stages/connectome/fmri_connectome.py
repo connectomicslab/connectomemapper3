@@ -22,7 +22,7 @@ class ConnectomeConfigUI(ConnectomeConfig):
     ----------
     output_types : list of string
         A list of ``output_types``. Valid ``output_types`` are
-        'gPickle', 'mat', 'cff', 'graphml'
+        'gpickle', 'mat', 'cff', 'graphml'
 
     traits_view : traits.ui.View
         TraitsUI view that displays the Attributes of this class
@@ -33,8 +33,8 @@ class ConnectomeConfigUI(ConnectomeConfig):
     """
 
     output_types = List(
-        ["gPickle"],
-        editor=CheckListEditor(values=["gPickle", "mat", "cff", "graphml"], cols=4),
+        ["gpickle"],
+        editor=CheckListEditor(values=["gpickle", "mat", "cff", "graphml"], cols=4),
     )
 
     traits_view = View(

@@ -51,6 +51,9 @@ class MainWindow(HasTraits):
     fmri_pipeline : Instance(HasTraits)
         Instance of functional MRI pipeline UI
 
+    eeg_pipeline : Instance(HasTraits)
+        Instance of EEG pipeline UI
+
     configurator_ui : `PipelineConfiguratorWindow`
         Instance of :class:`PipelineConfiguratorWindow`
 
@@ -84,6 +87,7 @@ class MainWindow(HasTraits):
     anat_pipeline = Instance(HasTraits)
     dmri_pipeline = Instance(HasTraits)
     fmri_pipeline = Instance(HasTraits)
+    eeg_pipeline = Instance(HasTraits)
 
     configurator_ui = Instance(cmp.bidsappmanager.gui.config.PipelineConfiguratorWindow)
     bidsapp_ui = Instance(cmp.bidsappmanager.gui.bidsapp.BIDSAppInterfaceWindow)
@@ -218,6 +222,9 @@ class MainWindow(HasTraits):
         fmri_config = os.path.join(
             self.project_info.base_directory, "code/", "ref_fMRI_config.json"
         )
+        eeg_config = os.path.join(
+            self.project_info.base_directory, "code/", "ref_EEG_config.json"
+        )
 
         self.bidsapp_ui = cmp.bidsappmanager.gui.bidsapp.BIDSAppInterfaceWindow(
             project_info=self.project_info,
@@ -226,6 +233,7 @@ class MainWindow(HasTraits):
             anat_config=anat_config,
             dmri_config=dmri_config,
             fmri_config=fmri_config,
+            eeg_config=eeg_config
         )
         self.bidsapp_ui.configure_traits()
 
@@ -234,30 +242,30 @@ class MainWindow(HasTraits):
         print_blue("[Open Pipeline Configurator Window]")
         if self.project_info.t1_available:
             if os.path.isfile(self.project_info.anat_config_file):
-                print(
-                    "  .. Anatomical config file : %s"
-                    % self.project_info.anat_config_file
-                )
+                print(f"  .. Anatomical config file : {self.project_info.anat_config_file}")
 
         if self.project_info.dmri_available:
             if os.path.isfile(self.project_info.dmri_config_file):
-                print(
-                    "  .. Diffusion config file : %s"
-                    % self.project_info.dmri_config_file
-                )
+                print(f"  .. Diffusion config file : {self.project_info.dmri_config_file}")
 
         if self.project_info.fmri_available:
             if os.path.isfile(self.project_info.fmri_config_file):
-                print("  .. fMRI config file : %s" % self.project_info.fmri_config_file)
+                print(f"  .. fMRI config file : {self.project_info.fmri_config_file}")
+
+        if self.project_info.eeg_available:
+            if os.path.isfile(self.project_info.eeg_config_file):
+                print(f"  .. EEG config file : {self.project_info.eeg_config_file}")
 
         self.configurator_ui = cmp.bidsappmanager.gui.config.PipelineConfiguratorWindow(
             project_info=self.project_info,
             anat_pipeline=self.anat_pipeline,
             dmri_pipeline=self.dmri_pipeline,
             fmri_pipeline=self.fmri_pipeline,
+            eeg_pipeline=self.eeg_pipeline,
             anat_inputs_checked=self.project_info.t1_available,
             dmri_inputs_checked=self.project_info.dmri_available,
             fmri_inputs_checked=self.project_info.fmri_available,
+            eeg_inputs_checked=self.project_info.eeg_available,
         )
 
         self.configurator_ui.configure_traits()
@@ -267,21 +275,19 @@ class MainWindow(HasTraits):
         print_blue("[Open Quality Inspector Window]")
         if self.project_info.t1_available:
             if os.path.isfile(self.project_info.anat_config_file):
-                print(
-                    "  .. Anatomical config file : %s"
-                    % self.project_info.anat_config_file
-                )
+                print(f"  .. Anatomical config file : {self.project_info.anat_config_file}")
 
         if self.project_info.dmri_available:
             if os.path.isfile(self.project_info.dmri_config_file):
-                print(
-                    "  .. Diffusion config file : %s"
-                    % self.project_info.dmri_config_file
-                )
+                print(f"  .. Diffusion config file : {self.project_info.dmri_config_file}")
 
         if self.project_info.fmri_available:
             if os.path.isfile(self.project_info.fmri_config_file):
-                print("  .. fMRI config file : %s" % self.project_info.fmri_config_file)
+                print(f"  .. fMRI config file : {self.project_info.fmri_config_file}")
+
+        if self.project_info.eeg_available:
+            if os.path.isfile(self.project_info.eeg_config_file):
+                print(f"  .. EEG config file : {self.project_info.eeg_config_file}")
 
         try:
             self.quality_control_ui = cmp.bidsappmanager.gui.qc.QualityInspectorWindow(
@@ -289,6 +295,7 @@ class MainWindow(HasTraits):
                 anat_inputs_checked=self.project_info.t1_available,
                 dmri_inputs_checked=self.project_info.dmri_available,
                 fmri_inputs_checked=self.project_info.fmri_available,
+                eeg_inputs_checked=self.project_info.eeg_available
             )
             self.quality_control_ui.configure_traits()
         except Exception as e:

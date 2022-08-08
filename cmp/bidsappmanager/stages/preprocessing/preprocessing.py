@@ -6,12 +6,9 @@
 
 """Definition of  diffusion preprocessing config and stage UI classes."""
 
+import subprocess
 from traits.api import *
 from traitsui.api import *
-
-import subprocess
-
-# from cmp.bidsappmanager.stages.common import Stage
 
 from cmp.stages.preprocessing.preprocessing import (
     PreprocessingConfig,

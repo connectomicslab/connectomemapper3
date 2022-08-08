@@ -158,11 +158,11 @@ class SegmentationConfig(HasTraits):
     freesurfer_subject_id = Str
     freesurfer_args = Str("")
 
-    custom_brainmask = Instance(CustomBrainMaskBIDSFile , (),
+    custom_brainmask = Instance(CustomBrainMaskBIDSFile, (),
                                 desc="Instance of :obj:`~cmtklib.bids.io.CustomBrainMaskBIDSFile` "
                                      "that describes the custom BIDS formatted brain mask")
 
-    custom_wm_mask = Instance(CustomWMMaskBIDSFile , (),
+    custom_wm_mask = Instance(CustomWMMaskBIDSFile, (),
                               desc="Instance of :obj:`~cmtklib.bids.io.CustomWMMaskBIDSFile` "
                                    "that describes the custom BIDS formatted white-matter mask")
 
@@ -674,19 +674,3 @@ class SegmentationStage(Stage):
         self.inspect_outputs = sorted(
             [key for key in list(self.inspect_outputs_dict.keys())], key=str.lower
         )
-
-    def has_run(self):
-        """Function that returns `True` if the stage has been run successfully.
-
-        Returns
-        -------
-        `True` if the stage has been run successfully
-        """
-        if self.config.use_existing_freesurfer_data:
-            return True
-        else:
-            return os.path.exists(
-                os.path.join(self.stage_dir, "reconall", "result_reconall.pklz")
-            )
-
-        # TODO: Add condition when "Custom Segmentation is used"

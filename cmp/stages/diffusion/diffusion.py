@@ -860,36 +860,3 @@ class DiffusionStage(Stage):
         self.inspect_outputs = sorted(
             [key for key in list(self.inspect_outputs_dict.keys())], key=str.lower
         )
-
-    def has_run(self):
-        """Function that returns `True` if the stage has been run successfully.
-
-        Returns
-        -------
-        `True` if the stage has been run successfully
-        """
-        if self.config.tracking_processing_tool == "Dipy":
-            if self.config.diffusion_model == "Deterministic":
-                return os.path.exists(
-                    os.path.join(
-                        self.stage_dir,
-                        "tracking",
-                        "dipy_deterministic_tracking",
-                        "result_dipy_deterministic_tracking.pklz",
-                    )
-                )
-            elif self.config.diffusion_model == "Probabilistic":
-                return os.path.exists(
-                    os.path.join(
-                        self.stage_dir,
-                        "tracking",
-                        "dipy_probabilistic_tracking",
-                        "result_dipy_probabilistic_tracking.pklz",
-                    )
-                )
-        elif self.config.tracking_processing_tool == "MRtrix":
-            return os.path.exists(
-                os.path.join(
-                    self.stage_dir, "tracking", "trackvis", "result_trackvis.pklz"
-                )
-            )

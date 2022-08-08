@@ -25,7 +25,11 @@ from traitsui.view import View
 
 import cmp.project
 
-from cmtklib.bids.io import __cmp_directory__, __nipype_directory__, __freesurfer_directory__
+from cmtklib.bids.io import (
+    __cmp_directory__,
+    __nipype_directory__,
+    __freesurfer_directory__
+)
 from cmtklib.config import (
     anat_load_config_json,
     anat_save_config,
@@ -33,6 +37,8 @@ from cmtklib.config import (
     dmri_save_config,
     fmri_load_config_json,
     fmri_save_config,
+    eeg_load_config_json,
+    eeg_save_config
 )
 from cmtklib.util import (
     print_warning, print_error
@@ -42,6 +48,7 @@ from cmp.bidsappmanager.gui.globals import modal_width
 from cmp.bidsappmanager.pipelines.anatomical import anatomical as anatomical_pipeline
 from cmp.bidsappmanager.pipelines.diffusion import diffusion as diffusion_pipeline
 from cmp.bidsappmanager.pipelines.functional import fMRI as fMRI_pipeline
+from cmp.bidsappmanager.pipelines.functional import eeg as EEG_pipeline
 
 warnings.filterwarnings(
     "ignore", message="No valid root directory found for domain 'derivatives'."
@@ -419,6 +426,99 @@ def init_anat_project(project_info, is_new_project):
     return anat_pipeline
 
 
+def init_eeg_project(project_info, is_new_project, debug=False):
+    """Initialize the eeg processing pipeline.
+
+    Parameters
+    ----------
+    project_info : ProjectInfoUI
+        Instance of :class:`ProjectInfoUI` class
+
+    is_new_project : bool
+        If True, this is a new project which has been never processed
+
+    debug : bool
+        If `True`, display extra prints to support debugging
+
+    Returns
+    -------
+    eeg_pipeline : Instance(cmp.bidsappmanager.pipelines.functional.eeg.EEGPipelineUI)
+        `EEGPipelineUI` object instance
+    """
+    eeg_pipeline = EEG_pipeline.EEGPipelineUI(project_info)
+
+    derivatives_directory = os.path.abspath(project_info.output_directory)
+
+    if (project_info.subject_session != '') and (project_info.subject_session is not None):
+        if debug:  # pragma: no cover
+            print('Refresh folder WITH session')
+        refresh_folder(
+            derivatives_directory,
+            project_info.subject,
+            eeg_pipeline.input_folders,
+            session=project_info.subject_session
+        )
+        subject_derivatives_directory = os.path.join(
+            derivatives_directory, project_info.subject, project_info.subject_session
+        )
+    else:
+        if debug:  # pragma: no cover
+            print('Refresh folder WITHOUT session')
+        refresh_folder(
+            derivatives_directory,
+            project_info.subject,
+            eeg_pipeline.input_folders
+        )
+
+        subject_derivatives_directory = os.path.join(
+            derivatives_directory, project_info.subject
+        )
+
+    if is_new_project and eeg_pipeline is not None:
+        print("> Initialize eeg project")
+        if not os.path.exists(subject_derivatives_directory):
+            try:
+                os.makedirs(subject_derivatives_directory)
+            except os.error:  # pragma: no cover
+                print("... Info: %s was already existing" %
+                      subject_derivatives_directory)
+            finally:
+                print("... Info : Created directory %s" %
+                      subject_derivatives_directory)
+
+        if (project_info.subject_session != '') and (project_info.subject_session is not None):
+            project_info.eeg_config_file = os.path.join(
+                subject_derivatives_directory, '%s_%s_eeg_config.json' % (
+                    project_info.subject, project_info.subject_session
+                )
+            )
+        else:
+            project_info.eeg_config_file = os.path.join(
+                subject_derivatives_directory, '%s_eeg_config.json' % project_info.subject)
+
+        if os.path.exists(project_info.eeg_config_file):
+            print(f' .. WARNING: Overwrite EEG pipeline configuration file to {project_info.eeg_config_file}')
+        eeg_save_config(eeg_pipeline, project_info.eeg_config_file)
+
+        eeg_inputs_checked = True
+
+    else:
+        if debug:  # pragma: no cover
+            print("init_project eeg_pipeline.global_config.subjects : ")
+            print(eeg_pipeline.global_conf.subjects)
+
+        eeg_conf_loaded = eeg_load_config_json(eeg_pipeline, project_info.eeg_config_file)
+
+        eeg_inputs_checked = eeg_pipeline.check_input()
+
+        if not eeg_conf_loaded:  # pragma: no cover
+            raise FileNotFoundError(f"Problem to load the eeg pipeline config file {project_info.eeg_config_file}")
+
+    eeg_pipeline.config_file = project_info.eeg_config_file
+
+    return eeg_inputs_checked, eeg_pipeline
+
+
 def update_anat_last_processed(project_info, pipeline):
     """Update anatomical pipeline processing information
 
@@ -436,14 +536,6 @@ def update_anat_last_processed(project_info, pipeline):
             project_info.base_directory, "derivatives", __cmp_directory__, project_info.subject
         )
     ):
-        # out_dirs = os.listdir(os.path.join(
-        #    project_info.base_directory, 'derivatives', 'cmp', project_info.subject))
-        # for out in out_dirs:
-        #     if (project_info.last_date_processed == "Not yet processed" or
-        #         out > project_info.last_date_processed):
-        #         pipeline.last_date_processed = out
-        #         project_info.last_date_processed = out
-
         if (
             project_info.anat_last_date_processed == "Not yet processed"
             or pipeline.now > project_info.anat_last_date_processed
@@ -502,14 +594,6 @@ def update_dmri_last_processed(project_info, pipeline):
             project_info.base_directory, "derivatives", __cmp_directory__, project_info.subject
         )
     ):
-        # out_dirs = os.listdir(os.path.join(
-        #     project_info.base_directory, 'derivatives', 'cmp', project_info.subject))
-        # for out in out_dirs:
-        #     if (project_info.last_date_processed == "Not yet processed" or
-        #         out > project_info.last_date_processed):
-        #         pipeline.last_date_processed = out
-        #         project_info.last_date_processed = out
-
         if (
             project_info.dmri_last_date_processed == "Not yet processed"
             or pipeline.now > project_info.dmri_last_date_processed
@@ -564,14 +648,6 @@ def update_fmri_last_processed(project_info, pipeline):
             project_info.base_directory, "derivatives", __cmp_directory__, project_info.subject
         )
     ):
-        # out_dirs = os.listdir(os.path.join(
-        #     project_info.base_directory, 'derivatives', 'cmp', project_info.subject))
-        # for out in out_dirs:
-        #     if (project_info.last_date_processed == "Not yet processed" or
-        #         out > project_info.last_date_processed):
-        #         pipeline.last_date_processed = out
-        #         project_info.last_date_processed = out
-
         if (
             project_info.fmri_last_date_processed == "Not yet processed"
             or pipeline.now > project_info.fmri_last_date_processed
@@ -607,6 +683,60 @@ def update_fmri_last_processed(project_info, pipeline):
             if stage.lower() + "_stage" in stage_dirs:
                 pipeline.last_stage_processed = stage
                 project_info.dmri_last_stage_processed = stage
+
+
+def update_eeg_last_processed(project_info, pipeline):
+    """Update EEG pipeline processing information
+
+    Parameters
+    ----------
+    project_info : ProjectInfoUI
+        Instance of :class:`ProjectInfoUI` class
+
+    pipeline : EEGPipelineUI
+        Instance of :class:`EEGPipelineUI`
+    """
+    # last date
+    if os.path.exists(
+        os.path.join(
+            project_info.base_directory, "derivatives", __cmp_directory__, project_info.subject
+        )
+    ):
+        if (
+            project_info.eeg_last_date_processed == "Not yet processed"
+            or pipeline.now > project_info.eeg_last_date_processed
+        ):
+            pipeline.eeg_last_date_processed = pipeline.now
+            project_info.eeg_last_date_processed = pipeline.now
+
+    # last stage
+    if os.path.exists(
+        os.path.join(
+            project_info.base_directory,
+            "derivatives",
+            __cmp_directory__,
+            project_info.subject,
+            "tmp",
+            "eeg_pipeline",
+        )
+    ):
+        stage_dirs = []
+        for _, dirnames, _ in os.walk(
+            os.path.join(
+                project_info.base_directory,
+                "derivatives",
+                __cmp_directory__,
+                project_info.subject,
+                "tmp",
+                "eeg_pipeline",
+            )
+        ):
+            for dirname in fnmatch.filter(dirnames, "*_stage"):
+                stage_dirs.append(dirname)
+        for stage in pipeline.ordered_stage_list:
+            if stage.lower() + "_stage" in stage_dirs:
+                pipeline.last_stage_processed = stage
+                project_info.eeg_last_stage_processed = stage
 
 
 class ProjectInfoUI(cmp.project.ProjectInfo):
@@ -689,6 +819,14 @@ class ProjectInfoUI(cmp.project.ProjectInfo):
     fmri_config_error_view : traits.ui.View
         View that displays an error message regarding
         the configuration of the fMRI pipeline
+
+    eeg_warning_view : traits.ui.View
+        View that displays a warning message regarding
+        the EEG data
+
+    eeg_config_error_view : traits.ui.View
+        View that displays an error message regarding
+        the configuration of the EEG pipeline
 
     open_view : traits.ui.View
         Dialog view to load a BIDS Dataset
@@ -951,6 +1089,27 @@ class ProjectInfoUI(cmp.project.ProjectInfo):
         kind="modal",
         width=modal_width,
         # style_sheet=style_sheet,
+        buttons=["OK", "Cancel"],
+    )
+
+    eeg_warning_view = View(
+        Group(
+            Item("eeg_warning_msg", style="readonly", show_label=False),
+        ),
+        title="Warning : EEG data",
+        kind="modal",
+        width=modal_width,
+        # style_sheet=style_sheet,
+        buttons=["OK", "Cancel"],
+    )
+
+    eeg_config_error_view = View(
+        Group(
+            Item("eeg_config_error_msg", style="readonly", show_label=False),
+        ),
+        title="Error",
+        kind="modal",
+        width=modal_width,
         buttons=["OK", "Cancel"],
     )
 
