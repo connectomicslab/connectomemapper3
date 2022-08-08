@@ -295,7 +295,7 @@ EEG derivatives are placed in each subject's ``eeg/`` subfolder including:
 
 * The inverse operator in ``fif`` format:
 
-    - ``eeg/sub-<subject_label>_task-<task_label>_fwd.fif``
+    - ``eeg/sub-<subject_label>_task-<task_label>_inv.fif``
 
 * The computed noise covariance in ``fif`` format:
 
