@@ -362,6 +362,7 @@ def main():
 
     else:
         print('INVALID USAGE. Please enter the command: visualize_eeg_pipeline_outputs -h to get a list of possible options.')
+        return 1
 
     plt.show()
     return 0
