@@ -530,11 +530,14 @@ EEG Source Imaging
 
 EEG Source Imaging refers to the all the steps necessary to obtain the inverse solutions and extract ROI time-series for a given parcellation scheme.
 
-    * *Structural parcellation*: specify the cmp derivatives directory, the parcellation scheme, and the scale (for Lausanne 2018) to retrieve the parcellation files
+    *   *Structural parcellation*: specify the cmp derivatives directory, the parcellation scheme, and the scale (for Lausanne 2018) to retrieve the parcellation files
+
+        .. image:: images/eeg_esi_parcellation.png
+                :align: center
 
     *   *Tool*: CMP3 can either leverage MNE to compute the inverse solutions or take inverse solutions already pre-computed with Cartool as input.
 
-        .. image:: images/eeg_esi_mne.png
+        .. image:: images/eeg_esi_tool.png
                 :align: center
 
         *   *MNE*
