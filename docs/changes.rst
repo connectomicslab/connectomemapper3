@@ -37,6 +37,9 @@ This version fully integrates the new pipeline dedicated to EEG modality inside 
     `spectral_connectivity_epochs <https://mne.tools/mne-connectivity/stable/generated/mne_connectivity.spectral_connectivity_epochs.html>`_ of
     MNE Connectivity.
 
+*   Option to apply or not band-pass filtering in fMRI pipeline.
+    (`PR #200 <https://github.com/connectomicslab/connectomemapper3/pull/200>`_)
+
 *Code refactoring*
 
 *   Major refactoring of all the code related to the EEG pipeline
@@ -57,6 +60,9 @@ This version fully integrates the new pipeline dedicated to EEG modality inside 
 *   Fix nibabel to `3.2.2` as the imported functions of `nibabel.trackvis` has been moved since `4.0.0` and caused errors.
     (`PR #XX <https://github.com/connectomicslab/connectomemapper3/pull/XX>`_)
 
+*   Fix problem of traits not updated while making the diffusion pipeline config with ACT.
+    (`PR #200 <https://github.com/connectomicslab/connectomemapper3/pull/200>`_)
+
 *Documentation*
 
 *   Update/add documentation for the EEG pipeline
@@ -68,8 +74,6 @@ This version fully integrates the new pipeline dedicated to EEG modality inside 
     * Show call to `--eeg_pipeline` in `docs/usage.rst`
     * Show how to configure and check outputs of EEG pipeline in `docs/bidsappmanager.rst`
     * Add link to VEPCON dataset as example with EEG in `docs/cmpbids.rst`
-
-
 
 *Software development life cycle*
 
