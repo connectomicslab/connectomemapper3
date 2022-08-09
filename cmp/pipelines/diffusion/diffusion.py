@@ -148,6 +148,10 @@ class DiffusionPipeline(Pipeline):
         self.subject = project_info.subject
         self.diffusion_imaging_model = project_info.diffusion_imaging_model
 
+        self._init_and_add_listeners_to_stage_traits()
+
+    def _init_and_add_listeners_to_stage_traits(self):
+        """Initialize and add listeners to traits that are shared between the pipeline and the different stages."""
         self.stages["Preprocessing"].config.tracking_tool = self.stages["Diffusion"].config.tracking_processing_tool
         self.stages["Preprocessing"].config.act_tracking = self.stages["Diffusion"].config.mrtrix_tracking_config.use_act
         self.stages["Preprocessing"].config.gmwmi_seeding = self.stages["Diffusion"].config.mrtrix_tracking_config.seed_from_gmwmi
@@ -170,56 +174,28 @@ class DiffusionPipeline(Pipeline):
         self.stages["Diffusion"].config.mrtrix_tracking_config.on_trait_change(
             self.update_preprocessing_act, "use_act"
         )
-        self.stages["Diffusion"].config.mrtrix_tracking_config.on_trait_change(
-            self.update_preprocessing_gmwmi, "seed_from_gmwmi"
-        )
         self.stages["Diffusion"].config.dipy_tracking_config.on_trait_change(
             self.update_preprocessing_act, "use_act"
         )
-        self.stages["Diffusion"].config.on_trait_change(
-            self.update_outputs_recon, "recon_processing_tool"
+        self.stages["Diffusion"].config.mrtrix_tracking_config.on_trait_change(
+            self.update_preprocessing_gmwmi, "seed_from_gmwmi"
         )
-        # self.anat_flow = anat_flow
 
     def update_outputs_recon(self, new):
-        """Update list of of outputs of the diffusion stage when ``recon_processing_tool`` is updated.
-
-        Parameters
-        ----------
-        new : string
-            New value.
-        """
+        """Update list of of outputs of the diffusion stage when ``recon_processing_tool`` is updated."""
         self.stages["Diffusion"].define_inspect_outputs()
 
     def update_outputs_tracking(self, new):
-        """Update list of of outputs of the diffusion stage when ``tracking_processing_tool`` is updated.
-
-        Parameters
-        ----------
-        new : string
-            New value.
-        """
+        """Update list of of outputs of the diffusion stage when ``tracking_processing_tool`` is updated."""
         self.stages["Diffusion"].define_inspect_outputs()
 
     def update_vizualization_layout(self, new):
-        """Update list of of outputs of the connectome stage when ``circular_layout`` is updated.
-
-        Parameters
-        ----------
-        new : string
-            New value.
-        """
+        """Update list of of outputs of the connectome stage when ``circular_layout`` is updated."""
         self.stages["Connectome"].define_inspect_outputs()
         self.stages["Connectome"].config.subject = self.subject
 
     def update_vizualization_logscale(self, new):
-        """Update list of of outputs of the connectome stage when ``log_visualization`` is updated.
-
-        Parameters
-        ----------
-        new : bool
-            New value.
-        """
+        """Update list of of outputs of the connectome stage when ``log_visualization`` is updated."""
         self.stages["Connectome"].define_inspect_outputs()
         self.stages["Connectome"].config.subject = self.subject
 
@@ -231,6 +207,7 @@ class DiffusionPipeline(Pipeline):
         new : string
             New value.
         """
+        print(f"Update tracking_tool in preproc/reg stages to {new}")
         self.stages["Preprocessing"].config.tracking_tool = new
         self.stages["Registration"].config.tracking_tool = new
 
@@ -242,6 +219,7 @@ class DiffusionPipeline(Pipeline):
         new : string
             New value.
         """
+        print(f"Update act_tracking in preproc/reg stages to {new}")
         self.stages["Preprocessing"].config.act_tracking = new
         self.stages["Registration"].config.act_tracking = new
         if not new:
@@ -277,7 +255,6 @@ class DiffusionPipeline(Pipeline):
         new : string
             New value.
         """
-        # print "diffusion model changed"
         self.stages["Diffusion"].config.diffusion_imaging_model = new
 
     def check_config(self):
