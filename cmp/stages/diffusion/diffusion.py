@@ -94,9 +94,9 @@ class DiffusionConfig(HasTraits):
     dilate_rois = Bool(True)
     dilation_kernel = Enum(["Box", "Gauss", "Sphere"])
     dilation_radius = Enum([1, 2, 3, 4])
-    recon_processing_tool_editor = List(["Dipy", "MRtrix"])
-    tracking_processing_tool_editor = List(["Dipy", "MRtrix"])
-    processing_tool_editor = List(["Dipy", "MRtrix"])
+    recon_processing_tool_editor = List(["MRtrix", "Dipy"])
+    tracking_processing_tool_editor = List(["MRtrix", "Dipy"])
+    processing_tool_editor = List(["MRtrix", "Dipy"])
     recon_processing_tool = Str("MRtrix")
     tracking_processing_tool = Str("MRtrix")
     custom_track_file = File

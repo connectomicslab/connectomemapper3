@@ -199,6 +199,8 @@ class fMRIPipelineUI(fMRIPipeline):
                     self.stages[stage].name,
                 )
 
+        self._init_and_add_listeners_to_stage_traits()
+
     def _preprocessing_fired(self, info):
         """Method that displays the window for the preprocessing stage.
 
