@@ -57,13 +57,14 @@ About
 
 Connectome Mapper 3 is an open-source Python3 image processing pipeline software,
 with a Graphical User Interface (GUI), that implements full anatomical, diffusion and
-resting-state MRI processing pipelines, from raw T1 / Diffusion / BOLD data
-to multi-resolution connection matrices based on a new version of the Lausanne
+resting-state MRI processing pipelines, from raw T1 / Diffusion / BOLD / preprocessed
+EEG data to multi-resolution connection matrices based on a new version of the Lausanne
 parcellation atlas, aka `Lausanne2018`.
 
 ``Connectome Mapper 3`` pipelines use a combination of tools from
 well-known software packages, including FSL_, FreeSurfer_, ANTs_,
-MRtrix3_, Dipy_ and AFNI_, empowered by the Nipype_ dataflow library.
+MRtrix3_, Dipy_, AFNI_, MNE_, MNEcon_, and PyCartool_ empowered by
+the Nipype_ dataflow library.
 These pipelines are designed to provide the best software implementation
 for each state of processing at the time of conception, and can be
 easily updated as newer and better neuroimaging software become available.
@@ -85,10 +86,7 @@ Connectome Mapper 3 provides two Python commandline wrappers
 (`connectomemapper3_docker` and `connectomemapper3_singularity`) that will
 generate and run the appropriate command.
 
-Since ``v3.0.3``, CMP3 provides a new pipeline py:class:`~cmp.pipelines.functional.eeg.EEGPipeline`
-dedicated to EEG modality with a collection of interfaces based on
-`MNE <https://mne.tools/>`_, `MNE-Connectivity <https://mne.tools/mne-connectivity>`_, and
-`PyCartool <https://github.com/Functional-Brain-Mapping-Laboratory/PyCartool>`_.
+Since ``v3.1.0``, CMP3 provides full support to EEG.
 Please check `this notebook <docs/notebooks/EEG_pipeline_tutorial.ipynb>`_ for a demonstration
 using the public `VEPCON dataset <https://openneuro.org/datasets/ds003505/versions/1.1.1>`_.
 
@@ -124,6 +122,12 @@ using the public `VEPCON dataset <https://openneuro.org/datasets/ds003505/versio
 .. _Dipy: https://nipy.org/dipy/
 
 .. _AFNI: https://afni.nimh.nih.gov/
+
+.. _MNE: https://mne.tools/
+
+.. _MNEcon: https://mne.tools/mne-connectivity
+
+.. _PyCartool: https://github.com/Functional-Brain-Mapping-Laboratory/PyCartool
 
 .. _Nipype: https://nipype.readthedocs.io/en/latest/
 
