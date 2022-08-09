@@ -16,6 +16,8 @@ BIDS derivatives entities
 +--------------------------+------------------------------------------------------------------------------------------------------------+
 | ``ses-<label>``          | Distinguish different acquisition sessions                                                                 |
 +--------------------------+------------------------------------------------------------------------------------------------------------+
+| ``task-<label>``         | Distinguish different experiment tasks                                                                     |
++--------------------------+------------------------------------------------------------------------------------------------------------+
 | ``label-<label>``        | Describe the type of brain tissue segmented (for _probseg/dseg)                                            |
 +--------------------------+------------------------------------------------------------------------------------------------------------+
 | ``atlas-<label>``        | Distinguish data derived from different types of parcellation atlases                                      |
@@ -30,7 +32,7 @@ BIDS derivatives entities
 See `Original BIDS Entities Appendix <https://bids-specification.readthedocs.io/en/v1.4.1/99-appendices/09-entities.html>`_ for more description.
 
 .. note:: Connectome Mapper 3 introduced a new BIDS entity ``atlas-<atlas_label>``
-    (where ``<atlas_label>``: ``Desikan``/ ``L2008``/ ``L2018``), that is used
+    (where ``<atlas_label>``: ``Desikan``/ ``L2018``), that is used
     in combination with the ``res-<atlas_scale>`` (where ``<atlas_scale>``:
     ``scale1`` / ``scale2`` / ``scale3`` / ``scale4`` / ``scale5``) entity to
     distinguish data derived from different parcellation atlases and
@@ -42,9 +44,9 @@ Main Connectome Mapper Derivatives
 
 Main outputs produced by Connectome Mapper 3 are written to
 ``cmp/sub-<subject_label>/``. In this folder, a configuration file
-generated for each modality pipeline (i.e. anatomical/diffusion/fMRI)
+generated for each modality pipeline (i.e. anatomical/diffusion/fMRI/EEG)
 and used for processing each participant is saved as
-``sub-<subject_label>_anatomical/diffusion/fMRI_config.ini``.
+``sub-<subject_label>_anatomical/diffusion/fMRI/EEG_config.json``.
 It summarizes pipeline workflow options and parameters used for processing.
 An execution log of the full workflow is saved as `sub-<subject_label>_log.txt``.
 
@@ -75,7 +77,7 @@ Anatomical derivatives
 
           where:
 
-          - ``<atlas_label>``: ``Desikan`` / ``L2008`` / ``L2018``
+          - ``<atlas_label>``: ``Desikan`` / ``L2018``
             is the parcellation scheme used
           - ``<scale_label>``: ``scale1``, ``scale2``, ``scale3``, ``scale4``, ``scale5``
             corresponds to the parcellation scale if applicable
@@ -110,7 +112,7 @@ Anatomical derivatives
 
           where:
 
-          - ``<atlas_label>``: ``Desikan`` / ``L2008`` / ``L2018``
+          - ``<atlas_label>``: ``Desikan`` / ``L2018``
             is the parcellation scheme used
           - ``<scale_label>``: ``scale1``, ``scale2``, ``scale3``, ``scale4``, ``scale5``
             corresponds to the parcellation scale if applicable
@@ -203,7 +205,7 @@ each subject's ``dwi/`` subfolder, including:
 
       where:
 
-      - ``<atlas_label>``: ``Desikan`` / ``L2008`` / ``L2018``
+      - ``<atlas_label>``: ``Desikan`` / ``L2018``
         is the parcellation scheme used
       - ``<scale_label>``: ``scale1``, ``scale2``, ``scale3``, ``scale4``, ``scale5``
         corresponds to the parcellation scale if applicable
@@ -252,7 +254,7 @@ each subject's ``func/`` subfolder including:
 
       where:
 
-        - ``<atlas_label>``: ``Desikan`` / ``L2008`` / ``L2018``
+        - ``<atlas_label>``: ``Desikan`` / ``L2018``
           is the parcellation scheme used
         - ``<scale_label>``: ``scale1``, ``scale2``, ``scale3``, ``scale4``, ``scale5``
           corresponds to the parcellation scale if applicable
@@ -263,13 +265,70 @@ each subject's ``func/`` subfolder including:
 
       where:
 
-      - ``<atlas_label>``: ``Desikan`` / ``L2008`` / ``L2018``
+      - ``<atlas_label>``: ``Desikan`` / ``L2018``
         is the parcellation scheme used
       - ``<scale_label>``: ``scale1``, ``scale2``, ``scale3``, ``scale4``, ``scale5``
         corresponds to the parcellation scale if applicable
       - ``<fmt>``: ``mat`` / ``gpickle`` / ``tsv`` / ``graphml`` is
         the format used to store the graph
 
+EEG derivatives
+-----------------------
+
+EEG derivatives are placed in each subject's ``eeg/`` subfolder including:
+
+* The preprocessed EEG epochs data in ``fif`` format:
+
+    - ``eeg/sub-<subject_label>_task-<task_label>_epo.fif``
+
+* The BEM surfaces in ``fif`` format:
+
+    - ``eeg/sub-<subject_label>_task-<task_label>_bem.fif``
+
+* The source space in ``fif`` format:
+
+    - ``eeg/sub-<subject_label>_task-<task_label>_src.fif``
+
+* The forward solution in ``fif`` format:
+
+    - ``eeg/sub-<subject_label>_task-<task_label>_fwd.fif``
+
+* The inverse operator in ``fif`` format:
+
+    - ``eeg/sub-<subject_label>_task-<task_label>_inv.fif``
+
+* The computed noise covariance in ``fif`` format:
+
+    - ``eeg/sub-<subject_label>_task-<task_label>_noisecov.fif``
+
+* The transform of electrode positions that might be used for ESI in ``fif`` format:
+
+    - ``eeg/sub-<subject_label>_trans.fif``
+
+* The ROI time-series for each parcellation atlas (and scale):
+
+    - ``eeg/sub-<subject_label>_task-<task_label>_atlas-<atlas_label>[_res-<scale_label>]_timeseries.npy``
+    - ``eeg/sub-<subject_label>_task-<task_label>_atlas-<atlas_label>[_res-<scale_label>]_timeseries.mat``
+
+      where:
+
+        - ``<atlas_label>``: ``Desikan`` / ``L2018``
+          is the parcellation scheme used
+        - ``<scale_label>``: ``scale1``, ``scale2``, ``scale3``, ``scale4``, ``scale5``
+          corresponds to the parcellation scale if applicable
+
+* The functional time- and frequency- based connectivity graphs:
+
+    - ``eeg/sub-<subject_label>_task-<task_label>_atlas-<atlas_label>[_res-<scale_label>]_conndata-network_connectivity.<fmt>``
+
+      where:
+
+      - ``<atlas_label>``: ``Desikan`` / ``L2018``
+        is the parcellation scheme used
+      - ``<scale_label>``: ``scale1``, ``scale2``, ``scale3``, ``scale4``, ``scale5``
+        corresponds to the parcellation scale if applicable
+      - ``<fmt>``: ``mat`` / ``gpickle`` / ``tsv`` / ``graphml`` is
+        the format used to store the graph
 
 FreeSurfer Derivatives
 =======================
@@ -278,7 +337,7 @@ A FreeSurfer subjects directory is created in ``<bids_dataset/derivatives>/frees
 
 ::
 
-    freesurfer-7.2.0/
+    freesurfer-7.1.1/
         fsaverage/
             mri/
             surf/
@@ -297,19 +356,19 @@ The ``fsaverage`` subject distributed with the running version of FreeSurfer is 
 Nipype Workflow Derivatives
 ===========================
 
-The execution of each Nipype workflow (pipeline) dedicated to the processing of one modality (i.e. anatomical/diffusion/fMRI) involves the creation of a number of intermediate outputs which are written to ``<bids_dataset/derivatives>/nipype/sub-<subject_label>/<anatomical/diffusion/fMRI>_pipeline`` respectively:
+The execution of each Nipype workflow (pipeline) dedicated to the processing of one modality (i.e. anatomical/diffusion/fMRI/EEG) involves the creation of a number of intermediate outputs which are written to ``<bids_dataset/derivatives>/nipype/sub-<subject_label>/<anatomical/diffusion/fMRI/eeg>_pipeline`` respectively:
 
 .. image:: images/nipype_wf_derivatives.png
     :width: 888
     :align: center
 
-To enhance transparency on how data is processed, outputs include a pipeline execution graph saved as ``<anatomical/diffusion/fMRI>_pipeline/graph.svg`` which summarizes all processing nodes involves in the given processing pipeline:
+To enhance transparency on how data is processed, outputs include a pipeline execution graph saved as ``<anatomical/diffusion/fMRI/eeg>_pipeline/graph.svg`` which summarizes all processing nodes involves in the given processing pipeline:
 
 .. image:: images/nipype_wf_graph.png
     :width: 888
     :align: center
 
-Execution details (data provenance) of each interface (node) of a given pipeline are reported in ``<anatomical/diffusion/fMRI>_pipeline/<stage_name>/<interface_name>/_report/report.rst``
+Execution details (data provenance) of each interface (node) of a given pipeline are reported in ``<anatomical/diffusion/fMRI/eeg>_pipeline/<stage_name>/<interface_name>/_report/report.rst``
 
 .. image:: images/nipype_node_report.png
     :width: 888
