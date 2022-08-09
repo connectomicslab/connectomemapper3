@@ -144,6 +144,10 @@ class fMRIPipeline(Pipeline):
 
         self.subject = project_info.subject
 
+        self._init_and_add_listeners_to_stage_traits()
+
+    def _init_and_add_listeners_to_stage_traits(self):
+        """Initialize and add listeners to traits that are shared between the pipeline and the different stages."""
         self.stages["FunctionalMRI"].config.on_trait_change(
             self.update_nuisance_requirements, "global_nuisance"
         )
@@ -157,21 +161,11 @@ class fMRIPipeline(Pipeline):
             self.update_scrubbing, "apply_scrubbing"
         )
 
-    def _subject_changed(self, new):
-        """ "Update subject in the connectome stage configuration when ``subject`` is updated.
-
-        Parameters
-        ----------
-        new : string
-            New value.
-        """
-        self.stages["Connectome"].config.subject = new
-
     def update_registration(self):
         """Configure the list of registration tools."""
         if (
-                "Nonlinear (FSL)"
-                in self.stages["Registration"].config.registration_mode_trait
+            "Nonlinear (FSL)"
+            in self.stages["Registration"].config.registration_mode_trait
         ):
             self.stages["Registration"].config.registration_mode_trait = [
                 "Linear (FSL)",
@@ -205,6 +199,16 @@ class fMRIPipeline(Pipeline):
         self.stages["FunctionalMRI"].config.scrubbing = self.stages[
             "Connectome"
         ].config.apply_scrubbing
+
+    def _subject_changed(self, new):
+        """ "Update subject in the connectome stage configuration when ``subject`` is updated.
+
+        Parameters
+        ----------
+        new : string
+            New value.
+        """
+        self.stages["Connectome"].config.subject = new
 
     def define_custom_mapping(self, custom_last_stage):
         """Define the pipeline to be executed until a specific stages.

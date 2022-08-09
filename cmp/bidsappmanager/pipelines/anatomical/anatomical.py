@@ -138,18 +138,6 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
             ),
         }
 
-        self.stages["Segmentation"].config.freesurfer_subjects_dir = os.path.join(
-            self.output_directory, __freesurfer_directory__
-        )
-        self.stages["Segmentation"].config.freesurfer_subject_id = os.path.join(
-            self.output_directory, __freesurfer_directory__, subject_id
-        )
-
-        print(
-            "Freesurfer subjects directory: "
-            + self.stages["Segmentation"].config.freesurfer_subjects_dir
-        )
-
         for stage in list(self.stages.keys()):
             if project_info.subject_session != "":
                 self.stages[stage].stage_dir = os.path.join(
@@ -171,13 +159,28 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
                     self.stages[stage].name,
                 )
 
-            self.stages["Segmentation"].config.on_trait_change(
-                self._update_parcellation, "seg_tool"
-            )
-            self.stages["Parcellation"].config.on_trait_change(
-                self._update_segmentation, "parcellation_scheme"
-            )
+        self._init_and_add_listeners_to_stage_traits_ui(subject_id=subject_id)
 
+    def _init_and_add_listeners_to_stage_traits_ui(self, subject_id):
+        """Initialize and add listeners to traits that are shared between the pipeline and the different stages."""
+        self.stages["Segmentation"].config.freesurfer_subjects_dir = os.path.join(
+            self.output_directory, __freesurfer_directory__
+        )
+        self.stages["Segmentation"].config.freesurfer_subject_id = os.path.join(
+            self.output_directory, __freesurfer_directory__, subject_id
+        )
+
+        print(
+            'Freesurfer subjects directory: '
+            f'{self.stages["Segmentation"].config.freesurfer_subjects_dir}'
+        )
+
+        self.stages["Segmentation"].config.on_trait_change(
+            self._update_parcellation, "seg_tool"
+        )
+        self.stages["Parcellation"].config.on_trait_change(
+            self._update_segmentation, "parcellation_scheme"
+        )
 
     def _update_parcellation(self):
         """Update self.stages['Parcellation'].config.parcellation_scheme when ``seg_tool`` is updated."""
