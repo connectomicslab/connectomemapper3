@@ -14,16 +14,17 @@ This version fully integrates the new pipeline dedicated to EEG modality inside 
 
 *Updates*
 
-*   Datalad has been updated from ``0.15.4`` to ``0.17.2``. (`PR #209 <https://github.com/connectomicslab/connectomemapper3/pull/209>`_)
-    See `Datalad changelog <http://docs.datalad.org/en/stable/changelog.html>`_) for more details.
+*   Datalad has been updated from ``0.15.4`` to ``0.17.2``. See `Datalad changelog <http://docs.datalad.org/en/stable/changelog.html>`_ for more details.
+
+    (`PR #209 <https://github.com/connectomicslab/connectomemapper3/pull/209>`_)
 
 *   ...
 
 *New features*
 
-*   Creation of new EEG connectome stage that builds the connectivity matrices from
-    the extracted ROI time-series using
-    `spectral_connectivity_epochs<https://mne.tools/mne-connectivity/stable/generated/mne_connectivity.spectral_connectivity_epochs.html>`_ of
+*   Creation of ``cmp/stages/connectome/eeg_connectome`` that implements the `EEGConnectomeStage`.
+    This stage which builds the connectivity matrices from the extracted ROI time-series using the function
+    `spectral_connectivity_epochs <https://mne.tools/mne-connectivity/stable/generated/mne_connectivity.spectral_connectivity_epochs.html>`_ of
     MNE Connectivity.
 
 *   The new pipeline dedicated to EEG modality has been integrated into the BIDS App
@@ -40,7 +41,8 @@ This version fully integrates the new pipeline dedicated to EEG modality inside 
 
 *Code refactoring*
 
-*   Major refactoring of all the code related to the EEG pipeline.
+*   Major refactoring of all the code related to the EEG pipeline
+    (`PR #198 <https://github.com/connectomicslab/connectomemapper3/pull/198>`_).
     This includes:
 
     *   Renaming `EEGLoaderStage` to `EEGPreprocessingStage`,
@@ -50,18 +52,18 @@ This version fully integrates the new pipeline dedicated to EEG modality inside 
     *   Modification of `cmp.pipelines.functional.eeg.py` that integrates all previous changes
     *   Tutorial notebook for the EEG pipeline has been modified accordingly
 
-    (`PR #198 <https://github.com/connectomicslab/connectomemapper3/pull/198>`_)
-
 *Bug fix*
 
 *   Update conda environment. (`PR #XX <https://github.com/connectomicslab/connectomemapper3/pull/XX>`_)
 
-*   Fix nibabel to 3.2.2 as the imported functions of `nibabel.trackvis` has been moved since 4.0.0 version and caused error.
+*   Fix nibabel to `3.2.2` as the imported functions of `nibabel.trackvis` has been moved since `4.0.0` and caused errors.
     (`PR #XX <https://github.com/connectomicslab/connectomemapper3/pull/XX>`_)
 
 *Documentation*
 
-*   Update/add documentation for the EEG pipeline. This includes:
+*   Update/add documentation for the EEG pipeline
+    (`PR #208 <https://github.com/connectomicslab/connectomemapper3/pull/208>`_).
+    This includes:
 
     * Update the BIDS flowchart displayed in `README` and in `docs/index.rst` with the EEG pipeline. The SVG can be found inside the `docs/images/svg` directory.
     * Make appropriate changes to `docs/index.rst` and `README` around the EEG pipeline
@@ -69,7 +71,7 @@ This version fully integrates the new pipeline dedicated to EEG modality inside 
     * Show how to configure and check outputs of EEG pipeline in `docs/bidsappmanager.rst`
     * Add link to VEPCON dataset as example with EEG in `docs/cmpbids.rst`
 
-    (`PR #208 <https://github.com/connectomicslab/connectomemapper3/pull/208>`_)
+
 
 *Software development life cycle*
 
