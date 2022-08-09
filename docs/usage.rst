@@ -4,7 +4,7 @@
 Commandline Usage
 ***********************
 
-``Connectome Mapper 3 (CMP3)`` is distributed as a BIDS App which adopts the :abbr:`BIDS (Brain Imaging Data Structure)` standard for data organization and takes as principal input the path of the dataset that is to be processed. The input dataset is required to be in valid `BIDS` format, and it must include at least a T1w or MPRAGE structural image and a DWI and/or resting-state fMRI image. See :ref:`cmpbids` page that provides links for more information about BIDS and BIDS-Apps as well as an example for dataset organization and naming.
+``Connectome Mapper 3 (CMP3)`` is distributed as a BIDS App which adopts the :abbr:`BIDS (Brain Imaging Data Structure)` standard for data organization and takes as principal input the path of the dataset that is to be processed. The input dataset is required to be in valid `BIDS` format, and it must include at least a T1w or MPRAGE structural image and a DWI and/or resting-state fMRI image and/or preprocessed EEG data. See :ref:`cmpbids` page that provides links for more information about BIDS and BIDS-Apps as well as an example for dataset organization and naming.
 
 .. warning::
     As of ``CMP3 v3.0.0-RC2``, the BIDS App includes a **tracking** system that anonymously reports the run of the BIDS App. This feature has been introduced to support us in the task of fund finding for the development of CMP3 in the future. However, users are still free to opt-out using the ``--notrack`` commandline argument.
@@ -60,6 +60,7 @@ When you run ``connectomemapper3_docker``, it will generate a Docker command lin
             --anat_pipeline_config "ref_anatomical_config.json" \
             (--dwi_pipeline_config "ref_diffusion_config.json" \)
             (--func_pipeline_config "ref_fMRI_config.json" \)
+            (--eeg_pipeline_config "ref_EEG_config.json" \)
             (--number_of_participants_processed_in_parallel 1)
             
 When you run ``connectomemapper3_singularity``, it will generate a Singularity command line for you, print it out for reporting purposes, and then execute it without further action needed, e.g.:
@@ -75,6 +76,7 @@ When you run ``connectomemapper3_singularity``, it will generate a Singularity c
             --anat_pipeline_config "ref_anatomical_config.json" \
             (--dwi_pipeline_config "ref_diffusion_config.json" \)
             (--func_pipeline_config "ref_fMRI_config.json" \)
+            (--eeg_pipeline_config "ref_EEG_config.json" \)
             (--number_of_participants_processed_in_parallel 1)
 
 .. _containerusage:
@@ -100,6 +102,7 @@ For instance, the previous call to the ``connectomemapper3_docker`` wrapper corr
             --anat_pipeline_config /bids_dir/code/ref_anatomical_config.json \\
             (--dwi_pipeline_config /bids_dir/code/ref_diffusion_config.json \\)
             (--func_pipeline_config /bids_dir/code/ref_fMRI_config.json \\)
+            (--eeg_pipeline_config /bids_dir/code/ref_EEG_config.json \\)
             (--number_of_participants_processed_in_parallel 1)
             
 Singularity
@@ -118,6 +121,7 @@ For instance, the previous call to the ``connectomemapper3_singularity`` wrapper
             --anat_pipeline_config /bids_dir/code/ref_anatomical_config.json \\
             (--dwi_pipeline_config /bids_dir/code/ref_diffusion_config.json \\)
             (--func_pipeline_config /bids_dir/code/ref_fMRI_config.json \\)
+            (--eeg_pipeline_config /bids_dir/code/ref_EEG_config.json \\)
             (--number_of_participants_processed_in_parallel 1)
 
 .. note:: The local directory of the input BIDS dataset (here: ``/home/user/data/ds001``) and the output directory (here: ``/home/user/data/ds001/derivatives``) used to process have to be mapped to the folders ``/bids_dir`` and ``/output_dir`` respectively using the docker ``-v`` / singularity ``--bind`` run option.
@@ -130,19 +134,19 @@ For instance, the previous call to the ``connectomemapper3_singularity`` wrapper
 Debugging
 =========
 
-Logs are outputted into
-``<output dir>/cmp/sub-<participant_label>/sub-<participant_label>_log-cmpbidsapp.txt``.
+Logs are saved into
+``<output dir>/cmp/sub-<participant_label>/sub-<participant_label>_log.txt``.
 
 Already have Freesurfer outputs?
 ================================
 
 If you have already Freesurfer v5 / v6 output data available, CMP3 can use them if there are properly placed in your output / derivatives directory.
-Since ``v3.0.0``, CMP3 expects to find a ``freesurfer-7.2.0``, so make sure that your derivatives are organized as
+Since ``v3.0.3``, CMP3 expects to find a ``freesurfer-7.1.1``, so make sure that your derivatives are organized as
 follows::
 
     your_bids_dataset
       |______ derivatives/
-      |         |______ freesurfer-7.2.0/
+      |         |______ freesurfer-7.1.1/
       |                   |______ sub-01[_ses-01]/
       |                   |           |______ label/
       |                   |           |______ mri/
