@@ -33,10 +33,10 @@ This version fully integrates the new pipeline dedicated to EEG modality inside 
     been updated to the following versions
     (`PR #209 <https://github.com/connectomicslab/connectomemapper3/pull/209>`_):
 
-    *    `datalad`: from ``0.15.4`` to ``0.17.2``
+    *   `datalad`: from ``0.15.4`` to ``0.17.2``
         (See `Datalad changelog <http://docs.datalad.org/en/stable/changelog.html>`_ for more details).
 
-    *    `datalad-container`: from ``1.1.5`` to ``1.1.6``
+    *   `datalad-container`: from ``1.1.5`` to ``1.1.6``
 
 *New features*
 
