@@ -22,7 +22,7 @@ Since ``v3.1.0``, CMP3 provides full support to EEG. Please check [this notebook
 
 You need to have first either Docker or Singularity engine and miniconda installed. We refer to the [dedicated documentation page](https://connectome-mapper-3.readthedocs.io/en/latest/installation.html) for more instruction details.
 
-Then, download the appropriate [environment.yml](https://github.com/connectomicslab/connectomemapper3/raw/master/conda/environment.yml) / [environment_macosx.yml](https://github.com/connectomicslab/connectomemapper3/raw/master/conda/environment_macosx.yml) and create a conda environment `py37cmp-gui` with the following command:
+Then, download the appropriate [environment.yml](https://github.com/connectomicslab/connectomemapper3/raw/master/conda/environment.yml) / [environment_macosx.yml](https://github.com/connectomicslab/connectomemapper3/raw/master/conda/environment_macosx.yml) and create a conda environment `py39cmp-gui` with the following command:
 
 ```bash
 $ conda env create -f /path/to/environment[_macosx].yml
@@ -31,8 +31,8 @@ $ conda env create -f /path/to/environment[_macosx].yml
 Once the environment is created, activate it and install Connectome Mapper 3 with `PyPI` as follows:
 
 ```bash
-$ conda activate py37cmp-gui
-(py37cmp-gui)$ pip install connectomemapper
+$ conda activate py39cmp-gui
+(py39cmp-gui)$ pip install connectomemapper
 ```
 
 You are ready to use Connectome Mapper 3!
@@ -69,7 +69,7 @@ Please check [https://ohbm-environment.org](https://ohbm-environment.org) to lea
 
 ### Usage
 
-Having the `py37cmp-gui` conda environment previously installed activated, the BIDS App can easily be run using `connectomemapper3_docker`, the python wrapper for Docker, as follows:
+Having the `py39cmp-gui` conda environment previously installed activated, the BIDS App can easily be run using `connectomemapper3_docker`, the python wrapper for Docker, as follows:
 
 ```output
     usage: connectomemapper3_docker [-h]
