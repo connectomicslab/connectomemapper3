@@ -26,8 +26,8 @@ dependencies:
           - obspy==1.2.2
           - mne==0.24.1
           - mne_connectivity==0.3
-          - datalad[full]==0.15.4
-          - datalad-container==1.1.5
+          - datalad[full]==0.17.2
+          - datalad-container==1.1.6
           - datalad-neuroimaging==0.3.1
           - pybids==0.14.0
           - statsmodels==0.13.1
