@@ -14,9 +14,29 @@ This version fully integrates the new pipeline dedicated to EEG modality inside 
 
 *Updates*
 
-*   Datalad has been updated from ``0.15.4`` to ``0.17.2``
-    (`PR #209 <https://github.com/connectomicslab/connectomemapper3/pull/209>`_).
-    See `Datalad changelog <http://docs.datalad.org/en/stable/changelog.html>`_ for more details.
+*   The conda environment files for `cmpbidsappmanager`
+    (``conda/environment.yml`` and ``conda/environment_macosx.yml``) have been greatly modified
+    (`PR #212 <https://github.com/connectomicslab/connectomemapper3/pull/212>`_).
+    This includes the following updates:
+
+    *   `python`: from ``3.7`` to ``3.9``
+    *   `pip`: from ``21.3.1`` to ``22.2``
+    *   `indexed_gzip`: from ``1.6.4`` to ``1.6.13``
+    *   `git-annex` (``conda/environment.yml`` only): from ``8.20211123`` to ``10.20220724``
+    *   `qt/pyqt` ``5.15.4`` installed via `conda-forge`
+    *   `pyqt5-sip` ``12.9.0`` (version compatible with `qt/pyqt` ``5.15.4``) installed via `conda-forge`
+
+    In addition, the created environment has been renamed `py39cmp-gui` to be consistent
+    with the new python version installed in the environment.
+
+*   In all conda environment `*.yml` and `requirements.txt` files, datalad and its container extension have
+    been updated to the following versions
+    (`PR #209 <https://github.com/connectomicslab/connectomemapper3/pull/209>`_):
+
+    *    `datalad`: from ``0.15.4`` to ``0.17.2``
+        (See `Datalad changelog <http://docs.datalad.org/en/stable/changelog.html>`_ for more details).
+
+    *    `datalad-container`: from ``1.1.5`` to ``1.1.6``
 
 *New features*
 
@@ -35,7 +55,9 @@ This version fully integrates the new pipeline dedicated to EEG modality inside 
     `EEGConnectomeStage` stage has been implemented that builds the connectivity
     matrices from the extracted ROI time-series using the function
     `spectral_connectivity_epochs <https://mne.tools/mne-connectivity/stable/generated/mne_connectivity.spectral_connectivity_epochs.html>`_ of
-    MNE Connectivity.
+    MNE Connectivity. A new utility script `visualize_eeg_pipeline_outputs.py` has been
+    implemented in the `cmp/cli` module, which is called by the output inspector window
+    of `cmpbidsappmanager`.
 
 *   Option to apply or not band-pass filtering in fMRI pipeline.
     (`PR #200 <https://github.com/connectomicslab/connectomemapper3/pull/200>`_)
@@ -55,7 +77,7 @@ This version fully integrates the new pipeline dedicated to EEG modality inside 
 
 *Bug fix*
 
-*   Update conda environment. (`PR #XX <https://github.com/connectomicslab/connectomemapper3/pull/XX>`_)
+*   Problems to install and launch cmpbidsappmanager on Ubuntu. (`PR #212 <https://github.com/connectomicslab/connectomemapper3/pull/212>`_)
 
 *   Fix nibabel to `3.2.2` as the imported functions of `nibabel.trackvis` has been moved since `4.0.0` and caused errors.
     (`PR #XX <https://github.com/connectomicslab/connectomemapper3/pull/XX>`_)
