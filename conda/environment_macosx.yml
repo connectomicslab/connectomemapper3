@@ -1,18 +1,20 @@
-name: py37cmp-gui
+name: py39cmp-gui
 
 channels:
     - conda-forge
-    - aramislab
     - mrtrix3
 
 dependencies:
-    - python=3.7
-    - pip=21.3.1
+    - python=3.9
+    - pip=22.2
     - graphviz=2.50.0
     - dipy=1.3.0
     - fsleyes=1.3.3
-    - indexed_gzip=1.6.4
+    - indexed_gzip
     - mrtrix3=3.0.3
+    - qt=5.15.4
+    - pyqt=5.15.4
+    - pyqt5-sip=12.9.0
 
     - pip:
           - numpy==1.21.6
