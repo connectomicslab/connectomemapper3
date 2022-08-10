@@ -18,6 +18,7 @@ dependencies:
           - numpy==1.21.6
           - matplotlib==3.5.2
           - configparser==5.2.0
+          - nibabel==3.2.2
           - nipype==1.8.0
           - traits==6.3.2
           - traitsui==7.2.0
