@@ -6,7 +6,7 @@ channels:
   - defaults
 dependencies:
   - python=3.7
-  - datalad=0.16.5
+  - datalad=0.17.2
   - jupyterlab=3.2.8
   - matplotlib=3.5.1
   - networkx=2.5
