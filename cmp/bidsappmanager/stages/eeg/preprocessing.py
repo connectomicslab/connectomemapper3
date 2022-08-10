@@ -44,7 +44,8 @@ class EEGPreprocessingConfigUI(EEGPreprocessingConfig):
         Item('object.events_file.task', label="task", style='readonly'),
         Item('object.events_file.desc', label="desc"),
         Item('object.events_file.suffix', label="suffix", style='readonly'),
-        label="Recording events file"
+        label="Recording events file",
+        enabled_when='object.eeg_ts_file.extension=="set"'
     )
 
     bids_electrodes_file_group = VGroup(
@@ -53,7 +54,8 @@ class EEGPreprocessingConfigUI(EEGPreprocessingConfig):
         Item('object.bids_electrodes_file.desc', label="desc"),
         Item('object.bids_electrodes_file.suffix', label="suffix", style='readonly'),
         Item('object.bids_electrodes_file.extension', label="extension", style='readonly'),
-        label="Electrodes file (BIDS)"
+        label="Electrodes file (BIDS)",
+        enabled_when='object.eeg_ts_file.extension=="set"'
     )
 
     cartool_electrodes_file_group = VGroup(
@@ -61,7 +63,8 @@ class EEGPreprocessingConfigUI(EEGPreprocessingConfig):
         Item('object.cartool_electrodes_file.desc', label="desc"),
         Item('object.cartool_electrodes_file.suffix', label="suffix", style='readonly'),
         Item('object.cartool_electrodes_file.extension', label="extension", style='readonly'),
-        label="Electrodes file (Cartool)"
+        label="Electrodes file (Cartool)",
+        enabled_when='object.eeg_ts_file.extension=="set"'
     )
 
     traits_view = View(
@@ -74,7 +77,8 @@ class EEGPreprocessingConfigUI(EEGPreprocessingConfig):
                 Group(
                     Include('events_file_group'),
                 ),
-                Item("electrodes_file_fmt"),
+                Item("electrodes_file_fmt",
+                     enabled_when='object.eeg_ts_file.extension=="set"'),
                 Group(
                     Include("bids_electrodes_file_group"),
                     visible_when='electrodes_file_fmt=="BIDS"'
@@ -88,7 +92,8 @@ class EEGPreprocessingConfigUI(EEGPreprocessingConfig):
             HGroup(
                 Item("t_min", label="Start time"),
                 Item("t_max", label="End time"),
-                label="Epochs time window"
+                label="Epochs time window",
+                enabled_when='object.eeg_ts_file.extension=="set"'
             )
         ),
         width=0.4,
@@ -184,6 +189,10 @@ class EEGPreprocessingStageUI(EEGPreprocessingStage):
             self, subject=subject, session=session, bids_dir=bids_dir, output_dir=output_dir
         )
         self.config = EEGPreprocessingConfigUI()
+        self.config.eeg_ts_file.on_trait_change(self._reload_view, 'extension')
+
+    def _reload_view(self, new):
+        self.define_inspect_outputs()
 
     def _inspect_output_button_fired(self, info):
         """Display the selected output when ``inspect_output_button`` is clicked.
