@@ -167,29 +167,29 @@ How to build the documentation locally
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 To generate the documentation:
 
-    1. Install the CMP3 conda environment ``py37cmp-gui``::
+    1. Install the CMP3 conda environment ``py39cmp-gui``::
 
         $ cd connectomemapper3
         $ conda env create -f environment.yml
 
-    2. Activate CMP3 conda environment ``py37cmp-gui``::
+    2. Activate CMP3 conda environment ``py39cmp-gui``::
 
-        $ conda activate py37cmp-gui
+        $ conda activate py39cmp-gui
 
     3. Install all dependencies such as sphinx and its extensions, required for the build::
 
-        (py37cmp-gui)$ pip install -r docs/requirements.txt
+        (py39cmp-gui)$ pip install -r docs/requirements.txt
 
     4. Install ``connectomemapper3``::
 
-        (py37cmp-gui)$ pip install .
+        (py39cmp-gui)$ pip install .
 
     5. Run the script ``scripts/build_docs.sh`` to generate the HTML documentation in ``docs/_build/html``::
 
-        (py37cmp-gui)$ sh scripts/build_docs.sh
+        (py39cmp-gui)$ sh scripts/build_docs.sh
 
     .. note::
-        Make sure to have (1) activated the conda environment ``py37cmp-gui`` and (2) reinstalled ``connectomemapper3`` with ``pip`` before running ``build_docs.sh``.
+        Make sure to have (1) activated the conda environment ``py39cmp-gui`` and (2) reinstalled ``connectomemapper3`` with ``pip`` before running ``build_docs.sh``.
 
 ------------
 
