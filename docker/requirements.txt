@@ -1,5 +1,6 @@
 coverage==5.2
 duecredit==0.8.0
+nibabel==3.2.2
 mne==0.24.1
 mne_connectivity==0.3
 datalad[full]==0.17.2

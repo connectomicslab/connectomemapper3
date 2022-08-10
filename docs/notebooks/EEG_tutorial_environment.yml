@@ -25,6 +25,7 @@ dependencies:
   - pip:
       - duecredit==0.9.1
       - future==0.18.2
+      - nibabel==3.2.2
       - pybids==0.14.0
       - networkx==2.6.3
       - pycartool==0.1.1
