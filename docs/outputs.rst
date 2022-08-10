@@ -317,7 +317,7 @@ EEG derivatives are placed in each subject's ``eeg/`` subfolder including:
         - ``<scale_label>``: ``scale1``, ``scale2``, ``scale3``, ``scale4``, ``scale5``
           corresponds to the parcellation scale if applicable
 
-* The functional time- and frequency- based connectivity graphs:
+* The functional frequency- and time-frequency-domain based connectivity graphs:
 
     - ``eeg/sub-<subject_label>_task-<task_label>_atlas-<atlas_label>[_res-<scale_label>]_conndata-network_connectivity.<fmt>``
 
