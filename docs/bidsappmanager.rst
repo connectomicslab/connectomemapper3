@@ -19,11 +19,11 @@ Start the Graphical User Interface
 
 In a terminal, enter to following::
 
-    $ source activate py37cmp-gui
+    $ source activate py39cmp-gui
 
 or::
 
-    $ conda activate py37cmp-gui
+    $ conda activate py39cmp-gui
 
 Please see Section :ref:`manual-install-cmpbidsappmanager` for more details about installation.
 
