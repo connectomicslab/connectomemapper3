@@ -182,7 +182,7 @@ class EEGPipeline(Pipeline):
 
         Returns
         -------
-        valid_inputs : traits.Bool
+        valid_inputs : bool
             True if inputs are available
         """
         print("**** Check Inputs ****")
