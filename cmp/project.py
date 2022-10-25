@@ -640,10 +640,9 @@ def init_anat_project(project_info, is_new_project, debug=False):
         if not os.path.exists(subject_derivatives_directory):
             try:
                 os.makedirs(subject_derivatives_directory)
+                print("... Info : Created directory %s" % subject_derivatives_directory)
             except os.error:
                 print("... Info: %s was already existing" % subject_derivatives_directory)
-            finally:
-                print("... Info : Created directory %s" % subject_derivatives_directory)
 
         if (project_info.subject_session != "") and (
             project_info.subject_session is not None
@@ -739,13 +738,11 @@ def init_eeg_project(project_info, is_new_project, debug=False):
         if not os.path.exists(subject_derivatives_directory):
             try:
                 os.makedirs(subject_derivatives_directory)
+                print("... Info : Created directory %s" %
+                      subject_derivatives_directory)
             except os.error:  # pragma: no cover
                 print("... Info: %s was already existing" %
                       subject_derivatives_directory)
-            finally:
-                print("... Info : Created directory %s" %
-                      subject_derivatives_directory)
-
         if (project_info.subject_session != '') and (project_info.subject_session is not None):
             project_info.eeg_config_file = os.path.join(
                 subject_derivatives_directory, '%s_%s_eeg_config.json' % (
