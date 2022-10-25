@@ -718,16 +718,7 @@ jobs:
       image: ubuntu-2004:202201-02
     working_directory: /tmp/data
     steps:
-      - restore_cache:
-          keys:
-            - env-v1-{{ .Branch }}-
-            - env-v1-master-
-            - env-v1-
       - install-conda-gitannex-and-datalad
-      - save_cache:
-          key: env-v1-{{ .Branch }}-{{ .BuildNum }}
-          paths:
-            - /home/circleci/miniconda
       - checkout:
           path: /home/circleci/src/connectomemapper3
       - restore_cache:
