@@ -1130,14 +1130,12 @@ def run_anat_pipeline(project, bids_layout, number_of_threads):
         if anat_valid_inputs:
             print(">> Process anatomical pipeline")
             anat_pipeline.process()
+            anat_valid_outputs, msg = anat_pipeline.check_output()
+            anat_pipeline.fill_stages_outputs()
             exit_code = 0
         else:  # pragma: no cover
             print("ERROR : Invalid inputs for anatomical pipeline")
             exit_code = 1
-            return exit_code
-
-    anat_valid_outputs, msg = anat_pipeline.check_output()
-    anat_pipeline.fill_stages_outputs()
 
     return anat_pipeline, exit_code, anat_valid_outputs, msg
 
@@ -1155,13 +1153,14 @@ def run_dmri_pipeline(project, bids_layout, anat_pipeline):
             dmri_pipeline.custom_atlas_res = anat_pipeline.stages["Parcellation"].config.custom_parcellation.res
         if dmri_valid_inputs:
             dmri_pipeline.process()
+            dmri_pipeline.fill_stages_outputs()
             exit_code = 0
         else:  # pragma: no cover
             print("   ... ERROR : Invalid inputs for diffusion pipeline")
             exit_code = 1
-            return exit_code
-
-        dmri_pipeline.fill_stages_outputs()
+    else:  # pragma: no cover
+        print("   ... ERROR : Diffusion pipeline is None")
+        exit_code = 1
     return exit_code
 
 
@@ -1184,14 +1183,11 @@ def run_fmri_pipeline(project, bids_layout, anat_pipeline):
         if fmri_valid_inputs:
             print(">> Process fMRI pipeline")
             fmri_pipeline.process()
+            fmri_pipeline.fill_stages_outputs()
             exit_code = 0
         else:  # pragma: no cover
             print("   ... ERROR : Invalid inputs for the fMRI pipeline")
             exit_code = 1
-            return exit_code
-
-        fmri_pipeline.fill_stages_outputs()
-
     return exit_code
 
 
@@ -1214,12 +1210,9 @@ def run_eeg_pipeline(project, anat_pipeline):
         if eeg_valid_inputs:
             print(">> Process EEG pipeline")
             eeg_pipeline.process()
+            eeg_pipeline.fill_stages_outputs()
             exit_code = 0
         else:  # pragma: no cover
             print("   ... ERROR : Invalid inputs for the EEG pipeline")
             exit_code = 1
-            return exit_code
-
-        eeg_pipeline.fill_stages_outputs()
-
     return exit_code
