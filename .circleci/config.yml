@@ -140,6 +140,7 @@ commands:
       - run:
           name: "Install and setup git-annex & DataLad in the environment"
           command: |
+            ls -la /home/circleci/miniconda
             if [[ ! -d /home/circleci/miniconda ]]; then
               export PATH="$HOME/miniconda/bin:$PATH"
               source activate py37cmp-data
