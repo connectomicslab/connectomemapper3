@@ -144,9 +144,9 @@ commands:
               export PATH="$HOME/miniconda/bin:$PATH"
               source activate py37cmp-data
               conda install -y -c anaconda -c conda-forge git-annex datalad
-              pip install mne
               git config --global user.name 'CMP3 Bot'
               git config --global user.email 'connectomicslab.chuv@gmail.com'
+              conda list
             fi
       - run:
           name: "Install MNE in the environment"
@@ -155,6 +155,7 @@ commands:
               export PATH="$HOME/miniconda/bin:$PATH"
               source activate py37cmp-data
               pip install mne
+              conda list
             fi
 
   install-conda-and-cmp3:
@@ -787,6 +788,7 @@ jobs:
           command: |
             export PATH="$HOME/miniconda/bin:$PATH"
             source activate py37cmp-data
+            conda list
             if [[ ! -d /tmp/data/ds003505 ]]; then
               datalad install https://github.com/OpenNeuroDatasets/ds003505.git
             fi
