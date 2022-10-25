@@ -140,24 +140,20 @@ commands:
       - run:
           name: "Install and setup git-annex & DataLad in the environment"
           command: |
-            ls -la /home/circleci/miniconda
-            if [[ ! -d /home/circleci/miniconda ]]; then
-              export PATH="$HOME/miniconda/bin:$PATH"
-              source activate py37cmp-data
-              conda install -y -c anaconda -c conda-forge git-annex datalad
-              git config --global user.name 'CMP3 Bot'
-              git config --global user.email 'connectomicslab.chuv@gmail.com'
-              conda list
-            fi
+            export PATH="$HOME/miniconda/bin:$PATH"
+            source activate py37cmp-data
+            conda install -y -c anaconda -c conda-forge git-annex datalad
+            git config --global user.name 'CMP3 Bot'
+            git config --global user.email 'connectomicslab.chuv@gmail.com'
+            conda list
+
       - run:
           name: "Install MNE in the environment"
           command: |
-            if [[ ! -d /home/circleci/miniconda ]]; then
-              export PATH="$HOME/miniconda/bin:$PATH"
-              source activate py37cmp-data
-              pip install mne
-              conda list
-            fi
+            export PATH="$HOME/miniconda/bin:$PATH"
+            source activate py37cmp-data
+            pip install mne
+            conda list
 
   install-conda-and-cmp3:
     parameters:
