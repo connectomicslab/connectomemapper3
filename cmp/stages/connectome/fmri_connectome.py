@@ -46,7 +46,7 @@ class ConnectomeConfig(HasTraits):
         DVARS (RMS of variance over voxels) threshold
         (Default: 4.0)
 
-    output_types : ['gPickle', 'mat', 'cff', 'graphml']
+    output_types : ['gpickle', 'mat', 'cff', 'graphml']
         Output connectome format
 
     log_visualization : traits.Bool
@@ -69,7 +69,7 @@ class ConnectomeConfig(HasTraits):
     apply_scrubbing = Bool(False)
     FD_thr = Float(0.2)
     DVARS_thr = Float(4.0)
-    output_types = List(["gPickle", "mat", "cff", "graphml"])
+    output_types = List(["gpickle", "mat", "cff", "graphml"])
     log_visualization = Bool(True)
     circular_layout = Bool(False)
     subject = Str()
@@ -214,16 +214,3 @@ class ConnectomeStage(Stage):
             self.inspect_outputs = sorted(
                 [key for key in list(self.inspect_outputs_dict.keys())], key=str.lower
             )
-
-    def has_run(self):
-        """Function that returns `True` if the stage has been run successfully.
-
-        Returns
-        -------
-        `True` if the stage has been run successfully
-        """
-        return os.path.exists(
-            os.path.join(
-                self.stage_dir, "compute_matrice", "result_compute_matrice.pklz"
-            )
-        )

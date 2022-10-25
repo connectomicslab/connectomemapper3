@@ -69,20 +69,20 @@ def get() -> argparse.ArgumentParser:
 
     p.add_argument(
         "--anat_pipeline_config",
-        help="Configuration .txt file for processing stages of the anatomical MRI processing pipeline",
+        help="Configuration .json file for processing stages of the anatomical MRI processing pipeline",
     )
     p.add_argument(
         "--dwi_pipeline_config",
-        help="Configuration .txt file for processing stages of the diffusion MRI processing pipeline",
+        help="Configuration .json file for processing stages of the diffusion MRI processing pipeline",
     )
     p.add_argument(
         "--func_pipeline_config",
-        help="Configuration .txt file for processing stages of the fMRI processing pipeline",
+        help="Configuration .json file for processing stages of the fMRI processing pipeline",
     )
-    # p.add_argument(
-    #     "--eeg_pipeline_config",
-    #     help="Configuration .txt file for processing stages of the eeg processing pipeline"
-    # )
+    p.add_argument(
+        "--eeg_pipeline_config",
+        help="Configuration .json file for processing stages of the eeg processing pipeline"
+    )
 
     p.add_argument(
         "--number_of_threads",

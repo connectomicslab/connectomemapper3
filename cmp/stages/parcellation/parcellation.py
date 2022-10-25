@@ -584,35 +584,3 @@ class ParcellationStage(Stage):
             [key for key in list(self.inspect_outputs_dict.keys())],
             key=str.lower
         )
-
-    def has_run(self):
-        """Function that returns `True` if the stage has been run successfully.
-
-        Returns
-        -------
-        `True` if the stage has been run successfully
-        """
-        if self.config.parcellation_scheme == "Custom":
-            return os.path.exists(
-                os.path.join(
-                    self.stage_dir,
-                    "custom_compute_roi_volumetry",
-                    "result_custom_compute_roi_volumetry.pklz"
-                )
-            )
-        elif self.config.parcellation_scheme == "Lausanne2018":
-            return os.path.exists(
-                os.path.join(
-                    self.stage_dir,
-                    "parcCombiner",
-                    "result_parcCombiner.pklz"
-                )
-            )
-        else:
-            return os.path.exists(
-                os.path.join(
-                    self.stage_dir,
-                    f'{self.config.parcellation_scheme}_parcellation',
-                    f'result_{self.config.parcellation_scheme}_parcellation.pklz',
-                )
-            )

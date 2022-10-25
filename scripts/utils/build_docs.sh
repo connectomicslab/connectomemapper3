@@ -8,10 +8,10 @@
 # Build the documentation using BASH shell interpreter and Sphinx doc generator.
 #
 # All python packages related to Sphinx necessary to build the docs
-# are provided in the `py37cmp-gui` conda environment described by
+# are provided in the `py39cmp-gui` conda environment described by
 # `environment.yml` / `environment_macosx.yml` files.
 #
-# Usage conda activate py37cmp-gui
+# Usage conda activate py39cmp-gui
 #       /bin/bash build_docs.sh
 #
 # Created by Sebastien Tourbier

@@ -9,7 +9,7 @@ channels:
 dependencies:
   - python=3.7
   - pip=21.3.1
-  - datalad=0.15.4
+  - datalad=0.17.2
   - jupyterlab=3.2.8
   - numpy=1.21.5
   - matplotlib=3.5.1
@@ -25,8 +25,9 @@ dependencies:
   - pip:
       - duecredit==0.9.1
       - future==0.18.2
+      - nibabel==3.2.2
       - pybids==0.14.0
       - networkx==2.6.3
       - pycartool==0.1.1
       - mne-connectivity==0.2
-      - connectomemapper==3.0.3
+      - connectomemapper==3.1.0

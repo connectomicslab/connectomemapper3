@@ -23,7 +23,7 @@ class ConnectomeConfigUI(ConnectomeConfig):
     ----------
     output_types : list of string
         A list of ``output_types``. Valid ``output_types`` are
-        'gPickle', 'mat', 'cff', 'graphml'
+        'gpickle', 'mat', 'cff', 'graphml'
 
     connectivity_metrics : list of string
         A list of connectivity metrics to stored. Valid ``connectivity_metrics`` are
@@ -39,8 +39,8 @@ class ConnectomeConfigUI(ConnectomeConfig):
     """
 
     output_types = List(
-        ["gPickle"],
-        editor=CheckListEditor(values=["gPickle", "mat", "cff", "graphml"], cols=4),
+        ["gpickle"],
+        editor=CheckListEditor(values=["gpickle", "mat", "cff", "graphml"], cols=4),
     )
 
     connectivity_metrics = List(

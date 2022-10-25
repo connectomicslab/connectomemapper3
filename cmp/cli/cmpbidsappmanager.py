@@ -140,7 +140,7 @@ def main():
                 'To unfreeze the menubar on macOS, '
                 'click away from cmpbidsappmanager window to another app, '
                 'then reactivate cmpbidsappmanager. To avoid this problem, '
-                'please install python.app in the py37cmp-gui conda environment using:\n'
+                'please install python.app in the py39cmp-gui conda environment using:\n'
                 'conda install -c conda-forge python.app'
             )
             warnings.warn(msg)

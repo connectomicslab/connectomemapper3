@@ -36,6 +36,7 @@ def create_docker_cmd(args):
                 'anat_pipeline_config': "/path/to/ref_anatomical_config.json",
                 'dwi_pipeline_config': "/path/to/ref_diffusion_config.json",
                 'func_pipeline_config': "/path/to/ref_fMRI_config.json",
+                'eeg_pipeline_config': "/path/to/ref_eeg_config.json",
                 ('number_of_threads': 1,)
                 ('number_of_participants_processed_in_parallel': 1,)
                 ('mrtrix_random_seed': 1234,)
@@ -84,6 +85,8 @@ def create_docker_cmd(args):
         cmd += f'--dwi_pipeline_config /config/{args.dwi_pipeline_config} '
     if args.func_pipeline_config:
         cmd += f'--func_pipeline_config /config/{args.func_pipeline_config} '
+    if args.eeg_pipeline_config:
+        cmd += f'--eeg_pipeline_config /config/{args.eeg_pipeline_config} '
     cmd += f'--fs_license /bids_dir/code/license.txt '
     optional_single_args = (
         "number_of_threads", "number_of_participants_processed_in_parallel",

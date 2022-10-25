@@ -94,9 +94,9 @@ class DiffusionConfig(HasTraits):
     dilate_rois = Bool(True)
     dilation_kernel = Enum(["Box", "Gauss", "Sphere"])
     dilation_radius = Enum([1, 2, 3, 4])
-    recon_processing_tool_editor = List(["Dipy", "MRtrix"])
-    tracking_processing_tool_editor = List(["Dipy", "MRtrix"])
-    processing_tool_editor = List(["Dipy", "MRtrix"])
+    recon_processing_tool_editor = List(["MRtrix", "Dipy"])
+    tracking_processing_tool_editor = List(["MRtrix", "Dipy"])
+    processing_tool_editor = List(["MRtrix", "Dipy"])
     recon_processing_tool = Str("MRtrix")
     tracking_processing_tool = Str("MRtrix")
     custom_track_file = File
@@ -860,36 +860,3 @@ class DiffusionStage(Stage):
         self.inspect_outputs = sorted(
             [key for key in list(self.inspect_outputs_dict.keys())], key=str.lower
         )
-
-    def has_run(self):
-        """Function that returns `True` if the stage has been run successfully.
-
-        Returns
-        -------
-        `True` if the stage has been run successfully
-        """
-        if self.config.tracking_processing_tool == "Dipy":
-            if self.config.diffusion_model == "Deterministic":
-                return os.path.exists(
-                    os.path.join(
-                        self.stage_dir,
-                        "tracking",
-                        "dipy_deterministic_tracking",
-                        "result_dipy_deterministic_tracking.pklz",
-                    )
-                )
-            elif self.config.diffusion_model == "Probabilistic":
-                return os.path.exists(
-                    os.path.join(
-                        self.stage_dir,
-                        "tracking",
-                        "dipy_probabilistic_tracking",
-                        "result_dipy_probabilistic_tracking.pklz",
-                    )
-                )
-        elif self.config.tracking_processing_tool == "MRtrix":
-            return os.path.exists(
-                os.path.join(
-                    self.stage_dir, "tracking", "trackvis", "result_trackvis.pklz"
-                )
-            )

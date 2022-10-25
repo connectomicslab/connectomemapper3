@@ -105,7 +105,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         else:
             self.global_conf.subject_session = ""
             self.subject_directory = os.path.join( project_info.base_directory, self.global_conf.subject)
-            subject_id =  self.global_conf.subject
+            subject_id = self.global_conf.subject
 
         self.derivatives_directory = os.path.abspath(project_info.output_directory)
         self.output_directory = os.path.abspath(project_info.output_directory)
@@ -129,6 +129,10 @@ class AnatomicalPipeline(cmp_common.Pipeline):
 
         self.subject = project_info.subject
 
+        self._init_and_add_listeners_to_stage_traits(subject_id=subject_id)
+
+    def _init_and_add_listeners_to_stage_traits(self, subject_id):
+        """Initialize and add listeners to traits that are shared between the pipeline and the different stages."""
         self.stages["Segmentation"].config.freesurfer_subjects_dir = os.path.join(
             self.output_directory, __freesurfer_directory__
         )
@@ -137,7 +141,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         )
 
         self.stages["Parcellation"].config.on_trait_change(
-             self._update_parcellation_scheme, "parcellation_scheme"
+            self._update_parcellation_scheme, "parcellation_scheme"
         )
 
     def _update_parcellation_scheme(self):
@@ -399,8 +403,8 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             ]
             # Keep only unique custom derivatives to make the BIDSLayout happy
             custom_derivatives_dirnames = list(set(custom_derivatives_dirnames))
-            for custom_derivatives_dirname in  custom_derivatives_dirnames:
-                if custom_derivatives_dirname not in layout.derivatives:
+            for custom_derivatives_dirname in custom_derivatives_dirnames:
+                if custom_derivatives_dirname not in layout.derivatives.keys():
                     print(f"    * Add custom_derivatives_dirname: {custom_derivatives_dirname}")
                     layout.add_derivatives(os.path.join(self.base_directory, 'derivatives', custom_derivatives_dirname))
 

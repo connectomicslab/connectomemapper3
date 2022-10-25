@@ -80,11 +80,15 @@ autodoc_mock_imports = ['graphviz',
                         'fslpy',
                         'fsleyes',
                         'mne',
+                        'nilearn',
                         'obspy',
                         'statsmodels',
                         'pydicom',
                         'networkx',
-                        'datalad']
+                        'datalad',
+                        "mne_connectivity",
+                        "PyQt5",
+                        ]
 
 # Allow errors in notebooks for doc
 nbsphinx_allow_errors = True
@@ -370,7 +374,7 @@ intersphinx_mapping = {"http://docs.python.org/3": None}
 
 # -- sphinx-copybutton extension configuration -------------------------------
 
-copybutton_prompt_text = r">>> |\.\.\. |\$ | |\(py37cmp-gui\)\$ "
+copybutton_prompt_text = r">>> |\.\.\. |\$ | |\(py39cmp-gui\)\$ "
 copybutton_prompt_is_regexp = True
 # copybutton_only_copy_prompt_lines = False
 copybutton_remove_prompts = True

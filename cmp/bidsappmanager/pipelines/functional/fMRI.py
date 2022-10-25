@@ -152,7 +152,7 @@ class fMRIPipelineUI(fMRIPipeline):
 
         See also
         ---------
-        cmp.pipelines.functional.fMRIPipeline.__init__
+        cmp.pipelines.functional.fMRI.fMRIPipeline.__init__
         """
         fMRIPipeline.__init__(self, project_info)
 
@@ -198,6 +198,8 @@ class fMRIPipelineUI(fMRIPipeline):
                     self.pipeline_name,
                     self.stages[stage].name,
                 )
+
+        self._init_and_add_listeners_to_stage_traits()
 
     def _preprocessing_fired(self, info):
         """Method that displays the window for the preprocessing stage.

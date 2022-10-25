@@ -20,11 +20,11 @@ import time
 import glob
 from pathlib import Path
 
-from codecarbon import EmissionsTracker
 from pyface.api import ImageResource
 from traitsui.qt4.extra.qt_view import QtView
 from traitsui.api import *
 from traits.api import *
+from traitsui.handler import Handler
 
 from bids import BIDSLayout
 
@@ -50,7 +50,10 @@ from cmtklib.carbonfootprint import (
 import cmp.bidsappmanager.gui.handlers
 import cmp.bidsappmanager.project as project
 from cmp.bidsappmanager.gui.traits import MultiSelectAdapter
-from cmp.bidsappmanager.gui.globals import get_icon, modal_width
+from cmp.bidsappmanager.gui.globals import (
+    # get_icon,
+    modal_width
+)
 
 # Remove warnings visible whenever you import scipy (or another package)
 # that was compiled against an older numpy than is installed.
@@ -109,6 +112,9 @@ class BIDSAppInterfaceWindow(HasTraits):
     fmri_config : traits.File
         Configuration file for the functional MRI pipeline
 
+    eeg_config : traits.File
+        Configuration file for the EEG pipeline
+
     run_anat_pipeline : traits.Bool
         If True, run the anatomical pipeline
 
@@ -117,6 +123,9 @@ class BIDSAppInterfaceWindow(HasTraits):
 
     run_fmri_pipeline : traits.Bool
         If True, run the functional pipeline
+
+    run_eeg_pipeline : traits.Bool
+        If True, run the EEG pipeline
 
     bidsapp_tag : traits.Enum
         Selection of BIDS App version to use
@@ -203,13 +212,16 @@ class BIDSAppInterfaceWindow(HasTraits):
     anat_config = File(desc="Path to the configuration file of the anatomical pipeline")
     dmri_config = File(desc="Path to the configuration file of the diffusion pipeline")
     fmri_config = File(desc="Path to the configuration file of the fMRI pipeline")
+    eeg_config = File(desc="Path to the configuration file of the EEG pipeline")
 
     run_anat_pipeline = Bool(True, desc="Run the anatomical pipeline")
     run_dmri_pipeline = Bool(False, desc="Run the diffusion pipeline")
     run_fmri_pipeline = Bool(False, desc="Run the fMRI pipeline")
+    run_eeg_pipeline = Bool(False, desc="Run the EEG pipeline")
 
     dmri_inputs_checked = Bool(False)
     fmri_inputs_checked = Bool(False)
+    eeg_inputs_checked = Bool(False)
 
     settings_checked = Bool(False)
     docker_running = Bool(False)
@@ -369,6 +381,17 @@ class BIDSAppInterfaceWindow(HasTraits):
                         label="fMRI pipeline",
                         visible_when="fmri_inputs_checked==True",
                     ),
+                    Group(
+                        Item("run_eeg_pipeline", label="Run processing stages"),
+                        Item(
+                            "eeg_config",
+                            editor=FileEditor(dialog_style="open"),
+                            label="Configuration file",
+                            visible_when="run_eeg_pipeline",
+                        ),
+                        label="EEG pipeline",
+                        visible_when="eeg_inputs_checked==True",
+                    ),
                     label="Configuration of processing pipelines",
                 ),
                 VGroup(
@@ -444,7 +467,7 @@ class BIDSAppInterfaceWindow(HasTraits):
             springy=True,
         ),
         title="Connectome Mapper 3 BIDS App GUI",
-        handler=cmp.bidsappmanager.gui.handlers.BIDSAppInterfaceWindowHandler(),
+        handler=Handler(),
         buttons=[],
         width=0.6,
         height=0.8,
@@ -464,7 +487,7 @@ class BIDSAppInterfaceWindow(HasTraits):
         # icon=get_icon("bidsapp.png")
     )
 
-    carbon_footprint_view = View(
+    carbon_footprint_view = QtView(
         Group(
             Item("carbon_emission_msg", editor=HTMLEditor(), show_label=False),
         ),
@@ -485,6 +508,7 @@ class BIDSAppInterfaceWindow(HasTraits):
         anat_config="",
         dmri_config="",
         fmri_config="",
+        eeg_config="",
     ):
         """Constructor of an :class:``BIDSAppInterfaceWindow`` instance.
 
@@ -507,6 +531,9 @@ class BIDSAppInterfaceWindow(HasTraits):
 
         fmri_config : string
             Path to functional pipeline configuration file (Default: \'\')
+
+        eeg_config : string
+            Path to EEG pipeline configuration file (Default: \'\')
         """
         print("> Initialize window...")
         if multiprocessing.cpu_count() < 4:
@@ -565,6 +592,21 @@ class BIDSAppInterfaceWindow(HasTraits):
 
         print(f"  .. rsfMRI available: {self.fmri_inputs_checked}")
 
+        # Check if EEG data is available in the dataset
+        eeg_files = bids_layout.get(
+            datatype="eeg",
+            suffix="eeg",
+            return_type="file",
+        )
+        if not eeg_files:
+            self.eeg_inputs_checked = False
+            self.run_eeg_pipeline = False
+        else:
+            self.eeg_inputs_checked = True
+            self.run_eeg_pipeline = True
+
+        print(f"  .. EEG available: {self.eeg_inputs_checked}")
+
         # Initialize output directory to be /bids_dir/derivatives
         self.output_dir = os.path.join(bids_root, "derivatives")
 
@@ -572,6 +614,7 @@ class BIDSAppInterfaceWindow(HasTraits):
         self.anat_config = anat_config
         self.dmri_config = dmri_config
         self.fmri_config = fmri_config
+        self.eeg_config = eeg_config
 
         if 'FREESURFER_HOME' in os.environ:
             self.fs_license = os.path.join(
@@ -588,6 +631,7 @@ class BIDSAppInterfaceWindow(HasTraits):
 
         self.on_trait_change(self.update_run_dmri_pipeline, "run_dmri_pipeline")
         self.on_trait_change(self.update_run_fmri_pipeline, "run_fmri_pipeline")
+        self.on_trait_change(self.update_run_eeg_pipeline, "run_eeg_pipeline")
 
         self.on_trait_change(
             self.number_of_parallel_procs_updated,
@@ -602,6 +646,8 @@ class BIDSAppInterfaceWindow(HasTraits):
         self.on_trait_change(self.update_checksettings, "dmri_config")
         self.on_trait_change(self.update_checksettings, "run_fmri_pipeline")
         self.on_trait_change(self.update_checksettings, "fmri_config")
+        self.on_trait_change(self.update_checksettings, "run_eeg_pipeline")
+        self.on_trait_change(self.update_checksettings, "eeg_config")
         self.on_trait_change(self.update_checksettings, "fs_license")
 
     def number_of_parallel_procs_updated(self, new):
@@ -626,6 +672,10 @@ class BIDSAppInterfaceWindow(HasTraits):
 
     def update_run_fmri_pipeline(self, new):
         """Callback function when ``run_fmri_pipeline`` is updated."""
+        self.run_anat_pipeline = True
+
+    def update_run_eeg_pipeline(self, new):
+        """Callback function when ``run_eeg_pipeline`` is updated."""
         self.run_anat_pipeline = True
 
     def update_checksettings(self, new):
@@ -700,6 +750,11 @@ class BIDSAppInterfaceWindow(HasTraits):
         else:
             print_warning("Warning: Configuration file for fMRI pipeline not existing!")
 
+        if os.path.isfile(self.eeg_config):
+            print(f"* EEG configuration file : {self.eeg_config}")
+        else:
+            print_warning("Warning: Configuration file for EEG pipeline not existing!")
+
         if os.path.isfile(self.fs_license):
             print(f"* Freesurfer license : {self.fs_license}")
         else:
@@ -757,6 +812,10 @@ class BIDSAppInterfaceWindow(HasTraits):
             cmd.append("-v")
             cmd.append(f"{self.fmri_config}:/code/ref_fMRI_config.json")
 
+        if self.run_eeg_pipeline:
+            cmd.append("-v")
+            cmd.append(f"{self.eeg_config}:/code/ref_EEG_config.json")
+
         cmd.append("-u")
         cmd.append(f"{os.geteuid()}:{os.getegid()}")
 
@@ -779,6 +838,10 @@ class BIDSAppInterfaceWindow(HasTraits):
         if self.run_fmri_pipeline:
             cmd.append("--func_pipeline_config")
             cmd.append("/code/ref_fMRI_config.json")
+
+        if self.run_eeg_pipeline:
+            cmd.append("--eeg_pipeline_config")
+            cmd.append("/code/ref_EEG_config.json")
 
         cmd.append("--fs_license")
         cmd.append("/bids_dir/code/license.txt")
@@ -837,6 +900,10 @@ class BIDSAppInterfaceWindow(HasTraits):
             cmd.append("--input")
             cmd.append(f"{self.fmri_config}")
 
+        if self.run_eeg_pipeline:
+            cmd.append("--input")
+            cmd.append(f"{self.eeg_config}")
+
         cmd.append("--output")
         cmd.append(f"{self.output_dir}")
         cmd.append("/bids_dir")
@@ -859,6 +926,10 @@ class BIDSAppInterfaceWindow(HasTraits):
 
         if self.run_fmri_pipeline:
             cmd.append("--func_pipeline_config")
+            cmd.append(f"/{{inputs[{i}]}}")
+
+        if self.run_eeg_pipeline:
+            cmd.append("--eeg_pipeline_config")
             cmd.append(f"/{{inputs[{i}]}}")
 
         print_blue("... Datalad cmd : {}".format(" ".join(cmd)))
@@ -986,9 +1057,10 @@ class BIDSAppInterfaceWindow(HasTraits):
                     msg = ("Add all files to datalad. "
                            "Dataset ready to be linked with the BIDS App.")
 
-                except Exception:
+                except Exception as e:
                     msg = "Save state after error at datalad dataset creation"
-                    print_error("    DATALAD ERROR: Failed to create the datalad dataset")
+                    print_error("    DATALAD ERROR: Failed to create the datalad dataset"
+                                f"\n    {e}")
             else:
                 msg = "Datalad dataset up-to-date and ready to be linked with the BIDS App."
                 print("    INFO: A datalad dataset already exists!")
@@ -1006,8 +1078,9 @@ class BIDSAppInterfaceWindow(HasTraits):
             try:
                 print_blue(f"... cmd: {cmd}")
                 self.run(cmd, env={}, cwd=os.path.abspath(self.bids_root))
-            except Exception:
-                print_error("    DATALAD ERROR: Failed to add changes to dataset")
+            except Exception as e:
+                print_error("    DATALAD ERROR: Failed to add changes to dataset"
+                            f"\n    {e}")
 
             datalad_container = os.path.join(
                 self.bids_root,
@@ -1061,6 +1134,12 @@ class BIDSAppInterfaceWindow(HasTraits):
                         f'"$(pwd)"/code/{os.path.basename(self.fmri_config)}:/code/ref_fMRI_config.json'
                     )
 
+                if self.run_eeg_pipeline:
+                    docker_cmd.append("-v")
+                    docker_cmd.append(
+                        f'"$(pwd)"/code/{os.path.basename(self.eeg_config)}:/code/ref_EEG_config.json'
+                    )
+
                 docker_cmd.append("-u")
                 docker_cmd.append("{}:{}".format(os.geteuid(), os.getegid()))
 
@@ -1089,8 +1168,9 @@ class BIDSAppInterfaceWindow(HasTraits):
                     print_blue(f"... cmd: {cmd}")
                     self.run(cmd, env={}, cwd=os.path.join(self.bids_root))
                     print("    INFO: Container image has been linked to dataset with success!")
-                except Exception:
-                    print_error("   DATALAD ERROR: Failed to link the container image to the dataset")
+                except Exception as e:
+                    print_error("   DATALAD ERROR: Failed to link the container image to the dataset"
+                                f"\n    {e}")
 
             # Create a list of files to be retrieved by datalad get
             datalad_get_list = [self.anat_config]
@@ -1117,6 +1197,16 @@ class BIDSAppInterfaceWindow(HasTraits):
                         datalad_get_list.append(
                             "sub-{}/ses-*/func/sub-{}*_bold.*".format(label, label)
                         )
+                    if self.run_eeg_pipeline:
+                        datalad_get_list.append(
+                            "sub-{}/ses-*/eeg/sub-{}*.*".format(label, label)
+                        )
+                        datalad_get_list.append(
+                            f"derivatives/cartool*/sub-{label}/ses-*/eeg/sub-{label}*.*"
+                        )
+                        datalad_get_list.append(
+                            f"derivatives/eeglab*/sub-{label}/ses-*/eeg/sub-{label}*.*"
+                        )
             else:
                 for label in self.list_of_subjects_to_be_processed:
                     datalad_get_list.append(
@@ -1133,6 +1223,16 @@ class BIDSAppInterfaceWindow(HasTraits):
                         datalad_get_list.append(
                             "sub-{}/func/sub-{}*_bold.*".format(label, label)
                         )
+                    if self.run_eeg_pipeline:
+                        datalad_get_list.append(
+                            "sub-{}/eeg/sub-{}*.*".format(label, label)
+                        )
+                        datalad_get_list.append(
+                            f"derivatives/cartool*/sub-{label}/eeg/sub-{label}*.*"
+                        )
+                        datalad_get_list.append(
+                            f"derivatives/eeglab*/sub-{label}/eeg/sub-{label}*.*"
+                        )
 
             cmd = (
                 'datalad save -d . -m "Dataset state after adding the container image. '
@@ -1141,8 +1241,9 @@ class BIDSAppInterfaceWindow(HasTraits):
             try:
                 print_blue(f"... cmd: {cmd}")
                 self.run(cmd, env={}, cwd=os.path.abspath(self.bids_root))
-            except Exception:
-                print_error("    DATALAD ERROR: Failed to add existing files to dataset")
+            except Exception as e:
+                print_error("    DATALAD ERROR: Failed to add existing files to dataset"
+                            f"\n    {e}")
 
             cmd = 'datalad run -d . -m "Get files for sub-{}" bash -c "datalad get {}"'.format(
                 self.list_of_subjects_to_be_processed, " ".join(datalad_get_list)
@@ -1150,11 +1251,10 @@ class BIDSAppInterfaceWindow(HasTraits):
             try:
                 print_blue(f"... cmd: {cmd}")
                 self.run(cmd, env={}, cwd=os.path.abspath(self.bids_root))
-            except Exception:
+            except Exception as e:
                 print_error(
-                    "    DATALAD ERROR: Failed to get files (cmd: datalad get {})".format(
-                        " ".join(datalad_get_list)
-                    )
+                    f'    DATALAD ERROR: Failed to get files (cmd: datalad get {" ".join(datalad_get_list)})'
+                    f"\n    {e}"
                 )
 
             cmd = (
@@ -1164,15 +1264,17 @@ class BIDSAppInterfaceWindow(HasTraits):
             try:
                 print_blue(f"... cmd: {cmd}")
                 self.run(cmd, env={}, cwd=os.path.abspath(self.bids_root))
-            except Exception:
-                print_error("    DATALAD ERROR: Failed to commit changes to dataset")
+            except Exception as e:
+                print_error("    DATALAD ERROR: Failed to commit changes to dataset"
+                            f"\n    {e}")
 
             cmd = "datalad status -d ."
             try:
                 print_blue(f"... cmd: {cmd}")
                 self.run(cmd, env={}, cwd=os.path.abspath(self.bids_root))
-            except Exception:
-                print_error("    DATALAD ERROR: Failed to run datalad rev-status")
+            except Exception as e:
+                print_error("    DATALAD ERROR: Failed to run datalad rev-status"
+                            f"\n    {e}")
 
         # Create and start the carbon footprint tracker
         if self.track_carbon_footprint:
@@ -1211,17 +1313,19 @@ class BIDSAppInterfaceWindow(HasTraits):
             try:
                 print_blue(f"... cmd: {cmd}")
                 self.run(cmd, env={}, cwd=os.path.abspath(self.bids_root))
-            except Exception:
+            except Exception as e:
                 print_error(
                     "    DATALAD ERROR: Failed to commit derivatives to datalad dataset"
+                    f"\n    {e}"
                 )
 
             cmd = "datalad diff -t HEAD~1"
             try:
                 print_blue(f"... cmd: {cmd}")
                 self.run(cmd, env={}, cwd=os.path.abspath(self.bids_root))
-            except Exception:
-                print_error("    DATALAD ERROR: Failed to run datalad diff -t HEAD~1")
+            except Exception as e:
+                print_error("    DATALAD ERROR: Failed to run datalad diff -t HEAD~1"
+                            f"\n    {e}")
 
         print("Processing with BIDS App Finished\n")
         self.docker_running = False
@@ -1244,9 +1348,3 @@ class BIDSAppInterfaceWindow(HasTraits):
             self.configure_traits(view='carbon_footprint_view')
 
         return True
-
-    # def stop_bids_app(self, ui_info):
-    #     print("Stop BIDS App")
-    #     #self.docker_process.kill()
-    #     self.docker_running = False
-    #     return True

@@ -21,7 +21,7 @@ from nipype.interfaces import afni
 # Own imports
 from cmp.stages.common import Stage
 from cmtklib.functionalMRI import Scrubbing, Detrending, NuisanceRegression
-
+from cmtklib.interfaces.afni import Bandpass
 
 class FunctionalMRIConfig(HasTraits):
     """Class used to store configuration parameters of a :class:`~cmp.stages.functional.functional.FunctionalMRIStage` object.
@@ -52,6 +52,10 @@ class FunctionalMRIConfig(HasTraits):
         Detrending mode
         (Default: "Linear")
 
+    bandpass_filtering = Bool
+        Perform bandpass filtering
+        (Default: True)
+
     lowpass_filter = Float
         Lowpass filter frequency
         (Default: 0.01)
@@ -80,6 +84,7 @@ class FunctionalMRIConfig(HasTraits):
     detrending = Bool(True)
     detrending_mode = Enum("linear", "quadratic")
 
+    bandpass_filtering = Bool(True)
     lowpass_filter = Float(0.01)
     highpass_filter = Float(0.1)
 
@@ -216,9 +221,8 @@ class FunctionalMRIStage(Stage):
             interface=util.IdentityInterface(fields=["filter_output"]),
             name="filter_output",
         )
-        if self.config.lowpass_filter > 0 or self.config.highpass_filter > 0:
-            from cmtklib.interfaces.afni import Bandpass
-
+        if (self.config.bandpass_filtering and
+                (self.config.lowpass_filter > 0 or self.config.highpass_filter > 0)):
             filtering = pe.Node(interface=Bandpass(), name="temporal_filter")
             # filtering = pe.Node(interface=afni.Bandpass(),name='temporal_filter')
             converter = pe.Node(
@@ -289,7 +293,8 @@ class FunctionalMRIStage(Stage):
                     "brain_colours_blackbdy_iso",
                 ]
 
-        if self.config.lowpass_filter > 0 or self.config.highpass_filter > 0:
+        if (self.config.bandpass_filtering and
+                (self.config.lowpass_filter > 0 or self.config.highpass_filter > 0)):
             res_dir = os.path.join(self.stage_dir, "converter")
             filt = os.path.join(res_dir, "fMRI_bandpass.nii.gz")
             if os.path.exists(filt):
@@ -304,40 +309,3 @@ class FunctionalMRIStage(Stage):
         self.inspect_outputs = sorted(
             [key for key in list(self.inspect_outputs_dict.keys())], key=str.lower
         )
-
-    def has_run(self):
-        """Function that returns `True` if the stage has been run successfully.
-
-        Returns
-        -------
-        `True` if the stage has been run successfully
-        """
-        if self.config.lowpass_filter > 0 or self.config.highpass_filter > 0:
-            return os.path.exists(
-                os.path.join(
-                    self.stage_dir, "temporal_filter", "result_temporal_filter.pklz"
-                )
-            )
-        elif self.config.detrending:
-            return os.path.exists(
-                os.path.join(self.stage_dir, "detrending", "result_detrending.pklz")
-            )
-        elif (
-            self.config.wm
-            or self.config.global_nuisance
-            or self.config.csf
-            or self.config.motion
-        ):
-            return os.path.exists(
-                os.path.join(
-                    self.stage_dir,
-                    "nuisance_regression",
-                    "result_nuisance_regression.pklz",
-                )
-            )
-        elif self.config.smoothing > 0.0:
-            return os.path.exists(
-                os.path.join(self.stage_dir, "smoothing", "result_smoothing.pklz")
-            )
-        else:
-            return True

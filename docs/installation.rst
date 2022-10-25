@@ -133,15 +133,15 @@ The installation of the Connectome Mapper 3, including `cmpbidsappmanager`, cons
 
 *   Activate the conda environment::
 
-        $ source activate py37cmp-gui
+        $ source activate py39cmp-gui
 
   or::
 
-        $ conda activate py37cmp-gui
+        $ conda activate py39cmp-gui
 
 *   Install finally the latest released version of Connectome Mapper 3 with the Python Package Index (PyPI) using `pip`::
 
-        (py37cmp-gui)$ pip install connectomemapper
+        (py39cmp-gui)$ pip install connectomemapper
 
 *   You are ready to use the Connectome Mapper 3 (1) via its Graphical User Interface (GUI) aka CMP BIDS App Manager
     (See :ref:`guiusage` for the user guide), (2) via its python ``connectomemapper3_docker`` and

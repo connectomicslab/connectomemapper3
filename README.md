@@ -6,23 +6,23 @@ This neuroimaging processing pipeline software is developed by the Connectomics 
 
 ### Description
 
-Connectome Mapper 3 is an open-source Python3 image processing pipeline software, with a Graphical User Interface, that implements full anatomical, diffusion and resting-state MRI processing pipelines, from raw Diffusion / T1 / BOLD to multi-resolution connection matrices, based on a new version of the Lausanne parcellation atlas, aka `Lausanne2018`.
+Connectome Mapper 3 is an open-source Python3 image processing pipeline software, with a Graphical User Interface, that implements full anatomical, diffusion, resting-state MRI, and EEG processing pipelines, from raw Diffusion / T1 / BOLD / preprocessed EEG to multi-resolution connection matrices, based on a new version of the Lausanne parcellation atlas, aka `Lausanne2018`.
 
 ![Image not found](https://github.com/connectomicslab/connectomemapper3/raw/master/docs/images/flowchart_bidsapp.png)
 
-Connectome Mapper 3 pipelines use a combination of tools from well-known software packages, including [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki), [FreeSurfer](https://surfer.nmr.mgh.harvard.edu/fswiki/FreeSurferWiki), [ANTs](http://stnava.github.io/ANTs/), [MRtrix3](http://www.mrtrix.org/), [Dipy](https://nipy.org/dipy/) and [AFNI](https://afni.nimh.nih.gov/), orchestrated by the [Nipype](https://nipype.readthedocs.io/en/latest/) dataflow library. These pipelines were designed to provide the best software implementation for each state of processing at the time conceptualization, and can be updated as newer and better neuroimaging software become available.
+Connectome Mapper 3 pipelines use a combination of tools from well-known software packages, including [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki), [FreeSurfer](https://surfer.nmr.mgh.harvard.edu/fswiki/FreeSurferWiki), [ANTs](http://stnava.github.io/ANTs/), [MRtrix3](http://www.mrtrix.org/), [Dipy](https://nipy.org/dipy/), [AFNI](https://afni.nimh.nih.gov/), [MNE](https://mne.tools/), [MNE_Connectivity](https://mne.tools/mne-connectivity), and [Cartool (PyCartool)](https://github.com/Functional-Brain-Mapping-Laboratory/PyCartool) orchestrated by the [Nipype](https://nipype.readthedocs.io/en/latest/) dataflow library. These pipelines were designed to provide the best software implementation for each state of processing at the time conceptualization, and can be updated as newer and better neuroimaging software become available.
 
 To enhance reproducibility and replicatibility, the processing pipelines with all dependencies are encapsulated in a Docker image container, which handles datasets organized following the BIDS standard and is distributed as a `BIDS App` @ [Docker Hub](https://hub.docker.com/r/sebastientourbier/connectomemapper-bidsapp). For execution on high-performance computing cluster, a Singularity image is also made freely available @ [Sylabs Cloud](https://cloud.sylabs.io/library/_container/5fe4e971bccfe9cf45792495).
 
 To reduce the risk of misconfiguration and improve accessibility, Connectome Mapper 3 comes with an interactive GUI, aka `cmpbidsappmanager`, which supports the user in all the steps involved in the configuration of the pipelines, the configuration and execution of the BIDS App, and the control of the output quality. In addition, to facilitate the use by users not familiar with Docker and Singularity containers, Connectome Mapper 3 provides two Python commandline wrappers (`connectomemapper3_docker` and `connectomemapper3_singularity`) that will generate and run the appropriate command.
 
-Since ``v3.0.3``, CMP3 provides a new pipeline ``cmp.pipelines.functional.eeg.EEGPipeline`` dedicated to EEG modality with a collection of interfaces based on [MNE](https://mne.tools/), [MNE-Connectivity](https://mne.tools/mne-connectivity), and [PyCartool](https://github.com/Functional-Brain-Mapping-Laboratory/PyCartool). Please check [this notebook](docs/notebooks/EEG_pipeline_tutorial.ipynb) for a demonstration of the newly implemented pipeline, using the “VEPCON” dataset, available at https://openneuro.org/datasets/ds003505/versions/1.1.1.
+Since ``v3.1.0``, CMP3 provides full support to EEG. Please check [this notebook](docs/notebooks/EEG_pipeline_tutorial.ipynb) for a demonstration of the newly implemented pipeline, using the “VEPCON” dataset, available at https://openneuro.org/datasets/ds003505/versions/1.1.1.
 
 ### How to install the python wrappers and the GUI?
 
 You need to have first either Docker or Singularity engine and miniconda installed. We refer to the [dedicated documentation page](https://connectome-mapper-3.readthedocs.io/en/latest/installation.html) for more instruction details.
 
-Then, download the appropriate [environment.yml](https://github.com/connectomicslab/connectomemapper3/raw/master/conda/environment.yml) / [environment_macosx.yml](https://github.com/connectomicslab/connectomemapper3/raw/master/conda/environment_macosx.yml) and create a conda environment `py37cmp-gui` with the following command:
+Then, download the appropriate [environment.yml](https://github.com/connectomicslab/connectomemapper3/raw/master/conda/environment.yml) / [environment_macosx.yml](https://github.com/connectomicslab/connectomemapper3/raw/master/conda/environment_macosx.yml) and create a conda environment `py39cmp-gui` with the following command:
 
 ```bash
 $ conda env create -f /path/to/environment[_macosx].yml
@@ -31,8 +31,8 @@ $ conda env create -f /path/to/environment[_macosx].yml
 Once the environment is created, activate it and install Connectome Mapper 3 with `PyPI` as follows:
 
 ```bash
-$ conda activate py37cmp-gui
-(py37cmp-gui)$ pip install connectomemapper
+$ conda activate py39cmp-gui
+(py39cmp-gui)$ pip install connectomemapper
 ```
 
 You are ready to use Connectome Mapper 3!
@@ -69,7 +69,7 @@ Please check [https://ohbm-environment.org](https://ohbm-environment.org) to lea
 
 ### Usage
 
-Having the `py37cmp-gui` conda environment previously installed activated, the BIDS App can easily be run using `connectomemapper3_docker`, the python wrapper for Docker, as follows:
+Having the `py39cmp-gui` conda environment previously installed activated, the BIDS App can easily be run using `connectomemapper3_docker`, the python wrapper for Docker, as follows:
 
 ```output
     usage: connectomemapper3_docker [-h]
@@ -78,6 +78,7 @@ Having the `py37cmp-gui` conda environment previously installed activated, the B
                             [--anat_pipeline_config ANAT_PIPELINE_CONFIG]
                             [--dwi_pipeline_config DWI_PIPELINE_CONFIG]
                             [--func_pipeline_config FUNC_PIPELINE_CONFIG]
+                            [--eeg_pipeline_config EEG_PIPELINE_CONFIG]
                             [--number_of_threads NUMBER_OF_THREADS]
                             [--number_of_participants_processed_in_parallel NUMBER_OF_PARTICIPANTS_PROCESSED_IN_PARALLEL]
                             [--mrtrix_random_seed MRTRIX_RANDOM_SEED]
@@ -89,7 +90,7 @@ Having the `py37cmp-gui` conda environment previously installed activated, the B
                             [--config_dir CONFIG_DIR]
                             bids_dir output_dir {participant,group}
 
-    Entrypoint script of the Connectome Mapper BIDS-App version v3.0.3 via Docker.
+    Entrypoint script of the Connectome Mapper BIDS-App version v3.1.0 via Docker.
     
     positional arguments:
       bids_dir              The directory with the input dataset formatted
@@ -119,14 +120,17 @@ Having the `py37cmp-gui` conda environment previously installed activated, the B
                             analyzed. Multiple sessions can be specified with a
                             space separated list.
       --anat_pipeline_config ANAT_PIPELINE_CONFIG
-                            Configuration .txt file for processing stages of the
+                            Configuration .json file for processing stages of the
                             anatomical MRI processing pipeline
       --dwi_pipeline_config DWI_PIPELINE_CONFIG
-                            Configuration .txt file for processing stages of the
+                            Configuration .json file for processing stages of the
                             diffusion MRI processing pipeline
       --func_pipeline_config FUNC_PIPELINE_CONFIG
-                            Configuration .txt file for processing stages of the
+                            Configuration .json file for processing stages of the
                             fMRI processing pipeline
+      --eeg_pipeline_config EEG_PIPELINE_CONFIG
+                            Configuration .json file for processing stages of the
+                            EEG processing pipeline
       --number_of_threads NUMBER_OF_THREADS
                             The number of OpenMP threads used for multi-threading
                             by Freesurfer (Set to [Number of available CPUs -1] by
