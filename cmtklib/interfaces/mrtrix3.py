@@ -1094,7 +1094,8 @@ class EstimateResponseForSH(CommandLine):
 
 class ConstrainedSphericalDeconvolutionInputSpec(CommandLineInputSpec):
     algorithm = traits.Enum('csd', 'msmt_csd', argstr='%s', mandatory=True, position=-4,
-                            desc='use CSD algorithm for FOD estimation')
+                            desc='Select the CSD algorithm to be use for FOD estimation'
+                            'Options are: csd (single shell single tissue) or msmt_csd (multi-shell multi-tissues)')
 
     in_file = File(exists=True, argstr='%s', mandatory=True,
                    position=-3, desc='diffusion-weighted image')
