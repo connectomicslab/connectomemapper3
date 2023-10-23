@@ -1093,8 +1093,14 @@ class EstimateResponseForSH(CommandLine):
 
 
 class ConstrainedSphericalDeconvolutionInputSpec(CommandLineInputSpec):
-    algorithm = traits.Enum('csd', 'msmt_csd', argstr='%s', mandatory=True, position=-4,
+   # algorithm = traits.Enum('csd', 'msmt_csd', argstr='%s', mandatory=True, position=-4,
+   #                         desc='Select the CSD algorithm to be use for FOD estimation'
+   #                         'Options are: csd (single shell single tissue) or msmt_csd (multi-shell multi-tissues)')
+
+   algorithm = traits.Enum('csd', argstr='%s', mandatory=True, position=-4,
                             desc='Select the CSD algorithm to be use for FOD estimation'
+   
+   
                             'Options are: csd (single shell single tissue) or msmt_csd (multi-shell multi-tissues)')
 
     in_file = File(exists=True, argstr='%s', mandatory=True,
