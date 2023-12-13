@@ -619,74 +619,153 @@ def create_mrtrix_recon_flow(config):
 
     # Constrained Spherical Deconvolution
     if config.local_model:
-        print("CSD true")
-        # Compute single fiber voxel mask
-        mrtrix_erode = pe.Node(
-            interface=Erode(out_filename="wm_mask_res_eroded.nii.gz"),
-            name="mrtrix_erode",
-        )
-        mrtrix_erode.inputs.number_of_passes = 1
-        mrtrix_erode.inputs.filtertype = "erode"
-        mrtrix_mul_eroded_FA = pe.Node(
-            interface=MRtrix_mul(), name="mrtrix_mul_eroded_FA"
-        )
-        mrtrix_mul_eroded_FA.inputs.out_filename = "diffusion_resampled_tensor_FA_masked.mif"
-        mrtrix_thr_FA = pe.Node(
-            interface=MRThreshold(out_file="FA_th.mif"), name="mrtrix_thr"
-        )
-        mrtrix_thr_FA.inputs.abs_value = config.single_fib_thr
-        # fmt:off
-        flow.connect(
+
+        ### Multi Tissue Spherical Deconvolution
+        if config.imaging_model=='multishell':
+
+            print("CSD true")
+            # Compute single fiber voxel mask
+            mrtrix_erode = pe.Node(
+                interface=Erode(out_filename="wm_mask_res_eroded.nii.gz"),
+                name="mrtrix_erode",
+            )
+            mrtrix_erode.inputs.number_of_passes = 1
+            mrtrix_erode.inputs.filtertype = "erode"
+            mrtrix_mul_eroded_FA = pe.Node(
+                interface=MRtrix_mul(), name="mrtrix_mul_eroded_FA"
+            )
+            mrtrix_mul_eroded_FA.inputs.out_filename = "diffusion_resampled_tensor_FA_masked.mif"
+            mrtrix_thr_FA = pe.Node(
+                interface=MRThreshold(out_file="FA_th.mif"), name="mrtrix_thr"
+            )
+            mrtrix_thr_FA.inputs.abs_value = config.single_fib_thr
+            # fmt:off
+            flow.connect(
+                [
+                    (inputnode, mrtrix_erode, [("wm_mask_resampled", "in_file")]),
+                    (mrtrix_erode, mrtrix_mul_eroded_FA, [("out_file", "input2")]),
+                    (mrtrix_tensor_metrics, mrtrix_mul_eroded_FA, [("out_fa", "input1")]),
+                    (mrtrix_mul_eroded_FA, mrtrix_thr_FA, [("out_file", "in_file")]),
+                ]
+            )
+            # fmt:on
+
+            # Compute multi tissue  response function
+            mrtrix_rf = pe.Node(interface=EstimateResponseForSH(), name="mrtrix_rf")
+            mrtrix_rf.inputs.maximum_harmonic_order = int(config.lmax_order)
+            mrtrix_rf.inputs.algorithm = "msmt_5tt"
+            # mrtrix_rf.inputs.normalise = config.normalize_to_B0
+            # fmt:off
+            flow.connect(
+                [
+                    (inputnode, mrtrix_rf, [("diffusion_resampled", "in_file")]),
+                    (mrtrix_thr_FA, mrtrix_rf, [("thresholded", "mask_image")]),
+                    (flip_table, mrtrix_rf, [("table", "encoding_file")]),
+                ]
+            )
+            # fmt:on
+
+        
+            # Perform multi tissue spherical deconvolution
+            mrtrix_CSD = pe.Node(
+                interface=ConstrainedSphericalDeconvolution(), name="mrtrix_CSD"
+            )
+            mrtrix_CSD.inputs.algorithm = "msmt_csd"
+            mrtrix_CSD.inputs.maximum_harmonic_order = int(config.lmax_order)
+            # mrtrix_CSD.inputs.normalise = config.normalize_to_B0
+
+            convert_CSD = pe.Node(
+                interface=MRConvert(out_filename="spherical_harmonics_image.nii.gz"),
+                name="convert_CSD",
+            )
+            # fmt:off
+            flow.connect(
             [
-                (inputnode, mrtrix_erode, [("wm_mask_resampled", "in_file")]),
-                (mrtrix_erode, mrtrix_mul_eroded_FA, [("out_file", "input2")]),
-                (mrtrix_tensor_metrics, mrtrix_mul_eroded_FA, [("out_fa", "input1")]),
-                (mrtrix_mul_eroded_FA, mrtrix_thr_FA, [("out_file", "in_file")]),
+                    (inputnode, mrtrix_CSD, [("diffusion_resampled", "in_file")]),
+                    (mrtrix_rf, mrtrix_CSD, [("response", "response_file")]),
+                    (mrtrix_rf, outputnode, [("response", "RF")]),
+                    (inputnode, mrtrix_CSD, [("wm_mask_resampled", "mask_image")]),
+                    (flip_table, mrtrix_CSD, [("table", "encoding_file")]),
+                    (mrtrix_CSD, convert_CSD, [("spherical_harmonics_image", "in_file")]),
+                    (convert_CSD, outputnode, [("converted", "DWI")])
+                    # (mrtrix_CSD,outputnode,[('spherical_harmonics_image','DWI')])
             ]
-        )
+            )
         # fmt:on
 
-        # Compute single fiber response function
-        mrtrix_rf = pe.Node(interface=EstimateResponseForSH(), name="mrtrix_rf")
-        mrtrix_rf.inputs.maximum_harmonic_order = int(config.lmax_order)
-        mrtrix_rf.inputs.algorithm = "tournier"
-        # mrtrix_rf.inputs.normalise = config.normalize_to_B0
-        # fmt:off
-        flow.connect(
-            [
-                (inputnode, mrtrix_rf, [("diffusion_resampled", "in_file")]),
-                (mrtrix_thr_FA, mrtrix_rf, [("thresholded", "mask_image")]),
-                (flip_table, mrtrix_rf, [("table", "encoding_file")]),
-            ]
-        )
-        # fmt:on
+        ### Single Tissue Spherical Deconvolution
+        else:
+            print("CSD true")
+            # Compute single fiber voxel mask
+            mrtrix_erode = pe.Node(
+                interface=Erode(out_filename="wm_mask_res_eroded.nii.gz"),
+                name="mrtrix_erode",
+            )
+            mrtrix_erode.inputs.number_of_passes = 1
+            mrtrix_erode.inputs.filtertype = "erode"
+            mrtrix_mul_eroded_FA = pe.Node(
+                interface=MRtrix_mul(), name="mrtrix_mul_eroded_FA"
+            )
+            mrtrix_mul_eroded_FA.inputs.out_filename = "diffusion_resampled_tensor_FA_masked.mif"
+            mrtrix_thr_FA = pe.Node(
+                interface=MRThreshold(out_file="FA_th.mif"), name="mrtrix_thr"
+            )
+            mrtrix_thr_FA.inputs.abs_value = config.single_fib_thr
+            # fmt:off
+            flow.connect(
+                [
+                    (inputnode, mrtrix_erode, [("wm_mask_resampled", "in_file")]),
+                    (mrtrix_erode, mrtrix_mul_eroded_FA, [("out_file", "input2")]),
+                    (mrtrix_tensor_metrics, mrtrix_mul_eroded_FA, [("out_fa", "input1")]),
+                    (mrtrix_mul_eroded_FA, mrtrix_thr_FA, [("out_file", "in_file")]),
+                ]
+            )
+            # fmt:on
 
-        # Perform spherical deconvolution
-        mrtrix_CSD = pe.Node(
-            interface=ConstrainedSphericalDeconvolution(), name="mrtrix_CSD"
-        )
-        mrtrix_CSD.inputs.algorithm = "csd"
-        mrtrix_CSD.inputs.maximum_harmonic_order = int(config.lmax_order)
-        # mrtrix_CSD.inputs.normalise = config.normalize_to_B0
+            # Compute single fiber response function
+            mrtrix_rf = pe.Node(interface=EstimateResponseForSH(), name="mrtrix_rf")
+            mrtrix_rf.inputs.maximum_harmonic_order = int(config.lmax_order)
+            mrtrix_rf.inputs.algorithm = "tournier"
+            # mrtrix_rf.inputs.normalise = config.normalize_to_B0
+            # fmt:off
+            flow.connect(
+                [
+                    (inputnode, mrtrix_rf, [("diffusion_resampled", "in_file")]),
+                    (mrtrix_thr_FA, mrtrix_rf, [("thresholded", "mask_image")]),
+                    (flip_table, mrtrix_rf, [("table", "encoding_file")]),
+                ]
+            )
+            # fmt:on
 
-        convert_CSD = pe.Node(
-            interface=MRConvert(out_filename="spherical_harmonics_image.nii.gz"),
-            name="convert_CSD",
-        )
-        # fmt:off
-        flow.connect(
+        
+            # Perform spherical deconvolution
+            mrtrix_CSD = pe.Node(
+                interface=ConstrainedSphericalDeconvolution(), name="mrtrix_CSD"
+            )
+            mrtrix_CSD.inputs.algorithm = "msmt_csd"
+            mrtrix_CSD.inputs.maximum_harmonic_order = int(config.lmax_order)
+            # mrtrix_CSD.inputs.normalise = config.normalize_to_B0
+
+            convert_CSD = pe.Node(
+                interface=MRConvert(out_filename="spherical_harmonics_image.nii.gz"),
+                name="convert_CSD",
+            )
+            # fmt:off
+            flow.connect(
             [
-                (inputnode, mrtrix_CSD, [("diffusion_resampled", "in_file")]),
-                (mrtrix_rf, mrtrix_CSD, [("response", "response_file")]),
-                (mrtrix_rf, outputnode, [("response", "RF")]),
-                (inputnode, mrtrix_CSD, [("wm_mask_resampled", "mask_image")]),
-                (flip_table, mrtrix_CSD, [("table", "encoding_file")]),
-                (mrtrix_CSD, convert_CSD, [("spherical_harmonics_image", "in_file")]),
-                (convert_CSD, outputnode, [("converted", "DWI")])
-                # (mrtrix_CSD,outputnode,[('spherical_harmonics_image','DWI')])
-            ]
-        )
-        # fmt:on
+                    (inputnode, mrtrix_CSD, [("diffusion_resampled", "in_file")]),
+                    (mrtrix_rf, mrtrix_CSD, [("response", "response_file")]),
+                    (mrtrix_rf, outputnode, [("response", "RF")]),
+                    (inputnode, mrtrix_CSD, [("wm_mask_resampled", "mask_image")]),
+                    (flip_table, mrtrix_CSD, [("table", "encoding_file")]),
+                    (mrtrix_CSD, convert_CSD, [("spherical_harmonics_image", "in_file")]),
+                    (convert_CSD, outputnode, [("converted", "DWI")])
+                    # (mrtrix_CSD,outputnode,[('spherical_harmonics_image','DWI')])
+                ]
+            )
+            # fmt:on
+
+
     else:
         # fmt:off
         flow.connect(

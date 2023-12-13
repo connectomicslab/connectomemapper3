@@ -1056,7 +1056,12 @@ class EstimateResponseForSHInputSpec(CommandLineInputSpec):
 
 class EstimateResponseForSHOutputSpec(TraitedSpec):
     response = File(exists=True, desc='Spherical harmonics image')
-
+    response_wm = File(exists=True, desc='WM Spherical harmonics image')
+    response_gm = File(exists=True, desc='GM Spherical harmonics image')
+    response_csf = File(exists=True, desc='CSF Spherical harmonics image')
+    # response_wm (in case of single tissue, response_wm only)
+    # response_gm
+    # response_csf
 
 class EstimateResponseForSH(CommandLine):
     """Estimates the fibre response function for use in spherical deconvolution using `dwi2response`.
@@ -1093,21 +1098,28 @@ class EstimateResponseForSH(CommandLine):
 
 
 class ConstrainedSphericalDeconvolutionInputSpec(CommandLineInputSpec):
-   # algorithm = traits.Enum('csd', 'msmt_csd', argstr='%s', mandatory=True, position=-4,
+    algorithm = traits.Enum('csd', 'msmt_csd', argstr='%s', mandatory=True, position=-4,
+                        desc='Select the CSD algorithm to be use for FOD estimation'
+                        'Options are: csd (single shell single tissue) or msmt_csd (multi-shell multi-tissues)')
+
+   # algorithm = traits.Enum('csd', argstr='%s', mandatory=True, position=-4,
    #                         desc='Select the CSD algorithm to be use for FOD estimation'
    #                         'Options are: csd (single shell single tissue) or msmt_csd (multi-shell multi-tissues)')
-
-   algorithm = traits.Enum('csd', argstr='%s', mandatory=True, position=-4,
-                            desc='Select the CSD algorithm to be use for FOD estimation'
-   
-   
-                            'Options are: csd (single shell single tissue) or msmt_csd (multi-shell multi-tissues)')
 
     in_file = File(exists=True, argstr='%s', mandatory=True,
                    position=-3, desc='diffusion-weighted image')
 
     response_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
                          desc='the diffusion-weighted signal response function for a single fibre population (see EstimateResponse)')
+    
+    response_wm_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
+                         desc='the diffusion-weighted signal response function for a single fibre population WM (see EstimateResponse)')
+    
+    response_gm_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
+                         desc='the diffusion-weighted signal response function for a single fibre population GM (see EstimateResponse)')
+
+    response_csf_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
+                         desc='the diffusion-weighted signal response function for a single fibre population CSF (see EstimateResponse)')
 
     out_filename = File(genfile=True, argstr='%s',
                         position=-1, desc='Output filename')
