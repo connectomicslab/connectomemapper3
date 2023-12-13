@@ -659,7 +659,6 @@ def create_mrtrix_recon_flow(config):
             flow.connect(
                 [
                     (inputnode, mrtrix_rf, [("diffusion_resampled", "in_file")]),
-                    (mrtrix_thr_FA, mrtrix_rf, [("thresholded", "mask_image")]),
                     (flip_table, mrtrix_rf, [("table", "encoding_file")]),
                 ]
             )
@@ -674,9 +673,17 @@ def create_mrtrix_recon_flow(config):
             mrtrix_CSD.inputs.maximum_harmonic_order = int(config.lmax_order)
             # mrtrix_CSD.inputs.normalise = config.normalize_to_B0
 
-            convert_CSD = pe.Node(
-                interface=MRConvert(out_filename="spherical_harmonics_image.nii.gz"),
-                name="convert_CSD",
+            convert_wm_CSD = pe.Node(
+                interface=MRConvert(out_filename="wm_spherical_harmonics_image.nii.gz"),
+                name="convert_wm_CSD",
+            )
+            convert_gm_CSD = pe.Node(
+                interface=MRConvert(out_filename="gm_spherical_harmonics_image.nii.gz"),
+                name="convert_gm_CSD",
+            )
+            convert_csf_CSD = pe.Node(
+                interface=MRConvert(out_filename="csf_spherical_harmonics_image.nii.gz"),
+                name="convert_csf_CSD",
             )
             # fmt:off
             flow.connect(
@@ -684,9 +691,10 @@ def create_mrtrix_recon_flow(config):
                     (inputnode, mrtrix_CSD, [("diffusion_resampled", "in_file")]),
                     (mrtrix_rf, mrtrix_CSD, [("response", "response_file")]),
                     (mrtrix_rf, outputnode, [("response", "RF")]),
-                    (inputnode, mrtrix_CSD, [("wm_mask_resampled", "mask_image")]),
                     (flip_table, mrtrix_CSD, [("table", "encoding_file")]),
-                    (mrtrix_CSD, convert_CSD, [("spherical_harmonics_image", "in_file")]),
+                    (mrtrix_CSD, convert_CSD, [("wm_spherical_harmonics_image", "in_file")]),
+                    (mrtrix_CSD, convert_CSD, [("gm_spherical_harmonics_image", "in_file")]),
+                    (mrtrix_CSD, convert_CSD, [("csf_spherical_harmonics_image", "in_file")]),
                     (convert_CSD, outputnode, [("converted", "DWI")])
                     # (mrtrix_CSD,outputnode,[('spherical_harmonics_image','DWI')])
             ]
