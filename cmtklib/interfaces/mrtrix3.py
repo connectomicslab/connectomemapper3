@@ -1024,7 +1024,7 @@ class Tensor2Vector(CommandLine):
         return name + '_vector.mif'
 
 
-class EstimateResponseForSHInputSpec(CommandLineInputSpec):
+class EstimateResponseForSHSingleTissueInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True,
                    position=2, desc='Diffusion-weighted images')
 
@@ -1054,16 +1054,11 @@ class EstimateResponseForSHInputSpec(CommandLineInputSpec):
     debug = traits.Bool(argstr='-debug', desc='Display debugging messages.')
 
 
-class EstimateResponseForSHOutputSpec(TraitedSpec):
+class EstimateResponseForSHSingleTissueOutputSpec(TraitedSpec):
     response = File(exists=True, desc='Spherical harmonics image')
-    response_wm = File(exists=True, desc='WM Spherical harmonics image')
-    response_gm = File(exists=True, desc='GM Spherical harmonics image')
-    response_csf = File(exists=True, desc='CSF Spherical harmonics image')
-    # response_wm (in case of single tissue, response_wm only)
-    # response_gm
-    # response_csf
 
-class EstimateResponseForSH(CommandLine):
+
+class EstimateResponseForSHSingleTissue(CommandLine):
     """Estimates the fibre response function for use in spherical deconvolution using `dwi2response`.
 
     Example
@@ -1078,8 +1073,8 @@ class EstimateResponseForSH(CommandLine):
     """
 
     _cmd = 'dwi2response'
-    input_spec = EstimateResponseForSHInputSpec
-    output_spec = EstimateResponseForSHOutputSpec
+    input_spec = EstimateResponseForSHSingleTissueInputSpec
+    output_spec = EstimateResponseForSHSingleTissueOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -1097,7 +1092,88 @@ class EstimateResponseForSH(CommandLine):
         return name + '_ER.mif'
 
 
-class ConstrainedSphericalDeconvolutionInputSpec(CommandLineInputSpec):
+class EstimateResponseForSHMultiTissueInputSpec(CommandLineInputSpec):
+    in_file = File(exists=True, argstr='%s', mandatory=True,
+                   position=2, desc='Diffusion-weighted images')
+    
+    in_5tt_file = File(exists=True, argstr='%s', mandatory=True,
+                   position=3, desc='Diffusion-weighted images')
+
+    algorithm = traits.Enum('dhollander', 'fa', 'manual', 'msmt_5tt', 'tax', 'tournier', argstr='%s', position=1,
+                            desc='Select the algorithm to be used to derive the response function; '
+                            'additional details and options become available once an algorithm is nominated. '
+                            'Options are: dhollander, fa, manual, msmt_5tt, tax, tournier')
+
+    out_filename = File(genfile=True, argstr='%s',
+                        position=4, desc='Output filename')
+    out_gm_filename = File(genfile=True, argstr='%s',
+                        position=5, desc='Output filename')
+    out_csf_filename = File(genfile=True, argstr='%s',
+                        position=6, desc='Output filename')
+
+    encoding_file = File(exists=True, argstr='-grad %s', mandatory=True, position=-2,
+                         desc='Gradient encoding, supplied as a 4xN text file with each line is in the format [ X Y Z b ], '
+                         'where [ X Y Z ] describe the direction of the applied gradient, and b gives the b-value in units (1000 s/mm^2). '
+                         'See FSL2MRTrix')
+    maximum_harmonic_order = traits.Int(argstr='-lmax %s', position=-3,
+                                        desc='set the maximum harmonic order for the output series. '
+                                        'By default, the program will use the highest possible lmax given the number of diffusion-weighted images.')
+    # normalise = traits.Bool(argstr='-normalise', desc='normalise the DW signal to the b=0 image')
+
+    quiet = traits.Bool(
+        argstr='-quiet', desc='Do not display information messages or progress status.')
+
+    debug = traits.Bool(argstr='-debug', desc='Display debugging messages.')
+
+
+class EstimateResponseForSHMultiTissueOutputSpec(TraitedSpec):
+    response = File(exists=True, desc='WM Spherical harmonics image')
+    response_gm = File(exists=True, desc='GM Spherical harmonics image')
+    response_csf = File(exists=True, desc='CSF Spherical harmonics image')
+
+
+class EstimateResponseForSHMultiTissue(CommandLine):
+    """Estimates the fibre response function for use in spherical deconvolution using `dwi2response`.
+
+    Example
+    -------
+    >>> import cmtklib.interfaces.mrtrix3 as mrt
+    >>> estresp = mrt.EstimateResponseForSH()
+    >>> estresp.inputs.in_file = 'dwi.mif'
+    >>> estresp.inputs.mask_image = 'dwi_WMProb.mif'
+    >>> estresp.inputs.encoding_file = 'encoding.txt'
+    >>> estresp.run()  # doctest: +SKIP
+
+    """
+
+    _cmd = 'dwi2response'
+    input_spec = EstimateResponseForSHMultiTissueInputSpec
+    output_spec = EstimateResponseForSHMultiTissueOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['response'] = op.abspath(self._gen_outfilename()[0])
+        outputs['response_gm'] = op.abspath(self._gen_outfilename()[1])
+        outputs['response_csf'] = op.abspath(self._gen_outfilename()[2])
+        return outputs
+
+    def _gen_filename(self, name):
+        if name is 'out_filename':
+            return self._gen_outfilename()[0]
+        elif name is 'out_gm_filename':
+            return self._gen_outfilename()[1] 
+        else:
+            return self._gen_outfilename()[2]
+
+    def _gen_outfilename(self):
+        _, name, _ = split_filename(self.inputs.in_file)
+        out_wm = name + '_ER.txt'
+        out_gm = name + '_ER_gm.txt'
+        out_csf = name + '_ER_csf.txt'
+        return  out_wm, out_gm, out_csf
+
+
+class ConstrainedSphericalDeconvolutionSingleTissueInputSpec(CommandLineInputSpec):
     algorithm = traits.Enum('csd', 'msmt_csd', argstr='%s', mandatory=True, position=-4,
                         desc='Select the CSD algorithm to be use for FOD estimation'
                         'Options are: csd (single shell single tissue) or msmt_csd (multi-shell multi-tissues)')
@@ -1111,16 +1187,7 @@ class ConstrainedSphericalDeconvolutionInputSpec(CommandLineInputSpec):
 
     response_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
                          desc='the diffusion-weighted signal response function for a single fibre population (see EstimateResponse)')
-    
-    response_wm_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
-                         desc='the diffusion-weighted signal response function for a single fibre population WM (see EstimateResponse)')
-    
-    response_gm_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
-                         desc='the diffusion-weighted signal response function for a single fibre population GM (see EstimateResponse)')
-
-    response_csf_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
-                         desc='the diffusion-weighted signal response function for a single fibre population CSF (see EstimateResponse)')
-
+ 
     out_filename = File(genfile=True, argstr='%s',
                         position=-1, desc='Output filename')
 
@@ -1158,12 +1225,12 @@ class ConstrainedSphericalDeconvolutionInputSpec(CommandLineInputSpec):
     # normalise = traits.Bool(argstr='-normalise', position=3, desc="normalise the DW signal to the b=0 image")
 
 
-class ConstrainedSphericalDeconvolutionOutputSpec(TraitedSpec):
+class ConstrainedSphericalDeconvolutionSingleTissueOutputSpec(TraitedSpec):
     spherical_harmonics_image = File(
         exists=True, desc='Spherical harmonics image')
 
 
-class ConstrainedSphericalDeconvolution(CommandLine):
+class ConstrainedSphericalDeconvolutionSingleTissue(CommandLine):
     """Perform non-negativity constrained spherical deconvolution using `dwi2fod`.
 
     Note that this program makes use of implied symmetries in the diffusion profile.
@@ -1195,8 +1262,8 @@ class ConstrainedSphericalDeconvolution(CommandLine):
     """
 
     _cmd = 'dwi2fod'
-    input_spec = ConstrainedSphericalDeconvolutionInputSpec
-    output_spec = ConstrainedSphericalDeconvolutionOutputSpec
+    input_spec = ConstrainedSphericalDeconvolutionSingleTissueInputSpec
+    output_spec = ConstrainedSphericalDeconvolutionSingleTissueOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -1213,6 +1280,141 @@ class ConstrainedSphericalDeconvolution(CommandLine):
     def _gen_outfilename(self):
         _, name, _ = split_filename(self.inputs.in_file)
         return name + '_CSD.mif'
+
+
+class ConstrainedSphericalDeconvolutionMultiTissueInputSpec(CommandLineInputSpec):
+    algorithm = traits.Enum('csd', 'msmt_csd', argstr='%s', mandatory=True, position=0,
+                        desc='Select the CSD algorithm to be use for FOD estimation'
+                        'Options are: csd (single shell single tissue) or msmt_csd (multi-shell multi-tissues)')
+
+   # algorithm = traits.Enum('csd', argstr='%s', mandatory=True, position=-4,
+   #                         desc='Select the CSD algorithm to be use for FOD estimation'
+   #                         'Options are: csd (single shell single tissue) or msmt_csd (multi-shell multi-tissues)')
+
+    in_file = File(exists=True, argstr='%s', mandatory=True,
+                   position=1, desc='diffusion-weighted image')
+
+    
+    response_file = File(exists=True, argstr='%s', mandatory=True, position=2,
+                         desc='the diffusion-weighted signal response function for a single fibre population WM (see EstimateResponse)')
+    
+    response_gm_file = File(exists=True, argstr='%s', mandatory=True, position=4,
+                         desc='the diffusion-weighted signal response function for a single fibre population GM (see EstimateResponse)')
+
+    response_csf_file = File(exists=True, argstr='%s', mandatory=True, position=6,
+                         desc='the diffusion-weighted signal response function for a single fibre population CSF (see EstimateResponse)')
+
+    out_wm_filename = File(genfile=True, argstr='%s',
+                        position=3, desc='Output filename')
+
+    out_gm_filename = File(genfile=True, argstr='%s',
+                        position=5, desc='Output filename')
+    
+    out_csf_filename = File(genfile=True, argstr='%s',
+                        position=7, desc='Output filename')
+    
+    mask_image = File(exists=True, argstr='-mask %s', position=2,
+                      desc='only perform computation within the specified binary brain mask image')
+
+    encoding_file = File(exists=True, argstr='-grad %s', position=8,
+                         desc='Gradient encoding, supplied as a 4xN text file with each line is in the format [ X Y Z b ], '
+                         'where [ X Y Z ] describe the direction of the applied gradient, and b gives the b-value in units (1000 s/mm^2). '
+                         'See FSL2MRTrix')
+
+    filter_file = File(exists=True, argstr='-filter %s', position=-2,
+                       desc='a text file containing the filtering coefficients for each even harmonic order.'
+                            'the linear frequency filtering parameters used for the initial linear spherical deconvolution step (default = [ 1 1 1 0 0 ]).')
+
+    lambda_value = traits.Float(argstr='-norm_lambda %s',
+                                desc='the regularisation parameter lambda that controls the strength of the constraint (default = 1.0).')
+
+    maximum_harmonic_order = traits.Int(argstr='-lmax %s',
+                                        desc='set the maximum harmonic order for the output series. '
+                                        'By default, the program will use the highest possible lmax given the number of diffusion-weighted images.')
+
+    threshold_value = traits.Float(argstr='-threshold %s',
+                                   desc='the threshold below which the amplitude of the FOD is assumed to be zero, '
+                                   'expressed as a fraction of the mean value of the initial FOD (default = 0.1)')
+
+    iterations = traits.Int(argstr='-niter %s',
+                            desc='the maximum number of iterations to perform for each voxel (default = 50)')
+
+    directions_file = File(exists=True, argstr='-directions %s', position=-2,
+                           desc='a text file containing the [ el az ] pairs for the directions: '
+                           'Specify the directions over which to apply the non-negativity constraint '
+                           '(by default, the built-in 300 direction set is used)')
+
+    # normalise = traits.Bool(argstr='-normalise', position=3, desc="normalise the DW signal to the b=0 image")
+
+
+class ConstrainedSphericalDeconvolutionMultiTissueOutputSpec(TraitedSpec):
+    
+    CSD = File(exists=True, desc='WM Spherical harmonics image')
+    CSD_gm = File(exists=True, desc='GM Spherical harmonics image')
+    CSD_csf = File(exists=True, desc='CSF Spherical harmonics image')
+
+
+
+
+
+class ConstrainedSphericalDeconvolutionMultiTissue(CommandLine):
+    """Perform non-negativity constrained spherical deconvolution using `dwi2fod`.
+
+    Note that this program makes use of implied symmetries in the diffusion profile.
+    First, the fact the signal attenuation profile is real implies that it has conjugate symmetry,
+    i.e. Y(l,-m) = Y(l,m)* (where * denotes the complex conjugate). Second, the diffusion profile should be
+    antipodally symmetric (i.e. S(x) = S(-x)), implying that all odd l components should be zero.
+    Therefore, this program only computes the even elements. 	Note that the spherical harmonics equations used here
+    differ slightly from those conventionally used, in that the (-1)^m factor has been omitted. This should be taken
+    into account in all subsequent calculations. Each volume in the output image corresponds to a different spherical
+    harmonic component, according to the following convention:
+
+    * [0] Y(0,0)
+    * [1] Im {Y(2,2)}
+    * [2] Im {Y(2,1)}
+    * [3] Y(2,0)
+    * [4] Re {Y(2,1)}
+    * [5] Re {Y(2,2)}
+    * [6] Im {Y(4,4)}
+    * [7] Im {Y(4,3)}
+
+
+    Example
+    -------
+    >>> import cmtklib.interfaces.mrtrix3 as mrt
+    >>> csdeconv = mrt.ConstrainedSphericalDeconvolution()
+    >>> csdeconv.inputs.in_file = 'dwi.mif'
+    >>> csdeconv.inputs.encoding_file = 'encoding.txt'
+    >>> csdeconv.run()                                          # doctest: +SKIP
+    """
+
+    _cmd = 'dwi2fod'
+    input_spec = ConstrainedSphericalDeconvolutionMultiTissueInputSpec
+    output_spec = ConstrainedSphericalDeconvolutionMultiTissueOutputSpec
+
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['CSD'] = op.abspath(self._gen_outfilename()[0])
+        outputs['CSD_gm'] = op.abspath(self._gen_outfilename()[1])
+        outputs['CSD_csf'] = op.abspath(self._gen_outfilename()[2])
+        return outputs
+
+    def _gen_filename(self, name):
+        if name is 'out_wm_filename':
+            return self._gen_outfilename()[0]
+        elif name is 'out_gm_filename':
+            return self._gen_outfilename()[1] 
+        else:
+            return self._gen_outfilename()[2]
+
+    def _gen_outfilename(self):
+        _, name, _ = split_filename(self.inputs.in_file)
+        out_wm = name + '_CSD.mif'
+        out_gm = name + '_CSD_gm.mif'
+        out_csf = name + '_CSD_csf.mif'
+        return  out_wm, out_gm, out_csf
+
 
 
 class Generate5ttInputSpec(CommandLineInputSpec):

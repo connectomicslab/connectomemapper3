@@ -858,15 +858,15 @@ class MainWindowHandler(Handler):
                                     "DTI" in loaded_project.dmri_bids_acq
                                 ):
                                     loaded_project.diffusion_imaging_model = "DTI"
-                                elif ("hardi" in loaded_project.dmri_bids_acq) or (
-                                    "HARDI" in loaded_project.dmri_bids_acq
+                                elif ("HARDI" in loaded_project.dmri_bids_acq) or (
+                                    "HARDI_singleTissue" in loaded_project.dmri_bids_acq
                                 ):
-                                    loaded_project.diffusion_imaging_model = "HARDI"
-                                elif ("multishell" in loaded_project.dmri_bids_acq) or (
-                                    "MULTISHELL" in loaded_project.dmri_bids_acq
+                                    loaded_project.diffusion_imaging_model = "HARDI_singleTissue"
+                                elif ("HARDI_multiTissue" in loaded_project.dmri_bids_acq) or (
+                                    "multishell" in loaded_project.dmri_bids_acq
                                 ):
                                     loaded_project.diffusion_imaging_model = (
-                                        "multishell"
+                                        "HARDI_multiTissue"
                                     )
                                 else:
                                     loaded_project.diffusion_imaging_model = "DTI"

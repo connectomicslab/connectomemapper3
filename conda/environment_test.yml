@@ -1,0 +1,40 @@
+name: test_cmp
+
+channels:
+    - conda-forge
+    - mrtrix3
+
+dependencies:
+    - python=3.9
+    - pip=22.2
+    - graphviz=2.50.0
+    - dipy=1.3.0
+    - fsleyes=1.3.3
+    - indexed_gzip
+    - mrtrix3=3.0.3
+    - git-annex=10.20220724
+    - qt=5.15.4
+    - pyqt=5.15.4
+    - pyqt5-sip=12.9.0
+
+    - pip:
+          - numpy==1.21.6
+          - matplotlib==3.5.2
+          - configparser==5.2.0
+          - nibabel==3.2.2
+          - nipype==1.8.0
+          - traits==6.3.2
+          - traitsui==7.2.0
+          - duecredit==0.9.1
+          - obspy==1.2.2
+          - mne==0.24.1
+          - mne_connectivity==0.3
+          - datalad[full]==0.17.2
+          - datalad-container==1.1.6
+          - datalad-neuroimaging==0.3.1
+          - pybids==0.14.0
+          - statsmodels==0.13.1
+          - networkx==2.6.3
+          - pydicom==2.2.2
+          - pycartool==0.1.1
+          - pyface==7.4.4

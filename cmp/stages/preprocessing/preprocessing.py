@@ -189,6 +189,7 @@ class PreprocessingStage(Stage):
             "dwi_brain_mask",
             "T1",
             "act_5TT",
+            "in_5tt_orig",
             "gmwmi",
             "brain",
             "brain_mask",
@@ -987,6 +988,7 @@ class PreprocessingStage(Stage):
                 [
                     (processing_input, mrtrix_5tt, [("aparc_aseg", "in_file")]),
                     (mrtrix_5tt, fs_mriconvert_5tt, [("out_file", "in_file")]),
+                    (mrtrix_5tt, outputnode, [("out_file", "in_5tt_orig")]),
                     (fs_mriconvert_5tt, outputnode, [("out_file", "act_5TT")]),
                 ]
             )

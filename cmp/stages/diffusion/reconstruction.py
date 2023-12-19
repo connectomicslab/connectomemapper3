@@ -23,8 +23,10 @@ from cmtklib.interfaces.mrtrix3 import (
     MRtrix_mul,
     MRThreshold,
     MRConvert,
-    EstimateResponseForSH,
-    ConstrainedSphericalDeconvolution,
+    EstimateResponseForSHSingleTissue,
+    EstimateResponseForSHMultiTissue,
+    ConstrainedSphericalDeconvolutionSingleTissue,
+    ConstrainedSphericalDeconvolutionMultiTissue,
     DWI2Tensor,
     Tensor2Vector,
 )
@@ -37,7 +39,6 @@ from cmtklib.interfaces.dipy import DTIEstimateResponseSH, CSD, SHORE, MAPMRI
 
 
 iflogger = logging.getLogger("nipype.interface")
-
 
 class DipyReconConfig(HasTraits):
     """Class used to store Dipy diffusion reconstruction sub-workflow configuration parameters.
@@ -133,7 +134,7 @@ class DipyReconConfig(HasTraits):
     flip_table_axis = List(["x", "y", "z"])
     # gradient_table = File
     local_model_editor = Dict(
-        {False: "1:Tensor", True: "2:Constrained Spherical Deconvolution"}
+        {False: "1:Tensor", True: "2:Constrained Spherical Deconvolution (single tissue)"}
     )
     local_model = Bool(True)
     lmax_order = Enum([2, 4, 6, 8, 10, 12, 14, 16])
@@ -208,11 +209,12 @@ class DipyReconConfig(HasTraits):
         elif new == "DTI":
             self.local_model_editor = {
                 False: "1:Tensor",
-                True: "2:Constrained Spherical Deconvolution",
+                True: "2:Constrained Spherical Deconvolution (single tissue)",
             }
-        elif new == "multishell" or new == "HARDI":
-            self.local_model_editor = {True: "Constrained Spherical Deconvolution"}
+        elif new == "HARDI_singleTissue" or new == "HARDI_multiTissue":
+            self.local_model_editor = {True: "2:Constrained Spherical Deconvolution (single tissue)"}
             self.local_model = True
+
 
     def _recon_mode_changed(self, new):
         """Update ``local_model_editor`` and ``self.local_model`` when ``recon_mode`` is updated.
@@ -222,17 +224,15 @@ class DipyReconConfig(HasTraits):
         new : string
             New value of ``recon_mode``
         """
-        if new == "Probabilistic" and self.imaging_model != "DSI":
-            self.local_model_editor = {True: "Constrained Spherical Deconvolution"}
-            self.local_model = True
-        elif new == "Probabilistic" and self.imaging_model == "DSI":
+
+        if new == "Probabilistic" and self.imaging_model == "DSI":
             pass
         else:
-            self.local_model_editor = {
-                False: "1:Tensor",
-                True: "2:Constrained Spherical Deconvolution",
-            }
-
+            pass
+            #self.local_model_editor = {
+            #    False: "1:Tensor",
+            #    True: "2:Constrained Spherical Deconvolution",
+            #}
 
 class MRtrixReconConfig(HasTraits):
     """Class used to store Dipy diffusion reconstruction sub-workflow configuration parameters.
@@ -259,16 +259,19 @@ class MRtrixReconConfig(HasTraits):
         Can be "Probabilistic" or "Deterministic"
     """
 
+    imaging_model = Str
     # gradient_table = File
     flip_table_axis = List(["x", "y", "z"])
     local_model_editor = Dict(
-        {False: "1:Tensor", True: "2:Constrained Spherical Deconvolution"}
+        {False: "1:Tensor", True: "2:Constrained Spherical Deconvolution (single tissue)",  False: "3:Constrained Spherical Deconvolution (multi tissues)"}
+
     )
     local_model = Bool(True)
     lmax_order = Enum([2, 4, 6, 8, 10, 12, 14, 16])
     normalize_to_B0 = Bool(False)
     single_fib_thr = Float(0.7, min=0, max=1)
     recon_mode = Str
+
 
     def _imaging_model_changed(self, new):
         """Update ``local_model_editor`` and ``self.local_model`` when ``imaging_model`` is updated.
@@ -277,15 +280,23 @@ class MRtrixReconConfig(HasTraits):
         ----------
         new : string
             New value of ``imaging_model``
-        """
+        """   
+
         if new == "DTI":
             self.local_model_editor = {
                 False: "1:Tensor",
-                True: "2:Constrained Spherical Deconvolution",
+                True: "2:Constrained Spherical Deconvolution (single tissue)",
             }
-        elif new == "multishell" or new == "HARDI":
-            self.local_model_editor = {True: "Constrained Spherical Deconvolution"}
+        elif new == "HARDI_singleTissue":
+            self.local_model_editor = {True: "2:Constrained Spherical Deconvolution (single tissue)"}
             self.local_model = True
+            
+
+        elif new == "HARDI_multiTissue":
+            self.local_model_editor = {True: "3:Constrained Spherical Deconvolution (multi tissues)"}
+            self.local_model = True
+
+    
 
     def _recon_mode_changed(self, new):
         """Update ``local_model_editor`` and ``self.local_model`` when ``recon_mode`` is updated.
@@ -295,14 +306,16 @@ class MRtrixReconConfig(HasTraits):
         new : string
             New value of ``recon_mode``
         """
-        if new == "Probabilistic":
-            self.local_model_editor = {True: "Constrained Spherical Deconvolution"}
-            self.local_model = True
-        else:
-            self.local_model_editor = {
-                False: "1:Tensor",
-                True: "2:Constrained Spherical Deconvolution",
-            }
+        #if new == "Probabilistic":
+        #    self.local_model_editor = {True: "Constrained Spherical Deconvolution"}
+        #    self.local_model = True
+        #else:
+        #    self.local_model_editor = {
+        #        False: "1:Tensor",
+        #        True: "2:Constrained Spherical Deconvolution",
+        #    }
+        pass
+
 
 
 def create_dipy_recon_flow(config):
@@ -328,6 +341,8 @@ def create_dipy_recon_flow(config):
                 "wm_mask_resampled",
                 "bvals",
                 "bvecs",
+                "act_5tt_registered",
+                "in_5tt_orig",
             ]
         ),
         name="inputnode",
@@ -539,7 +554,7 @@ def create_mrtrix_recon_flow(config):
     flow = pe.Workflow(name="reconstruction")
     inputnode = pe.Node(
         interface=util.IdentityInterface(
-            fields=["diffusion", "diffusion_resampled", "wm_mask_resampled", "grad"]
+            fields=["diffusion", "diffusion_resampled", "wm_mask_resampled", "grad", "act_5tt_registered", "in_5tt_orig"]
         ),
         name="inputnode",
     )
@@ -621,9 +636,10 @@ def create_mrtrix_recon_flow(config):
     if config.local_model:
 
         ### Multi Tissue Spherical Deconvolution
-        if config.imaging_model=='multishell':
+        if config.imaging_model=='HARDI_multiTissue':
 
             print("CSD true")
+
             # Compute single fiber voxel mask
             mrtrix_erode = pe.Node(
                 interface=Erode(out_filename="wm_mask_res_eroded.nii.gz"),
@@ -640,6 +656,7 @@ def create_mrtrix_recon_flow(config):
             )
             mrtrix_thr_FA.inputs.abs_value = config.single_fib_thr
             # fmt:off
+
             flow.connect(
                 [
                     (inputnode, mrtrix_erode, [("wm_mask_resampled", "in_file")]),
@@ -651,15 +668,16 @@ def create_mrtrix_recon_flow(config):
             # fmt:on
 
             # Compute multi tissue  response function
-            mrtrix_rf = pe.Node(interface=EstimateResponseForSH(), name="mrtrix_rf")
-            mrtrix_rf.inputs.maximum_harmonic_order = int(config.lmax_order)
+            mrtrix_rf = pe.Node(interface=EstimateResponseForSHMultiTissue(), name="mrtrix_rf")
+            #mrtrix_rf.inputs.maximum_harmonic_order = int(config.lmax_order)
             mrtrix_rf.inputs.algorithm = "msmt_5tt"
             # mrtrix_rf.inputs.normalise = config.normalize_to_B0
             # fmt:off
             flow.connect(
                 [
                     (inputnode, mrtrix_rf, [("diffusion_resampled", "in_file")]),
-                    (mrtrix_thr_FA, mrtrix_rf, [("thresholded", "mask_image")]),
+                    (inputnode, mrtrix_rf, [("in_5tt_orig", "in_5tt_file")]),
+                    #(mrtrix_thr_FA, mrtrix_rf, [("thresholded", "mask_image")]),
                     (flip_table, mrtrix_rf, [("table", "encoding_file")]),
                 ]
             )
@@ -668,10 +686,10 @@ def create_mrtrix_recon_flow(config):
         
             # Perform multi tissue spherical deconvolution
             mrtrix_CSD = pe.Node(
-                interface=ConstrainedSphericalDeconvolution(), name="mrtrix_CSD"
+                interface=ConstrainedSphericalDeconvolutionMultiTissue(), name="mrtrix_CSD"
             )
             mrtrix_CSD.inputs.algorithm = "msmt_csd"
-            mrtrix_CSD.inputs.maximum_harmonic_order = int(config.lmax_order)
+            #mrtrix_CSD.inputs.maximum_harmonic_order = int(config.lmax_order)
             # mrtrix_CSD.inputs.normalise = config.normalize_to_B0
 
             convert_CSD = pe.Node(
@@ -683,10 +701,13 @@ def create_mrtrix_recon_flow(config):
             [
                     (inputnode, mrtrix_CSD, [("diffusion_resampled", "in_file")]),
                     (mrtrix_rf, mrtrix_CSD, [("response", "response_file")]),
+                    (mrtrix_rf, mrtrix_CSD, [("response_gm", "response_gm_file")]),
+                    (mrtrix_rf, mrtrix_CSD, [("response_csf", "response_csf_file")]),
                     (mrtrix_rf, outputnode, [("response", "RF")]),
                     (inputnode, mrtrix_CSD, [("wm_mask_resampled", "mask_image")]),
                     (flip_table, mrtrix_CSD, [("table", "encoding_file")]),
-                    (mrtrix_CSD, convert_CSD, [("spherical_harmonics_image", "in_file")]),
+                    #(mrtrix_CSD, convert_CSD, [("spherical_harmonics_image", "in_file")]),
+                    (mrtrix_CSD, convert_CSD, [("CSD", "in_file")]),
                     (convert_CSD, outputnode, [("converted", "DWI")])
                     # (mrtrix_CSD,outputnode,[('spherical_harmonics_image','DWI')])
             ]
@@ -723,7 +744,7 @@ def create_mrtrix_recon_flow(config):
             # fmt:on
 
             # Compute single fiber response function
-            mrtrix_rf = pe.Node(interface=EstimateResponseForSH(), name="mrtrix_rf")
+            mrtrix_rf = pe.Node(interface=EstimateResponseForSHSingleTissue(), name="mrtrix_rf")
             mrtrix_rf.inputs.maximum_harmonic_order = int(config.lmax_order)
             mrtrix_rf.inputs.algorithm = "tournier"
             # mrtrix_rf.inputs.normalise = config.normalize_to_B0
@@ -740,9 +761,9 @@ def create_mrtrix_recon_flow(config):
         
             # Perform spherical deconvolution
             mrtrix_CSD = pe.Node(
-                interface=ConstrainedSphericalDeconvolution(), name="mrtrix_CSD"
+                interface=ConstrainedSphericalDeconvolutionSingleTissue(), name="mrtrix_CSD"
             )
-            mrtrix_CSD.inputs.algorithm = "msmt_csd"
+            mrtrix_CSD.inputs.algorithm = "csd"
             mrtrix_CSD.inputs.maximum_harmonic_order = int(config.lmax_order)
             # mrtrix_CSD.inputs.normalise = config.normalize_to_B0
 
