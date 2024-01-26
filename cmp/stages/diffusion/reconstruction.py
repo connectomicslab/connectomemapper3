@@ -676,11 +676,9 @@ def create_mrtrix_recon_flow(config):
             flow.connect(
                 [
                     (inputnode, mrtrix_rf, [("diffusion_resampled", "in_file")]),
-<<<<<<< HEAD
                     (inputnode, mrtrix_rf, [("in_5tt_orig", "in_5tt_file")]),
                     #(mrtrix_thr_FA, mrtrix_rf, [("thresholded", "mask_image")]),
-=======
->>>>>>> refs/remotes/origin/master
+
                     (flip_table, mrtrix_rf, [("table", "encoding_file")]),
                 ]
             )
@@ -716,14 +714,12 @@ def create_mrtrix_recon_flow(config):
                     (mrtrix_rf, mrtrix_CSD, [("response_csf", "response_csf_file")]),
                     (mrtrix_rf, outputnode, [("response", "RF")]),
                     (flip_table, mrtrix_CSD, [("table", "encoding_file")]),
-<<<<<<< HEAD
+
                     #(mrtrix_CSD, convert_CSD, [("spherical_harmonics_image", "in_file")]),
                     (mrtrix_CSD, convert_CSD, [("CSD", "in_file")]),
-=======
                     (mrtrix_CSD, convert_CSD, [("wm_spherical_harmonics_image", "in_file")]),
                     (mrtrix_CSD, convert_CSD, [("gm_spherical_harmonics_image", "in_file")]),
                     (mrtrix_CSD, convert_CSD, [("csf_spherical_harmonics_image", "in_file")]),
->>>>>>> refs/remotes/origin/master
                     (convert_CSD, outputnode, [("converted", "DWI")])
                     # (mrtrix_CSD,outputnode,[('spherical_harmonics_image','DWI')])
             ]
