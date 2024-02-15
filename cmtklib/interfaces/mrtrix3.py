@@ -1304,7 +1304,7 @@ class ConstrainedSphericalDeconvolutionMultiTissueInputSpec(CommandLineInputSpec
     response_csf_file = File(exists=True, argstr='%s', mandatory=True, position=6,
                          desc='the diffusion-weighted signal response function for a single fibre population CSF (see EstimateResponse)')
 
-    out_wm_filename = File(genfile=True, argstr='%s',
+    out_filename = File(genfile=True, argstr='%s',
                         position=3, desc='Output filename')
 
     out_gm_filename = File(genfile=True, argstr='%s',
@@ -1349,10 +1349,12 @@ class ConstrainedSphericalDeconvolutionMultiTissueInputSpec(CommandLineInputSpec
 
 class ConstrainedSphericalDeconvolutionMultiTissueOutputSpec(TraitedSpec):
     
-    CSD = File(exists=True, desc='WM Spherical harmonics image')
-    CSD_gm = File(exists=True, desc='GM Spherical harmonics image')
-    CSD_csf = File(exists=True, desc='CSF Spherical harmonics image')
-
+    #CSD = File(exists=True, desc='WM Spherical harmonics image')
+    #CSD_gm = File(exists=True, desc='GM Spherical harmonics image')
+    #CSD_csf = File(exists=True, desc='CSF Spherical harmonics image')
+    spherical_harmonics_image = File(exists=True, desc='WM Spherical harmonics image')
+    gm_spherical_harmonics_image = File(exists=True, desc='GM Spherical harmonics image')
+    csf_spherical_harmonics_image = File(exists=True, desc='CSF Spherical harmonics image')
 
 
 
@@ -1395,13 +1397,13 @@ class ConstrainedSphericalDeconvolutionMultiTissue(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['CSD'] = op.abspath(self._gen_outfilename()[0])
-        outputs['CSD_gm'] = op.abspath(self._gen_outfilename()[1])
-        outputs['CSD_csf'] = op.abspath(self._gen_outfilename()[2])
+        outputs['spherical_harmonics_image'] = op.abspath(self._gen_outfilename()[0])
+        outputs['gm_spherical_harmonics_image'] = op.abspath(self._gen_outfilename()[1])
+        outputs['csf_spherical_harmonics_image'] = op.abspath(self._gen_outfilename()[2])
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_wm_filename':
+        if name is 'out_filename':
             return self._gen_outfilename()[0]
         elif name is 'out_gm_filename':
             return self._gen_outfilename()[1] 

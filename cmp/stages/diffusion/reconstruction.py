@@ -693,9 +693,9 @@ def create_mrtrix_recon_flow(config):
             #mrtrix_CSD.inputs.maximum_harmonic_order = int(config.lmax_order)
             # mrtrix_CSD.inputs.normalise = config.normalize_to_B0
 
-            convert_wm_CSD = pe.Node(
-                interface=MRConvert(out_filename="wm_spherical_harmonics_image.nii.gz"),
-                name="convert_wm_CSD",
+            convert_CSD = pe.Node(
+                interface=MRConvert(out_filename="spherical_harmonics_image.nii.gz"),
+                name="convert_CSD",
             )
             convert_gm_CSD = pe.Node(
                 interface=MRConvert(out_filename="gm_spherical_harmonics_image.nii.gz"),
@@ -716,15 +716,17 @@ def create_mrtrix_recon_flow(config):
                     (flip_table, mrtrix_CSD, [("table", "encoding_file")]),
 
                     #(mrtrix_CSD, convert_CSD, [("spherical_harmonics_image", "in_file")]),
-                    (mrtrix_CSD, convert_CSD, [("CSD", "in_file")]),
-                    (mrtrix_CSD, convert_CSD, [("wm_spherical_harmonics_image", "in_file")]),
-                    (mrtrix_CSD, convert_CSD, [("gm_spherical_harmonics_image", "in_file")]),
-                    (mrtrix_CSD, convert_CSD, [("csf_spherical_harmonics_image", "in_file")]),
+                    #(mrtrix_CSD, convert_CSD, [("CSD", "in_file")]),
+                    (mrtrix_CSD, convert_CSD, [("spherical_harmonics_image", "in_file")]),
+                    (mrtrix_CSD, convert_gm_CSD, [("gm_spherical_harmonics_image", "in_file")]),
+                    (mrtrix_CSD, convert_csf_CSD, [("csf_spherical_harmonics_image", "in_file")]),
                     (convert_CSD, outputnode, [("converted", "DWI")])
                     # (mrtrix_CSD,outputnode,[('spherical_harmonics_image','DWI')])
             ]
             )
         # fmt:on
+
+            
 
         ### Single Tissue Spherical Deconvolution
         else:
