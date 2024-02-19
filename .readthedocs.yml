@@ -21,6 +21,8 @@ formats:
 # # Install the pymialsrtk conda environment with all dependencies required to build the doc
 # conda:
 #   environment: environment.yml
+build:
+  os: ubuntu-22.04
 
 # Optionally set the version of Python and requirements required to build your docs
 python:
