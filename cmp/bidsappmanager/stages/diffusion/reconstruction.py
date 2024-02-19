@@ -105,12 +105,14 @@ class MRtrix_recon_configUI(MRtrixReconConfig):
     flip_table_axis = List(editor=CheckListEditor(values=["x", "y", "z"], cols=3))
 
     traits_view = View(
-        Item("flip_table_axis", style="custom", label="Flip gradient table:"),
-        Item("local_model", editor=EnumEditor(name="local_model_editor")),
-        Group(
-            Item("lmax_order"),
-            # Item('normalize_to_B0'),
-            Item("single_fib_thr", label="FA threshold"),
-            visible_when="local_model",
-        ),
-    )
+            Item("flip_table_axis", style="custom", label="Flip gradient table:"),
+            Item("local_model", editor=EnumEditor(name="local_model_editor")),
+            Group(
+                Group(
+                    Item("lmax_order"),
+                    # Item('normalize_to_B0'),
+                    Item("single_fib_thr", label="FA threshold"),
+                    visible_when="local_model",
+                ),
+            visible_when='imaging_model != "HARDI_multiTissue"',
+            ))

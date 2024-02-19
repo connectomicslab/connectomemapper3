@@ -80,7 +80,7 @@ class ProjectInfo(HasTraits):
 
     diffusion_imaging_model : traits.Str
         Diffusion imaging model that can be
-        'DSI', 'DTI', 'HARDI' or 'multishell'
+        'DSI', 'DTI', 'HARDI_singleTissue' or 'HARDI_multiTissue'
 
     dmri_bids_acqs : traits.List
         List diffusion imaging models extracted from ``acq-<label>`` filename part.
@@ -228,7 +228,7 @@ class ProjectInfo(HasTraits):
     )
 
     # process_type = Enum('diffusion',['diffusion','fMRI'])
-    diffusion_imaging_model = Enum("DTI", ["DSI", "DTI", "HARDI", "multishell"])
+    diffusion_imaging_model = Enum("DTI", ["DSI", "DTI", "HARDI_singleTissue", "HARDI_multiTissue"])
     parcellation_scheme = Str("Lausanne2018")
     atlas_info = Dict()
     freesurfer_subjects_dir = Str("")
