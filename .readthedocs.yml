@@ -1,3 +1,6 @@
+It looks like there is a small indentation issue in your configuration. The `install` list should be at the same indentation level as the `python` key. Here's the corrected version:
+
+```yaml
 # .readthedocs.yml
 # Read the Docs configuration file
 # See https://docs.readthedocs.io/en/stable/config-file/v2.html for details
@@ -25,8 +28,11 @@ build:
   os: ubuntu-22.04
   tools:
     # Optionally set the version of Python and requirements required to build your docs
-    python: "3.7" 
-      install: 
-        - requirements: docs/requirements.txt 
-        - method: setuptools 
-          path: .
+    python: "3.7"
+    install:
+      - requirements: docs/requirements.txt 
+      - method: setuptools 
+        path: .
+```
+
+In this corrected version, the `install` list is properly indented under the `python` key. Please use this corrected version in your `.readthedocs.yml` file, and it should resolve the configuration validation error.
