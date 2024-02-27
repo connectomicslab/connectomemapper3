@@ -25,8 +25,7 @@ formats:
 build:
   os: ubuntu-22.04
   tools:
-    python:
-      version: 3.7
+    python: 3.7
    install:
       - requirements: docs/requirements.txt
       - method: setuptools
