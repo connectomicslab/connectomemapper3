@@ -5,7 +5,7 @@ BSD 3-Clause License
 
 Copyright (C) 2009-2022, Ecole Polytechnique Fédérale de Lausanne (EPFL) and
 Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland, & Contributors,
-All rights reserved.
+All rights reserved.  
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
