@@ -25,9 +25,10 @@ formats:
 build:  
   os: ubuntu-22.04
 # Optionally set the version of Python and requirements required to build your docs
-python:
-  version: 3.7
-  install:
-    - requirements: docs/requirements.txt
-    - method: setuptools
-      path: .
+  tools:
+    python:
+      version: 3.7
+      install:
+        - requirements: docs/requirements.txt
+        - method: setuptools
+          path: .
