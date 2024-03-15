@@ -1102,12 +1102,14 @@ class DiffusionPipeline(Pipeline):
                 )
                 # fmt:on
 
+
         if self.stages["Diffusion"].enabled:
             diff_flow = self.create_stage_flow("Diffusion")
             # fmt:off
             diffusion_flow.connect(
                 [
-                    (preproc_flow, diff_flow, [("outputnode.diffusion_preproc", "inputnode.diffusion")]),
+                    (preproc_flow, diff_flow, [("outputnode.diffusion_preproc", "inputnode.diffusion"),
+                                               ("outputnode.in_5tt_orig", "inputnode.in_5tt_orig")],),
                     (reg_flow, diff_flow, [("outputnode.wm_mask_registered_crop", "inputnode.wm_mask_registered",),
                                            ("outputnode.brain_mask_registered_crop", "inputnode.brain_mask_registered",),
                                            ("outputnode.partial_volumes_registered_crop", "inputnode.partial_volumes",),

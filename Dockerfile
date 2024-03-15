@@ -15,7 +15,7 @@ COPY docker/files/neurodebian.gpg /root/.neurodebian.gpg
 ##################################################################
 RUN apt-get update && \
     apt-get install software-properties-common -y && \
-    apt-get install -qq -y --no-install-recommends bc \
+    apt-get install -qq -y --no-install-recommends bc build-essential \
     locales libstdc++6 npm curl perl gzip bzip2 xvfb liblzma-dev locate exfat-fuse exfat-utils default-jre && \
     curl -sSL http://neuro.debian.net/lists/xenial.us-ca.full >> /etc/apt/sources.list.d/neurodebian.sources.list && \
     apt-key add /root/.neurodebian.gpg && \

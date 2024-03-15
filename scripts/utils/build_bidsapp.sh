@@ -16,6 +16,7 @@
 UTILSDIR=$(cd "$(dirname "$0")"; pwd)
 SCRIPTSDIR="$(dirname "$UTILSDIR")"
 BASEDIR="$(dirname "$SCRIPTSDIR")"
+cd $BASEDIR
 
 # Get the current date and time
 CMP_BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
