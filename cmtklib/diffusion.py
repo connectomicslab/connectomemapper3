@@ -8,7 +8,7 @@
 
 import os
 import subprocess
-
+import pandas
 import nibabel as nib
 import numpy as np
 import nibabel.trackvis as tv

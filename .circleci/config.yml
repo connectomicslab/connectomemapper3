@@ -1964,7 +1964,6 @@ workflows:
             - build_docker
           filters:
             branches:
-            - enh/*
               ignore:
                 - /docs?\/.*/
                 - paper-joss
