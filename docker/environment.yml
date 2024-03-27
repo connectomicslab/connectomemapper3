@@ -1,4 +1,4 @@
-name: py37cmp-core
+name: py38cmp-core
 
 channels:
 - conda-forge
@@ -6,10 +6,10 @@ channels:
 - mrtrix3
 
 dependencies:
-- python=3.7
+- python=3.8
 - pip=20.1.1
 - ants=2.2.0
-- numpy=1.19.2
+- numpy=1.21.0
 - matplotlib=3.2.2
 - graphviz=2.40.1
 - traits=6.2.0
