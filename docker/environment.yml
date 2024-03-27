@@ -24,7 +24,7 @@ dependencies:
 - mrtrix3=3.0.2
 
 - pip:
-    - coverage==5.2
+    - coverage==5.2.1
     - duecredit==0.8.0
     - mne==0.24.1
     - mne_connectivity==0.3
