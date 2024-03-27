@@ -1,4 +1,4 @@
-coverage==5.2
+coverage==5.2.1
 duecredit==0.8.0
 nibabel==3.2.2
 mne==0.24.1
