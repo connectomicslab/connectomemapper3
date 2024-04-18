@@ -22,13 +22,10 @@ formats:
 # conda:
 #   environment: environment.yml
 
-build:  
-  os: ubuntu-22.04
 # Optionally set the version of Python and requirements required to build your docs
-  tools:
-    python:
-      version: "3.7"
-    install:
-      - requirements: docs/requirements.txt
-      - method: setuptools
-        path: .
+python:
+  version: 3.7
+  install:
+    - requirements: docs/requirements.txt
+    - method: setuptools
+      path: .
