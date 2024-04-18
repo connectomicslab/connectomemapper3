@@ -25,11 +25,9 @@ formats:
 build:  
   image: latest
   os: ubuntu-22.04
-  python:
-    version: 3.7
+  tools:
+    python: "3.7"
     install:
       - requirements: docs/requirements.txt
       - method: setuptools
       - path: .
-  # Add your actual build tools or commands here, or remove this section if not needed
-  tools:
