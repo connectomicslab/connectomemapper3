@@ -30,5 +30,5 @@ build:
 python:
   install:
     - requirements: docs/requirements.txt
-    - method: setuptools
-    - path: .
+    #- method: setuptools
+    #- path: .
