@@ -32,4 +32,4 @@ build:
       - method: setuptools
       - path: .
   # Add your actual build tools or commands here, or remove this section if not needed
-  tools: []
+  tools:
