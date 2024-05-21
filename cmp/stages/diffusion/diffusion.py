@@ -24,7 +24,7 @@ class DiffusionConfig(HasTraits):
 
     Attributes
     ----------
-    diffusion_imaging_model_editor : ['DSI', 'DTI', 'HARDI', 'multishell']
+    diffusion_imaging_model_editor : ['DSI', 'DTI', 'HARDI_singleTissue', 'HARDI_multiTissue']
         Available diffusion imaging models
 
     diffusion_imaging_model : traits.Str
@@ -89,7 +89,7 @@ class DiffusionConfig(HasTraits):
     cmp.stages.diffusion.diffusion.DiffusionStage
     """
 
-    diffusion_imaging_model_editor = List(["DSI", "DTI", "HARDI", "multishell"])
+    diffusion_imaging_model_editor = List(["DSI", "DTI", "HARDI_singleTissue", "HARDI_multiTissue"])
     diffusion_imaging_model = Str("DTI")
     dilate_rois = Bool(True)
     dilation_kernel = Enum(["Box", "Gauss", "Sphere"])
@@ -117,7 +117,8 @@ class DiffusionConfig(HasTraits):
             tracking_processing_tool=self.tracking_processing_tool,
         )
         self.mrtrix_recon_config = MRtrixReconConfig(
-            imaging_model=self.diffusion_imaging_model, recon_mode=self.diffusion_model
+            imaging_model=self.diffusion_imaging_model, 
+            recon_mode=self.diffusion_model,
         )
         self.dipy_tracking_config = DipyTrackingConfig(
             imaging_model=self.diffusion_imaging_model,
@@ -336,6 +337,7 @@ class DiffusionStage(Stage):
             "wm_mask_registered",
             "brain_mask_registered",
             "act_5tt_registered",
+            "in_5tt_orig",
             "gmwmi_registered",
             "roi_volumes",
             "grad",
@@ -460,6 +462,8 @@ class DiffusionStage(Stage):
                     (inputnode, recon_flow, [("diffusion", "inputnode.diffusion")]),
                     (inputnode, recon_flow, [("grad", "inputnode.grad")]),
                     (inputnode, recon_flow, [("diffusion", "inputnode.diffusion_resampled")],),
+                    (inputnode, recon_flow, [("act_5tt_registered", "inputnode.act_5tt_registered")],),
+                    (inputnode, recon_flow, [("in_5tt_orig", "inputnode.in_5tt_orig")],),
                     (inputnode, recon_flow, [("brain_mask_registered", "inputnode.wm_mask_resampled")],),
                     (recon_flow, outputnode, [("outputnode.FA", "FA")]),
                     (recon_flow, outputnode, [("outputnode.ADC", "ADC")]),

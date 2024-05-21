@@ -10,8 +10,8 @@ sphinx:
   configuration: docs/conf.py
 
 # Build documentation with MkDocs
-#mkdocs:
-#  configuration: mkdocs.yml
+# mkdocs:
+#   configuration: mkdocs.yml
 
 # Optionally build your docs in additional formats such as PDF
 formats:
@@ -22,10 +22,13 @@ formats:
 # conda:
 #   environment: environment.yml
 
-# Optionally set the version of Python and requirements required to build your docs
+build:  
+  os: ubuntu-22.04
+  tools:
+    python: "3.7"
+
 python:
-  version: 3.7
   install:
     - requirements: docs/requirements.txt
-    - method: setuptools
-      path: .
+    #- method: setuptools
+    #- path: .

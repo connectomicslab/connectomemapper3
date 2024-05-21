@@ -114,21 +114,26 @@ RUN apt-get update && \
     curl -sSL https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -o /tmp/miniconda.sh && \
     bash /tmp/miniconda.sh -bfp /opt/conda && \
     rm -rf /tmp/miniconda.sh && \
+    apt-get install -y gcc && \
     apt-get remove -y curl && \
     conda update conda && \
     conda clean --all --yes && \
-    rm -rf ~/.conda ~/.cache/pip/* && \
+    rm -rf ~/.conda ~/.cache//* && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* 
+
 
 ## Create conda environment, including ANTs 2.2.0 and MRtrix 3.0.2
-ENV CONDA_ENV="py37cmp-core"
+ENV CONDA_ENV="py38cmp-core"
 COPY docker/spec-file.txt /app/spec-file.txt
 COPY docker/requirements.txt /app/requirements.txt
-RUN /bin/bash -c "conda config --set default_threads 4 &&\
-    conda create --name ${CONDA_ENV} --file /app/spec-file.txt &&\
+COPY docker/environment.yml /app/environment.yml
+RUN /bin/bash -c "conda config --set default_threads 3 &&\ 
+    conda env create --file /app/environment.yml &&\ 
     . activate ${CONDA_ENV} &&\
-    pip install -r /app/requirements.txt &&\
+    python --version &&\
+    pip install --upgrade pip setuptools wheel &&\
+    pip install -r /app/requirements.txt&&\
     conda clean -v --all --yes &&\
     rm -rf ~/.conda ~/.cache/pip/*"
 
@@ -140,7 +145,7 @@ RUN /bin/bash -c "conda config --set default_threads 4 &&\
 
 ##################################################################
 # Installation of Connectome Mapper 3 packages
-##################################################################
+################################################################t#
 FROM neurocondabuntu AS cmpbuntu
 
 # Docker build command arguments
@@ -183,7 +188,7 @@ RUN mkdir -p /cache/python-eggs && \
     chmod -R 777 /cache/python-eggs
 
 # Install cmp and cmtklib packages in the conda environment $CONDA_ENV
-ENV CONDA_ENV="py37cmp-core"
+ENV CONDA_ENV="py38cmp-core"
 RUN /bin/bash -c ". activate ${CONDA_ENV} &&\
     pip install ."
 

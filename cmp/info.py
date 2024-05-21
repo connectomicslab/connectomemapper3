@@ -5,6 +5,7 @@
 #  This software is distributed under the open-source license Modified BSD.
 """This file contains cmp package information."""
 
+
 _version_major = 3
 _version_minor = 1
 _version_micro = 0
@@ -23,7 +24,7 @@ __version__ = "v%s.%s.%s%s" % (
 # __current_year__ = datetime.datetime.now().strftime("%Y")
 __current_year__ = "2022"
 
-__author__ = "The CMP3 developers"
+__author__ = "The CMP3 developers"  
 
 __copyright__ = (
     "Copyright (C) 2009-{}, ".format(__current_year__)
