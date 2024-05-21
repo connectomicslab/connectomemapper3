@@ -5,6 +5,7 @@
 #  This software is distributed under the open-source license Modified BSD.
 """This file contains cmp package information."""
 
+
 _version_major = 3
 _version_minor = 1
 _version_micro = 0
