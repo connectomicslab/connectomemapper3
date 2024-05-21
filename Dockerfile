@@ -133,7 +133,7 @@ RUN /bin/bash -c "conda config --set default_threads 3 &&\
     . activate ${CONDA_ENV} &&\
     python --version &&\
     pip install --upgrade pip setuptools wheel --no-binary :all: &&\
-    pip install -r /app/requirements.txt &&\
+    pip install -r /app/requirements.txt --no-binary :all: &&\
     conda clean -v --all --yes &&\
     rm -rf ~/.conda ~/.cache/pip/*"
 
