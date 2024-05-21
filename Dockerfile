@@ -118,7 +118,7 @@ RUN apt-get update && \
     apt-get remove -y curl && \
     conda update conda && \
     conda clean --all --yes && \
-    rm -rf ~/.conda ~/.cache/pip/* && \
+    rm -rf ~/.conda ~/.cache//* && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* 
 
@@ -132,7 +132,7 @@ RUN /bin/bash -c "conda config --set default_threads 3 &&\
     conda env create --file /app/environment.yml &&\ 
     . activate ${CONDA_ENV} &&\
     python --version &&\
-    pip install --upgrade pip setuptools wheel &&\
+    pip install --upgrade pip setuptools wheel --no-binary :all: &&\
     pip install -r /app/requirements.txt &&\
     conda clean -v --all --yes &&\
     rm -rf ~/.conda ~/.cache/pip/*"
