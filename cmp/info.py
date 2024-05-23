@@ -7,7 +7,7 @@
 
 
 _version_major = 3
-_version_minor = 1
+_version_minor = 2
 _version_micro = 0
 _version_extra = ""
 __release_date__ = "DD.MM.2022"
