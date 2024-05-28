@@ -551,7 +551,7 @@ jobs:
       TZ: "/usr/share/zoneinfo/Europe/Zurich"
       SCRATCH: "/scratch"
     machine:
-      image: ubuntu-2204:202305-01
+      image: ubuntu-2204:2024.04.4
       # NEW: Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
       #image: ubuntu-2004:202201-02
       # OLD: Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
