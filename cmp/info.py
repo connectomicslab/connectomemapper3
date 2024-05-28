@@ -22,7 +22,7 @@ __version__ = "v%s.%s.%s%s" % (
 )
 
 # __current_year__ = datetime.datetime.now().strftime("%Y")
-__current_year__ = "2022"
+__current_year__ = "2024"
 
 __author__ = "The CMP3 developers"  
 
