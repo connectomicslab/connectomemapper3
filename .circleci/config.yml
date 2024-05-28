@@ -650,7 +650,7 @@ jobs:
 
   build_singularity:
     machine:
-      image: ubuntu-2004:202305-01
+      image: ubuntu-2204:2024.04.4
       # Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
       #image: ubuntu-2004:202201-02
     resource_class: large
@@ -714,7 +714,7 @@ jobs:
 
   get_data:
     machine:
-      image: ubuntu-2004:202305-01
+      image: ubuntu-2204:2024.04.4
       # Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
       #image: ubuntu-2004:202201-02
     working_directory: /tmp/data
@@ -869,7 +869,7 @@ jobs:
 
   test1_docker_parcellation:
     machine:
-      image: ubuntu-2004:202305-01
+      image: ubuntu-2204:2024.04.4
       # Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
       #image: ubuntu-2004:202201-02
     resource_class: large
@@ -942,7 +942,7 @@ jobs:
 
   test2_docker_parcellation:
     machine:
-      image: ubuntu-2004:202305-01
+      image: ubuntu-2204:2024.04.4
       # Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
       #image: ubuntu-2004:202201-02
     resource_class: medium
@@ -1012,7 +1012,7 @@ jobs:
 
   test3_docker_dsi_mrtrix:
     machine:
-      image: ubuntu-2004:202305-01
+      image: ubuntu-2204:2024.04.4
       # Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
       #image: ubuntu-2004:202201-02
     resource_class: large
@@ -1083,7 +1083,7 @@ jobs:
 
   test4_docker_dsi_mrtrix:
     machine:
-      image: ubuntu-2004:202305-01
+      image: ubuntu-2204:2024.04.4
       # Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
       #image: ubuntu-2004:202201-02
     resource_class: large
@@ -1157,7 +1157,7 @@ jobs:
 
   test5_docker_dsi_dipy:
     machine:
-      image: ubuntu-2004:202305-01
+      image: ubuntu-2204:2024.04.4
       # Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
       #image: ubuntu-2004:202201-02
     resource_class: large
@@ -1304,7 +1304,7 @@ jobs:
 
   test7_docker_fmri:
     machine:
-      image: ubuntu-2004:202305-01
+      image: ubuntu-2204:2024.04.4
       # Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
       #image: ubuntu-2004:202201-02
     resource_class: large
@@ -1378,7 +1378,7 @@ jobs:
 
   test8_docker_fmri:
     machine:
-      image: ubuntu-2004:202305-01
+      image: ubuntu-2204:2024.04.4
       # Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
       # image: ubuntu-2004:202201-02
     resource_class: large
@@ -1452,7 +1452,7 @@ jobs:
 
   test9_singularity_parcellation:
     machine:
-      image: ubuntu-2004:202305-01
+      image: ubuntu-2204:2024.04.4
       # Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
       #image: ubuntu-2004:202201-02
     resource_class: large
@@ -1524,7 +1524,7 @@ jobs:
 
   test10_docker_eeg:
     machine:
-      image: ubuntu-2004:202305-01
+      image: ubuntu-2204:2024.04.4
       # Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
       #image: ubuntu-2004:202201-02
     resource_class: large
@@ -1590,7 +1590,7 @@ jobs:
 
   test11_docker_eeg:
     machine:
-      image: ubuntu-2004:202305-01
+      image: ubuntu-2204:2024.04.4
       # Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
       #image: ubuntu-2004:202201-02
     resource_class: large
@@ -1750,7 +1750,7 @@ jobs:
 
   build_docs:
     machine:
-      image: ubuntu-2004:202305-01
+      image: ubuntu-2204:2024.04.4
       # Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
       #image: ubuntu-2004:202201-02
     working_directory: /home/circleci/out/docs
@@ -1786,7 +1786,7 @@ jobs:
 
   deploy_docker_latest:
     machine:
-      image: ubuntu-2004:202305-01
+      image: ubuntu-2204:2024.04.4
       # Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
       #image: ubuntu-2004:202201-02
     resource_class: medium
