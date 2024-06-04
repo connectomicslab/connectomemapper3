@@ -6,7 +6,7 @@
         ],
         "subject": "sub-01",
         "subject_session": "ses-01",
-        "version": "v3.0.0"
+        "version": "v3.2.0"
     },
     "segmentation_stage": {
         "seg_tool": "Custom segmentation",

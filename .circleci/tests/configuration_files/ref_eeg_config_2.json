@@ -5,7 +5,7 @@
             "sub-01"
         ],
         "subject": "sub-01",
-        "version": "v3.1.0"
+        "version": "v3.2.0"
     },
     "eeg_preprocessing_stage": {
         "task_label": "faces",
