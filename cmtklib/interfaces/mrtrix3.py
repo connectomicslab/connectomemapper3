@@ -56,7 +56,7 @@ class MRtrix_mul(CommandLine):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_filename':
+        if name == 'out_filename':
             return self._gen_outfilename()
         else:
             return None
@@ -115,7 +115,7 @@ class Erode(CommandLine):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_file':
+        if name == 'out_file':
             return self._gen_outfilename()
         else:
             return None
@@ -214,7 +214,7 @@ class DWIDenoise(CommandLine):
 
         if basename == '':
             msg = 'Unable to generate filename for command %s. ' % self.cmd
-            msg += 'basename is not set!'
+            msg += 'basename == not set!'
             raise ValueError(msg)
         if cwd is None:
             cwd = os.getcwd()
@@ -330,7 +330,7 @@ class DWIBiasCorrect(CommandLine):
 
         if basename == '':
             msg = 'Unable to generate filename for command %s. ' % self.cmd
-            msg += 'basename is not set!'
+            msg += 'basename == not set!'
             raise ValueError(msg)
         if cwd is None:
             cwd = os.getcwd()
@@ -474,7 +474,7 @@ class MRConvert(CommandLine):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_filename':
+        if name == 'out_filename':
             return self._gen_outfilename()
         else:
             return None
@@ -595,7 +595,7 @@ class MRCrop(CommandLine):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_filename':
+        if name == 'out_filename':
             return self._gen_outfilename()
         else:
             return None
@@ -719,7 +719,7 @@ class MRTransform(CommandLine):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_filename':
+        if name == 'out_filename':
             return self._gen_outfilename()
         else:
             return None
@@ -963,7 +963,7 @@ class DWI2Tensor(CommandLine):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_filename':
+        if name == 'out_filename':
             return self._gen_outfilename()
         else:
             return None
@@ -1014,7 +1014,7 @@ class Tensor2Vector(CommandLine):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_filename':
+        if name == 'out_filename':
             return self._gen_outfilename()
         else:
             return None
@@ -1082,7 +1082,7 @@ class EstimateResponseForSHSingleTissue(CommandLine):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_filename':
+        if name == 'out_filename':
             return self._gen_outfilename()
         else:
             return None
@@ -1158,9 +1158,9 @@ class EstimateResponseForSHMultiTissue(CommandLine):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_filename':
+        if name == 'out_filename':
             return self._gen_outfilename()[0]
-        elif name is 'out_gm_filename':
+        elif name == 'out_gm_filename':
             return self._gen_outfilename()[1] 
         else:
             return self._gen_outfilename()[2]
@@ -1272,7 +1272,7 @@ class ConstrainedSphericalDeconvolutionSingleTissue(CommandLine):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_filename':
+        if name == 'out_filename':
             return self._gen_outfilename()
         else:
             return None
@@ -1403,9 +1403,9 @@ class ConstrainedSphericalDeconvolutionMultiTissue(CommandLine):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_filename':
+        if name == 'out_filename':
             return self._gen_outfilename()[0]
-        elif name is 'out_gm_filename':
+        elif name == 'out_gm_filename':
             return self._gen_outfilename()[1] 
         else:
             return self._gen_outfilename()[2]
@@ -1660,7 +1660,7 @@ class StreamlineTrack(CommandLine):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_file':
+        if name == 'out_file':
             return self._gen_outfilename()
         else:
             return None
