@@ -378,7 +378,7 @@ class Eddy(FSLCommand):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_file':
+        if name == 'out_file':
             return self._list_outputs()['eddy_corrected']
         else:
             return None
@@ -426,7 +426,7 @@ class EddyOpenMP(FSLCommand):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_file':
+        if name == 'out_file':
             return self._list_outputs()['eddy_corrected']
         else:
             return None
