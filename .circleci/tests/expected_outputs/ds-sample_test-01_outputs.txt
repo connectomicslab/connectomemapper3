@@ -390,12 +390,10 @@ freesurfer-7.1.1/sub-01_ses-01/touch/wmaparc.stats.touch
 freesurfer-7.1.1/sub-01_ses-01/touch/wmaparc.touch
 freesurfer-7.1.1/sub-01_ses-01/touch/wmsegment.touch
 nipype-1.8.0/dataset_description.json
-nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/anat_datasinker/_0x975097f098d6666b2afdab0014327746.json
 nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/anat_datasinker/_inputs.pklz
 nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/anat_datasinker/_node.pklz
 nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/anat_datasinker/_report/report.rst
 nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/anat_datasinker/result_anat_datasinker.pklz
-nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/anat_datasource/_0xd133af645de62e9ff00c857b5077582e.json
 nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/anat_datasource/_inputs.pklz
 nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/anat_datasource/_node.pklz
 nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/anat_datasource/_report/report.rst
