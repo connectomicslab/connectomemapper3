@@ -418,7 +418,6 @@ nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/Lausanne2018_p
 nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/Lausanne2018_parcellation/ROIv_Lausanne2018_scale5.nii.gz
 nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/Lausanne2018_parcellation/T1.nii.gz
 nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/Lausanne2018_parcellation/T1w_class-GM.nii.gz
-nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/Lausanne2018_parcellation/_0xe4d1cd2a25fea21168235c76ef8a3232.json
 nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/Lausanne2018_parcellation/_inputs.pklz
 nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/Lausanne2018_parcellation/_node.pklz
 nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/Lausanne2018_parcellation/_report/report.rst
@@ -433,7 +432,6 @@ nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/Lausanne2018_p
 nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/Lausanne2018_parcellation/result_Lausanne2018_parcellation.pklz
 nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/Lausanne2018_parcellation/ribbon.nii.gz
 nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/Lausanne2018_parcellation/wm_eroded.nii.gz
-nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/compute_roi_volumetry/_0x7060b641433189e167d34c5eb21c9f26.json
 nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/compute_roi_volumetry/_inputs.pklz
 nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/compute_roi_volumetry/_node.pklz
 nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/compute_roi_volumetry/_report/report.rst
@@ -443,7 +441,6 @@ nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/compute_roi_vo
 nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/compute_roi_volumetry/scale3_roi_stats.tsv
 nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/compute_roi_volumetry/scale4_roi_stats.tsv
 nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/compute_roi_volumetry/scale5_roi_stats.tsv
-nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/createBIDSLabelIndexMappingFile/_0x03907a3406b884a33c0798b20a3dcbf5.json
 nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/createBIDSLabelIndexMappingFile/_inputs.pklz
 nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/createBIDSLabelIndexMappingFile/_node.pklz
 nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/createBIDSLabelIndexMappingFile/_report/report.rst
@@ -463,7 +460,6 @@ nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/parcCombiner/R
 nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/parcCombiner/ROIv_Lausanne2018_scale5.graphml
 nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/parcCombiner/ROIv_Lausanne2018_scale5_FreeSurferColorLUT.txt
 nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/parcCombiner/ROIv_Lausanne2018_scale5_final.nii.gz
-nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/parcCombiner/_0x310e6f1ca18ef519f573cb46e6110d2f.json
 nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/parcCombiner/_inputs.pklz
 nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/parcCombiner/_node.pklz
 nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/parcCombiner/_report/report.rst
