@@ -848,4 +848,3 @@ nipype-1.8.0/sub-01/eeg_pipeline/graph.svg
 nipype-1.8.0/sub-01/eeg_pipeline/graph1.json
 nipype-1.8.0/sub-01/eeg_pipeline/index.html
 nipype-1.8.0/sub-01/eeg_pipeline/pypeline.log
-
