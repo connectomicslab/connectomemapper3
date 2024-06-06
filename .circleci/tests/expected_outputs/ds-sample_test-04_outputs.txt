@@ -478,6 +478,7 @@ nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/compute_roi_vo
 nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/createBIDSLabelIndexMappingFile/_inputs.pklz
 nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/createBIDSLabelIndexMappingFile/_node.pklz
 nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/createBIDSLabelIndexMappingFile/_report/report.rst
+
 nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/createBIDSLabelIndexMappingFile/result_createBIDSLabelIndexMappingFile.pklz
 nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/parcCombiner/ROIv_Lausanne2018_scale1.graphml
 nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/parcCombiner/ROIv_Lausanne2018_scale1_FreeSurferColorLUT.txt
@@ -1082,8 +1083,8 @@ nipype-1.8.0/sub-01/ses-01/diffusion_pipeline/registration_stage/tensor2FA/comma
 nipype-1.8.0/sub-01/ses-01/diffusion_pipeline/registration_stage/tensor2FA/fa_corrected.mif
 nipype-1.8.0/sub-01/ses-01/diffusion_pipeline/registration_stage/tensor2FA/result_tensor2FA.pklz
 nipype-1.8.0/sub-01/ses-01/diffusion_pipeline/registration_stage/tensor2FA_unmasked/_inputs.pklz
-nipype-1.8.0/sub-01/ses-01/diffusion_pipeline/registration_stage/tensor2FA_unmasked/command.txt
-nipype-1.8.0/sub-01/ses-01/diffusion_pipeline/registration_stage/tensor2FA_unmasked/fa_corrected_unmasked.mif
 nipype-1.8.0/sub-01/ses-01/diffusion_pipeline/registration_stage/tensor2FA_unmasked/_node.pklz
 nipype-1.8.0/sub-01/ses-01/diffusion_pipeline/registration_stage/tensor2FA_unmasked/_report/report.rst
+nipype-1.8.0/sub-01/ses-01/diffusion_pipeline/registration_stage/tensor2FA_unmasked/command.txt
+nipype-1.8.0/sub-01/ses-01/diffusion_pipeline/registration_stage/tensor2FA_unmasked/fa_corrected_unmasked.mif
 nipype-1.8.0/sub-01/ses-01/diffusion_pipeline/registration_stage/tensor2FA_unmasked/result_tensor2FA_unmasked.pklz
