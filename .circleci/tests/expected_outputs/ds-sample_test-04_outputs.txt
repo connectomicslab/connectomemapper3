@@ -478,7 +478,6 @@ nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/compute_roi_vo
 nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/createBIDSLabelIndexMappingFile/_inputs.pklz
 nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/createBIDSLabelIndexMappingFile/_node.pklz
 nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/createBIDSLabelIndexMappingFile/_report/report.rst
-
 nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/createBIDSLabelIndexMappingFile/result_createBIDSLabelIndexMappingFile.pklz
 nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/parcCombiner/ROIv_Lausanne2018_scale1.graphml
 nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/parcCombiner/ROIv_Lausanne2018_scale1_FreeSurferColorLUT.txt
