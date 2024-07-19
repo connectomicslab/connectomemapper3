@@ -1809,8 +1809,6 @@ jobs:
 
             if [[ -n "$DOCKER_PASS" ]]; then
               docker login -u $DOCKER_USER -p $DOCKER_PASS
-    #          docker tag sebastientourbier/connectomemapper3 sebastientourbier/connectomemapper-bidsapp:latest
-    #          docker push sebastientourbier/connectomemapper-bidsapp:latest
               docker tag  connectomicslab/connectomemapper3 connectomicslab/connectomemapper-bidsapp:latest
               docker push connectomicslab/connectomemapper-bidsapp:latest
             fi
@@ -1880,8 +1878,6 @@ jobs:
             if [[ -n "$DOCKER_PASS" ]]; then
               docker login -u $DOCKER_USER -p $DOCKER_PASS
               if [[ -n "$CIRCLE_TAG" ]]; then
-    #            docker tag sebastientourbier/connectomemapper3 sebastientourbier/connectomemapper-bidsapp:$CIRCLE_TAG
-    #            docker push sebastientourbier/connectomemapper-bidsapp:$CIRCLE_TAG
                 docker tag  connectomicslab/connectomemapper3 connectomicslab/connectomemapper-bidsapp:$CIRCLE_TAG
                 docker push connectomicslab/connectomemapper-bidsapp:$CIRCLE_TAG
               fi
