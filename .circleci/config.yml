@@ -698,6 +698,7 @@ jobs:
             docker tag sebastientourbier/connectomemapper3 localhost:5000/sebastientourbier/connectomemapper3:latest
             docker push localhost:5000/sebastientourbier/connectomemapper3:latest
             docker images -a | grep "sebastientourbier/connectomemapper3"
+            export DEBIAN_FRONTEND=noninteractive
             SINGULARITY_NOHTTPS=1 \
             SINGULARITY_LOCALCACHEDIR=~/.singularity/tmp \
             SINGULARITY_CACHEDIR=~/.singularity/tmp SINGULARITY_TMPDIR=~/.singularity/tmp \
