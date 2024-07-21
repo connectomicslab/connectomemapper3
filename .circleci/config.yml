@@ -269,7 +269,7 @@ commands:
             output_dir="${bids_dir}/derivatives"
             connectomemapper3_docker \
                 "${bids_dir}" "${output_dir}" participant --participant_label 01 --session_label 01 \
-                --docker_image "sebastientourbier/connectomemapper3" \
+                --docker_image "connectomicslab/connectomemapper3" \
                 --config_dir <<parameters.config_dir>> \
                 --anat_pipeline_config <<parameters.anat_pipeline_config>> \
                 --fs_license "${bids_dir}/code/license.txt" \
@@ -330,7 +330,7 @@ commands:
             output_dir="${bids_dir}/derivatives"
             connectomemapper3_docker \
                 "${bids_dir}" "${output_dir}" participant --participant_label 01 --session_label 01 \
-                --docker_image "sebastientourbier/connectomemapper3" \
+                --docker_image "connectomicslab/connectomemapper3" \
                 --config_dir <<parameters.config_dir>> \
                 --anat_pipeline_config <<parameters.anat_pipeline_config>> \
                 --dwi_pipeline_config <<parameters.dwi_pipeline_config>> \
@@ -392,7 +392,7 @@ commands:
             output_dir="${bids_dir}/derivatives"
             connectomemapper3_docker \
                 "${bids_dir}" "${output_dir}" participant --participant_label 01 --session_label 01 \
-                --docker_image "sebastientourbier/connectomemapper3" \
+                --docker_image "connectomicslab/connectomemapper3" \
                 --config_dir <<parameters.config_dir>> \
                 --anat_pipeline_config <<parameters.anat_pipeline_config>> \
                 --func_pipeline_config <<parameters.func_pipeline_config>> \
@@ -457,7 +457,7 @@ commands:
             output_dir="${bids_dir}/derivatives"
             connectomemapper3_docker \
                 "${bids_dir}" "${output_dir}" participant --participant_label 01 \
-                --docker_image "sebastientourbier/connectomemapper3" \
+                --docker_image "connectomicslab/connectomemapper3" \
                 --config_dir <<parameters.config_dir>> \
                 --anat_pipeline_config <<parameters.anat_pipeline_config>> \
                 --eeg_pipeline_config <<parameters.eeg_pipeline_config>> \
@@ -616,7 +616,7 @@ jobs:
               --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
               --build-arg VCS_REF=`git rev-parse --short HEAD` \
               --build-arg VERSION="${CIRCLE_TAG:-$THISVERSION}" \
-              -t sebastientourbier/connectomemapper3 /home/circleci/src/connectomemapper3
+              -t connectomicslab/connectomemapper3 /home/circleci/src/connectomemapper3
       #- run:
       #    name: Prune Docker cache (temporary)
       #    command: docker system prune -f
@@ -637,7 +637,7 @@ jobs:
             # Get version, update files.
             THISVERSION=$( python /home/circleci/src/connectomemapper3/get_version.py )
             mkdir -p /tmp/cache/docker
-            docker save sebastientourbier/connectomemapper3 \
+            docker save connectomicslab/connectomemapper3 \
             | zstd -10 --threads=4 > /tmp/cache/docker/docker.tar.zst
       - persist_to_workspace:
           root: /tmp/cache/docker
@@ -695,15 +695,15 @@ jobs:
           name: "Building Singularity image from Docker image"
           command: |
             mkdir -p /tmp/cache/singularity
-            docker tag sebastientourbier/connectomemapper3 localhost:5000/sebastientourbier/connectomemapper3:latest
-            docker push localhost:5000/sebastientourbier/connectomemapper3:latest
-            docker images -a | grep "sebastientourbier/connectomemapper3"
+            docker tag connectomicslab/connectomemapper3 localhost:5000/connectomicslab/connectomemapper3:latest
+            docker push localhost:5000/connectomicslab/connectomemapper3:latest
+            docker images -a | grep "connectomicslab/connectomemapper3"
             export DEBIAN_FRONTEND=noninteractive
             SINGULARITY_NOHTTPS=1 \
             SINGULARITY_LOCALCACHEDIR=~/.singularity/tmp \
             SINGULARITY_CACHEDIR=~/.singularity/tmp SINGULARITY_TMPDIR=~/.singularity/tmp \
             TMPDIR=~/.singularity/tmp SINGULARITY_DISABLE_CACHE=true \
-            singularity build /tmp/cache/singularity/connectomemapper3.simg docker://localhost:5000/sebastientourbier/connectomemapper3:latest
+            singularity build /tmp/cache/singularity/connectomemapper3.simg docker://localhost:5000/connectomicslab/connectomemapper3:latest
           no_output_timeout: 5h
       - run:
           name: "Display storage information ALL"
@@ -1776,7 +1776,7 @@ jobs:
           no_output_timeout: 2h
           command: |
             docker run -ti --rm=false -v $PWD:/_build_html \
-              --entrypoint=sphinx-build sebastientourbier/connectomemapper3:latest \
+              --entrypoint=sphinx-build connectomicslab/connectomemapper3:latest \
               -T -E -b html -d _build/doctrees-readthedocs -W -D \
               language=en /root/src/connectomemapper3/docs/ /_build_html 2>&1 \
               | tee $PWD/builddocs.log
