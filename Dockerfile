@@ -135,7 +135,7 @@ RUN /bin/bash -c "conda config --set default_threads 3 &&\
     pip install --upgrade pip setuptools wheel &&\
     pip install -r /app/requirements.txt&&\
     conda clean -v --all --yes &&\
-    rm -rf ~/.conda ~/.cache/pip/*
+    rm -rf ~/.conda ~/.cache/pip/* "
 
 ##################################################################
 # Install BIDS validator
