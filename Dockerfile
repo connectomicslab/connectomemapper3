@@ -128,14 +128,14 @@ ENV CONDA_ENV="py38cmp-core"
 COPY docker/spec-file.txt /app/spec-file.txt
 COPY docker/requirements.txt /app/requirements.txt
 COPY docker/environment.yml /app/environment.yml
-RUN /bin/bash -c "conda config --set default_threads 3 &&\ 
-    conda env create --file /app/environment.yml &&\ 
-    . activate ${CONDA_ENV} &&\
-    python --version &&\
-    pip install --upgrade pip setuptools wheel &&\
-    pip install -r /app/requirements.txt&&\
-    conda clean -v --all --yes &&\
-    rm -rf ~/.conda ~/.cache/pip/* "
+RUN /bin/bash -c "conda config --set default_threads 3"
+RUN /bin/bash "conda env create --file /app/environment.yml" 
+RUN /bin/bash ". activate ${CONDA_ENV}"
+#python --version &&\
+RUN /bin/bash "pip install --upgrade pip setuptools wheel"
+RUN /bin/bash "pip install -r /app/requirements.txt"
+#conda clean -v --all --yes &&\
+RUN /bin/bash "rm -rf ~/.conda ~/.cache/pip/*"
 
 ##################################################################
 # Install BIDS validator
