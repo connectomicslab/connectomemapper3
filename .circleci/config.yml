@@ -1488,9 +1488,9 @@ jobs:
           paths:
             - /tmp/data/ds-sample
       - singularity/install-go:
-          go-version: '1.13'
+          go-version: '1.13.15'
       - singularity/debian-install-3:
-          singularity-version: 3.8.4
+          singularity-version: 3.6.3
       - install-conda-and-cmp3:
           run_name: "Setup miniconda environment and install connectomemapper3 with Python wrappers"
           cmp3_dir: /home/circleci/src/connectomemapper3
