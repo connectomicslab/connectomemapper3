@@ -135,7 +135,7 @@ RUN /bin/bash -c ". activate ${CONDA_ENV}"
 RUN /bin/bash -c "conda install python==3.8"
 RUN /bin/bash -c "pip install --upgrade setuptools==58.0.4"
 RUN /bin/bash -c "pip install -r /app/requirements.txt"
-#conda clean -v --all --yes &&\
+#RUN /bin/bash -c "conda clean -v --all --yes"
 RUN /bin/bash -c "rm -rf ~/.conda ~/.cache/pip/*"
 
 ##################################################################
