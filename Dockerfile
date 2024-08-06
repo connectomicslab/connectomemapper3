@@ -3,7 +3,7 @@
 ##################################################################
 #FROM ubuntu:xenial-20210804 AS main
 # Use Ubuntu 20.04 as the base image
-FROM ubuntu:20.04 AS main
+FROM ubuntu:16.04 AS main
 
 ##################################################################
 # Pre-cache neurodebian key
@@ -83,9 +83,6 @@ RUN apt-get update && \
 # Installing Neurodebian packages (FSL, AFNI)
 RUN apt-get update 
 RUN apt-get install -y --no-install-recommends dc wget
-RUN wget https://launchpad.net/~ubuntu-security/+archive/ubuntu/ppa/+build/15108504/+files/libpng12-0_1.2.54-1ubuntu1.1_amd64.deb && \
-    dpkg -i libpng12-0_1.2.54-1ubuntu1.1_amd64.deb && \
-    rm libpng12-0_1.2.54-1ubuntu1.1_amd64.deb
 RUN apt-get install  fsl-5.0-core fsl-core=5.0.9-5~nd16.04+1 fsl-mni152-templates=5.0.7-2 
 RUN apt-get install fsl-5.0-eddy-nonfree 
 RUN apt-get install afni=16.2.07~dfsg.1-5~nd16.04+1 
