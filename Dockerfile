@@ -20,8 +20,8 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
     apt-get install software-properties-common -y && \
     apt-get install -qq -y --no-install-recommends bc \
-    #locales libstdc++6 npm curl perl gzip bzip2 xvfb liblzma-dev locate exfat-fuse exfat-utils default-jre && \
-    locales libstdc++6 npm curl perl gzip bzip2 xvfb liblzma-dev locate exfat-fuse exfatprogs default-jre && \
+    locales libstdc++6 npm curl perl gzip bzip2 xvfb liblzma-dev locate exfat-fuse exfat-utils default-jre && \
+    #locales libstdc++6 npm curl perl gzip bzip2 xvfb liblzma-dev locate exfat-fuse exfatprogs default-jre && \
     curl -fsSL http://neuro.debian.net/lists/focal.us-ca.full | tee /etc/apt/sources.list.d/neurodebian.sources.list && \
     curl -fsSL http://neuro.debian.net/lists/focal.us-ca.full.gpg | gpg --dearmor -o /etc/apt/trusted.gpg.d/neurodebian.gpg && \
 
