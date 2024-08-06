@@ -83,7 +83,10 @@ RUN apt-get update && \
 # Installing Neurodebian packages (FSL, AFNI)
 RUN apt-get update 
 RUN apt-get install -y --no-install-recommends dc wget
-RUN apt-get install libpng12-0 fsl-5.0-core fsl-core=5.0.9-5~nd16.04+1 fsl-mni152-templates=5.0.7-2 
+RUN wget http://security.ubuntu.com/ubuntu/pool/universe/libp/libpng/libpng12-0_1.2.54-1ubuntu1.1_amd64.deb && \
+    dpkg -i libpng12-0_1.2.54-1ubuntu1.1_amd64.deb && \
+    rm libpng12-0_1.2.54-1ubuntu1.1_amd64.deb
+RUN apt-get install  fsl-5.0-core fsl-core=5.0.9-5~nd16.04+1 fsl-mni152-templates=5.0.7-2 
 RUN apt-get install fsl-5.0-eddy-nonfree 
 RUN apt-get install afni=16.2.07~dfsg.1-5~nd16.04+1 
 RUN apt-get clean && \
