@@ -2,7 +2,8 @@
 # Use Ubuntu 16.04 LTS as base image
 ##################################################################
 #FROM ubuntu:xenial-20210804 AS main
-FROM ubuntu:22.04 AS main
+# Use Ubuntu 20.04 as the base image
+FROM ubuntu:20.04 AS main
 
 ##################################################################
 # Pre-cache neurodebian key
@@ -21,7 +22,9 @@ RUN apt-get update && \
     apt-get install -qq -y --no-install-recommends bc \
     #locales libstdc++6 npm curl perl gzip bzip2 xvfb liblzma-dev locate exfat-fuse exfat-utils default-jre && \
     locales libstdc++6 npm curl perl gzip bzip2 xvfb liblzma-dev locate exfat-fuse exfatprogs default-jre && \
-    curl -fsSL http://neuro.debian.net/lists/jammy.us-ca.full.gpg | gpg --dearmor -o /etc/apt/trusted.gpg.d/neurodebian.gpg && \
+    curl -fsSL http://neuro.debian.net/lists/focal.us-ca.full | tee /etc/apt/sources.list.d/neurodebian.sources.list && \
+    curl -fsSL http://neuro.debian.net/lists/focal.us-ca.full.gpg | gpg --dearmor -o /etc/apt/trusted.gpg.d/neurodebian.gpg && \
+
     #curl -sSL http://neuro.debian.net/lists/xenial.us-ca.full >> /etc/apt/sources.list.d/neurodebian.sources.list && \
     #apt-key adv --refresh-keys --keyserver hkp://ha.pool.sks-keyservers.net 0xA5D32F012649A5A9 || true) && \
     localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8 && \
