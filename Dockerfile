@@ -81,14 +81,13 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Installing Neurodebian packages (FSL, AFNI)
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    dc wget \
-    fsl-core=5.0.9-5~nd16.04+1 \
+RUN apt-get update 
+RUN apt-get install -y --no-install-recommends dc wget
+RUN apt-get install fsl-core=5.0.9-5~nd16.04+1 \
     fsl-mni152-templates=5.0.7-2 \
-    fsl-5.0-eddy-nonfree \
-    afni=16.2.07~dfsg.1-5~nd16.04+1 && \
-    apt-get clean && \
+RUN apt-get install fsl-5.0-eddy-nonfree 
+RUN apt-get install afni=16.2.07~dfsg.1-5~nd16.04+1 
+RUN apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Patch that replaces replace aff2rigid fsl_abspath fsladd imglob
