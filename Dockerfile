@@ -21,10 +21,7 @@ RUN apt-get update && \
     apt-get install -qq -y --no-install-recommends bc \
     #locales libstdc++6 npm curl perl gzip bzip2 xvfb liblzma-dev locate exfat-fuse exfat-utils default-jre && \
     locales libstdc++6 npm curl perl gzip bzip2 xvfb liblzma-dev locate exfat-fuse exfatprogs default-jre && \
-    curl -sSL http://neuro.debian.net/lists/jammy.us-ca.full | tee /etc/apt/sources.list.d/neurodebian.sources.list && \
-    apt-key add /root/.neurodebian.gpg && \
-    apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com A5D32F012649A5A9 &&\
-    curl -sSL http://neuro.debian.net/lists/jammy.us-ca.full.gpg | apt-key add - && \
+    curl -fsSL http://neuro.debian.net/lists/jammy.us-ca.full.gpg | gpg --dearmor -o /etc/apt/trusted.gpg.d/neurodebian.gpg && \
     #curl -sSL http://neuro.debian.net/lists/xenial.us-ca.full >> /etc/apt/sources.list.d/neurodebian.sources.list && \
     #apt-key adv --refresh-keys --keyserver hkp://ha.pool.sks-keyservers.net 0xA5D32F012649A5A9 || true) && \
     localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8 && \
