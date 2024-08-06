@@ -16,7 +16,6 @@ COPY docker/files/neurodebian.gpg /root/.neurodebian.gpg
 # Set environment variables to avoid interactive prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
-    -o Dpkg::Options::="--force-confnew" \
     apt-get install software-properties-common -y && \
     apt-get install -qq -y --no-install-recommends bc \
     locales libstdc++6 npm curl perl gzip bzip2 xvfb liblzma-dev locate exfat-fuse exfat-utils default-jre && \
@@ -40,6 +39,7 @@ WORKDIR /opt/freesurfer
 # Download and install
 RUN apt-get update && \
     apt-get install -qq -y --no-install-recommends curl && \
+    apt-get install libssl-dev && \
     curl -sSL https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/7.1.1/freesurfer-linux-centos6_x86_64-7.1.1.tar.gz | tar zxv --no-same-owner -C /opt \
     --exclude='freesurfer/diffusion' \
     --exclude='freesurfer/docs' \
