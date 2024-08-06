@@ -13,8 +13,9 @@ COPY docker/files/neurodebian.gpg /root/.neurodebian.gpg
 # exfat libraries for exfat-formatted hard-drives (only MAC?) :
 # exfat-fuse exfat-utils Neurodebian
 ##################################################################
+# Set environment variables to avoid interactive prompts during package installation
+ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     -o Dpkg::Options::="--force-confnew" \
     apt-get install software-properties-common -y && \
     apt-get install -qq -y --no-install-recommends bc \
