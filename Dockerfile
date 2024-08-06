@@ -2,7 +2,7 @@
 # Use Ubuntu 16.04 LTS as base image
 ##################################################################
 #FROM ubuntu:xenial-20210804 AS main
-FROM ubuntu:22.04
+FROM ubuntu:22.04 AS main
 
 ##################################################################
 # Pre-cache neurodebian key
