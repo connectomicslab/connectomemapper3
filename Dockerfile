@@ -83,7 +83,7 @@ RUN apt-get update && \
 # Installing Neurodebian packages (FSL, AFNI)
 RUN apt-get update 
 RUN apt-get install -y --no-install-recommends dc wget
-RUN apt-get install fsl-core=5.0.9-5~nd16.04+1 fsl-mni152-templates=5.0.7-2 
+RUN apt-get install fsl-5.0-core fsl-core=5.0.9-5~nd16.04+1 fsl-mni152-templates=5.0.7-2 
 RUN apt-get install fsl-5.0-eddy-nonfree 
 RUN apt-get install afni=16.2.07~dfsg.1-5~nd16.04+1 
 RUN apt-get clean && \
