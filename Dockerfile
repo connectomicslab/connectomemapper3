@@ -17,19 +17,17 @@ COPY docker/files/neurodebian.gpg /root/.neurodebian.gpg
 ##################################################################
 # Set environment variables to avoid interactive prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && \
-    apt-get install software-properties-common -y && \
-    apt-get install -qq -y --no-install-recommends bc \
-    locales libstdc++6 npm curl perl gzip bzip2 xvfb liblzma-dev locate exfat-fuse exfat-utils default-jre && \
+RUN apt-get update 
+RUN apt-get install software-properties-common -y 
+RUN apt-get install -qq -y --no-install-recommends bc locales libstdc++6 npm curl perl gzip bzip2 xvfb liblzma-dev locate exfat-fuse exfat-utils default-jre
     #locales libstdc++6 npm curl perl gzip bzip2 xvfb liblzma-dev locate exfat-fuse exfatprogs default-jre && \
-    curl -fsSL http://neuro.debian.net/lists/focal.us-ca.full | tee /etc/apt/sources.list.d/neurodebian.sources.list && \
-    curl -fsSL http://neuro.debian.net/lists/focal.us-ca.full.gpg | gpg --dearmor -o /etc/apt/trusted.gpg.d/neurodebian.gpg && \
-
+RUN curl -sSL http://neuro.debian.net/lists/xenial.us-ca.full | tee /etc/apt/sources.list.d/neurodebian.sources.list && \
+    apt-key adv --recv-keys --keyserver hkps://keyserver.ubuntu.com 0xA5D32F012649A5A9
     #curl -sSL http://neuro.debian.net/lists/xenial.us-ca.full >> /etc/apt/sources.list.d/neurodebian.sources.list && \
     #apt-key adv --refresh-keys --keyserver hkp://ha.pool.sks-keyservers.net 0xA5D32F012649A5A9 || true) && \
-    localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8 && \
-    apt-get update && \
-    apt-get clean && \
+RUN localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8 
+RUN apt-get update 
+RUN apt-get clean && \
     apt-get remove -y curl && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
@@ -86,14 +84,10 @@ RUN apt-get update && \
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     dc wget \
-    #fsl-core=5.0.9-5~nd16.04+1 \
-    #fsl-mni152-templates=5.0.7-2 \
-    #fsl-5.0-eddy-nonfree \
-    #afni=16.2.07~dfsg.1-5~nd16.04+1 && \
-    fsl-core \
-    fsl-mni152-templates \
+    fsl-core=5.0.9-5~nd16.04+1 \
+    fsl-mni152-templates=5.0.7-2 \
     fsl-5.0-eddy-nonfree \
-    afni \
+    afni=16.2.07~dfsg.1-5~nd16.04+1 && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
