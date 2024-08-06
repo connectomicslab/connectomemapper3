@@ -14,6 +14,8 @@ COPY docker/files/neurodebian.gpg /root/.neurodebian.gpg
 # exfat-fuse exfat-utils Neurodebian
 ##################################################################
 RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    -o Dpkg::Options::="--force-confnew" \
     apt-get install software-properties-common -y && \
     apt-get install -qq -y --no-install-recommends bc \
     locales libstdc++6 npm curl perl gzip bzip2 xvfb liblzma-dev locate exfat-fuse exfat-utils default-jre && \
