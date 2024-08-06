@@ -1,9 +1,7 @@
 ##################################################################
 # Use Ubuntu 16.04 LTS as base image
 ##################################################################
-#FROM ubuntu:xenial-20210804 AS main
-# Use Ubuntu 20.04 as the base image
-FROM ubuntu:16.04 AS main
+FROM ubuntu:xenial-20210804 AS main
 
 ##################################################################
 # Pre-cache neurodebian key
@@ -17,17 +15,17 @@ COPY docker/files/neurodebian.gpg /root/.neurodebian.gpg
 ##################################################################
 # Set environment variables to avoid interactive prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update 
-RUN apt-get install software-properties-common -y 
-RUN apt-get install -qq -y --no-install-recommends bc locales libstdc++6 npm curl perl gzip bzip2 xvfb liblzma-dev locate exfat-fuse exfat-utils default-jre
-    #locales libstdc++6 npm curl perl gzip bzip2 xvfb liblzma-dev locate exfat-fuse exfatprogs default-jre && \
-RUN curl -sSL http://neuro.debian.net/lists/xenial.us-ca.full | tee /etc/apt/sources.list.d/neurodebian.sources.list && \
-    apt-key adv --recv-keys --keyserver hkps://keyserver.ubuntu.com 0xA5D32F012649A5A9
-    #curl -sSL http://neuro.debian.net/lists/xenial.us-ca.full >> /etc/apt/sources.list.d/neurodebian.sources.list && \
-    #apt-key adv --refresh-keys --keyserver hkp://ha.pool.sks-keyservers.net 0xA5D32F012649A5A9 || true) && \
-RUN localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8 
-RUN apt-get update 
-RUN apt-get clean && \
+RUN apt-get update && \
+    -o Dpkg::Options::="--force-confnew" \
+    apt-get install software-properties-common -y && \
+    apt-get install -qq -y --no-install-recommends bc \
+    locales libstdc++6 npm curl perl gzip bzip2 xvfb liblzma-dev locate exfat-fuse exfat-utils default-jre && \
+    curl -sSL http://neuro.debian.net/lists/xenial.us-ca.full >> /etc/apt/sources.list.d/neurodebian.sources.list && \
+    apt-key add /root/.neurodebian.gpg && \
+    (apt-key adv --refresh-keys --keyserver hkp://ha.pool.sks-keyservers.net 0xA5D32F012649A5A9 || true) && \
+    localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8 && \
+    apt-get update && \
+    apt-get clean && \
     apt-get remove -y curl && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
@@ -81,12 +79,14 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Installing Neurodebian packages (FSL, AFNI)
-RUN apt-get update 
-RUN apt-get install -y --no-install-recommends dc wget
-RUN apt-get install  fsl-5.0-core fsl-core=5.0.9-5~nd16.04+1 fsl-mni152-templates=5.0.7-2 
-RUN apt-get install fsl-5.0-eddy-nonfree 
-RUN apt-get install afni=16.2.07~dfsg.1-5~nd16.04+1 
-RUN apt-get clean && \
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    dc wget \
+    fsl-core=5.0.9-5~nd16.04+1 \
+    fsl-mni152-templates=5.0.7-2 \
+    fsl-5.0-eddy-nonfree \
+    afni=16.2.07~dfsg.1-5~nd16.04+1 && \
+    apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Patch that replaces replace aff2rigid fsl_abspath fsladd imglob
