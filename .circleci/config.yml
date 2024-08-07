@@ -652,7 +652,7 @@ jobs:
     machine:
       #image: ubuntu-2204:2024.04.4
       # Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
-      image: ubuntu:xenial-20210804
+      image: ubuntu:16.04
     resource_class: large
     working_directory: /home/circleci/src/connectomemapper3
     steps:
