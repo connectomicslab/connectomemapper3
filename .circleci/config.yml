@@ -680,7 +680,6 @@ jobs:
       - run:
           name: "Set SINGULARITY TMP and CACHEDIR to prevent overflowing the /tmp folder"
           command: |
-            echo "\$nrconf{restart} = 'a'" >> /etc/needrestart/needrestart.conf
             mkdir -p ~/.singularity/tmp
             export SINGULARITY_LOCALCACHEDIR=~/.singularity/tmp
             export SINGULARITY_CACHEDIR=~/.singularity/tmp
