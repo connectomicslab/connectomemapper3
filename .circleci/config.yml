@@ -650,7 +650,7 @@ jobs:
 
   build_singularity:
     machine:
-      image: ubuntu-2204:2024.04.4
+      image: ubuntu-2004:202201-02
       # Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
       #image: ubuntu-1604:201903-01
     resource_class: large
@@ -676,7 +676,7 @@ jobs:
       - singularity/install-go:
           go-version: '1.13'
       - singularity/debian-install-3:
-          singularity-version: 3.8.4
+          singularity-version: 3.6.3
       - run:
           name: "Set SINGULARITY TMP and CACHEDIR to prevent overflowing the /tmp folder"
           command: |
