@@ -650,9 +650,9 @@ jobs:
 
   build_singularity:
     machine:
-      #image: ubuntu-2204:2024.04.4
+      image: ubuntu-2204:2024.04.4
       # Ubuntu 20.04, docker 20.10.11, docker-compose 1.29.2
-      image: ubuntu-1604:201903-01
+      #image: ubuntu-1604:201903-01
     resource_class: large
     working_directory: /home/circleci/src/connectomemapper3
     steps:
