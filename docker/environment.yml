@@ -13,6 +13,7 @@ dependencies:
 - matplotlib=3.2.2
 - graphviz=2.40.1
 - traits=6.2.0
+- traitsui=7.0.0
 - configparser=5.0.0
 - nipype=1.8.0
 - git-annex=8.20200617
@@ -37,3 +38,6 @@ dependencies:
     - pydicom==2.2.2
     - pycartool==0.1.1
     - pandas==1.4.0
+    - nibabel==3.2.2
+    - scipy==1.5.4
+

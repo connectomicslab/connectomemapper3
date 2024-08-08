@@ -19,6 +19,8 @@ COPY docker/files/neurodebian.gpg /root/.neurodebian.gpg
 # exfat libraries for exfat-formatted hard-drives (only MAC?) :
 # exfat-fuse exfat-utils Neurodebian
 ##################################################################
+# Set environment variables to avoid interactive prompts during package installation
+ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
     apt-get install software-properties-common -y && \
     apt-get install -qq -y --no-install-recommends bc \
@@ -43,6 +45,7 @@ WORKDIR /opt/freesurfer
 # Download and install
 RUN apt-get update && \
     apt-get install -qq -y --no-install-recommends curl && \
+    apt-get install libssl-dev && \
     curl -sSL https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/7.1.1/freesurfer-linux-centos6_x86_64-7.1.1.tar.gz | tar zxv --no-same-owner -C /opt \
     --exclude='freesurfer/diffusion' \
     --exclude='freesurfer/docs' \
@@ -134,14 +137,15 @@ ENV CONDA_ENV="py38cmp-core"
 COPY docker/spec-file.txt /app/spec-file.txt
 COPY docker/requirements.txt /app/requirements.txt
 COPY docker/environment.yml /app/environment.yml
-RUN /bin/bash -c "conda config --set default_threads 3 &&\ 
-    conda env create --file /app/environment.yml &&\ 
-    . activate ${CONDA_ENV} &&\
-    #python --version &&\
-    #pip install --upgrade pip setuptools wheel &&\
-    pip install -r /app/requirements.txt&&\
-    conda clean -v --all --yes &&\
-    rm -rf ~/.conda ~/.cache/pip/*"
+RUN /bin/bash -c "conda config --set default_threads 4"
+RUN /bin/bash -c "conda env create --file /app/environment.yml" 
+RUN /bin/bash -c ". activate ${CONDA_ENV}"
+#RUN /bin/bash -c "pip install --upgrade pip setuptools wheel"
+RUN /bin/bash -c "conda install python==3.8"
+RUN /bin/bash -c "pip install --upgrade setuptools==58.0.4"
+RUN /bin/bash -c "pip install -r /app/requirements.txt"
+#RUN /bin/bash -c "conda clean -v --all --yes"
+RUN /bin/bash -c "rm -rf ~/.conda ~/.cache/pip/*"
 
 ##################################################################
 # Install BIDS validator
