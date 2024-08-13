@@ -49,11 +49,6 @@ freesurfer-7.1.1/sub-01_ses-01/label/lh.BA_exvivo.thresh.annot
 freesurfer-7.1.1/sub-01_ses-01/label/lh.cortex.label
 freesurfer-7.1.1/sub-01_ses-01/label/lh.entorhinal_exvivo.label
 freesurfer-7.1.1/sub-01_ses-01/label/lh.entorhinal_exvivo.thresh.label
-freesurfer-7.1.1/sub-01_ses-01/label/lh.lausanne2018.scale1.annot
-freesurfer-7.1.1/sub-01_ses-01/label/lh.lausanne2018.scale2.annot
-freesurfer-7.1.1/sub-01_ses-01/label/lh.lausanne2018.scale3.annot
-freesurfer-7.1.1/sub-01_ses-01/label/lh.lausanne2018.scale4.annot
-freesurfer-7.1.1/sub-01_ses-01/label/lh.lausanne2018.scale5.annot
 freesurfer-7.1.1/sub-01_ses-01/label/lh.mpm.vpnl.annot
 freesurfer-7.1.1/sub-01_ses-01/label/lh.MT_exvivo.label
 freesurfer-7.1.1/sub-01_ses-01/label/lh.MT_exvivo.thresh.label
@@ -90,11 +85,6 @@ freesurfer-7.1.1/sub-01_ses-01/label/rh.cortex+hipamyg.label
 freesurfer-7.1.1/sub-01_ses-01/label/rh.cortex.label
 freesurfer-7.1.1/sub-01_ses-01/label/rh.entorhinal_exvivo.label
 freesurfer-7.1.1/sub-01_ses-01/label/rh.entorhinal_exvivo.thresh.label
-freesurfer-7.1.1/sub-01_ses-01/label/rh.lausanne2018.scale1.annot
-freesurfer-7.1.1/sub-01_ses-01/label/rh.lausanne2018.scale2.annot
-freesurfer-7.1.1/sub-01_ses-01/label/rh.lausanne2018.scale3.annot
-freesurfer-7.1.1/sub-01_ses-01/label/rh.lausanne2018.scale4.annot
-freesurfer-7.1.1/sub-01_ses-01/label/rh.lausanne2018.scale5.annot
 freesurfer-7.1.1/sub-01_ses-01/label/rh.mpm.vpnl.annot
 freesurfer-7.1.1/sub-01_ses-01/label/rh.MT_exvivo.label
 freesurfer-7.1.1/sub-01_ses-01/label/rh.MT_exvivo.thresh.label
@@ -323,7 +313,6 @@ freesurfer-7.1.1/sub-01_ses-01/touch/lh.aparcstats.touch
 freesurfer-7.1.1/sub-01_ses-01/touch/lh.aparc.touch
 freesurfer-7.1.1/sub-01_ses-01/touch/lh.autodet.gw.stats.touch
 freesurfer-7.1.1/sub-01_ses-01/touch/lh.avgcurv.touch
-freesurfer-7.1.1/sub-01_ses-01/touch/lh.cortex+hipamyg.touch
 freesurfer-7.1.1/sub-01_ses-01/touch/lh.cortex.touch
 freesurfer-7.1.1/sub-01_ses-01/touch/lh.curvstats.touch
 freesurfer-7.1.1/sub-01_ses-01/touch/lh.inflate1.touch
