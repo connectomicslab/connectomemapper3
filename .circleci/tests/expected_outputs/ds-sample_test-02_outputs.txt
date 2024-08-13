@@ -1,4 +1,3 @@
-cmp-v3.2.0/dataset_description.json
 cmp-v3.2.0/sub-01/ses-01/anat/sub-01_ses-01_atlas-Desikan_dseg.graphml
 cmp-v3.2.0/sub-01/ses-01/anat/sub-01_ses-01_atlas-Desikan_dseg.nii.gz
 cmp-v3.2.0/sub-01/ses-01/anat/sub-01_ses-01_atlas-Desikan_dseg.tsv
@@ -51,14 +50,6 @@ freesurfer-7.1.1/sub-01_ses-01/label/lh.cortex+hipamyg.label
 freesurfer-7.1.1/sub-01_ses-01/label/lh.cortex.label
 freesurfer-7.1.1/sub-01_ses-01/label/lh.entorhinal_exvivo.label
 freesurfer-7.1.1/sub-01_ses-01/label/lh.entorhinal_exvivo.thresh.label
-freesurfer-7.1.1/sub-01_ses-01/label/lh.FG1.mpm.vpnl.label
-freesurfer-7.1.1/sub-01_ses-01/label/lh.FG2.mpm.vpnl.label
-freesurfer-7.1.1/sub-01_ses-01/label/lh.FG3.mpm.vpnl.label
-freesurfer-7.1.1/sub-01_ses-01/label/lh.FG4.mpm.vpnl.label
-freesurfer-7.1.1/sub-01_ses-01/label/lh.hOc1.mpm.vpnl.label
-freesurfer-7.1.1/sub-01_ses-01/label/lh.hOc2.mpm.vpnl.label
-freesurfer-7.1.1/sub-01_ses-01/label/lh.hOc3v.mpm.vpnl.label
-freesurfer-7.1.1/sub-01_ses-01/label/lh.hOc4v.mpm.vpnl.label
 freesurfer-7.1.1/sub-01_ses-01/label/lh.mpm.vpnl.annot
 freesurfer-7.1.1/sub-01_ses-01/label/lh.MT_exvivo.label
 freesurfer-7.1.1/sub-01_ses-01/label/lh.MT_exvivo.thresh.label
@@ -95,14 +86,6 @@ freesurfer-7.1.1/sub-01_ses-01/label/rh.cortex+hipamyg.label
 freesurfer-7.1.1/sub-01_ses-01/label/rh.cortex.label
 freesurfer-7.1.1/sub-01_ses-01/label/rh.entorhinal_exvivo.label
 freesurfer-7.1.1/sub-01_ses-01/label/rh.entorhinal_exvivo.thresh.label
-freesurfer-7.1.1/sub-01_ses-01/label/rh.FG1.mpm.vpnl.label
-freesurfer-7.1.1/sub-01_ses-01/label/rh.FG2.mpm.vpnl.label
-freesurfer-7.1.1/sub-01_ses-01/label/rh.FG3.mpm.vpnl.label
-freesurfer-7.1.1/sub-01_ses-01/label/rh.FG4.mpm.vpnl.label
-freesurfer-7.1.1/sub-01_ses-01/label/rh.hOc1.mpm.vpnl.label
-freesurfer-7.1.1/sub-01_ses-01/label/rh.hOc2.mpm.vpnl.label
-freesurfer-7.1.1/sub-01_ses-01/label/rh.hOc3v.mpm.vpnl.label
-freesurfer-7.1.1/sub-01_ses-01/label/rh.hOc4v.mpm.vpnl.label
 freesurfer-7.1.1/sub-01_ses-01/label/rh.mpm.vpnl.annot
 freesurfer-7.1.1/sub-01_ses-01/label/rh.MT_exvivo.label
 freesurfer-7.1.1/sub-01_ses-01/label/rh.MT_exvivo.thresh.label
