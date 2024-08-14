@@ -393,9 +393,10 @@ nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/NativeFreesurf
 nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/NativeFreesurfer_parcellation/csf_mask.nii.gz
 nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/NativeFreesurfer_parcellation/fsmask_1mm.nii.gz
 nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/NativeFreesurfer_parcellation/gmmask.nii.gz
-age/NativeFreesurfer_parcellation/_inputs.pklz
 nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/NativeFreesurfer_parcellation/_node.pklz
-nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/NativeFreesurfer_parcellation/_report/report.rst            nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/NativeFreesurfer_parcellation/result_NativeFreesurfer_parcellation.pklz  nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/NativeFreesurfer_parcellation/_inputs.pklz
+nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/NativeFreesurfer_parcellation/_report/report.rst            
+nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/NativeFreesurfer_parcellation/result_NativeFreesurfer_parcellation.pklz  
+nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/NativeFreesurfer_parcellation/_inputs.pklz
 nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/NativeFreesurfer_parcellation/_node.pklz
 nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/NativeFreesurfer_parcellation/_report/report.rst
 nipype-1.8.0/sub-01/ses-01/anatomical_pipeline/parcellation_stage/NativeFreesurfer_parcellation/result_NativeFreesurfer_parcellation.pklz
