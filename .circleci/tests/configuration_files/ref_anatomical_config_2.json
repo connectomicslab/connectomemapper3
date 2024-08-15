@@ -1,0 +1,36 @@
+{
+    "Global": {
+        "subject_session" : "ses-01",
+        "subjects" : ["sub-01"],
+        "process_type" : "anatomical",
+        "subject" : "sub-01"
+    },
+    "segmentation_stage": {
+        "make_isotropic": false,
+        "isotropic_interpolation": "cubic",
+        "isotropic_vox_size" : 1.0,
+        "brain_mask_extraction_tool" : "Freesurfer",
+        "seg_tool" : "Freesurfer",
+        "use_fsl_brain_mask" : false,
+        "use_existing_freesurfer_data" : false,
+        "number_of_threads" : 2
+    },
+
+    "parcellation_stage": {
+    "parcellation_scheme" : "NativeFreesurfer",
+    "segment_hippocampal_subfields" : true,
+    "segment_brainstem" : true,
+    "ants_precision_type" : "float",
+    "include_thalamic_nuclei_parcellation" : true,
+    "pipeline_mode" : "Diffusion",
+    "parcellation_scheme_editor" : ["NativeFreesurfer", "Lausanne2018", "Custom"],
+    "number_of_regions" : 0,
+    "pre_custom" : "Lausanne2018"
+    },
+
+    "Multi-processing": {
+        "number_of_cores" : 1
+    }
+
+}
+
