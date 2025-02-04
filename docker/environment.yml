@@ -9,7 +9,7 @@ dependencies:
 - python=3.8
 - pip=20.1.1
 - ants=2.2.0
-- numpy=1.21.0
+- numpy=1.23.5
 - matplotlib=3.2.2
 - graphviz=2.40.1
 - traits=6.2.0
