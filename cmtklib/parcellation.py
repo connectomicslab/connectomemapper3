@@ -841,7 +841,7 @@ class CombineParcellations(BaseInterface):
                 iflogger.info("  > Load {}".format(rh_annot_file))
                 rh_annot = ni.freesurfer.io.read_annot(
                     op.join(self.inputs.subjects_dir, self.inputs.subject_id, 'label', rh_annot_file))
-                rgb_table = rh_annot[1][1:, 0:3]
+                rgb_table = rh_annot[1][1:, 0:3] 
                 roi_names = rh_annot[2][1:]
                 # roi_labels = rh_annot[0][1:]
 
@@ -852,10 +852,10 @@ class CombineParcellations(BaseInterface):
                         g = rgb_table[label, 1]
                         b = rgb_table[label, 2]
 
-                        if label == 0:
-                            r = 0
-                            g = 0
-                            b = 0
+                        #if label == 0:
+                        #    r = 0
+                        #    g = 0
+                        #    b = 0
 
                         f_color_lut.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(
                             label + 1, name, r, g, b))
@@ -1102,7 +1102,8 @@ class CombineParcellations(BaseInterface):
             # Relabelling Left hemisphere
             ind = np.where((img_data > 1000) & (img_data < 2000))
             img_data_out[ind] = (img_data[ind] - 1000 + nlabel)
-            old_nlabel = nlabel
+            old_nlabel = nlabel + 1 ### changed 18.02
+            #old_nlabel = nlabel
             nlabel = img_data_out.max()
 
             # ColorLUT (cortical)
@@ -1116,7 +1117,7 @@ class CombineParcellations(BaseInterface):
                 iflogger.info("  > Load {}".format(lh_annot_file))
                 lh_annot = ni.freesurfer.io.read_annot(
                     op.join(self.inputs.subjects_dir, self.inputs.subject_id, 'label', lh_annot_file))
-                rgb_table = lh_annot[1][1:, 0:3]
+                rgb_table = lh_annot[1][1:, 0:3] ## 25.02
                 roi_names = lh_annot[2][1:]
 
                 for label, name in enumerate(roi_names):
@@ -1127,10 +1128,10 @@ class CombineParcellations(BaseInterface):
                         g = rgb_table[label, 1]
                         b = rgb_table[label, 2]
 
-                        if label == 0:
-                            r = 0
-                            g = 0
-                            b = 0
+                        #if label == 0:
+                        #    r = 0
+                        #    g = 0
+                        #    b = 0
 
                         f_color_lut.write(
                             '{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(label + old_nlabel + 1), name, r, g, b))
@@ -1161,6 +1162,7 @@ class CombineParcellations(BaseInterface):
                     f_color_lut.write(
                         "# Left Hemisphere. Subcortical Structures (Thalamic Nuclei) \n")
 
+                nlabel = nlabel + 1 ## added 25.02
                 new_labels = np.arange(
                     nlabel + 1, nlabel + 1 + left_thalNuclei.shape[0])
                 i = 0
@@ -1376,6 +1378,7 @@ class CombineParcellations(BaseInterface):
                 if self.inputs.create_colorLUT:
                     f_color_lut.write("# Brain Stem Structures \n")
 
+                nlabel = nlabel + 1
                 new_labels = np.arange(
                     nlabel + 1, nlabel + 1 + brainstem.shape[0])
                 i = 0
@@ -1455,6 +1458,7 @@ class CombineParcellations(BaseInterface):
 
                 if self.inputs.create_colorLUT:
                     f_color_lut.write("\n")
+
 
             # Fix negative values
             img_data_out[img_data_out < 0] = 0

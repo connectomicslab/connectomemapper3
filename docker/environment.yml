@@ -7,6 +7,7 @@ channels:
 
 dependencies:
 - python=3.8
+- zipp=3.16.0
 - pip=20.1.1
 - ants=2.2.0
 - numpy=1.21.0
