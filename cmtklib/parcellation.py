@@ -1102,8 +1102,8 @@ class CombineParcellations(BaseInterface):
             # Relabelling Left hemisphere
             ind = np.where((img_data > 1000) & (img_data < 2000))
             img_data_out[ind] = (img_data[ind] - 1000 + nlabel)
-            old_nlabel = nlabel + 1 ### changed 18.02
-            #old_nlabel = nlabel
+            #old_nlabel = nlabel + 1
+            old_nlabel = nlabel
             nlabel = img_data_out.max()
 
             # ColorLUT (cortical)
@@ -1162,7 +1162,7 @@ class CombineParcellations(BaseInterface):
                     f_color_lut.write(
                         "# Left Hemisphere. Subcortical Structures (Thalamic Nuclei) \n")
 
-                nlabel = nlabel + 1 ## added 25.02
+                #nlabel = nlabel + 1 ## added 25.02
                 new_labels = np.arange(
                     nlabel + 1, nlabel + 1 + left_thalNuclei.shape[0])
                 i = 0
